@@ -219,6 +219,73 @@ jobs:
           if-no-files-found: warn
 
   # =========================================================================
+  # THE MOBILE APP (mobile/). Its own job, in parallel with `app` and `engine`.
+  #
+  # WHY A SEPARATE JOB, and why it cannot slow the others down: `mobile/` is a
+  # SEPARATE npm project with its own package-lock.json, its own node_modules
+  # and its own Expo/React Native toolchain. Installing it inside the `app` job
+  # would add a few hundred packages to a job whose cache key is the desktop
+  # lockfile, for gates that share not one line of config with it. In its own
+  # job it runs in parallel and costs no wall clock.
+  #
+  # UBUNTU, not windows-latest: nothing here is Windows-specific — it is tsc,
+  # eslint and jest over pure TypeScript — and the Linux runner is faster and
+  # cheaper. It needs no Android SDK and no Xcode because NOTHING IN THIS JOB
+  # BUILDS AN APP: the three suites are the cipher conformance vectors, the
+  # pair-link parser, the relay state machine over a fake socket, the at-rest
+  # store over an in-memory filesystem, and one pure presenter per tab. A real
+  # build is `eas build`, which costs money and needs a login, and is the
+  # owner's to run (mobile/README.md).
+  #
+  # NO CACHE KEY COLLISION with the two jobs above: `cache-dependency-path`
+  # pins setup-node's npm cache to mobile/package-lock.json, so this job and
+  # the desktop jobs never race to save one key.
+  #
+  # IT READS TWO FILES OUT OF THE DESKTOP TREE and no more — `src/shared/phone/
+  # types.ts` and `limits.ts`, through the `@shared/*` alias (metro.config.js,
+  # jest.config.js). That is the whole coupling, and it is why this job does
+  # not need `npm ci` at the repo root.
+  # =========================================================================
+  mobile:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 (v4.4.0)
+        with:
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4 (v4.4.0)
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+
+      # mobile/.npmrc sets ignore-scripts=true, like the repo root's. An Expo
+      # managed project needs no install hook: the native build happens on EAS
+      # from app.json, never from a postinstall.
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      # Includes the CONFORMANCE VECTORS: every case tests/phoneCrypto.test.mts
+      # asserts about the desktop's node:crypto sealing half, replayed here
+      # against the app's pure-JavaScript @noble/ciphers opening half. Two
+      # independent AES-256-GCM implementations, one set of bytes, one verdict.
+      - name: Test
+        run: npm test
+
+  # =========================================================================
   # THE ENGINE (engine/crates). Its own job, in parallel with `app`.
   #
   # WHY A SEPARATE JOB rather than steps bolted onto `app`: a different

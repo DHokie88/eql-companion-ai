@@ -54,7 +54,10 @@
     "dist:dir": "npm run build && npm run build:engine && electron-builder --win --dir",
     "share:dev": "wrangler dev --config share-server/wrangler.toml",
     "share:deploy": "wrangler deploy --config share-server/wrangler.toml",
-    "typecheck:share": "tsc --noEmit -p share-server/tsconfig.json"
+    "typecheck:share": "tsc --noEmit -p share-server/tsconfig.json",
+    "typecheck:mobile": "npm --prefix mobile run typecheck",
+    "lint:mobile": "npm --prefix mobile run lint",
+    "test:mobile": "npm --prefix mobile test"
   },
   "dependencies": {
     "@emotion/react": "^11.13.3",

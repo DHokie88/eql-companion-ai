@@ -109,3 +109,17 @@ crash.*.log
 # game log; they are read locally and never enter git or a public issue.
 .triage/
 scripts/sources/cache/sodeq-items.txt.gz
+
+# THE MOBILE APP's per-machine state (mobile/, docs/plans/phone-native.md). `.expo/` is the CLI's
+# local cache and its generated route types; `mobile/android/` and `mobile/ios/` only exist if
+# somebody runs `expo prebuild` locally — the managed workflow generates them on EAS from
+# app.json, and a committed copy would silently outrank the config everybody edits.
+# `mobile/node_modules/` is already covered by the blanket rule at the top.
+mobile/.expo/
+mobile/dist/
+mobile/android/
+mobile/ios/
+mobile/*.jks
+mobile/*.p8
+mobile/*.p12
+mobile/*.mobileprovision

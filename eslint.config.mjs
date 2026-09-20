@@ -173,6 +173,12 @@ const IGNORES = [
   'release/**',
   'node_modules/**',
   'build/**',
+  // THE MOBILE APP IS ITS OWN PROJECT (docs/plans/phone-native.md). It has its own package.json,
+  // its own node_modules, its own tsconfig and its own eslint.config.js. This config is type-aware
+  // over tsconfig.node.json / tsconfig.web.json, NEITHER of which has ever included mobile/, so a
+  // .tsx under it would fail the project service before a rule ran; and the ratchet below has no
+  // entries for it. Its gate is `npm run lint:mobile`, which CI runs in its own job.
+  'mobile/**',
   'site/**',
   'resources/**',
   'tests/fixtures/**',
