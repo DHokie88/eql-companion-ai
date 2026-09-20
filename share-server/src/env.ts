@@ -45,10 +45,51 @@ export interface RateLimiterLike {
   limit(opts: { key: string }): Promise<{ success: boolean }>
 }
 
+/**
+ * A WebSocket, as `phoneRoom.ts` uses one. Structural for the same reason `KvLike` is: the worker
+ * tsconfig carries `types: []` and DOM's `WebSocket` is a different (and larger) shape than the
+ * runtime's, so the three methods this code touches are written out and both the real socket and a
+ * test fake satisfy them.
+ */
+export interface RoomWebSocket {
+  send(data: string): void
+  close(code?: number, reason?: string): void
+}
+
+/** The Durable Object state, as the phone room uses it: storage, the hibernation API, the tags. */
+export interface DurableStateLike {
+  storage: {
+    get<T>(key: string): Promise<T | undefined>
+    put(key: string, value: unknown): Promise<void>
+    delete(key: string): Promise<boolean>
+    setAlarm(at: number): Promise<void>
+  }
+  /** The HIBERNATION accept - not `ws.accept()`, which would pin the object in memory forever. */
+  acceptWebSocket(ws: RoomWebSocket, tags?: string[]): void
+  getWebSockets(tag?: string): RoomWebSocket[]
+  getTags(ws: RoomWebSocket): string[]
+}
+
+/** One Durable Object binding, as this worker uses it. */
+export interface DurableNamespaceLike {
+  idFromName(name: string): unknown
+  get(id: unknown): { fetch(request: Request): Promise<Response> }
+}
+
+/** The two socket roles, as hibernation tags. A socket also carries a unique `id:` tag. */
+export const DESK_TAG = 'desk'
+export const VIEW_TAG = 'view'
+
 export interface Env {
   SHARES: KvLike
   CREATE_LIMIT?: RateLimiterLike
   READ_LIMIT?: RateLimiterLike
+  /**
+   * The phone-link rooms (docs/plans/phone-link.md). OPTIONAL so the unit suite and a
+   * `wrangler dev` without the binding exercise the same code path the deployed worker runs: an
+   * absent namespace answers 503 `phone-off`, exactly as an absent Discord secret does.
+   */
+  PHONE_ROOMS?: DurableNamespaceLike
   /** the origin every URL this service hands out is built from (`[vars]` in wrangler.toml) */
   PUBLIC_ORIGIN?: string
   /** the Discord application's public client id (`[vars]`); absent = the /discord routes are off */

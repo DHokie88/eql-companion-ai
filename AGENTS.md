@@ -1886,13 +1886,22 @@ plumbing proven). Reuses the tier-2 lifecycle via
   (the card WARNS there rather than explaining). The access violation is
   unidentified: this is a workaround to re-measure when Wine or Electron moves.
 
-## Cloud — two deliberate outbound origins, nothing else (2026-09-08, updated 2026-09-10)
+## Cloud — two deliberate outbound origins, nothing else (2026-09-08, updated 2026-09-19)
 
 Since 2026-09-09 the app speaks to exactly two hosts of its own choosing, each behind a compiled
 origin, POST from main only, 15 s timeout, dark under `EQ_E2E`: `share.eqzera.com` (the share-link
 service, `src/main/share/net.ts`, Cloudflare Worker in `share-server/`) and `discord.com` (a
 user-pasted channel webhook, `src/main/share/discord.ts`; the URL is stored main-side, masked in
 the UI, never logged). Everything below about feedback and telemetry still holds.
+
+**THE THIRD USE OF THE FIRST ORIGIN IS A SOCKET (2026-09-19, docs/plans/phone-link.md).** Share
+links, settings sync and now the PHONE LINK all speak to `share.eqzera.com`; the phone link adds a
+SCHEME rather than a host, via `net.ts wsOriginFor`, which swaps `https:` for `wss:` on the origin
+that module already decided — so a socket can only ever name the host the share links name, and an
+empty origin (every `EQ_E2E` build) answers `''` and there is nothing to connect to. Frames are
+AES-256-GCM ciphertext sealed in main with a key that travels only in the pair link's FRAGMENT
+(settings-sync.md's zero-knowledge law, one generation on): the relay stores a SHA-256 digest and
+two clocks, and there is no decrypt path in `share-server/` to add one to.
 
 
 The fork compiles NO feedback or telemetry endpoint (`src/main/feedback/net.ts`,

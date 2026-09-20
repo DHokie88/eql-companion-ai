@@ -19,6 +19,11 @@
 //   GET    /discord/start       ?state=                      -> 302 to Discord's channel picker   (discord.ts)
 //   GET    /discord/callback    ?code=&state=                -> an HTML notice page               (discord.ts)
 //   GET    /discord/claim/:st   -                            -> 200 the webhook, ONCE; 404 not-ready | not-found
+//   POST   /api/v1/phone/rooms  {roomId, deskTokenHash}      -> 201 {roomId, expiresAt}     (phone.ts)
+//   DELETE /api/v1/phone/rooms/:id  Bearer desk token        -> 204
+//   GET    /phone/room/:id/desk  websocket upgrade           -> 101, the desktop's socket
+//   GET    /phone/room/:id/view  websocket upgrade           -> 101, a phone's socket
+//   GET    /phone/ , /phone/manifest.webmanifest , /phone/sw.js  -> the installable page
 //   POST   /api/v1/sync         {blob: base64}               -> 201 {code, expiresAt}              (sync.ts)
 //   GET    /api/v1/sync/:code   -                            -> 200 {blob, expiresAt}; 404 not-found
 //   DELETE /api/v1/sync/:code   -                            -> 204 (the code IS the secret)
@@ -67,6 +72,7 @@ import {
   type Accepted,
   type Refusal
 } from './store'
+import { phoneRoute } from './phone'
 import { SYNC_PREFIX, syncRoute } from './sync'
 import { SHARE_LIMITS, type ShareEnvelope } from '../../src/shared/shareSchema'
 import type { CharacterProfileShare } from '../../src/shared/characterShare'
@@ -441,6 +447,11 @@ export async function handleRequest(
     return (await discordRoute({ ...ctx, fetchImpl }, path)) ?? notFound()
   }
   if (path === '/logo.png') return logoRoute(request)
+  // The phone link (docs/plans/phone-link.md): its two API calls, its two WebSocket upgrades and
+  // its three static files. It answers `null` for a path that is none of those, so the share
+  // routes below are reached exactly as before.
+  const phone = await phoneRoute(ctx, path)
+  if (phone) return phone
   if (under(path, API_PREFIX)) return apiRoute(ctx, path)
   // Settings sync (sync.ts): the same /api/v1 tree, its own three routes, no envelope in sight.
   if (under(path, SYNC_PREFIX)) return syncRoute(ctx, path)

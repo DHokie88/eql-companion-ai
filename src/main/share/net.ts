@@ -186,6 +186,58 @@ export function syncRecordUrl(code: string): string {
   return `${SHARE_ORIGIN}/api/v1/sync/${code}`
 }
 
+/**
+ * THE PHONE LINK'S ROUTES (docs/plans/phone-link.md) — the THIRD use of this one origin, and the
+ * first one that speaks a scheme other than https.
+ *
+ * `wsOriginFor` is the whole extension of the law, and it extends it rather than widening it: it
+ * takes the origin this module already decided on and swaps its scheme, so a wss URL can only ever
+ * name the host the https URLs name. An empty origin - which is EVERY `EQ_E2E` build - answers the
+ * empty string, so a headless run cannot open a socket any more than it can post a share.
+ *
+ * `ws:` is admitted for the loopback DEV origin only, because that gate already refuses anything
+ * that is not a numeric loopback literal (see header item 2) and a local dev server has no
+ * certificate to offer.
+ */
+export function wsOriginFor(origin: string): string {
+  if (origin.startsWith('https://')) return `wss://${origin.slice(8)}`
+  if (origin.startsWith('http://')) return `ws://${origin.slice(7)}`
+  return ''
+}
+
+export const PHONE_WS_ORIGIN: string = wsOriginFor(SHARE_ORIGIN)
+
+/** Does this build have a phone relay compiled in? The Preferences card gates on it. */
+export function phoneEndpointConfigured(): boolean {
+  return PHONE_WS_ORIGIN.length > 0
+}
+
+/** Create a pairing room. The body carries the room id and the desk token's DIGEST, never the token. */
+export function phoneRoomsUrl(): string {
+  return `${SHARE_ORIGIN}/api/v1/phone/rooms`
+}
+
+/** …and the per-room route an unpair deletes, bearing the desk token. */
+export function phoneRoomUrl(roomId: string): string {
+  return `${SHARE_ORIGIN}/api/v1/phone/rooms/${roomId}`
+}
+
+/** The socket this process connects OUT to. Empty in a dark build - see `wsOriginFor`. */
+export function phoneDeskSocketUrl(roomId: string): string {
+  return PHONE_WS_ORIGIN === '' ? '' : `${PHONE_WS_ORIGIN}/phone/room/${roomId}/desk`
+}
+
+/**
+ * THE PAIR LINK, AND THE KEY IS IN ITS FRAGMENT.
+ *
+ * A fragment is never sent to a server - not in the request line, not in `Referer`, not in the
+ * Worker's own `request.url`. That is the whole mechanism behind ruling 1: the service learns the
+ * room id (it has to, to route) and never the key (it has no way to).
+ */
+export function phonePairUrl(roomId: string, viewKey: string): string {
+  return SHARE_ORIGIN === '' ? '' : `${SHARE_ORIGIN}/phone/#r=${roomId}&k=${viewKey}`
+}
+
 /** Is this an id this app will put in a URL? See `SHARE_ID`. */
 export function isShareId(raw: unknown): raw is string {
   return typeof raw === 'string' && SHARE_ID.test(raw)

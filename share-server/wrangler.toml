@@ -45,6 +45,22 @@ DISCORD_CLIENT_ID = "1547834842408943686"
 # (wrangler warns that unsafe fields are experimental; that warning is expected). The namespace
 # ids are LOCAL to this worker - any two distinct integers - and are what keeps the create and
 # read budgets from sharing one counter.
+# THE PHONE LINK'S ROOMS (docs/plans/phone-link.md). One Durable Object per pairing: it holds the
+# sockets, fans one encrypted frame out to at most four phones, and costs nothing while idle because
+# the WebSocket Hibernation API lets the runtime evict it without dropping the connections. KV is
+# the wrong shape here - a live meter is a write every quarter-second and KV's budget is a daily
+# number.
+[[durable_objects.bindings]]
+name = "PHONE_ROOMS"
+class_name = "PhoneRoom"
+
+# `new_sqlite_classes`, NOT `new_classes`: a SQLite-backed Durable Object is the only kind the FREE
+# plan will run, and free-tier is this service's standing constraint (share-links.md ruling 3).
+# Migrations are append-only and a tag is never reused - the same law as the app's store migrations.
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["PhoneRoom"]
+
 [[unsafe.bindings]]
 name = "CREATE_LIMIT"
 type = "ratelimit"

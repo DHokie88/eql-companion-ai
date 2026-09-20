@@ -32,6 +32,9 @@ import { discordApi } from './discordApi'
 // Carrying that same settings bundle to the user's OTHER PC as ciphertext (docs/plans/
 // settings-sync.md), split out for the same file-mass reason. See ./syncApi.ts.
 import { syncApi } from './syncApi'
+// …and the same service relaying an encrypted live feed to the user's own phone
+// (docs/plans/phone-link.md). See ./phoneApi.ts for which of its secrets may cross this line.
+import { phoneApi } from './phoneApi'
 import { awayAlertsApi } from './awayAlerts'
 // The quest tracker's read/write pair (EQ Zera), split out for the same file-mass reason.
 import { questsApi } from './questsApi'
@@ -475,6 +478,7 @@ const api = {
    *  uploads ciphertext; the key rides in the transfer code the user carries, so the service
    *  stores bytes it cannot read. No key and no decrypted payload ever crosses this bridge. */
   ...syncApi,
+  ...phoneApi,
   /** Away alerts (src/shared/awayAlerts.ts): which alerts ALSO go to one of those channels while
    *  nobody is at the keyboard. Same rule about the secret — a channel is named by id here, and
    *  the token stays main-side. */

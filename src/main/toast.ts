@@ -39,6 +39,7 @@
 import { ipcMain } from 'electron'
 import { IPC } from '../shared/ipc'
 import { postCelebration } from './celebrationPost'
+import { notePhoneEvent } from './phone/snapshots'
 import { logError } from './errorLog'
 import { lookupItem } from './itemLookup'
 import { questByPage } from './questCatalog'
@@ -127,6 +128,21 @@ export function sendToToastOverlay(payload: ToastPayload): void {
     postCelebration(payload)
   } catch (err) {
     logError('main:celebrationPost', err)
+  }
+  // …AND THE PHONE'S EVENT LIST HANGS HERE TOO, for exactly the same reason: this is the ONE place
+  // a celebration reaches main, so a second-screen feed of them attaches here and nowhere else
+  // (docs/plans/phone-link.md, ruling 5). The builder's kind gate is what keeps the list to
+  // celebrations - a payload of a kind it does not know is dropped rather than relayed.
+  try {
+    notePhoneEvent({
+      id: payload.id,
+      kind: payload.kind,
+      title: payload.title,
+      at: Date.now(),
+      ...(payload.subtitle === undefined ? {} : { subtitle: payload.subtitle })
+    })
+  } catch (err) {
+    logError('main:phoneEvent', err)
   }
   const w = getOverlayWindow('toast')
   if (!w || w.isDestroyed()) return

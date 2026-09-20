@@ -38,6 +38,23 @@ export interface LogTailMark {
   at: number
 }
 
+/**
+ * The phone link's persisted row (docs/plans/phone-link.md). Declared HERE rather than imported
+ * from `shared/` because two of its three fields are secrets that must never be importable by
+ * renderer code: the shape lives with the store file, and `src/main/storePhone.ts` is the only
+ * reader. Every field is optional — a store written before this feature carries none of them.
+ */
+export interface StoredPhonePrefs {
+  /** OFF is the shipped state, so an absent key and `false` mean the same thing. */
+  enabled?: boolean
+  /** 22 chars of base64url, minted on this machine. The one value the service ever learns. */
+  roomId?: string
+  /** 43 chars of base64url. NEVER crosses IPC — the `shareLinks.deleteToken` rule. */
+  deskToken?: string
+  /** 43 chars of base64url. Crosses IPC only inside the pair link, only while the dialog is open. */
+  viewKey?: string
+}
+
 export interface StoreShape {
   /**
    * Schema version of THIS file (src/main/storeMigrations.ts). Absent ⇒ pre-framework ⇒ 1.
@@ -392,4 +409,21 @@ export interface StoreShape {
    * every field, so an older build reading a store written here is unaffected and vice versa.
    */
   awayAlerts?: AwayAlertsPrefs
+
+  /**
+   * THE PHONE LINK (docs/plans/phone-link.md): whether this PC sends live data to a phone, and the
+   * one pairing it does that under.
+   *
+   * ALL THREE SECRETS ARE MAIN-SIDE, and two of them never cross IPC in any form: `deskToken` is
+   * what proves ownership of the room (the `shareLinks.deleteToken` precedent exactly) and
+   * `viewKey` is what opens every frame. The renderer is handed the pair link — which contains the
+   * key, because that is what a pair link IS — only while the pairing dialog is open, and only
+   * through `phone:pairUrl`; it is never part of `phone:getState`.
+   *
+   * ADDITIVE + OPTIONAL ⇒ no schema bump, no migration (the `shareLinks` / `discordChannels`
+   * carve-out). The feature ships OFF with no pairing, so an absent key is exactly the state every
+   * store written before it existed was in. `sanitizePhonePrefs` (src/main/storePhone.ts) defaults
+   * every field and drops a pairing whose ids are not the shapes this app mints.
+   */
+  phone?: StoredPhonePrefs
 }

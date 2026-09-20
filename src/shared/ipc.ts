@@ -914,6 +914,34 @@ export const IPC = {
   // incl. the localStorage writes the renderer must perform.
   syncApply: 'sync:apply',
 
+  // ---- the phone link (docs/plans/phone-link.md) ----
+  //
+  // A phone paired by QR code shows a live second screen. Main mints the three secrets, encrypts
+  // every frame with the view key and relays ciphertext through share.eqzera.com; the service
+  // cannot read it and neither can the renderer.
+  //
+  // WHAT DOES NOT CROSS THIS BOUNDARY: the desk token, ever, in any form; and the view key, except
+  // inside the PAIR LINK, which is what `phone:pairUrl` answers and what the pairing dialog draws
+  // as a QR code. The link contains the key because that is what a pair link is, so the renderer
+  // asks for it only while that dialog is open and drops it when the dialog unmounts. It is never
+  // part of `phone:getState`, never stored in localStorage and never logged.
+  //
+  // renderer -> main: the card's state. Returns
+  // { available, enabled, paired, connected, viewers } - `available` is false under `EQ_E2E` and
+  // in any build with no origin compiled in, which is what the card's dark sentence is drawn from.
+  phoneGetState: 'phone:getState',
+  // renderer -> main: switch it on. Mints and stores a pairing if there is none, claims the room,
+  // connects. Returns the same state shape.
+  phoneEnable: 'phone:enable',
+  // renderer -> main: switch it off. The PAIRING SURVIVES - only Unpair kills a link. Same shape.
+  phoneDisable: 'phone:disable',
+  // renderer -> main: the pair link, for the dialog only. Returns { ok: true, url } |
+  // { ok: false, error }.
+  phonePairUrl: 'phone:pairUrl',
+  // renderer -> main: Unpair all phones. Rotates BOTH the room id and the view key, so every link
+  // and every photographed QR code already out there is dead. Returns the state shape.
+  phoneUnpairAll: 'phone:unpairAll',
+
   // ---- clipboard (the combat "Copy this view as text" buttons) ----
   // renderer -> main: put plain text on the OS clipboard. Arg: text. Returns boolean (written).
   // WHY THIS IS AN IPC CHANNEL AND NOT `navigator.clipboard.writeText`: the async Clipboard API

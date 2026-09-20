@@ -27,6 +27,7 @@ import { Button, Collapse, Stack, TextField, Typography } from '@mui/material'
 import ForumIcon from '@mui/icons-material/Forum'
 import { CelebrationPostSetting } from './CelebrationPostSetting'
 import { DiscordChannelList } from './DiscordChannelList'
+import { phoneItem } from './PhoneSetting'
 import { useDiscordChannels, type DiscordChannelsState } from './useDiscordChannels'
 import type { PrefSection } from './PreferencesView'
 
@@ -182,7 +183,12 @@ export function sharingSection(): PrefSection {
         keywords:
           'discord celebration toast overlay post channel level boss quest wish list death automatic announce guild',
         content: <CelebrationPostSetting />
-      }
+      },
+      // …and the THIRD item, which is the same verb with a different destination again: not a
+      // channel other people read, but a screen in your own hand (docs/plans/phone-link.md). It
+      // belongs here rather than in a section of its own because "where does this app send what it
+      // sees" is one question, and this is its third answer.
+      phoneItem()
     ]
   }
 }

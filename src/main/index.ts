@@ -52,6 +52,9 @@ import { startEngineSupervisor, stopEngineSupervisor } from './dataServer/engine
 import { getProcessPriorityPrefs } from './storeProcessPriority'
 import { initPresenceEffects, stopPresenceEffects } from './presenceEffects'
 import { initAwayAlerts, stopAwayAlerts } from './awayAlerts'
+// The phone link (docs/plans/phone-link.md). Arms NOTHING unless the switch is already on, and
+// never under EQ_E2E - the origin is dark there, so a headless run cannot open a socket at all.
+import { initPhone, stopPhone } from './phone'
 import { provisionDefaultPacks } from './provisionPacks'
 import { removedPackIds } from './storeSoundPacks'
 import { startTailing, stopSession } from './session'
@@ -418,6 +421,10 @@ if (!gotSingleInstanceLock) {
     // (passively — it never subscribes, so it never starts the watcher itself).
     initAwayAlerts()
 
+    // …and the phone link, on the same terms: one store read when it is off, which is the default
+    // install, and no timer, no socket and no room until somebody switches it on.
+    initPhone()
+
     // The performance HUD (docs/plans/perf-profiling.md P1). Costs one store read when it is
     // off — which is the default install: with `perfHud.enabled` false no timer is created at
     // all, so there is nothing to skip on each tick. The pref is read HERE rather than inside
@@ -451,6 +458,8 @@ app.on('before-quit', () => {
   // stopped here anyway for the reason every other timer in this teardown is - a tick that fires
   // mid-quit would reach a store this process is about to flush.
   teardownStep('main:stopAwayAlerts', stopAwayAlerts)
+  // …and the phone link's socket and its three snapshot beats, for the same reason.
+  teardownStep('main:stopPhone', stopPhone)
   // …and the data-server engine, on BOTH quit events and for a stronger version of the reason the
   // presence watcher is: the engine is a CHILD PROCESS, and Windows does not kill children with
   // their parent. The one hazard JOS-182 retired by moving the presence watcher off a child is

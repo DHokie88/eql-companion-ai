@@ -135,6 +135,22 @@ export interface ReleaseNote {
  * still sees exactly the releases above it.
  */
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
+  // EQ Zera on a phone (docs/plans/phone-link.md): a second screen, paired by a QR code, relayed
+  // through share.eqzera.com as ciphertext the service cannot read.
+  {
+    version: '1.26.0',
+    date: '2026-09-19',
+    entries: [
+      {
+        kind: 'new',
+        text: 'EQ Zera on your phone. Preferences, Sharing, Pair a phone shows a QR code; scan it and your phone opens a live second screen with your fight meter, run tracker, respawn and buff timers, recent events and your character.'
+      },
+      {
+        kind: 'new',
+        text: 'It installs to the home screen like an app. Everything is encrypted on your PC before it is sent, the link holds the key, and the service that relays it cannot read it. It is off until you switch it on, and Unpair all phones kills every link.'
+      }
+    ]
+  },
   // The connect race the owner hit on every attempt (2026-09-13): the app polled the service
   // before the user's browser had registered the attempt, and read the gap as an ending.
   {

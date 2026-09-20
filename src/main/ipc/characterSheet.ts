@@ -110,27 +110,39 @@ function wornOf(cell: SheetCellView): WornItemBlock {
   return { tier: cell.item.tier, block: cell.item.block }
 }
 
+/**
+ * THE SHEET, BUILT. Exported since the phone link (docs/plans/phone-link.md): main is the side that
+ * holds the item corpus, so main is the side that can build a character profile for the phone's
+ * Character tab, and it must build it the SAME WAY the Character tab is built or the two would
+ * describe one character two ways. One function, two callers - this handler and
+ * `src/main/phone/snapshots.ts` - rather than a second join over the same 8.6 MB index.
+ *
+ * NOT CACHED, for the reason in the header: the dump is a file the player rewrites mid-session on
+ * purpose, and a cache would hand a caller the answer from before they typed the command.
+ */
+export function buildCharacterSheet(): CharacterSheet | null {
+  const character = getActiveCharacter()
+  const loaded = loadInventoryDump(character?.name, character?.server)
+  if (!loaded) return null
+
+  const { cells, unplaced } = sheetCells(loaded.dump)
+  const joined = cells.map(joinCell)
+  const joinedUnplaced = unplaced.map(joinCell)
+  // Only the cells that hold something feed the sum — an empty slot is not an unknown item.
+  const worn = [...joined, ...joinedUnplaced].filter((c) => c.item !== null)
+
+  return {
+    path: loaded.path,
+    loadedAt: loaded.loadedAt,
+    cells: joined,
+    unplaced: joinedUnplaced,
+    totals: sumGear(worn.map(wornOf)),
+    // …and the SAME parse, flattened (JOS-327). No DB join and no second read of the file: the
+    // ledger the carry-all table draws is by construction the same bytes the grid above it drew.
+    carry: carryAll(loaded.dump)
+  }
+}
+
 export function registerCharacterSheetIpc(): void {
-  ipcMain.handle(IPC.characterSheet, (): CharacterSheet | null => {
-    const character = getActiveCharacter()
-    const loaded = loadInventoryDump(character?.name, character?.server)
-    if (!loaded) return null
-
-    const { cells, unplaced } = sheetCells(loaded.dump)
-    const joined = cells.map(joinCell)
-    const joinedUnplaced = unplaced.map(joinCell)
-    // Only the cells that hold something feed the sum — an empty slot is not an unknown item.
-    const worn = [...joined, ...joinedUnplaced].filter((c) => c.item !== null)
-
-    return {
-      path: loaded.path,
-      loadedAt: loaded.loadedAt,
-      cells: joined,
-      unplaced: joinedUnplaced,
-      totals: sumGear(worn.map(wornOf)),
-      // …and the SAME parse, flattened (JOS-327). No DB join and no second read of the file: the
-      // ledger the carry-all table draws is by construction the same bytes the grid above it drew.
-      carry: carryAll(loaded.dump)
-    }
-  })
+  ipcMain.handle(IPC.characterSheet, (): CharacterSheet | null => buildCharacterSheet())
 }

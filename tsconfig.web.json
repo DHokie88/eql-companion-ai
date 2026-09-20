@@ -41,6 +41,9 @@
     "src/preload/discordApi.ts",
     // …and `syncApi.ts` (sending your settings to another PC of your own), likewise.
     "src/preload/syncApi.ts",
+    // …and `phoneApi.ts` (the encrypted live feed to your own phone, docs/plans/phone-link.md),
+    // likewise.
+    "src/preload/phoneApi.ts",
     // …and `awayAlerts.ts` (alerts that also go to one of those channels while you are away),
     // likewise.
     "src/preload/awayAlerts.ts",

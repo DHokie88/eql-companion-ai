@@ -62,6 +62,10 @@ import { registerShareIpc } from './share'
 // A leaf of its own because it holds one piece of state — the decrypted payload between a preview
 // and an apply, which must never cross to the renderer. See its header.
 import { registerSyncIpc } from './sync'
+// …and the same service relaying an ENCRYPTED live feed to the user's own phone
+// (docs/plans/phone-link.md). A leaf of its own because it holds the one boundary decision in the
+// feature: which of its three secrets may cross the IPC line, and when. See its header.
+import { registerPhoneIpc } from './phone'
 import { registerSoundsIpc } from './sounds'
 import { registerSpeechIpc } from './speech'
 import { registerTelemetryIpc } from './telemetry'
@@ -126,6 +130,7 @@ export function registerIpc(): void {
   registerAlertsIpc()
   registerShareIpc()
   registerSyncIpc()
+  registerPhoneIpc()
   registerSoundsIpc()
   registerSpeechIpc()
   registerKnowledgeIpc()
