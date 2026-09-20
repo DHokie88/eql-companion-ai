@@ -332,7 +332,7 @@ export class PhoneRoom {
     if (!core.record()) return new Response('not found', { status: 404 })
     if (!(await core.opens(token))) return new Response('unauthorized', { status: 401 })
     await this.run(core.destroy())
-    return new Response('deleted', { status: 204 })
+    return new Response(null, { status: 204 })
   }
 
   /**
