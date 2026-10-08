@@ -143,9 +143,15 @@ test('zoneLootSummary: mobs are DISTINCT pages, drops are rows, seen is a sum', 
 
 const REAL: MobEntry[] = (mobsJson as unknown as { mobs: MobEntry[] }).mobs
 
-test('zoneOptions over the REAL catalog: 185 zones, Cazic Thule folded to one 30-mob option', () => {
+test('zoneOptions over the REAL catalog: 186 zones, Cazic Thule folded to one 30-mob option', () => {
   const opts = zoneOptions(REAL)
-  assert.equal(opts.length, 185, 'the committed catalog stopped yielding 185 folded zones')
+  // 185 -> 186 on the 2026-10-07 rescrape, and the one new option is a SPELLING, not a place:
+  // `The Lair of the Splitpaw` (one row, Nisch Mal Gnoll), which is `shared/zones.ts`'s own `paw`
+  // name beside the catalog's `Splitpaw Lair` (31) and `Infected Paw` (1). The picker folds on
+  // `zoneKey` only, so all three were never going to merge here - `Splitpaw Lair` and `Infected
+  // Paw` were already two options before - while `mobsInZone` joins the verified aliases, so any
+  // of the three serves the same bestiary. Nothing else in the option list appeared or vanished.
+  assert.equal(opts.length, 186, 'the committed catalog stopped yielding 186 folded zones')
   // The corpus spells it `Cazic Thule` (28 rows) AND `Cazic-Thule` (2); the fold is why this is one
   // option and not two, and 30 is the number the picker states beside it.
   const ct = opts.find((o) => o.zone === 'Cazic Thule')
@@ -156,9 +162,15 @@ test('zoneOptions over the REAL catalog: 185 zones, Cazic Thule folded to one 30
   assert.deepEqual(names, [...names].sort((a, b) => a.localeCompare(b)))
 })
 
-test('zoneLootRows over the REAL catalog: Cazic Thule is 42 drops across 15 mobs', () => {
+test('zoneLootRows over the REAL catalog: Cazic Thule is 47 drops across 14 mobs', () => {
+  // 42/15 -> 47/14 on the 2026-10-07 rescrape, all of it the wiki's own edits: `a lizard
+  // ritualist` gained five Rubicite drops (1 -> 6), `Cazic Cenobite` and `Tae Ew Templar`/`Diviner`
+  // gained Lizard Meat/Tail rows (+4), and `Tae Ew Archon` LEFT the table - its page (rev
+  // 2026-09-04) rewrote `|known_loot` from `{{:Item}}` transclusions to plain `[[Item]]` links,
+  // the shape `parseMobLoot` has never read (140 catalog pages are link-only, measured on the same
+  // cache). That is a known parser gap, not a fold to paper over in this pin.
   const rows = zoneLootRows({ zone: 'Cazic Thule', catalog: REAL, seenByItem: NO_SEEN })
-  assert.deepEqual(zoneLootSummary(rows), { mobs: 15, drops: 42, outOfEra: 0, seen: 0, upgrades: 0 })
+  assert.deepEqual(zoneLootSummary(rows), { mobs: 14, drops: 47, outOfEra: 0, seen: 0, upgrades: 0 })
   assert.ok(rows.every((r) => r.item.trim() !== ''), 'a drop row carried an empty item name')
   assert.ok(rows.every((r) => r.mobPage !== '' && r.era.key === r.itemKey))
   assert.equal(new Set(rows.map((r) => r.key)).size, rows.length, 'a row key collided')

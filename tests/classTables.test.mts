@@ -224,10 +224,17 @@ test('the per-class counts reproduce the design measurement, per spell entry', (
   // are taken over the PRISTINE scrape (`spellsJson` directly, no removals and no corrections),
   // which still carries both invisibility pages exactly as the wiki wrote them. The effective
   // index below is where that ticket lands.
+  //
+  // BRD 91 -> 90, ENC 239 -> 238, MAG 202 -> 201, NEC 193 -> 192, WIZ 235 -> 234 (2026-10-07
+  // rescrape), and again they are ONE spell: the wiki emptied `Identify`'s `|classes` (it had
+  // listed Bard 14 via Lyssa's Cataloging Libretto, Wizard/Magician/Enchanter 16, Necromancer 20)
+  // and its description now says "This spell doesn't exist in EQL for classes to scribe". Every
+  // EXCLUSIVE count holds, because a five-class spell was exclusive to none of them. The scrape's
+  // six new pages (Healing Water, Summon Horse, …) parse to no class and reach no row here.
   const expected: Record<string, [number, number]> = {
-    BRD: [91, 90], BST: [77, 27], CLR: [206, 82], DRU: [268, 152],
-    ENC: [239, 184], MAG: [202, 161], NEC: [193, 86], PAL: [91, 17],
-    RNG: [92, 20], SHD: [91, 23], SHM: [209, 102], WIZ: [235, 193]
+    BRD: [90, 90], BST: [77, 27], CLR: [206, 82], DRU: [268, 152],
+    ENC: [238, 184], MAG: [201, 161], NEC: [192, 86], PAL: [91, 17],
+    RNG: [92, 20], SHD: [91, 23], SHM: [209, 102], WIZ: [234, 193]
   }
   for (const [abbr, [total, excl]] of Object.entries(expected)) {
     assert.deepEqual([RAW.get(abbr)?.total, RAW.get(abbr)?.excl], [total, excl], `${abbr} drifted`)

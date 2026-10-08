@@ -197,7 +197,16 @@ test('the override is ONE-DIRECTIONAL over the whole corpus: it hides, it never 
   // `--refresh` corrected 5 stale banners out of the set (Bronze Tanto and the four Torn Pages of
   // Mastery, all re-bannered Classic upstream). A FLOOR, not a count — a later refresh will
   // correct more, and that must not turn this red.
-  assert.ok(FLIPPED.length >= 140, `only ${String(FLIPPED.length)} verdicts changed`)
+  //
+  // AND IT DID (2026-10-07 rescrape): 148 -> 138, FearHateRevamp 53 · Velious 26 · Kunark 26 ·
+  // EpicQuests 20 · Epics 7 · Luclin 4 · Unknown 2, AC-bearing still 81. Ten pages left the set
+  // because the wiki RE-BANNERED them `Classic` (Alluring Horn, Ancient Rock, both Armadillo
+  // drops, Chunk of Tundra, Fleshless Skull, Green Heartwood Branch, Hollow Skull, Power of Fire,
+  // Weighted Gloves) and one (Torklar's Battle Hammer) lost its Velious banner outright; one joined
+  // (Blue Crystal Staff, newly Kunark). Every exit is upstream correcting a banner, which is the
+  // case this floor was written to absorb - so the floor drops under the new measurement rather
+  // than the property moving.
+  assert.ok(FLIPPED.length >= 125, `only ${String(FLIPPED.length)} verdicts changed`)
   assert.ok(FLIPPED.filter((r) => r.ac > 0).length >= 70, 'the AC-bearing damage stopped reproducing')
 })
 
@@ -392,7 +401,16 @@ test('THE IN-ERA DIRECTION refuses a page that merely failed to be out', () => {
   // Every in-era derivation in the corpus must trace to one of those 54.
   const derivations = buildEraDerivations(corpus)
   const inEra = [...derivations.values()].filter((d) => d.verdict === 'in-era')
-  assert.ok(inEra.length >= 50, `only ${String(inEra.length)} in-era derivations`)
+  // 2026-10-07 rescrape: 78 -> 45, sidecar 151 -> 138 pages (25 out, 44 carrying an in-era token).
+  // NOT a lost parse: 418 item pages gained a banner of their own (409 of them `Classic`), and 45
+  // of the era? pages whose |notes links fed this direction are among them - they now read in-era
+  // by LAYER 1, so they stopped needing a page to vouch for them and the sidecar stopped asking
+  // about the 14 targets only they linked (Erudin, Kedge Keep, Steamfont Mountains, the Banded
+  // Armor set pages, …). Of the 34 in-era derivations gone (one joined), 31 are rows that now carry
+  // `Classic` on their own page and one carries `Kunark`; the other two are Words of Magi`kot (its
+  // quest giver Jahsohn Aksot was re-bannered Kunark, so it flipped OUT, correctly) and Dusty Old
+  // Finger Bones (its page no longer links Kedge Keep).
+  assert.ok(inEra.length >= 40, `only ${String(inEra.length)} in-era derivations`)
   for (const d of inEra) {
     assert.equal(d.basis, 'page', `an in-era verdict came from a ${d.basis} edge, which cannot mean in-era`)
     const target = SIDECAR.pages[pageEraKey(d.target)]
@@ -436,7 +454,13 @@ test('THE CENSUS: what layer 3 costs the default era-filtered table', () => {
   for (const d of derivations.values()) byBasis.set(d.basis, (byBasis.get(d.basis) ?? 0) + 1)
   assert.ok((byBasis.get('drop-mob') ?? 0) >= 2000, `only ${String(byBasis.get('drop-mob'))} dropper edges`)
   assert.ok((byBasis.get('page') ?? 0) >= 380, `only ${String(byBasis.get('page'))} page edges`)
-  assert.ok((byBasis.get('component') ?? 0) >= 280, `only ${String(byBasis.get('component'))} component edges`)
+  // 2026-10-07 rescrape: component 308 -> 279 (drop-mob 2,364 -> 2,395 · page 442 -> 437 · quest
+  // 102 -> 98). Of the 33 component rows that left (4 joined), 27 now report a `page` edge instead
+  // (it outranks `component` in `BASIS_ORDER`; the verdict is unchanged), one gained its own
+  // Velious banner, and five lost the edge because an out-of-era COMPONENT was re-bannered upstream
+  // (Imbued Emerald Velious -> Classic for four of them, Small Plate Boot Mold Epics -> Classic for
+  // the fifth) - the wiki's correction, not a parse loss.
+  assert.ok((byBasis.get('component') ?? 0) >= 250, `only ${String(byBasis.get('component'))} component edges`)
   assert.ok((byBasis.get('quest') ?? 0) >= 90, `only ${String(byBasis.get('quest'))} quest edges`)
 
   // EVERY BASIS THE TYPE NAMES IS ACCOUNTED FOR. `yield` legitimately fires for nothing today; the
@@ -460,17 +484,29 @@ test('THE CENSUS: what layer 3 costs the default era-filtered table', () => {
   )
 
   // THE SHELF IT HIDES IS ONE FAMILY, and naming it is the point: a rule this blunt is only safe if
-  // the set it hides is a list somebody read. These five components carry the bulk of it, and each
+  // the set it hides is a list somebody read. These components carry the bulk of it, and each
   // one's page really does open with an out-of-era banner.
   // Compared by KEY, not by spelling (law 2): the recipes write `Teir\`Dal Smithy Hammer` while the
   // page is titled `Teir\`dal Smithy Hammer`, and the edge carries the recipe's spelling verbatim.
-  for (const target of ['Elven Smithy Hammer', 'Teir`dal Smithy Hammer', 'Imbued Emerald', 'Brute Hide']) {
+  for (const target of ['Elven Smithy Hammer', 'Teir`dal Smithy Hammer', 'Brute Hide']) {
     const riders = [...derivations.values()].filter((d) => itemKey(d.target) === itemKey(target))
     assert.ok(riders.length >= 10, `only ${String(riders.length)} pages ride on ${target}`)
     const page = CORPUS.find((r) => r.key === itemKey(target))
     assert.ok(page, `${target} is not in the corpus`)
     assert.equal(eraBadge(page.tag ?? ''), 'out', `${target} [${String(page.tag)}] is not badged out`)
   }
+  // IMBUED EMERALD LEFT THE LIST ON THE 2026-10-07 RESCRAPE, and the direction is the point: the
+  // wiki re-bannered its page `{{Velious Era}}` -> `{{Classic Era}}`, so the jewellery that rode on
+  // it stopped being hidden by it (the census above counts the exits). Pinned the other way round
+  // so a re-banner back to out-of-era is seen, not absorbed: it is in-era and carries no rider.
+  const emerald = CORPUS.find((r) => r.key === itemKey('Imbued Emerald'))
+  assert.ok(emerald, 'Imbued Emerald is not in the corpus')
+  assert.equal(emerald.tag, 'Classic', 'Imbued Emerald was re-bannered again - re-read its page')
+  assert.equal(
+    [...derivations.values()].filter((d) => itemKey(d.target) === itemKey('Imbued Emerald')).length,
+    0,
+    'a page derives its era from Imbued Emerald again'
+  )
 })
 
 test('SHIELD OF HATRED: the corpus never lost its page, so the link has one to point at', () => {
