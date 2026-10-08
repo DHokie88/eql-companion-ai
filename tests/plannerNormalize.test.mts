@@ -211,8 +211,22 @@ test('the class table covers the whole committed corpus', () => {
   // The measured token inventory: 16 codes + ALL/All + NONE/None + except + two annotations —
   // plus `War`, the one Title Case class code the 2026-08-22 rescrape added (the case fold
   // already normalizes it; it is listed so the inventory stays a census and not a guess).
-  const known = new Set<string>([...CLASS_ABBRS, 'ALL', 'All', 'NONE', 'None', 'except', '(35)', '(48)', 'War'])
+  // `RND` is the one typo the 2026-10-07 rescrape added (Bracers of Erollisi): a hand-verified
+  // CLASS_RENAMES row reads it as RNG, pinned by the test below.
+  const known = new Set<string>([
+    ...CLASS_ABBRS, 'ALL', 'All', 'NONE', 'None', 'except', '(35)', '(48)', 'War', 'RND'
+  ])
   assert.deepEqual([...seen].filter((t) => !known.has(t)), [], 'corpus class token outside the measured set')
+})
+
+test('the RND typo reads as Ranger, and the page it is on keeps all nine classes', () => {
+  // Bracers of Erollisi, 2026-10-07: `Class: WAR CLR PAL RND DRU MNK BRD ROG SHM`. RND sits where
+  // RNG falls in the class order, and the 2026-08-22 scrape of the same page said
+  // `ALL except SHD NEC WIZ MAG ENC`, which includes Ranger.
+  assert.deepEqual(normalizeClasses(['PAL', 'RND', 'DRU']), ['PAL', 'RNG', 'DRU'])
+  const bracers = index.get('bracers of erollisi')
+  assert.ok(bracers?.stats?.classes?.includes('RND'), 'the corpus still states the typo verbatim')
+  assert.deepEqual(normalizeClasses(bracers.stats.classes), ['WAR', 'CLR', 'PAL', 'RNG', 'DRU', 'MNK', 'BRD', 'ROG', 'SHM'])
 })
 
 // ---- socket types (D2) -------------------------------------------------------------
