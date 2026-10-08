@@ -365,7 +365,9 @@ async function attachItemStats(all: PoskyQuest[]): Promise<void> {
       if (stats) statByPage.set(page, stats)
     }
     if (++done % 25 === 0) console.log(`   ${done}/${pages.size}`)
-    await sleep(110)
+    // AGENTS.md scraper etiquette (LAW): one request per second minimum. This was the old 110 ms
+    // cadence the 2026-08-22 ruling retired, still live here.
+    await sleep(1000)
   }
   for (const q of all) {
     for (const it of q.items) if (it.page && statByPage.has(it.page)) it.stats = statByPage.get(it.page)

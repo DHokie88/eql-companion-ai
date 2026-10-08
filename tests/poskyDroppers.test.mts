@@ -201,23 +201,37 @@ test('mergeDroppers keeps layer 1 first and de-dupes by page', () => {
 
 test('an item with no known dropper resolves EMPTY', () => {
   // Wind runes: posky itself calls them "random drop — any Plane of Sky mob". No kill target
-  // exists, so none is invented. (Most runes behave this way; Ozah is the exception below.)
+  // exists, so none is invented. (Every rune behaves this way again since the 2026-10-07
+  // rescrape: Ozah was the exception for a while, see below.)
   assert.deepEqual(skyDroppersFor('Wind Rune Meda'), [])
   assert.deepEqual(skyDroppersFor('Wind Rune Azia'), [])
-  // No page in the catalog lists this one.
-  assert.deepEqual(skyDroppersFor('Large Sky Lapis'), [])
+  assert.deepEqual(skyDroppersFor('Wind Rune Ozah'), [])
+  // No Plane of Sky page lists this one (only same-named non-Sky items do; the gate test below).
+  // Large Sky Lapis held this line until the 2026-10-07 rescrape: the Eye of Veeshan page now
+  // lists it, which the positive assertion keeps honest.
+  assert.deepEqual(skyDroppersFor('Bixie Stinger'), [])
+  assert.deepEqual(names(skyDroppersFor('Large Sky Lapis')), ['Eye of Veeshan'])
   // A name nothing in EverQuest has ever heard of.
   assert.deepEqual(skyDroppersFor('Sword of Nonexistence'), [])
   assert.deepEqual(skyDroppersFor(''), [])
 })
 
-test('the 2026-08-22 rescrape gave the Azarack pair (and Ozah) a real dropper', () => {
-  // The Protector of Sky page (edited 2026-08-21) now lists Azarack Blood, Azarack Skin and
+test('the Azarack pair keeps its real dropper; Ozah went back to being a random rune', () => {
+  // The Protector of Sky page (edited 2026-08-21) began listing Azarack Blood, Azarack Skin and
   // Wind Rune Ozah in its loot — a triggered Island 2 raid spawn, verified on the live page.
-  // These three used to be the measured no-dropper remainder; they are kill targets now.
+  // The 2026-10-07 rescrape picked up the page's 2026-09-15 edit, which still lists the Azarack
+  // pair but REMOVED Wind Rune Ozah (verified on the live page), so Ozah resolves nobody again.
   assert.deepEqual(names(skyDroppersFor('Azarack Blood')), ['Protector of Sky'])
   assert.deepEqual(names(skyDroppersFor('Azarack Skin')), ['Protector of Sky'])
-  assert.deepEqual(names(skyDroppersFor('Wind Rune Ozah')), ['Protector of Sky'])
+  assert.deepEqual(names(skyDroppersFor('Wind Rune Ozah')), [])
+})
+
+test('a `{{:Item_Name}}` loot link joins the same item as `{{:Item Name}}`', () => {
+  // The wiki's 2026-09-21 edits wrote Brass Knuckles as `{{:Brass_Knuckles}}` on the Overseer of
+  // Air and the Hand of Veeshan pages (Noble Dojorn already did). MediaWiki treats `_` and a space
+  // in a title as one character; the scrape now does too, so all three efreeti still resolve.
+  assert.deepEqual(names(skyDroppersFor('Brass Knuckles')), ['Noble Dojorn', 'Overseer of Air', 'the Hand of Veeshan'])
+  assert.equal(MOBS.some((m) => (m.drops ?? []).some((d) => d.includes('_'))), false)
 })
 
 // =============================================================================
@@ -292,8 +306,9 @@ test('the tracker resolves a kill target for the great majority of its items', (
   assert.ok(items.length >= 128, `distinct items: ${items.length}`)
   assert.ok(resolved.length >= 109, `resolved: ${resolved.length} of ${items.length}`)
   // Every unresolved item is a wind rune or one of the gaps the catalog simply never lists.
-  // (Azarack Blood/Skin left this set 2026-08-22 — Protector of Sky now lists them.)
-  const expectedGaps = new Set(['Bixie Stinger', 'Large Sky Lapis'])
+  // (Azarack Blood/Skin left this set 2026-08-22 — Protector of Sky now lists them; Large Sky
+  // Lapis left it in the 2026-10-07 rescrape — the Eye of Veeshan page now lists it.)
+  const expectedGaps = new Set(['Bixie Stinger'])
   for (const n of unresolved) {
     assert.ok(
       n.toLowerCase().startsWith('wind rune') || expectedGaps.has(n),

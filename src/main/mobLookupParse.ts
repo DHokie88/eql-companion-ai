@@ -94,7 +94,14 @@ export function parseMobLoot(block: string): MobDrop[] {
   const re = /\{\{:\s*([^}|]+?)\s*\}\}/g
   const marks: { item: string; end: number }[] = []
   let m: RegExpExecArray | null
-  while ((m = re.exec(block)) !== null) marks.push({ item: m[1].trim(), end: re.lastIndex })
+  // The transclusion target is a PAGE TITLE, and MediaWiki treats `_` and a space in a title as
+  // the same character. Pages do write it both ways: on 2026-09-21 the wiki re-pasted the
+  // Overseer of Air / the Hand of Veeshan loot lists as `{{:Brass_Knuckles}}` (Noble Dojorn
+  // already said it that way), and the raw string then joined no item, so the 2026-10-07
+  // rescrape left Brass Knuckles with no Sky dropper at all. Fold to the spaced form the item
+  // catalog and the game both print.
+  while ((m = re.exec(block)) !== null)
+    marks.push({ item: m[1].replace(/_/g, ' ').replace(/\s+/g, ' ').trim(), end: re.lastIndex })
   for (let i = 0; i < marks.length; i++) {
     const item = marks[i].item
     if (!item) continue
