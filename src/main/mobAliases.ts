@@ -2,8 +2,9 @@
 //
 // THE DEFECT IT EXISTS FOR (characterized in JOS-137, reproduced from report
 // 01KZKVGAVAQGYZT2TE54NTT7KH): the log spells the Plane of Fear god `Cazic-Thule` with a HYPHEN.
-// The wiki, the committed mob catalog (page `Cazic Thule (God)`, 18 known drops) and the raid
-// roster all spell it with a SPACE. Kills already bridged that divergence, because
+// The wiki, the committed mob catalog (`name` `Cazic Thule`, 18 known drops) and the raid
+// roster all spell it with a SPACE. (The wiki moved the PAGE to `Cazic-Thule (God)` before the
+// 2026-10-07 rescrape; the catalog `name` this boundary resolves by did not change.) Kills already bridged that divergence, because
 // `bossStatus.statusFor` folds every roster `match` alias against the kill map. LOOT did not: the
 // own-loot index files each drop under `mobKey(ev.source)` — the raw LOG spelling — while the boss
 // card asks the mob page for `target.name`, the ROSTER spelling. Four items looted off one god's

@@ -30,7 +30,7 @@
 import { readFileSync, writeFileSync } from 'fs'
 import { dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
-import { parseWikiRespawn, type WikiRespawn, type WikiRespawnData } from '../src/shared/respawnWiki'
+import { parseWikiRespawn, respawnKey, type WikiRespawn, type WikiRespawnData } from '../src/shared/respawnWiki'
 import type { MobData } from '../src/shared/types'
 
 const API = 'https://eqlwiki.com/api.php'
@@ -88,13 +88,24 @@ interface RevPage {
  * Re-run the grammar over the committed verbatim text, with no network at all. This is the whole
  * reason `text` is committed beside `seconds`: tightening `parseWikiRespawn` is a code change, and
  * a code change should not cost the wiki 158 requests to land. `text` is never touched here — only
- * `seconds` appears, disappears or moves — so a reparse diff is exactly the grammar's effect.
+ * `seconds` appears, disappears or moves, and `key` is re-derived by `respawnKey` from the
+ * COMMITTED catalog — so a reparse diff is exactly the grammar's (and the key rule's) effect.
  */
 function reparse(): void {
   const data = JSON.parse(readFileSync(OUT_PATH, 'utf8')) as WikiRespawnData
+  const catalog = JSON.parse(readFileSync(MOBS_PATH, 'utf8')) as MobData
+  const nameByPage = new Map(catalog.mobs.map((m) => [m.page, m.name]))
   let gained = 0
   let lost = 0
+  let rekeyed = 0
   for (const row of data.rows) {
+    // A page the catalog no longer holds keeps the key it was scraped under.
+    const name = nameByPage.get(row.page)
+    if (name !== undefined) {
+      const key = respawnKey(name, row.page)
+      if (key !== row.key) rekeyed++
+      row.key = key
+    }
     const before = row.seconds
     const after = parseWikiRespawn(row.text)
     if (after === null) delete row.seconds
@@ -102,11 +113,12 @@ function reparse(): void {
     if (before === undefined && after !== null) gained++
     if (before !== undefined && after === null) lost++
   }
+  data.rows = dedupe(data.rows)
   writeFileSync(OUT_PATH, JSON.stringify(data, null, 1) + '\n')
   const parsed = data.rows.filter((r) => r.seconds !== undefined).length
   console.log(
     `reparse: ${String(data.rows.length)} rows → ${String(parsed)} parse ` +
-      `(+${String(gained)} newly read, -${String(lost)} newly refused)`
+      `(+${String(gained)} newly read, -${String(lost)} newly refused, ${String(rekeyed)} re-keyed)`
   )
 }
 
@@ -119,7 +131,7 @@ function rowsFromBatch(pages: RevPage[], byTitle: Map<string, string>): WikiResp
     const text = m ? m[1].trim() : ''
     if (text.length === 0) continue
     const name = byTitle.get(p.title) ?? p.title
-    const row: WikiRespawn = { key: name.toLowerCase(), page: p.title, text }
+    const row: WikiRespawn = { key: respawnKey(name, p.title), page: p.title, text }
     const seconds = parseWikiRespawn(text)
     if (seconds !== null) row.seconds = seconds
     out.push(row)
