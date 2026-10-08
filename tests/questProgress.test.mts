@@ -17,7 +17,7 @@
 //      `You Say 'Hail X'`, and hand-ins that start Hand / Give / Turn in.
 //   3. COMPLETION IS THE `countTurnIns` RULE: every required item reached the giver. A SUPERSET
 //      offer completes; a subset does not; a turn-in to a different NPC does nothing; a quest with
-//      no `requiredItems` (161 of the 904) can never auto-complete, said plainly.
+//      no `requiredItems` (155 of the 907) can never auto-complete, said plainly.
 //   4. THE HAND STEP naming a turned-in item goes auto, and THE HAIL STEP TICKS ITSELF once the
 //      `hails` module has a greeting to the NPC the step names (roadmap 2). The seam was typed and
 //      silent from the day this file was written; what changed is that a witness now arrives, so
@@ -165,14 +165,16 @@ test('A TURN-IN TO SOMEBODY ELSE DOES NOTHING', () => {
   assert.equal(p.turnedIn.size, 0)
 })
 
-test('NO requiredItems CAN NEVER AUTO-COMPLETE (161 of the 904 quests) — stated, not approximated', () => {
+test('NO requiredItems CAN NEVER AUTO-COMPLETE (155 of the 907 quests) — stated, not approximated', () => {
   const q = quest({ giver: 'Basher Nanrum', steps: ["You say, 'Hail, Basher Nanrum'"] })
   const p = questProgress(q, evidence([turnIn('Basher Nanrum', ['Anything At All'])]), [])
   assert.equal(p.complete, false)
   assert.equal(p.completeAt, undefined)
   let none = 0
   for (const e of catalog) if ((e.requiredItems ?? []).length === 0) none++
-  assert.equal(none, 161, 'the count this rule is about, off the committed catalog')
+  // 161 of 904 until the 2026-10-07 rescrape: three new quest pages (each naming items), and six pages (Tome of Ages,
+  // This Means Warrr, ...) began wiki-linking the items they ask for, so they gained requiredItems.
+  assert.equal(none, 155, 'the count this rule is about, off the committed catalog')
 })
 
 // ── 4. the steps the log ticks ────────────────────────────────────────────────────────────────

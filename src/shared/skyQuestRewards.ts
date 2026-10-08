@@ -1,7 +1,17 @@
 // skyQuestRewards.ts — WHICH ITEM A SKY QUEST ACTUALLY HANDS OUT, when the wiki quest page links
 // the wrong one (JOS-428).
 //
-// THE DEFECT, reported 01M0FH3XC4ST5Q3XXPJ0H3X75J (1.6.0), verbatim: "The link Fae Amulet/name
+// STATUS AFTER THE 2026-10-07 RESCRAPE: the Bard row this file was written for is RETIRED. The wiki
+// quest page now links `Amulet of the Fae` itself, posky's reward cell and stat block (AC 8, STR +5)
+// are that page's own, and items.json gives `Amulet of the Fae` the Bard Test of Wind questUse — so
+// the audit's own instruction ("a re-scrape landed the fix, so delete the row") was followed. The
+// story below is kept because it is the argument for the table's shape. The one live row is now
+// Beastlord Test of Harpy (see its `evidence`): the same rescrape moved that quest's link from
+// `Griffin-Hide Armguards` to a twin page `Griffon-Hide Armguards`, while the game's own client text
+// (Resources/Achievements/AchievementComponentsClient.txt, `Obtain Griffin-Hide Armguards`) still
+// names the Griffin spelling — the exact two-pages-one-item shape the Bard row had.
+//
+// THE DEFECT (retired row), reported 01M0FH3XC4ST5Q3XXPJ0H3X75J (1.6.0), verbatim: "The link Fae Amulet/name
 // should be Amulet of the Fae." The reporter is a Bard who has run Bard Test of Wind, and their
 // attached inventory export carries `Amulet of the Fae` (item id 27723, Bank7-Slot1) and no Fae
 // Amulet at all. Two consequences, one of them invisible until the reward inference landed with
@@ -65,31 +75,36 @@ export interface SkyQuestReward {
 }
 
 export const SKY_QUEST_REWARDS: readonly SkyQuestReward[] = [
+  // The Bard row (`Fae Amulet` -> `Amulet of the Fae`, verified 2026-08-20, report
+  // 01M0FH3XC4ST5Q3XXPJ0H3X75J) RETIRED 2026-10-07: the rescrape's posky.json names `Amulet of the
+  // Fae` on Bard Test of Wind with that page's own AC 8 / STR +5 block, so the row had stopped
+  // describing anything. tests/skyQuestRewards.test.mts keeps a tripwire on the fixed scrape.
   {
-    className: 'Bard',
-    questName: 'Bard Test of Wind',
-    from: 'Fae Amulet',
-    to: 'Amulet of the Fae',
+    className: 'Beastlord',
+    questName: 'Beastlord Test of Harpy',
+    from: 'Griffon-Hide Armguards',
+    to: 'Griffin-Hide Armguards',
     stats: [
-      'MAGIC ITEM LORE ITEM NO DROP',
-      'Slot: NECK',
-      'Charges: 4',
-      'AC: 8',
-      'STR: +5 DEX: +4 STA: +4 HP: +50',
-      'SV DISEASE: +10 SV POISON: +10',
-      'Effect: Healing (Must Equip, Casting Time: Instant) at Level 45',
-      'WT: 0.1 Size: TINY',
-      'Class: BRD',
-      'Race: ALL'
+      'Lore Equipped, No Trade',
+      'Slot: ARMS',
+      'Class: BST',
+      'Race: ALL',
+      'AC: 6',
+      'STA: +4 WIS: +3',
+      'SV MAGIC: +5 SV FIRE: +5 SV COLD: +5 SV DISEASE: +5 SV POISON: +5',
+      'End: +15',
+      'WT: 2.5 Size: SMALL',
+      'Custom EQL Plane of Sky reward.'
     ].join('\n'),
-    verified: '2026-08-20',
+    verified: '2026-10-07',
     evidence:
-      'Reported 01M0FH3XC4ST5Q3XXPJ0H3X75J (1.6.0), "The link Fae Amulet/name should be Amulet of ' +
-      'the Fae"; the same report\'s inventory export holds Amulet of the Fae (id 27723, Bank7) and ' +
-      'no Fae Amulet. items.json carries both pages: Fae Amulet AC 5 with questUses Bard Test of ' +
-      'Wind, Amulet of the Fae AC 8 STR +5 with the identical NECK/BRD/4-charge-Healing profile, ' +
-      'the same icon 1043, and no source of its own stated anywhere. Each page asks in its own ' +
-      'summary whether the other is the upgraded version; the bag settles it.'
+      'The 2026-08-22 scrape read the quest page linking Griffin-Hide Armguards; the 2026-10-07 ' +
+      'rescrape reads it linking Griffon-Hide Armguards. Both pages are live on eqlwiki.com (ids ' +
+      '57119 / 57117, same editor, identical stats and icon 634) and both are in items.json. The ' +
+      'game client ships `Obtain Griffin-Hide Armguards` in AchievementComponentsClient.txt (row ' +
+      '20000215); that text matches the reward name on 93 other Sky quests (Windhowl, a weapon ' +
+      'pair, is the lone alias), so the game spelling is Griffin. No inventory export holding the ' +
+      'item exists yet to settle it outright.'
   }
 ]
 

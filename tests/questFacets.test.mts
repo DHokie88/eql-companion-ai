@@ -122,10 +122,13 @@ test('LAW 1 — a quest with no resolvable dropper names NO boss, and keeps the 
   // this count is the tripwire that says which world the suite is measuring.
   const bossless = ALL.filter((q) => questBosses(q).length === 0)
   assert.equal(bossless.length, 0, `boss-less quests: ${bossless.length}`)
-  // The synthetic no-dropper quest: an island stated in words, an item no catalog page lists.
+  // The synthetic no-dropper quest: an island stated in words, an item no Plane of Sky page
+  // lists. (Large Sky Lapis until the 2026-10-07 rescrape, when the Eye of Veeshan page began
+  // listing it; Bixie Stinger is the one non-rune Sky item the catalog still resolves nobody for.)
   const synthetic = {
-    items: [{ where: 'Island 2', droppers: skyDroppersFor('Large Sky Lapis') }]
+    items: [{ where: 'Island 2', droppers: skyDroppersFor('Bixie Stinger') }]
   }
+  assert.deepEqual(synthetic.items[0].droppers, [], 'Bixie Stinger still resolves no Sky dropper')
   assert.deepEqual(questBosses(synthetic), [])
   assert.deepEqual(questIslands(synthetic), ['Island 2'])
   assert.equal(matchesFacets(synthetic, { islands: ['Island 2'], bosses: [] }), true)
