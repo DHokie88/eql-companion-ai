@@ -1,5 +1,5 @@
 {
-  "scrapedAt": "2026-09-06T16:56:58.634Z",
+  "scrapedAt": "2026-10-08T03:42:02.791Z",
   "source": "eqlwiki.com — Category:Quests + quest subcategories",
   "quests": [
     {
@@ -450,7 +450,6 @@
         "Emerald Warriors (+5)",
         "Clerics of Tunare (+?)",
         "King Tearis Thex (+?)",
-        "Anti-Mage (+?)",
         "Stackable Items",
         "Stacked Turn-Ins(?)",
         "Coalition of Tradefolk Underground (+10)",
@@ -474,7 +473,8 @@
         "Stacked Turn-Ins (multiples of 3)",
         "Silent Fist Clan (+5)",
         "Guards of Qeynos (+5)",
-        "Ashen Order (+5)"
+        "Ashen Order (+5)",
+        "Rewards the same faction for returning Grathin's Invoice to Phin Esrinap."
       ]
     },
     {
@@ -663,7 +663,7 @@
         "Deepwater Goblin Nets drop from a goblin net master in Lake Rathe.",
         "Give David 2 Deepwater Goblin Nets and receive the Mold of Ro Bracer.",
         "Mold of Ro Breastplate:",
-        "You must have Amiable faction with Clerics of Tunare to complete this step.",
+        "Speak with Abigail. You must have Amiable faction with Clerics of Tunare to complete this step.",
         "You say, 'Hail, Abigail'",
         "You say, 'I seek the Breastplate of Ro'",
         "A Dark Cauldron drops from an ancille cook in Mistmoore Castle.",
@@ -842,9 +842,10 @@
       ],
       "expReward": true,
       "steps": [
-        "Note: This quest made MQable on the 2/13/13 patch.",
-        "Your Location is -1409.67, 547.72, -49.54",
-        "Even though Xelha doesn't talk to you at dubious, or apprehensive, she will accept the Bone Chips. She WILL NOT accept fire beetle eyes or spiderling silk until faction is more suitable (Xelha is Dismal Rage).",
+        "Note: The Paineel newbie yard is a great place to get Bone Chips and Fire Beetle Eyes. In the northernmost corner of the yard, there are 2 spots that respawn very quickly- one spot spawns 3 fire beetles and the other spawns 4 decaying skeletons. If you can kill them fast enough, you can loot about 400 Bone Chips and 400 Fire Beetle Eyes in about an hour.",
+        "Even though Xelha doesn't talk to you at dubious, apprehensive, or indifferent, she will accept the Bone Chips.",
+        "At indifferent to Dismal Rage, Xelha accepts Bone Chips, but not Fire Beetle Eyes.",
+        "At amiable, she responds to hails and accepts Fire Beetle Eyes and Spiderling Silk.",
         "You say, 'Hail, Xelha Nevagon'",
         "You say, 'I will assist the great Xelha.'",
         "Give her 4 x Bone Chips. (Can be stacked and can be multiple turn-ins as long as its in multiples of 4)",
@@ -854,9 +855,6 @@
         "4% at Level 3 (Troll Shaman Innoruuk)",
         "2.15% at level 4 (Ogre Shadow Knight)",
         "1.1% at level 5 (Ogre Shadow Knight)",
-        "At amiable to Dismal Rage, Xelha would talk to me and accept both fire beetle eyes and spiderling silk. I did not try at indifferent.",
-        "edit : At indifferent, she actually offer the 3 quest. you can start with fire beetle and silk.",
-        "edit : I can confirm she offered the 3 quests but did not accept fire beetle and silk until amiable.",
         "You say, 'I will assist the great Xelha.'",
         "Give her 4 x Fire Beetle Eye.",
         "Bah!! I shall reward you for this small, very small, deed!! I pass on to you the knowledge of summoning. The more you serve, the more your faith in Innoruuk grows.'",
@@ -1146,7 +1144,7 @@
       ],
       "expReward": true,
       "steps": [
-        "Chesgard Sydwen, in the house of thunder, is willing to reward those who help eliminate the bandits in the Karanas. Bring him a Bandit Sash and he will give you xp (about one blue to a 12 bard), faction, some decent gold and a bronze weapon.",
+        "Chesgard Sydwen, in the house of thunder, is willing to reward those who help eliminate the bandits in the Karanas. Bring him a Bandit Sash and he will give you xp (about one blue to a 12 bard), faction, some decent gold and a bronze weapon. (Location: Bottom right corner of map)",
         "Upon handing in a sash:",
         "You can hand in more than one sash, you will get multiple rewards."
       ]
@@ -1283,7 +1281,6 @@
         "Solusek Mining Company Invoice",
         "Mechanical Doll",
         "Note for Baenar",
-        "Ripped Qeynos Bards Guild Flyer",
         "Note to Maligar",
         "Maligar's Head",
         "Mahlin's Mystical Bongos",
@@ -1312,12 +1309,12 @@
         "Talk to Konia Swiftfoot in Western Karana (guard tower #4), receive a Torch of Misty",
         "Give the torch to Fajio Knejo in Misty Thicket, receive Torch of Ro",
         "Give the torch to Andad Filla in South Ro, receive Torch of Rathe",
-        "Give the torch to Misty Tekchita in Lake Rathetear, receive ring Proof of Speed",
+        "Give the torch to Misty Tekcihta in Lake Rathetear, receive ring Proof of Speed",
         "Give the ring to Konia Swiftfoot in W Karana, receive Maestro's Symphony Page 24 Top",
         "Maestro's Symphony Page 24 Bottom:",
         "Ask Baenar Swiftsong in South Karana, “what doll,” receive Solusek Mining Company Invoice",
         "Take the invoice to Marfen Binkdirple in Solusek's Eye, receive Mechanical Doll",
-        "Give the doll to Serra in Unrest, receive Note for Baenar previously Ripped Qeynos Bards Guild Flyer ? I didn't get this 2nd one on turn in 2/6/25",
+        "Give the doll to Serra in Unrest, receive Note for Baenar",
         "Give the note to Baenar Swiftsong in South Karana, receive a Note to Maligar",
         "Give the note to Maligar in Western Plains of Karana",
         "Kill [45]Maligar's Enraged Doppleganger, loot his head",
@@ -1723,13 +1720,9 @@
       "giver": "Larkon Theardor",
       "minLevel": 10,
       "classes": [
-        "Cleric",
-        "Druid",
         "Enchanter",
         "Magician",
         "Necromancer",
-        "Paladin",
-        "Shaman",
         "Wizard"
       ],
       "relatedZones": [
@@ -2301,35 +2294,36 @@
       "requiredItems": [
         "Vial of Infectious Disease",
         "Empty Infectious Vial",
-        "Container of Infectious Reagents",
+        "Airtight Metal Box",
         "Gnomish Spirits",
         "Diseased Bone Marrow",
-        "Sprig of Wormwood"
+        "Sprig of Wormwood",
+        "Container of Infectious Reagents"
       ],
       "expReward": true,
       "steps": [
         "Part 1: Spread the Plague:",
+        "You can prove your worth to the god Bertoxxulous and earn a symbol of your devotion. Find Evah Xokez in the tunnels in northern Ak'Anon (#1 on the map).",
         "You say, 'Hail Evah Xokez'",
         "You say, 'I find these tunnels pleasing'",
         "You say, 'I am willing to learn'",
-        "[Receive a Vial of Infectious Disease ]",
-        "Find a female rat in Steamfont Mountains and trade it the vial.",
-        "a female rat injests the virulent substance and becomes ill.",
+        "You receive a Vial of Infectious Disease.",
+        "(You can give the rat up to 4 vials at once, but she despawns after you give them to her.)",
+        "Head out to Steamfont Mountains and find a female rat in the nothern half of the zone. Tracking can certainly help. Give it the vial. (Again, you can give her up to 4 at once, but no more than 4 at a time.)",
+        "You receive the Empty Infectious Vial.",
         "The female rat will respawn as Diseased female rat and proceed to have babies.",
-        "Return the Empty Infectious Vial to Evah Xokez.",
+        "Return back to Ak'Anon and give the vial to Evah Xokez.",
+        "You receive an Airtight Metal Box.",
         "Part 2: Poison Components:",
         "You say, 'What components'",
-        "You need to combine the following items in the box to make Container of Infectious Reagents.",
-        "Gnomish Spirits - Vendors",
-        "2 Diseased Bone Marrow - Steamfont Mountains - a brittle skeleton",
-        "Sprig of Wormwood - Steamfont Mountains - Ennixy Frennor",
-        "After getting the first two, go see Ennixy Frennor in Steamfont Mountains.",
+        "In Ak'Anon, find a clockwork barkeep and purchase the Gnomish Spirits.",
+        "Head out to northern Steamfont Mountains again and kill several brittle skeletons to get 2 Diseased Bone Marrow. It's a rare drop, so you may want to switch difficulties back and forth to force the spawns.",
+        "Once you have the Gnomish Spirits and the 2 Diseased Bone Marrow, go north of Steamfont's windmills to find Ennixy Frennor:",
         "You say, 'Hail Ennixy Frennor'",
         "You say, 'What sprig of wormwood?'",
-        "[Receive a free Sprig of Wormwood]",
-        "Return and give Container of Infectious Reagents to Evah Xokez.",
-        "Evah Xokez says, 'It appears that you truly seek to expand your vision into the Dark Reflection, Soandso. I grant you the Initiate Symbol of Bertoxxulous!'",
-        "[Receive the Initiate Symbol of Bertoxxulous ]"
+        "You receive a Sprig of Wormwood,",
+        "Combine the sprig, the spirits, and the rib bones in the Airtight Metal Box to make the Container of Infectious Reagents. Head back to Evah Xokez and give her the container..",
+        "You receive the Initiate Symbol of Bertoxxulous."
       ]
     },
     {
@@ -3050,15 +3044,11 @@
       ],
       "expReward": true,
       "steps": [
-        "Indifferent is too low for this quest",
+        "Requires Amiable or better Faction with Shadowknights of Night Keep.",
         "Hukulk is in the Shadowknight guild in Grobb.",
         "You say, 'Hail, Hukulk'",
         "You say, 'I want join Nightkeep'",
         "Hand in four Bone Chips.",
-        "Level 1 - 8%",
-        "Level 2 - 1-2%",
-        "Level 3 -",
-        "(Negligible) (1% @ Level 4)",
         "You receive a Rusty Two Handed Sword."
       ]
     },
@@ -3250,7 +3240,7 @@
         "You say, 'Hail, Lokar To`Biath.'",
         "You say, 'Are you a Scribe of Dal?'",
         "You say, 'Why are they Dead?'",
-        "Give him a Red Wine (up to 4 unstacked). It can be from anywhere, not just the Blind Fish. The nearest bar might be the Cuisine Excelsior, which is also conveniently devoid of hostile patrons.",
+        "Give him a Red Wine (large stacks are fine). It can be from anywhere, not just the Blind Fish. The nearest bar might be the Cuisine Excelsior, which is also conveniently devoid of hostile patrons.",
         "Note: This is one of the best quests to gain faction with the Dark Bargainers (Neriak Residents) and with Dreadguard Outer and Dreadguard Inner as it boosts the factions without giving you faction loss with anyone else. 151 turn-ins will take an Iksar Necromancer or Shadow Knight from scowling to dubious with the Neriak guards. It took between 401 and 460 turn-ins to get an Iksar Monk to dubious, without any other faction work."
       ]
     },
@@ -3339,7 +3329,7 @@
         "?"
       ],
       "relatedNpcs": [
-        "a pirate"
+        "Captain Surestout"
       ],
       "rewards": [
         {
@@ -3353,16 +3343,25 @@
         },
         {
           "name": "Kiola Nut"
+        },
+        {
+          "name": "Targ Shield"
+        },
+        {
+          "name": "Broad Sword"
         }
+      ],
+      "requiredItems": [
+        "Bracers of Erollisi"
       ],
       "expReward": true,
       "steps": [
-        "Styria Fearnon walks around the top of the hill next to the dock on the island with the Sisters of Erollisi.",
+        "Styria Fearnon may be found on Erollisi Isle in her own hut, northeast of the dock (578, -9357).",
         "You say, 'Hail, Styria Fearnon'",
-        "You say, 'Who are the Pirates of Gunthak?'",
-        "You say, 'I will hunt the pirates!'",
-        "Capt Surestout is on the Isle of the Seafoam Cyclops, two islands to the west.",
-        "Give the Bracers of Erollisi to Styria Fearnon."
+        "You say, 'What Pirates of Gunthak?'",
+        "You say, 'I wish to hunt the pirates.'",
+        "Captain Surestout is on the Isle of the Seafoam Cyclops, two islands to the west. Kill him for the Bracers of Erollisi and give that to Styria:",
+        "You receive one of the rewards listed above."
       ]
     },
     {
@@ -3639,9 +3638,11 @@
       "relatedNpcs": [
         "Queen Klaknak",
         "a fire beetle",
+        "a giant fire beetle",
         "a giant scarab",
         "a giant wasp",
-        "a spiderling"
+        "a spiderling",
+        "a giant yellowjacket"
       ],
       "rewards": [
         {
@@ -3669,9 +3670,10 @@
         "Giant Wasp Wing"
       ],
       "steps": [
+        "Note: The responses you need to use for this quest do not quite match the highlighted words in EQL, which is likely a bug. See below for responses which work.",
         "Blixkin Entopop roams the inside of the wall and has an unusual hobby. He collects bug parts, and you are just the halfling to help him out. Hail him to make him stop walking, then say the following:",
         "You Say 'Hail, Blixkin Entopop'",
-        "You say, 'I don't have a bug collection box'",
+        "You say, 'I don't have a box' (not 'don't have a bug collection box')",
         "The six bug parts for this quest are:",
         "1. Spiderling Eye",
         "2. Spiderling Silk",
@@ -3679,7 +3681,7 @@
         "4. Giant Scarab Egg Sack",
         "5. Giant Fire Beetle Leg",
         "6. Giant Wasp Wing",
-        "After collecting the items, hit combine and give the box back to him, along with the list he gave you, for your reward. Make sure to hand them both in at the same time or he won't give you a reward or experience. I forgot to ask for a list, handed him the box and he ate it. I then asked for a list and handed it to him and still got nothing."
+        "After collecting the items, hit combine and give the box back to him, along with the list he gave you, for your reward. Make sure to hand them both in at the same time or he won't give you a reward or experience."
       ]
     },
     {
@@ -4007,7 +4009,9 @@
         "You say, 'Who is Ganelorn Oast?'",
         "You say, 'How do I call upon the flames?'",
         "You say, 'I want to learn'",
-        "You say, 'I will take him the letter' (If you are not a level 50+ Ranger, she says \"I'm sorry, I don't trust you with such a task\" and you cannot proceed with the quest)",
+        "You say, 'I will take him the letter'",
+        "(If you are not a level 50+ Ranger, she says \"I'm sorry, I don't trust you with such a task\" and you cannot proceed with the quest)",
+        "(Received the note as a ROG/ENC/DRU with Lily conning as an ally)",
         "Receive a sealed love letter. You'll now need to locate Ganelorn Oast in East Karana.",
         "You say, 'Hail, Ganelorn Oast'",
         "You say, 'Will you teach me the call of flames?'",
@@ -4572,6 +4576,7 @@
         "You say, 'Hail, Cindl'",
         "You say, 'What extra hides?'",
         "Turn in a Polar Bear Skin:",
+        "You also receive minor coin and an item:",
         "Large Patchwork Boots",
         "Large Patchwork Cloak",
         "Large Patchwork Pants",
@@ -4584,7 +4589,8 @@
         "Large Tattered Mask",
         "Large Tattered Shoulderpads",
         "Large Tattered Skullcap",
-        "Large Tattered Wristbands"
+        "Large Tattered Wristbands",
+        "This leads to Cindl's Wristband Collection."
       ]
     },
     {
@@ -4621,7 +4627,8 @@
       "steps": [
         "Find Cindl inside Mac's Kilts, at +300, -160. At the end of the previous quest, Cindl mentioned a [second job].",
         "You say, 'What second job?'",
-        "Wrath Orc Wristbands drop from a snow orc trooper and a snow orc shaman in Everfrost Peaks. Hand in two."
+        "Wrath Orc Wristbands drop from a snow orc trooper and a snow orc shaman in Everfrost Peaks. Hand in two.",
+        "You receive a low-level piece of armor."
       ]
     },
     {
@@ -5096,6 +5103,7 @@
       "requiredItems": [
         "Lizard Tail"
       ],
+      "expReward": true,
       "steps": [
         "Clurg the bartender has a new task available."
       ]
@@ -5117,6 +5125,9 @@
       ],
       "rewards": [
         {
+          "name": "Crude Stein"
+        },
+        {
           "name": "Ogre War Maul"
         },
         {
@@ -5127,13 +5138,28 @@
         }
       ],
       "requiredItems": [
-        "Lizard Meat"
+        "Flaming Pungla",
+        "Ogre Head"
       ],
+      "expReward": true,
       "steps": [
         "Clurg the bartender doesn't like that someone in Neriak is imitating his drinks, and wants you to deal with her.",
-        "Her name is Pungla and you can finder her standing at the bar in the PVP area in the foreign quarter of Neriak. She hits a LOT harder then her level indicates. At 18 she is blue, however, she is very fast and hits hard.",
-        "If you ask her about the \"Flaming Pungla\" she acts scared.",
-        "WARNING: This quest SERIOUSLY lowers your faction with the Dark Bargainers in Neriak. Also, Clurg won't give you the quest until you have raised your faction with the Craknek Warriors and Green Blood Knights, and with Chef Dooga. (See Lizard Meat, Lizard Meat No 2, Lizard Tails, and Lizard Tails No 2 quests)."
+        "You say, 'Hail, Clurg'",
+        "You say, 'Bouncers?'",
+        "You say, 'Flaming Clurg?'",
+        "You say, 'Imposter drink?'",
+        "The barkeep is Pungla and you can find her the Neriak - Foreign Quarter, where she set up shop next to the PVP arena. She hits a LOT harder then her level indicates. At 18 she is blue, however, she is very fast and hits hard.",
+        "You say, 'Hail, Pungla'",
+        "You say, 'Flaming Pungla'",
+        "You can give Pungla 3 gold:",
+        "You receive a Flaming Pungla.",
+        "Kill Pungla, loot the Ogre Head, then return to Oggok and give it to Clurg:",
+        "You receive one of the following:",
+        "Crude Stein",
+        "Ogre War Maul",
+        "Pearl",
+        "Warhammer",
+        "Ringmail Armor"
       ]
     },
     {
@@ -5173,6 +5199,7 @@
       ],
       "requiredItems": [
         "Coin Pouch",
+        "Old Silver Coin",
         "Coin of Tash",
         "Glowing Coin of Tash",
         "Gleaming Coin of Tash",
@@ -5182,22 +5209,22 @@
       "expReward": true,
       "steps": [
         "Get Coin Pouch from Romar Sunto in The Temple of Solusek Ro",
-        "Collect the coins from cities across the world:",
-        "Azia - Ak'anon - Near great wheel (not in water) (+1990, -260, -125). It's on the West side of the water wheel, then North a bit right at the Star light thing.",
-        "Beza - Erudin Palace - In the Caster's Guild zone (Erudin Palace), go one level up from the zone-in teleporter. It's in the fountain with rocks in it. (+703, +740, +44).",
-        "Caza - Northern Felwithe - in the fishing pond (-110, -790, -50).",
+        "Collect the Old Silver Coins from cities across the world:",
+        "Azia - Ak'anon - Near great wheel (not in water) (1990, -260, -125). It's on the West side of the water wheel, then North a bit, right at the Star light thing.",
+        "Beza - Erudin Palace - In the Caster's Guild zone (Erudin Palace), go one level up from the zone-in teleporter. It's in the fountain with rocks in it, on the rocks. (703, 740, 44).",
+        "Caza - Northern Felwithe - In the fishing pond (-110, -790, -50).",
         "Dena - West Freeport - In the pool under the Academy of Arcane Science (Caster Guild) (129, -750, -80).",
-        "Ena - Grobb - in pool near bar #6 on map. When you enter the zone and go across the first bridge the small pool on the right. (+197, -261).",
-        "Fana - Halas - in lake in front of city. If you're facing the city, it's to the left near the far dock, underwater on a raised ledge (-138, +179).",
-        "Geza - South Kaladim - Pool by warrior's guild (+75, +360, -5).",
-        "Heda - Neriak Commons - Pass the Constructed Potential to the big bridge. Jump off to the left, it's in the water next to the glass windows. (0, -795, -70).",
-        "Izah - Oggok - in lake near warrior guild at the north end (+103, +108).",
-        "Jaka - North Qeynos - under Temple of Life \"UFO\" in the Koalindl Fish Pool (-90, -445, -10).",
-        "Combine the 10 coins and combine them in the coin pouch to get a Coin of Tash.",
-        "Give Coin of Tash to Tarn Visilin in the High Keep library at +75, -220 and receive the Glowing Coin of Tash.",
-        "Give Glowing Coin of Tash to Mizr N`Mar in the Neriak 3rd Gate library to receive the Gleaming Coin of Tash.",
-        "Give Gleaming Coin of Tash to Raine Beteria in Erudin library to receive the Radiant Coin of Tash.",
-        "Give Radiant Coin of Tash to Romar Sunto in The Temple of Solusek Ro to receive Spell: Tashania.",
+        "Ena - Grobb - In the pool near a bar. When you enter the zone and go across the first bridge, you'll see the small pool on the right. (197, -261, -2.31).",
+        "Fana - Halas - In the lake in front of city. If you're facing the city, it's to the left near the far dock, underwater on a raised ledge (-138, 179).",
+        "Geza - South Kaladim - Pool by warrior's guild (75, 360, -5).",
+        "Heda - Neriak Commons - Pass the Constructed Potential by the big bridge. Jump off to the left; it's in the water next to the glass windows. (0, -795, -70).",
+        "Izah - Oggok - In the lake near warrior guild at the north end (109, 101, -137).",
+        "Jaka - North Qeynos - Under the Temple of Life \"UFO\" in the Koalindl Fish Pool (-90, -445, -10).",
+        "Combine the 10 coins in the coin pouch to get a Coin of Tash.",
+        "Give Coin of Tash to Tarn Visilin in the library at High Keep, at (75, -220), to receive the Glowing Coin of Tash.",
+        "Give Glowing Coin of Tash to Mizr N`Mar in the Neriak 3rd Gate library at (913, -1314) to receive the Gleaming Coin of Tash.",
+        "Give Gleaming Coin of Tash to Raine Beteria in the Erudin library at (-1050, -212) to receive the Radiant Coin of Tash.",
+        "Give Radiant Coin of Tash to Romar Sunto in The Temple of Solusek Ro at (393, 90) to receive the Spell: Tashania.",
         "Warning DO NOT do turn-ins while invisible, though you can use Sneak"
       ]
     },
@@ -6068,10 +6095,32 @@
         "Warrior"
       ],
       "relatedZones": [
-        "Various"
+        "Southern Karana",
+        "Northern Karana",
+        "Permafrost",
+        "Solusek's Eye",
+        "Mistmoore",
+        "Runnyeye Citadel",
+        "Beholder's Maze",
+        "Lower Guk",
+        "Najena"
       ],
       "relatedNpcs": [
-        "Various"
+        "a Griffon",
+        "Grimfeather",
+        "Aviak avocet",
+        "Fire goblin shaman",
+        "inferno goblin shaman",
+        "A gypsy musician",
+        "A Werewolf",
+        "an Evil Eye prisoner",
+        "an Evil Eye (Runnyeye)",
+        "an Evil Eye (Beholder's Maze)",
+        "Lord Soptyvr",
+        "Lord Sviir",
+        "Lord Syrkl",
+        "An Evil Eye (Lower Guk)",
+        "Trazdon"
       ],
       "requiredItems": [
         "Crafted Vambraces",
@@ -6098,10 +6147,8 @@
         "Top of a Fractured Rune"
       ],
       "steps": [
-        "Talk to either Shakrn Meadowgreen (160, -2217) or Ulan Meadowgreen (126, -2177) in Southern Karana.",
-        "Shakrn: Vambraces, Boots, Gauntlets, Helmet",
-        "Ulan: Pauldron, Greaves, Bracer, Breastplate",
-        "For each armor piece you'll need to collect the following items."
+        "Talk to Shakrn Meadowgreen at 160, -2217 or Ulan Meadowgreen at 126, -2177 in Southern Karana.",
+        "For each armor piece, collect the following items."
       ]
     },
     {
@@ -6859,7 +6906,7 @@
         "In Rivervale, complete the Honey Jum Quest and receive Honey Jum.",
         "In North Qeynos, give the honey jum to Astaed Wemor and receive Prime Healer Potion [identifies as Potion of Disease Warding].",
         "Note: you need good faction with Astaed Wemor or he will keep the honey jum and give nothing. (Warning: Amiable faction is required (wolf form seems to work). You will recieve dialogue for the quest down to apprehensive, but not dubious, but if you are indifferent or apprehensive, your Honey Jum will be eaten.)",
-        "In West Karana, give the potion to Lempeck Hargrin and receive a LORE/NODROP Rusty Scythe.",
+        "In West Karana, give the potion to Lempeck Hargrin and receive a LORE/NODROP Rusty Scythe. CAUTION: Sometimes he goes crazy and attacks you at this point. This is most likely related to the potion you give him. The potion that identifies as \"Potion of Disease Warding\" is the one you want. If it identifies as \"Ochre Potion Disease Ward\" or anything else, you'll get attacked.",
         "In North Qeynos, give the scythe to Astaed Wemor and receive Shining Star of Light.",
         "Complete Walkthrough:",
         "You say, 'Hail, Astaed Wemor'",
@@ -7300,107 +7347,63 @@
     {
       "name": "Darkforge Armor Quests",
       "page": "Darkforge Armor Quests",
-      "startZone": "Temple of Solusek Ro",
-      "giver": "an undead knight",
+      "startZone": "Temple of Solusek Ro, Mistmoore Castle",
+      "giver": "an undead knight, An undead knight (Mistmoore)",
       "minLevel": 33,
       "classes": [
         "Shadow Knight"
       ],
       "relatedZones": [
+        "Cazic Thule",
         "Steamfont Mountains",
-        "Cazic Thule"
+        "Greater Faydark",
+        "Lesser Faydark",
+        "Solusek's Eye",
+        "East Freeport",
+        "West Freeport",
+        "Northern Desert of Ro",
+        "Northern Karana"
       ],
       "relatedNpcs": [
+        "A Lizard Crusader",
+        "A Lizard Ritualist",
         "Minotaur Lord",
-        "A Lizard Crusader"
-      ],
-      "rewards": [
-        {
-          "name": "Darkforge Bracer"
-        },
-        {
-          "name": "Darkforge Breastplate"
-        },
-        {
-          "name": "Darkforge Boots"
-        },
-        {
-          "name": "Darkforge Gauntlets"
-        },
-        {
-          "name": "Darkforge Greaves"
-        },
-        {
-          "name": "Darkforge Helm"
-        },
-        {
-          "name": "Darkforge Vambraces"
-        },
-        {
-          "name": "Broken Minotaur Lord's Horn"
-        },
-        {
-          "name": "Enchanted Platinum Bar"
-        },
-        {
-          "name": "Fairy Dust"
-        },
-        {
-          "name": "Melatite"
-        },
-        {
-          "name": "Damaged Militia Helm"
-        },
-        {
-          "name": "Qeynos Kite Shield"
-        }
+        "Guard Shilster"
       ],
       "requiredItems": [
-        "Decayed Left Bracer",
-        "Decayed Right Bracer",
-        "Decayed Chainmail",
-        "Decayed Breastplate",
-        "Decayed Left Boot",
-        "Decayed Right Boot",
-        "Decayed Left Gauntlet",
-        "Decayed Right Gauntlet",
-        "Decayed Left Legplate",
-        "Decayed Right Legplate",
-        "Decayed Helm",
-        "Decayed Visor",
-        "Decayed Left Vambrace",
-        "Decayed Right Vambrace"
-      ],
-      "steps": [
-        "Checklist:",
-        "Darkforge Bracer:",
+        "Darkforge Bracer",
+        "Darkforge Breastplate",
+        "Darkforge Helm",
+        "Darkforge Vambraces",
+        "Darkforge Boots",
+        "Darkforge Gauntlets",
+        "Darkforge Greaves",
         "Decayed Left Bracer",
         "Decayed Right Bracer",
         "Broken Minotaur Lord's Horn",
-        "Darkforge Breastplate:",
         "Decayed Chainmail",
         "Decayed Breastplate",
-        "Enchanted Platinum Bar x2",
-        "Darkforge Boots:",
-        "Decayed Left Boot",
-        "Decayed Right Boot",
-        "Fairy Dust x2",
-        "Darkforge Gauntlets:",
-        "Decayed Left Gauntlet",
-        "Decayed Right Gauntlet",
-        "Enchanted Platinum Bar x1",
-        "Darkforge Greaves:",
-        "Decayed Left Legplate",
-        "Decayed Right Legplate",
-        "Melatite x2",
-        "Darkforge Helm:",
+        "Enchanted Platinum Bar",
+        "Platinum Bar",
         "Decayed Helm",
         "Decayed Visor",
-        "Damaged Militia Helm x2",
-        "Darkforge Vambraces:",
+        "Damaged Militia Helm",
         "Decayed Left Vambrace",
         "Decayed Right Vambrace",
-        "Qeynos Kite Shield"
+        "Qeynos Kite Shield",
+        "Decayed Left Boot",
+        "Decayed Right Boot",
+        "Fairy Dust",
+        "Decayed Left Gauntlet",
+        "Decayed Right Gauntlet",
+        "Decayed Left Legplate",
+        "Decayed Right Legplate",
+        "Melatite"
+      ],
+      "steps": [
+        "There are two undead knights in the same room. Each knight accepts turn-ins for specific pieces of Darkforge Armor.",
+        "Left undead knight: Bracer, Breastplate, Helm, Vambraces",
+        "Right undead knight: Boots, Gauntlets, Greaves"
       ]
     },
     {
@@ -7438,21 +7441,6 @@
     {
       "name": "Death of Lyda Nasin",
       "page": "Death of Lyda Nasin",
-      "startZone": "Neriak Third Gate",
-      "giver": "Tani N`Mar",
-      "minLevel": 4,
-      "classes": [
-        "Bard",
-        "Rogue",
-        "Shadow Knight"
-      ],
-      "relatedZones": [
-        "East Freeport"
-      ],
-      "relatedNpcs": [
-        "Giz Dinree",
-        "Lyda Nasin"
-      ],
       "rewards": [
         {
           "name": "Cinctured Whip"
@@ -7463,14 +7451,11 @@
       ],
       "expReward": true,
       "steps": [
-        "WARNING! As a Dark Elf Shadowknight Giz Dinree conned amiably towards me but when I said \"Tani sent me.\" She turned and attacked me. She called me a \"Liar!\" and said, \"Silent and deadly are the daggers of the Ebon Mask!\"",
-        "Hit me for 34 damage until I died.",
-        "Do not enter the Seafarer's Roost until 9pm, there is a high level Ogre right inside during the day that is kos to Dark Elves.",
-        "Lyda Nasin Spawns at 9pm behind the bar on the second floor of the Seafarer's Roost.",
-        "You have slain Lyda Nasin!",
-        "--You have looted Human Head--",
-        "Hand the head in to Tani N`Mar back in the rogues guild in Neriak.",
-        "You receive 8 silver from Tani N`Mar."
+        "Giz Dinree is found around the corner from the Seafarer's Roost on the south side of the East Freeport harbor, between 9 PM and 5 AM.",
+        "Do not enter the Seafarer's Roost until 9pm, there is a high level Ogre right inside during the day that is KOS to Dark Elves.",
+        "Lyda Nasin spawns at 9pm in front of the bar on the second floor of the Seafarer's Roost. Murder her.",
+        "She drops a Human Head (identifies as \"Lyda's Head\" with that incorrect spelling). Take it to Neriak Third Gate and hand it to Tani N`Mar:",
+        "You receive the Cinctured Whip and 7-10 silver."
       ]
     },
     {
@@ -9154,7 +9139,7 @@
         "You say, 'Hail, Tonmerk Plorsin'",
         "You say, 'Who is the Prime Healer?'",
         "You say, 'What is the Academy of Arcane Science'",
-        "You say, 'I will pick up a regeant' [sic]",
+        "You say, 'I will pick up a reagent'",
         "You receive a flask of Inert Potion.",
         "You say, 'Who is Serna Tasknon?'",
         "You say, ' What is shark powder?'",
@@ -9281,6 +9266,17 @@
         "Go and kill Jailer Mkrarrg and loot the Bronze Shackle Key and give it to the prisoner.",
         "Give the erudite the key"
       ]
+    },
+    {
+      "name": "Escort the Cargo Clockwork",
+      "page": "Escort the Cargo Clockwork",
+      "requiredItems": [
+        "Fine Steel Dagger",
+        "Fine Steel Katana",
+        "Fine Steel Rapier",
+        "Fine Steel Spear"
+      ],
+      "expReward": true
     },
     {
       "name": "Essence Lens Quest",
@@ -9420,7 +9416,7 @@
         "If you don't mind Barbarian faction hits, you can kill Frostbite.",
         "If you don't mind large Qeynos faction hits, you can kill A Koalindl in North Qeynos.",
         "Get Barkeep Compendium",
-        "Go to Freeport. Turn into a Human and/or cast faction spell on Gregor Nasin (at East Freeport docks). Give Gregor Nasin the Kiola Nut, Honey Jum, Koalindl Fish, and Erud's Tonic all at the same time and receive the Barkeep Compendium",
+        "Go to East Freeport. Turn into a Human and/or cast faction spell on Gregor Nasin (at East Freeport docks). Give Gregor Nasin the Kiola Nut, Honey Jum, Koalindl Fish, and Erud's Tonic all at the same time and receive the Barkeep Compendium",
         "Get Stein of Moggok",
         "Go to Oggok. Turn into a Dark Elf or Ogre and/or cast faction spell on Clurg (located around area 17 of the Oggok map). Give him the Barkeep Compendium to receive the Stein of Moggok",
         "Enjoy your Stein!"
@@ -9592,26 +9588,35 @@
         "South Qeynos"
       ],
       "relatedNpcs": [
-        "Zahal the Vile"
+        "Zahal the Vile",
+        "Sansa Nusk"
       ],
       "requiredItems": [
-        "Bag of Troll Guts"
+        "Bag of Troll Guts",
+        "Lute Strings",
+        "Etched Silver Coin",
+        "Note from Fabian"
       ],
       "expReward": true,
       "steps": [
         "Fabian is located at (14, -749) in East Freeport inside the Grub 'n Grog Tavern.",
         "You say, 'Hail, Fabian'",
-        "Give Fabian 2gp and he will say:",
-        "Note: If previous questers have over-given gold, you can give him 1cp and it will use up his cached gold, trigger his response and faction hit. (This does not seem to be the case in Legends, anything other than 2g trades does nothing.)",
+        "Give Fabian 2g:",
         "Note: You can stop here if your only goal is faction. The rest of the quest is for level 30+.",
-        "Head to Wind Spirits Song, the Bard guild in South Qeynos",
+        "Head to Sansa Nusk in Wind Spirits Song, the Bard guild in South Qeynos",
         "You say, 'Hail, Sansa Nusk'",
         "You say, 'Who is Fabian?'",
         "You say, 'What special things?'",
-        "You say, 'Where do I get troll guts?'",
-        "You need a Bag of Troll Guts which drops off Zahal the Vile in North Karana. Hand them into Sansa.",
-        "Receive Lute Strings, hand them in to Fabian back in East Freeport.",
-        "You receive 20 silver, 10 gold, 1 platinum from Fabian."
+        "You say, 'troll gut'",
+        "Find Zahal the Vile in the Northern Plains of Karana. Kill him and loot the Bag of Troll Guts.",
+        "Hand the guts and 1 pp to Sansa back in Qeynos.",
+        "You receive the Lute Strings.",
+        "Travel back to East Freeport and hand them to Fabian.",
+        "You receive 20 silver, 10 gold, 1 platinum from Fabian and an Etched Silver Coin.",
+        "Give the coin back to Fabian:",
+        "Very rarely, you receive the Note from Fabian. (The note lore says \"Note to Sansa\".)",
+        "Dionna can be found in South Qeynos, At the fountain a bit east of the Bard's guild. Hand her the note:",
+        "You receive a small amount of gold."
       ]
     },
     {
@@ -10463,12 +10468,9 @@
         "There are two other ways to get the fish corpse. You can also complete this quest by killing Koalindl fish yourself or through a newbie mule character (which is the better method), taking the severe faction hit, getting killed by the guard, and turning in the fish corpse to Ruklin.",
         "Regurg:",
         "Or you can do The Regurgitonic quest in Ak'Anon and feed Frostbite the Regurgitonic, which will cause him to cough up the fish corpse with no loss of faction.",
-        "As of November 20th 2019 Frostbite does NOT cough up the fish every time. Out of 8 turn in's the fish was provided 5 of those times. Gnome Agnostic Enchanter doing turn in. (Note 6/17/21 - This is because sometimes Kimble gives you a 'Bad Regurgitonic'. Identify will tell you the item lore and let you know if you got a bad one.)",
+        "Note that sometimes Kimble gives you a dud that will not work. When a good tonic is inspected (as though you were adding motes) it will not have a 'Lore' tab. The bad tonics will have an item lore tab with the text 'Bad Regurgitonic'.",
         "Frostbite spits something into your hand.",
-        "You receive a Koalindl Fish.",
-        "Turn-in:",
-        "The faction for this turn in massive. I went from a couple points into amiable to Kindly in 3 turn ins. 5 to get ally on an Iksar Monk. (11/2018)",
-        "As of March, 2025, from 1 point into Amiable, 6 turn-ins still leaves you at Kindly. The 7th turn-in takes you from Kindly into Warmly. It looks like the Priests of Life increase is 100."
+        "You receive a Koalindl Fish."
       ]
     },
     {
@@ -10909,6 +10911,7 @@
         }
       ],
       "requiredItems": [
+        "Spider Venom Sac",
         "Crows Special Brew"
       ],
       "expReward": true,
@@ -11092,16 +11095,12 @@
       ],
       "expReward": true,
       "steps": [
+        "Available at Indifferent faction with Wolves of the North.",
         "Note: Lysbith and the other warriors do NOT like wolf form. They will still be KOS.",
-        "Lysbith McNaff is one of the warrior guildmasters found in the Pit of Doom within Halas (/loc 566, -412). You say, 'Hail, Lysbith McNaff'",
-        "Lysbith McNaff says, 'Hail! Ye've come to [serve Halas], have ye not? We're the Wolves o' the North and it is our task to defend our city from harm.'",
-        "You say, 'I serve Halas.'",
-        "Response if you're a non-warrior class... (triggers for The Seax and Ice Goblin Necklace quests).",
-        "Lysbith McNaff says, 'Halas is surrounded by barren arctic tundra. We've many foes. Among them are the [orc troopers], [ice goblins] and the ever-present polar bears.'",
-        "Response if you're a warrior... (but you can still use the trigger phrase to get the gnoll bounty dialogue)",
-        "Lysbith McNaff says, 'The Wolves o' the North show ye no ill will, but there's much ye must do to earn our trust. Perhaps ye should inquire o' the [gnoll bounty].'",
+        "Lysbith McNaff is one of the warrior guildmasters found in the Pit of Doom within Halas (/loc 566, -412). After the Ice Goblin Necklaces, she mentions a \"gnoll bounty\".",
         "You say, 'What gnoll bounty?'",
-        "You'll receive 2-5 gold and a minor item as well."
+        "Gnoll Fangs are randomly dropped from any gnoll in Everfrost Peaks or Blackburrow. You can give her stacks in multiples of 3 (i.e. 3, 6, 9, etc.), at a time.",
+        "You receive 2-5 gold and a minor item."
       ]
     },
     {
@@ -11292,7 +11291,7 @@
         "Everfrost Peaks"
       ],
       "relatedNpcs": [
-        "a goblin caster"
+        "ice goblin caster"
       ],
       "rewards": [
         {
@@ -11303,15 +11302,20 @@
         "Shattered Caster Beads",
         "Caster Beads"
       ],
+      "expReward": true,
       "steps": [
-        "This quest is given to you by Shamus Felligan (he is outside the Shaman's guild). The activation sentence is \"I will hunt the goblin casters\".",
-        "Ice Goblin Casters spawn in one location in and are an uncommon spawn. They can be found by following the right side wall after leaving the one guard area. Eventually, you will come across two igloos. Casters and Scouts spawn here.",
-        "About 1 out of every 4 spawns is a caster, and about 1 in 10 drop the Shattered Caster Beads and 1 in 10 of those drop Caster Beads .",
-        "The items dropped can be either Shattered Caster Beads, or more rarely, Caster Beads. If you bring the Shattered Caster Beads to Shamus, you receive faction with the guild, experience, coin, and a minor item.",
-        "If you return the Caster Beads, you receive a Gavel of Justice. It might be worth considering that the weapon you can summon using the symbol granted by the Tribunal Initiate quest does not grant mana, but it is a better melee weapon.",
-        "If you return the Shattered Caster Beads:",
+        "This quest is given to you by Shamus Felligan (he is outside the Shaman's guild).",
+        "You say, 'Hail, Shamus Felligan'",
+        "You say, 'ice goblins'",
+        "You say, 'hunt the goblin casters'",
+        "Ice goblin casters spawn in the Everfrost Peaks river and caves, sharing spawn locations with ice goblin divers. They spawn very quickly, about every 1.5 minutes.",
+        "The casters are a rare spawn. The Shattered Caster Beads are a rare drop and the Caster Beads are ultra-rare.",
+        "If you return the Shattered Caster Beads to Seamus:",
+        "You receive coin and a minor item.",
+        "If you return the Caster Beads to Seamus:",
         "Faction increase: Merchants of Halas, Shamen of Justice",
-        "Faction decrease: Hall of the Ebon Mask, Coalition of Tradefolk, Circle of Unseen Hands"
+        "Faction decrease: Hall of the Ebon Mask, Coalition of Tradefolk, Circle of Unseen Hands",
+        "You receive the Gavel of Justice."
       ]
     },
     {
@@ -14201,34 +14205,33 @@
       "classes": [
         "All"
       ],
+      "relatedZones": [
+        "Rivervale",
+        "Misty Thicket",
+        "Kithicor Forest",
+        "West Commonlands"
+      ],
+      "relatedNpcs": [
+        "a large piranha",
+        "a bixie",
+        "a bixie drone",
+        "a bixie queen"
+      ],
       "requiredItems": [
-        "Piranha Tooth",
         "Bixie Stinger"
       ],
       "steps": [
-        "Hendi Mrubble is located at -232, -347 in Rivervale.",
+        "Hendi Mrubble is located at -232, -380 in Rivervale.",
         "You say, 'Hail, Hendi Mrubble'",
-        "Hendi Mrubble says 'Why, hello there!! Welcome to the Church of Mischief. I am Hendi Mrubble. The 'R' is silent. I am the resident healer of the church, so if you are in [need of healing], or want me to [cure poison] or [cure disease], let me know. If you've got a touch of the crazy brain, I can't do a thing for you.'",
-        "You say, 'I am in need of healing.'",
-        "Hendi Mrubble says 'Hmmm. I would love to help you with that, but you will have to make a donation to the temple. The Guardians asked me to charge one of the Rivervale piranha teeth.'",
-        "You have slain a large piranha!",
-        "--You have looted a Piranha Tooth.--",
-        "Hand Hendi Mrubble the Piranha Tooth.",
-        "Hendi Mrubble says 'May the swift and silent spirit of Fizzlethorpe Bristlebane smile upon your frail soul.'",
-        "Hendi Mrubble begins to cast a spell.",
-        "You feel better. You have been healed for 65 points.",
-        "You say, 'Cure Poison.'",
-        "Hendi Mrubble says 'Cure poison, eh? Before we do that, you must fetch me three bixie stingers.'",
-        "You have slain a bixie.",
-        "--You have looted a Bixie Stinger.--",
-        "Hand Hendi Mrubble three Bixie Stingers.",
-        "Hendi Mrubble says 'May the swift and silent spirit of Fizzlethorpe Bristlebane smile upon your frail soul.'",
-        "Hendi Mrubble begins to cast a spell.",
-        "You say, 'Cure Disease.'",
-        "Hendi Mrubble says 'Eeww!! Careful, don't touch Hendi. I figured there must have been something not quite right about you. Well, now, before we can cast the disease from your body you will have to make a little donation of one gold for the service and eight gold to disinfect this place. That would be 10 total!! Let's see it.'",
-        "Hand Hendi Mrubble 10 gold.",
-        "Hendi Mrubble says 'May the swift and silent spirit of Fizzlethorpe Bristlebane smile upon your frail soul.'",
-        "Hendi Mrubble begins to cast a spell."
+        "You say, 'need of healing'",
+        "Hendi Mrubble casts Light Healing on you, healing up to 65 health.",
+        "You say, 'cure poison'",
+        "Bixies (also drones and queens) can be found in Misty Thicket, Kithicor Forest, and West Commonlands. Kill them until you have 3 Bixie Stingers, and hand them to Hendi:",
+        "Hendi casts Cure Poison on you.",
+        "You say, 'cure disease'",
+        "Hand Hendi 10 gold (or 1 platinum):",
+        "Hendi Mrubble casts Cure Disease on you.",
+        "(There are no faction hits from any of these turn-ins.)"
       ]
     },
     {
@@ -14531,15 +14534,7 @@
         "You say, 'What trying times?'",
         "You say, 'What about the Heretics?'",
         "Receive Burlap Satchel. Inside it, combine four Heretics Heads (Male/Female heads work). Then hand in the Satchel of Heretic Heads.",
-        "You receive 1pp, 5cp from Shazda Kaekwon.",
-        "You receive either the Kejekan Tribal Headband (common) or a Swiftclaw Sash (rare).",
-        "Drop Statistics",
-        "5 Turn ins: 4 Kejekan Tribal Headband, 1 Swiftclaw Sash",
-        "Tips:",
-        "Make use of different instances and difficulties to kill more heretics per hour.",
-        "Ensure you have plenty of carrying capacity as each head is quite heavy (WT 7.0)",
-        "Levitation or safe fall is highly recommended as the zone has many steep mountains.",
-        "Tracking is highly recommended"
+        "You receive either the Kejekan Tribal Headband (common) or a Swiftclaw Sash (rare) and some minor coin."
       ]
     },
     {
@@ -14632,26 +14627,23 @@
         }
       ],
       "requiredItems": [
+        "Pen Key No. 7",
+        "Rusty Two Handed Battle Axe",
         "Minotaur Hero Shackles"
       ],
       "expReward": true,
       "steps": [
-        "Note: need to verify what faction/consider the quest can be done, assuming amiable for now.",
         "The hero bracers are a result of this quest. The name of the quest is 'The Escaped Catman'.",
         "[1] Go to the basement of the arena in South Qeynos and talk to Grahan Rothkar. He will ask you if '...you have a report of the [escaped catman].' Ask him What escaped catman. He will give you the story and ask if you want to '...[retrieve key seven].' You can continue the quest anyway, but you will get nothing for it; no faction, no xp, no item, no nothing.",
-        "[2] Grahan will tell you to go to Wisp Isle (in Erud's Crossing) and kill the catman named Nomala. Yes, there is a catman named 'Monola' but that is the wrong catman. The correct catman is named 'Nomala'. He is not as high level as any of the other cats but tends to gather a mob. Best strategy to kill him is in Step 3.",
+        "[2] Grahan will tell you to go to Kerra Isle (AKA 'Wisp Isle' in Erud's Crossing -- not Kerra Isle the zone!) and kill the catman named Nomala. Yes, there is a catman named 'Monola' but that is the wrong catman. The correct catman is named 'Nomala'. He is not as high level as any of the other cats but tends to gather a mob. Best strategy to kill him is in Step 3.",
         "[3] Go to Wisp Isle (the only one in Erud's Crossing). Nomala will spawn by the fire. Once killed, he will not spawn again for another hour or two, so figure on taking a while to do this. Be warned that you lose faction with Prexuz for killing these catmen. Anyway, he will stand there for a bit, then walk off toward the shore down by the dock. Milla is standing around close by, but if you wait about one minute, she will walk off and leave Nomala all alone. Kill him - but don't let him run, kill him quick. Best bet is to hit him once then run a few feet down shore away from their village. He d…",
-        "[4] Return the Key to Grahan and you get xp, faction, an item (along the lines of a bronze short sword), and a second quest.",
+        "[4] Return the Key to Grahan and you get xp, faction, an random low-tier item (ex: Rusty Two Handed Battle Axe), and a second quest.",
         "[5] The 2nd Quest: He wants you to go hunt down '...a [second escaped gladiator]' Fine, sounds easy... nope. He wants you to return the shackles of the Minotaur Hero of the Steamfont Mountains. You do not need to do the 1st quest to complete this step.",
-        "Grahan Rothkar judges you amiably -- what would you like your tombstone to say?",
         "You say, 'what second escaped gladiator?'",
-        "Grahan Rothkar sat, 'it appears our prize gladiator has escaped. He is a minotaur hero!! Trained by our best. He took down five of our greatest warriors during his escape. Rumor has it he fled to his homeland in the Steamfont Mountains. They say he is an outcast and does not live with his people. He appears during times of great need to champion the minotaurs. Return his shackles to me and glory is yours!!'",
-        "[6] The Minotaur Hero's trigger is any minotaur slaver in the minotaur cave. When they die, there is a chance that the Minotaur Hero will spawn. Loot the Minotaur Hero Shackles and take them back to Grahan Rothkar.",
+        "Grahan Rothkar says, 'it appears our prize gladiator has escaped. He is a minotaur hero!! Trained by our best. He took down five of our greatest warriors during his escape. Rumor has it he fled to his homeland in the Steamfont Mountains. They say he is an outcast and does not live with his people. He appears during times of great need to champion the minotaurs. Return his shackles to me and glory is yours!'",
+        "[6] The Minotaur Hero is a very rare spawn. It can spawn at instance launch (confirmed once around 1800, -1600). Otherwise, its placeholder is any a minotaur slaver in or around the minotaur cave. Loot the Minotaur Hero Shackles and take them back to Grahan Rothkar.",
         "Grahan Rothkar says, 'You are a true Steel Warrior!! Now you shall wear my hero bracers. I designed them for my greatest gladiators and you have shown yourself mighty enough to wear them.'",
-        "You receive 2 platinum pieces.",
-        "This can be done if you are dubious. Just give item from Minotaur Hero and you will receive the Hero Bracers in return.",
-        "Lore Item Note",
-        "Because the Hero Bracers are lore, if you hand in the Minotaur Hero Shackles while in possession of Hero Bracers, you may lose the shackles and not receive additional Hero Bracers."
+        "You receive 3 platinum pieces."
       ]
     },
     {
@@ -14745,12 +14737,33 @@
     {
       "name": "Hollow Skull Quest",
       "page": "Hollow Skull Quest",
+      "giver": "Yiz Pon",
+      "minLevel": 25,
+      "classes": [
+        "Enchanter",
+        "Magician",
+        "Necromancer",
+        "Wizard"
+      ],
+      "relatedZones": [
+        "Splitpaw Lair",
+        "Innothule Swamp",
+        "Southern Karana",
+        "West Freeport"
+      ],
+      "relatedNpcs": [
+        "Hyrill Pon",
+        "Kurrpok Splitpaw",
+        "Lynuga",
+        "a Splitpaw assassin"
+      ],
       "requiredItems": [
-        "Hollow Skull (Skull of the Tower Cook)",
+        "Jeweled Skull",
+        "Torn Parchment (Letter to Hyrill Pon)",
         "Hollow Skull (Skull of Wun Toque)",
         "Torn Parchment",
-        "Ruby Pendant",
-        "Jeweled Skull"
+        "Large Ruby",
+        "Ruby Pendant"
       ],
       "expReward": true
     },
@@ -14864,8 +14877,6 @@
         "You say, 'What drinks?'",
         "You say, 'What is honey mead?'",
         "Give him 4 x Honey Mead.",
-        "Note: This is not Multi-Questable. You must hand in 4 Honey Mead at a time. If you hand in only 1 at a time, on the 4th you will not get the reward unlike other quests.",
-        "Additional Dialogue",
         "You say, 'Who is Kane?'",
         "You say, 'Who is Sragg?'"
       ]
@@ -14889,10 +14900,13 @@
         "Halfling Head",
         "Case of Jumjum Juice"
       ],
+      "expReward": true,
       "steps": [
         "This starts in the Rogue Guild...",
         "Pazin Punox wants Lil Honeybugger dead and promises a \"king's reward\" for her head. She lives in Misty Thicket in the Halfling territory just outside of town. Unfortunately, she rooms with her big brother Joogl Honeybugger who never seems to leave her side, and he is probably around level 10 or so. Since you need to be below this level to get the quest, you had better get some help in killing her.",
-        "When you kill Lil, she drops a Halfling Head (which is what you're supposed to bring back to Paziu Puno for your \"kings reward\"), a Bandage (so you can reverse the faction hit you take from killing Lil by giving it to Joogl later), and a Case of Jumjum Juice (lore item) (which I guess you can give to the treant)."
+        "When you kill Lil, she drops a Halfling Head (which is what you're supposed to bring back to Paziu Puno for your \"kings reward\"), a Bandage (so you can reverse the faction hit you take from killing Lil by giving it to Joogl later), and a Case of Jumjum Juice (lore item) (which I guess you can give to the treant).",
+        "Here's where this quest gets funny. After sneaking/hiding through Rivervale and making the run back to Neriak, you need to give the Halfling Head to Pazin Punox. He then tells you something to the effect of:",
+        "420 kills netted 208 heads"
       ]
     },
     {
@@ -15204,14 +15218,16 @@
       "giver": "Lysbith McNaff",
       "minLevel": 2,
       "classes": [
-        "?"
+        "Any"
       ],
       "relatedZones": [
         "Everfrost Peaks"
       ],
       "relatedNpcs": [
         "ice goblin whelp",
-        "ice goblin scout"
+        "ice goblin scout",
+        "ice goblin diver",
+        "ice goblin caster"
       ],
       "rewards": [
         {
@@ -15240,14 +15256,15 @@
       ],
       "expReward": true,
       "steps": [
-        "Lysbith McNaff is located (566, -410) in the Pit of Doom. Faction of indifferent required for quest - CAN be completed while sneaking.",
+        "Lysbith McNaff is located (566, -410, -18) in northeastern Halas' Pit of Doom. Indifferent faction with Wolves of the North is required for the quest - CAN be completed while sneaking.",
         "You say, 'Hail, Lysbith McNaff'",
         "You say, 'I serve Halas.'",
         "You say, 'What ice goblins?'",
         "You say, 'I will protect the pass.'",
-        "You receive a six-slot container called Empty Bag (identifies as \"Bag for Ice Necklaces\"). Kill ice goblin whelps or ice goblin scouts in Everfrost Peaks and loot Goblin Ice Necklace. They are found wandering throughout the canyon area. Combine six Goblin Ice Necklace in the bag to craft a Bag of Ice Necklaces. Hand this in to Lysbith.",
-        "You receive 3 gold from Lysbith McNaff.",
-        "Additionally you will randomly receive: ration, iron ration, torch, water flask, or small lantern."
+        "You receive a six-slot container called Empty Bag (weight 1.0, identifies as \"Bag for Ice Necklaces\").",
+        "Kill ice goblin whelps, scouts, divers, and casters in Everfrost Peaks and loot Goblin Ice Necklaces. They are found wandering throughout the zone. Combine six Goblin Ice Necklace in the bag to craft a Bag of Ice Necklaces. Hand this in to Lysbith.",
+        "You receive 3-5 gold from Lysbith McNaff and a minor item.",
+        "This leads to the Gnoll Bounty quest."
       ]
     },
     {
@@ -15617,7 +15634,7 @@
         "Sultin needs four items:",
         "Glowing Mask, found on a froglok scryer or a skeleton monk in Upper Guk",
         "Rune of Fortune (top), from Enynti in the Chasm below Mistmoore",
-        "Rune of Fortune (bottom) by giving 5 pp to Mizr N`Mar in the Neriak City Library",
+        "Rune of Fortune (bottom) by giving 5 pp to Mizr N`Mar in Neriak Third Gate",
         "Rune of Fortune (middle) by giving 5 pp to Madame Serena in South Qeynos",
         "You say, 'I am interested in the mask'",
         "Kill a froglok scryer or a skeleton monk in Upper Guk for the Glowing Mask.",
@@ -15632,13 +15649,13 @@
         "Sultin needs:",
         "Pouch of Silver Dust from the a dusty werebat in The Estate of Unrest",
         "Glowing Silver Wand from Raine Beteria",
-        "Blessed Silver Wand from Ezmirella (and 5 pp)",
-        "Silver Wand from a silvered guard in The Temple of Cazic-Thule (and 5 pp)",
+        "Blessed Silver Wand from Ezmirella",
+        "Silver Wand from a silvered guard in The Temple of Cazic-Thule",
         "You say, 'I am interested in the wand'",
         "In The Estate of Unrest, get the keys and go to the basement. Slay a a dusty werebat to get the Pouch of Silver Dust.",
         "In The Temple of Cazic-Thule, find a silvered guard at the northwest pyramids, and kill it to get a Silver Wand.",
-        "Find Ezmirella in the gypsy camp in the Northern Plains of Karana. Hand her the Silver Wand and 50 gold coins (or 5 platinum). She will return a Blessed Silver Wand and instruct you to seek out Raine Beteria.",
-        "Hand Raine the Blessed Silver Wand and 50 gold coins (or 5 platinum) to receive the Glowing Silver Wand.",
+        "Find Ezmirella in the gypsy camp in the Northern Plains of Karana. Hand her the Silver Wand. You do not need to tip her. She will return a Blessed Silver Wand and instruct you to seek out Raine Beteria.",
+        "Hand Raine the Blessed Silver Wand to receive the Glowing Silver Wand. You do not need to tip her.",
         "Take the Glowing Silver Wand and Pouch of Silver Dust back to Sultin. Hand him both.",
         "You receive the Incandescent Wand."
       ]
@@ -15737,7 +15754,7 @@
         "Toresian Fhabel is at 727.01, 804.42, 35.13 in Erudin Palace. Requires amiable faction to start the quest.",
         "You say, 'Hail, Toresian Fhabel'",
         "You say, 'i will study enchantment'",
-        "This spawns either Slansin or Slansin Denvin downstairs in the shop Vials of Vitality. Slansin is a merchant selling one item, a cloth cap. Slansin Denvin is not a merchant, is wearing armor, and is an enchanter who will summon an enchanter pet after spawning. Only one Slansin can be up a time.",
+        "This spawns either Slansin or Slansin Denvin downstairs in the shop Vials of Vitality. Slansin is a merchant selling one item, a cloth cap. Slansin Denvin is not a merchant, is wearing armor, and is an enchanter who will summon an enchanter pet after spawning (EQL: he did not summon a pet, the Real Slansin is level 50 and the fake is level 10). Only one Slansin can be up a time.",
         "You say, 'I wish to assist Toresian'",
         "Receive Inert Potion.",
         "Slansin:",
@@ -15753,7 +15770,9 @@
         "/say I will study Enchantment",
         "/pause 3",
         "/say I wish to assist Toresian",
-        "Then just go straight across to Vials of Vitality, where Slansin is."
+        "Then just go straight across to Vials of Vitality, where Slansin is.",
+        "This didn't seem to work on EQL, NPCs seem to need LoS with you to interact (8-22-2029).",
+        "Slansin does not spawn with a surname in EQL. The level difference and appearance can be used to determine the 'Denvin' version for the faction turn in. The level 50 version of Slansin wears a shopkeeper type outfit. The level 10 'Denvin' version wears a robe. Turn in your inert potions to the level 10, robe wearing Slansin. If you spawn the level 50 version, you can pick a different difficulty or create an instance to try again. You can turn in 4 bottles at a time without issue. (8-27-2026)"
       ]
     },
     {
@@ -15877,7 +15896,7 @@
         }
       ],
       "requiredItems": [
-        "Box For Ivan's Remains",
+        "Empty Box",
         "Barbarian Femur",
         "Barbarian Jaw",
         "Barbarian Skull",
@@ -15906,13 +15925,14 @@
         "Barbarian Femur: +1405, -4570, -190",
         "Barbarian Jaw: +1465, -4500, -230",
         "Barbarian Skull: +1580, -4485, -245",
-        "The final item, Barbarian Rib, is dropped by a \"goblin diver\". There are two spawns between the Femur, and the Skull, and one more spawn slightly north of the Skull. The monsters that can spawn in these spots are: ice goblin scout, ice goblin diver, and a rare goblin diver. Kill the placeholders until the goblin diver spawns and kill it for the final item, a Barbarian Rib.",
+        "The final item, Barbarian Rib, is dropped by a \"goblin diver\".",
+        "There are two spawns between the Femur, and the Skull, and one more spawn slightly north of the Skull. The monsters that can spawn in these spots are: ice goblin scout, ice goblin diver, and a rare goblin diver. Kill the placeholders until the goblin diver spawns and kill it for the final item, a Barbarian Rib.",
         "Some tips to accomplish this:",
         "You don't actually need to have enduring breath. If you simply swim straight up, and continue to do so, after a couple seconds your breath will refill",
         "All of the ice goblins flee when at low health. Unless you have a swimming skill of 100, or a high level speed buff, you will never catch them. Instead, fight them on the surface of the ice and you will not regret it",
-        "Combine the four items in the box to craft a Box of Remains . Head back to Halas and give Renth the Box of Remains.",
-        "You receive 1 copper from Renth McLanis.",
-        "You receive a random minor item.",
+        "Combine the four items in the box to craft a Box of Remains.",
+        "Head back to Halas and give Renth the Box of Remains.",
+        "You receive minor coin and a random minor item from Renth McLanis.",
         "The more \"dangerous matter\" is the quest for the Langseax."
       ]
     },
@@ -16161,7 +16181,7 @@
         "?"
       ],
       "relatedZones": [
-        "Western Plains of Karana"
+        "Western Karana"
       ],
       "relatedNpcs": [
         "Einhorst McMannus",
@@ -16173,28 +16193,28 @@
         }
       ],
       "requiredItems": [
-        "A tattered note",
+        "A Tattered Note",
         "Karana Clover Shipment",
         "Polar Bear Cloak"
       ],
       "expReward": true,
       "steps": [
-        "You'll need to talk to Jinkus Felligan, the Shaman Guildmaster, inside the Temple of the Tribunal (/loc 315, 444). You say, 'Hail, Jinkus Felligan'",
-        "Jinkus Felligan says, 'Welcome! Welcome to the Church o' the Tribunal! Do ey require healing or are ya [new to the Shamans o' Justice], then, eh?'",
-        "You say, 'new to the Shamans' Justice'",
-        "Jinkus Felligan says, 'Then I welcome ye into our noble order. Ye'll serve us well or spend an eternity in the dungeons o' the Tribunal. Are ye ready to [contribute to yer church] or do ye [wish to meditate] within our walls?'",
+        "You'll need to talk to Jinkus Felligan, the Shaman Guildmaster, inside the Temple of the Tribunal (/loc 315, 444).",
+        "You say, 'Hail, Jinkus Felligan'",
+        "You say, 'new to the Shamans o' Justice'",
         "You say, 'contribute to yer church'",
-        "Jinkus Felligan says, 'Ye'll help all o' Halas by doing the bidding o' this church. Go to Holana. Tell her [Jinkus sent] ye to assist her. She'll have work fer ye. Perhaps, if ye're planning on passing near Qeynos, ye can [make a delivery] as well?'",
-        "Next, go find Holana Oleary in Ye Majik shop on the east side of Halas (/loc 134, -336). You say, 'Jinkus sent me'",
-        "Holana Oleary says, 'So, ye're the next to be tested, then, eh?! I pray ye're able to return. Ye'll need to take this note to Einhorst in Clan McMannus' fishing village in the Plains o' Karana. He'll hand ye the monthly Karana clover shipment to be returned to me. Just remember, dinnae stop running! Do ye [need directions to Clan McMannus]?' You receive A tattered note, and off to the McMannus Clan fishing village of Western Karana ye' go to deliver the note to Einhorst!",
-        "Traveling to West Karana and the fishing village:",
-        "To get to the village, go though Blackburrow to Qeynos Hills. Then follow the mountains south until you hit a path which leads to the West Karana zone line. In West Karana follow path until it splits turn right to head south, the fishing village is straight ahead and not far from here. Einhorst is in one of the small fishing huts (/loc -3807, -2096).",
-        "Hand over the note to Einhorst McMannus. Einhorst McMannus says, 'Yes. We almost forgot of the shipment of Karana clovers. Here you are, my friend. Back to the north with you. I am sure the Shamans of Justice will need this.'",
-        "You receive various amounts of coin and the Karana Clover Shipment to return to Holana.",
+        "Next, go find Holana Oleary in Ye Majik shop on the east side of Halas inside Yee Majik (/loc 134, -336).",
+        "You say, 'Jinkus sent me'",
+        "You receive A Tattered Note (Item Lore : Message to Clan McMannus)",
+        "You say, 'need directions to Clan McMannus'",
+        "Traveling to the Western Karana fishing village:",
+        "To get to the village, head south out of Halas, all the way to the southwest corner of Everfrost Peaks, through Blackburrow, to Qeynos Hills. Then follow the eastern mountains south, until you hit a path which leads to the Western Karana zone line. In Western Karana, follow the path until it opens up from the zone valley, then turn right to head south. You'll find the fishing village straight ahead, just before the shore. Einhorst is in one of the small fishing huts (/loc -3807, -2096).",
+        "Hand over the note to Einhorst McMannus.",
+        "You receive the Karana Clover Shipment to return to Holana, and small amounts of coin.",
         "Side Quest Opportunity:",
-        "Before you hurry back to Halas to delivery the clover shipment to Holana, speaking to Einhorst further will offer you up another delivery quest (Lion Meat Shipment Quest) that leads you back to Halas as well.",
-        "Hand over the shipment to Holana. Holana Oleary says, 'Good work. We Shamans o' Justice are like no other. We must remain in top physical form for we never know when justice must be served. I was commanded to give ye a reward. Take this. It was doing nothing more than collecting dust. Go, and serve justice well.'",
-        "When you give the shipment to Holana, you'll receive coin, experience, an item (gear or a 5th level shaman spell). On occasion you may even receive a polar bear cloak. (Confirmed for EQ Legends - Was awarded with three cloaks over the course of 32 turn ins.)"
+        "Before you hurry back to Halas, you may want to do the Lion Meat Shipment Quest with Einhorst as well.",
+        "Head back to Halas and hand over the Karana Clover Shipment to Holana Oleary.",
+        "You receive coin, and an item (gear or a 5th level shaman spell). Occasionally you may receive a Polar Bear Cloak."
       ]
     },
     {
@@ -16839,7 +16859,7 @@
       ],
       "expReward": true,
       "steps": [
-        "Find Tiam Khonsir located behind the Temple of Deepwater Knights in the city of Erudin.",
+        "Find Tiam Khonsir (-1127, -419) located behind the Temple of Deepwater Knights in the city of Erudin.",
         "You say, 'Hail, Tiam Khonsir'",
         "You say, 'Yes.'",
         "You say, 'I have come to serve our lord.'",
@@ -16904,7 +16924,8 @@
         "Toxxulia Forest"
       ],
       "requiredItems": [
-        "Initiate Symbol of Quellious"
+        "Initiate Symbol of Quellious",
+        "Odd Kobold Paw"
       ],
       "expReward": true,
       "steps": [
@@ -17068,13 +17089,16 @@
         "Warrior"
       ],
       "relatedZones": [
-        "Western Plains of Karana"
+        "Western Karana"
       ],
       "relatedNpcs": [
         "Frostbite",
         "Iceberg",
         "Basil",
-        "Paglan"
+        "Paglan",
+        "Dok",
+        "Tundra Jack",
+        "Ulrich McMannus"
       ],
       "rewards": [
         {
@@ -17086,12 +17110,13 @@
       ],
       "requiredItems": [
         "Lion Delight",
-        "Sweaty Shirt"
+        "Sweaty Shirt",
+        "Barbarian Head"
       ],
       "expReward": true,
       "steps": [
         "This is the quest to obtain the Langseax or the Langseax of the Wolves. You need at least Kindly with the Wolves of the North to start this quest.",
-        "Faction Note: This quest requires a secondary quest - Lion Meat Shipment Quest which can probably be done with much lower faction. You can also do this quest a bunch of times in one go by asking Misla for the lion meat multiple times. Take empty bags and do you can do the quest 50+ times in one trip, gaining +350 Wolves of the North faction. You can use this to boost your faction for the Langsaex quest and get plenty Lion Delight for Iceberg.",
+        "Faction Note: This quest requires a secondary quest - Lion Meat Shipment Quest which can be done with much lower faction. You can also do this quest many times in one go by asking Misla or Einhorst for the lion meat multiple times. Take empty bags and do you can do the quest 50+ times in one trip, gaining +350 Wolves of the North faction. You can use this to boost your faction for the Langsaex quest and get plenty Lion Delight for Iceberg.",
         "Quest Summary:",
         "Complete the Lion Meat Shipment quest to get Lion Delight.",
         "Run to Iceberg, give Lion Delight, receive shirt.",
@@ -17100,23 +17125,43 @@
         "Return criminal's head for Langseax.",
         "Part 1: The Story:",
         "Go through the following steps to learn the story behind this quest. However, it's unnecessary - you can skip it and go to Part 2.",
-        "Go to Renth McLanis in the tavern across from Mac's Kilts. Ask him \"What dangerous matter?\". He tells you of a crime. Agree to hunt the murderer. Renth then sends you to see Dok in Dok's Cigars. Find out all you can about the crime.",
-        "He tells you to go see the leader of Clan McMannus. This is the fishing village located in West Karanas. Speak to the leader. Then speak to Ulrich McMannus and he tells you Frostbite can track prey if he has a piece of sweaty clothing.",
-        "Return to Dok and ask him \"Where is the sweaty shirt?\". He then tells you he sold it to Tundra Jack. Find Tundra Jack on the tundra of Everfrost. He will tell you that Iceberg is using it for a collar and that you can distract Iceberg with his favorite meal, Lion Delight.",
-        "Short version: You need a Sweaty Shirt for Frostbite to track the murderer. The polar bear Iceberg, Tundra Jack's companion and very good boy, has the shirt. You need some Lion Delight to get the shirt.",
+        "After the Ivan McMannus' Remains quest, Renth McLanis in Halas' McDaniels Smokes & Spirits mentions a more \"dangerous matter\". Once you have Kindly faction with the Wolves of the North, visit him again.",
+        "You say, 'What dangerous matter'",
+        "You say, 'I will hunt the murderer'",
+        "You say, 'What Langseax'",
+        "Find Dok west of Halas' bank in Dok's Cigars.",
+        "You say, 'Do you have any information about the crime?'",
+        "You say, 'Clan McMannus'",
+        "To get to the village, head south out of Halas, all the way to the southwest corner of Everfrost Peaks, through Blackburrow, to Qeynos Hills. Then follow the eastern mountains south, until you hit a path which leads to the Western Karana zone line. In Western Karana, follow the path until it opens up from the zone valley, then turn right to head south. You'll find the fishing village straight ahead, just before the shore. Talk to Einhorst McMannus in one of the small fishing huts (/loc -3807, -2096).",
+        "You say, 'I'm searching for the fugitive'",
+        "You can ask the same of the rest of the villagers, and eventually you'll catch up with Ulrich McMannus:",
+        "You say, 'I'm searching for the fugitive'",
+        "You say, 'Frostbite'",
+        "You say, 'tracking prey'",
+        "Return to Dok in Halas.",
+        "You say, 'Where is the sweaty shirt?'",
+        "You say, 'Tundra Jack'",
+        "Head out to Everfrost Peaks and find Tundra Jack on the tundra of Everfrost. He usually patrols from north to south, just west of the river.",
+        "You say, 'Hail, Tundra Jack'",
+        "You say, 'Where is the sweaty shirt?'",
+        "You say, 'favorite meal'",
+        "You say, 'Lion Delight'",
         "Part 2: The Sweaty Shirt:",
         "Go back to Halas and speak to Teria O`Danos. Do the Lion Meat Shipment Quest.",
-        "If you want to do this quest multiple times - either to merge multiple Langseax or to get Langseax of the Wolves you can do a bunch of the Lion meat quests in one go to save time. Simply ask Misla for the lion meat shipment a bunch of times.",
-        "WARNING: Once you have Lion Delight, be sure to bury it lower in your container than your normal food to prevent it being eaten by you.",
-        "Take the Lion Delight to Iceberg and receive the Sweaty Shirt and a faction adjustment.",
-        "Iceberg can be found roaming the tundra of Everfrost, usually west of the river. He spawns at Tundra Jack's tower (2050,-3800) and immediately runs off to find Tundra Jack. However, if you wait at the tower, the two of them return to the tower frequently.",
+        "WARNING: Once you have Lion Delight, be sure to bury it lower in your containers than your normal food to prevent eating it.",
+        "Once you have the Lion Delight, return to Iceberg who can be found roaming the tundra of Everfrost, usually west of the river to give him the food.",
+        "He spawns at Tundra Jack's tower (2050,-3800) and immediately runs off to find Tundra Jack. However, if you wait at the tower, the two of them return to the tower frequently.",
         "You can often find him stuck in pathing in front of the tower if you hop into a difficulty instance no one else is using, like D2 or D3.",
         "After giving him the meat, he immediately respawns at the tower, making it easy to hand in the meat over and over and over for faction and more shirts if you plan to complete the quest multiple times.",
+        "You offered 1 Lion Delight to Iceberg.",
+        "You receive the Sweaty Shirt.",
         "Part 3: The Murderers:",
         "This step appears to be slightly broken on EQ Legends - giving Frostbite the shirt causes the murderer to spawn, but Frostbite will not track for you.",
-        "Return to the McMannus fishing village in West Karana and give the shirt to Frostbite.",
-        "If Frostbite responds to the shirt with \"RUFF RUFF\" something bugged and the murderer did not spawn. He should react to the shirt with \"Frostbite takes a whiff of the sweaty shirt and barks\".",
-        "The murderer will be either Paglan or Basil. Paglan is tougher to kill and probably in his low to mid 20's, Basil is around level 20. Since Frostbite won't track for you it is recommended you just a loadout that includes a class with tracking. You can try finding them on your own, they seem to spawn on the western side of the map, but then run up into the mountainous north/northeast area of the map. Typically they pass through the area north of the Ogre shaman camp (area 18 on the West Karana map). Run speed buffs are also recommended.",
+        "Return to the McMannus fishing village in Western Karana and give the shirt to Frostbite.",
+        "(If he responds with \"RUFF RUFF\" something bugged and the murderer did not spawn.)",
+        "The murderer, either Paglan or Basil, spawns to the north and then start jogging to the east.",
+        "Since Frostbite won't track for you, you may want a loadout that includes Tracking. Typically the murderer passes through the area north of the Ogre shaman camp (area 18 on the Western Karana map). Run speed buffs are also recommended. Each of them will show up on tracking with an * in front of their name.",
+        "Paglan is tougher to kill and probably in his low to mid 20's, Basil is around level 20. Each drops a different Barbarian Head which have their own identifying lore.",
         "Give the head to Renth for faction, coin, and of course, the Langseax (if you have Basil's head) or the Langseax of the Wolves (if it is Paglan's head). I am not sure what triggers which criminal you get or even if you can just kill both and get both heads, but it seems that you wil normally get Basil.",
         "Faction Adjustments:",
         "When you complete the lion meat quest:",
@@ -17129,22 +17174,7 @@
         "Wolves of the North (+5)",
         "Merchants of Halas (+5)",
         "Steel Warriors (+5)",
-        "Rogues of the White Rose (+5)",
-        "When you kill Paglan or Basil:",
-        "Rogues of the White Rose (-5)",
-        "(Stuff after this is unconfirmed for EQL)",
-        "When you turn in Paglan's or Basil's head for your reward:",
-        "Faction adjustments overall:",
-        "Here are the quest completion texts, and the unquantified faction changes.",
-        "Basil's Head",
-        "Renth McLanis says, 'Nice work [YourName]! Basil has always been an outcast of sorts. I'm glad to see you were able to stop him. Here is a Langseax for your efforts.'",
-        "You receive 8 gold from Renth McLanis.",
-        "OR Paglan's head",
-        "Renth McLanis says, 'Incredible!! We'd heard Paglan was killed attempting to cross an ice floe!! It appears his escape was for naught. Ye've earned something greater than a mere Langseax. Ye've earned the Langseax o' the Wolves. Tis an enchanted weapon meant for a warrior's skill only. The Tribunal will watch over ye.'",
-        "You receive 4 platinum pieces from Renth McLanis.",
-        "You receive 8 gold from Renth McLanis.",
-        "Be warned that the Halas Banker is part of the Rogues of the White Rose, so you may lose banking privileges if you lose too much of that faction.",
-        "Need all dialogues, current faction hits, /loc of quest mobs, additional quest items, quest mobs, details to get both Langseax and Langseax of the Wolves."
+        "Rogues of the White Rose (+5)"
       ]
     },
     {
@@ -17501,17 +17531,18 @@
       "steps": [
         "This quest is also a part of the Langseax Quest, but can be done on its own. A good idea is to combine this quest with the Karana Clovers quest since they both go to the same place.",
         "You say, 'Hail, Teria O`Danos'",
-        "You say, 'what lion roast?'",
-        "You say, 'I will pick up your lion meat shipment.'",
-        "In West Karana, find Einhorst McMannus (-3800, -2100):",
+        "You say, 'lion roast'",
+        "You say, 'pick up me lion meat shipment.'",
+        "To get to the village, head south out of Halas, all the way to the southwest corner of Everfrost Peaks, through Blackburrow, to Qeynos Hills. Then follow the eastern mountains south, until you hit a path which leads to the Western Karana zone line. In Western Karana, follow the path until it opens up from the zone valley, then turn right to head south. You'll find the fishing village straight ahead, just before the shore. Einhorst is in one of the small fishing huts (/loc -3807, -2096). Alternatively, talk with Misla McMannus (you can get the shipment from either):",
         "You say, 'Hail, Einhorst McMannus'",
-        "You say, 'I am here to pick up the lion meat shipment for Halas.'",
-        "In West Karana, find Misla McMannus (-4025, -2340):",
+        "You say, 'pick up the lion meat shipment for Halas'",
+        "You say, 'delivery'",
+        "You receive the Lion Meat Shipment.",
         "You say, 'Hail, Misla McMannus'",
-        "You say, 'I am here to pick up the lion meat shipment for Halas.'",
-        "You receive the Lion Meat Shipment. Bring it back to Teria O`Danos.",
-        "You receive 3 gold from Teria O`Danos.",
-        "You receive Lion Delight."
+        "You say, 'pick up the lion meat shipment for Halas'",
+        "You receive the Lion Meat Shipment.",
+        "Bring the shipment back to Teria O`Danos.",
+        "You receive Lion Delight and 3 gold from Teria O`Danos."
       ]
     },
     {
@@ -17663,16 +17694,15 @@
         }
       ],
       "requiredItems": [
-        "lizard meat"
+        "Lizard Meat"
       ],
       "expReward": true,
       "steps": [
-        "You can give Soonog in the Greenblood guild 4 lizard meat for a rusty two handed sword.",
+        "You can give Soonog in the Greenblood guild 4 Lizard Meat for a rusty two handed sword.",
         "You say, 'Hail, Soonog'",
         "You say, 'Me Greenblood'",
-        "You hand the four lizardmen tails to Soonog:",
-        "You Receive Rusty Two Handed Sword.",
-        "At Indiffrent, you cannot do this quest. Presumably, this is only doable by fledgling Shadow Knights."
+        "Lizard Meat drops from any lizardman in The Feerrott, Rathe Mountains, or Cazic Thule. Hand 4 of them (or a stack of any multiple of 4) to Soonog.",
+        "You Receive a Rusty Two Handed Sword."
       ]
     },
     {
@@ -17704,8 +17734,8 @@
         "Talk to Kogna and he will reward you for giving him 4 pieces (at once, NOT stacked) of Lizard Meat with experience and an Rusty Two Handed Battle Axe.",
         "You say,'Hail, Kogna'",
         "You say, 'I am a real tuff craknek'",
-        "Hand him four (unstacked) pieces of Lizard Meat. They cannot be given one-at-a-time!",
-        "As a level 5 Troll Shaman, each turnin was worth rougly 0.12% of a level. The Axe vendors for 2g 7s 8c."
+        "Lizard Meat drops from any lizardman in The Feerrott, Rathe Mountains, or Cazic Thule. Hand 4 of them (or a stack of any multiple of 4) to Kogna.",
+        "You receive a Rusty Two Handed Battle Axe."
       ]
     },
     {
@@ -17729,7 +17759,9 @@
       "expReward": true,
       "steps": [
         "You say, 'Hail, Horgus'",
-        "You say, 'i craknek'"
+        "You say, 'i craknek'",
+        "Lizard Tails drop from any lizardman in The Feerrott, Rathe Mountains, or Cazic Thule. Hand 4 of them (or a stack of any multiple of 4) to Horgus.",
+        "You receive a piece of tattered armor and some minor coin."
       ]
     },
     {
@@ -17756,8 +17788,8 @@
         "Grevak doesn't like lizards. You can give Grevak in the Greenblood guild four Lizard Tails for a minor item.",
         "You say, 'Hail, Grevak'",
         "You say, 'I am a new peon'",
-        "You hand the four lizardmen tails to Grevak:",
-        "Receive: 6sp"
+        "Lizard Tails drop from any lizardman in The Feerrott, Rathe Mountains, or Cazic Thule. Hand 4 of them (or a stack of any multiple of 4) to Soonog.",
+        "You receive minor coin and a minor item."
       ]
     },
     {
@@ -17951,7 +17983,7 @@
         "You say, 'Hail, Lynuga'",
         "You say, 'Collecting what?'",
         "You can buy a Ruby from most jewelry vendors for about 131pp. Upon giving her a Ruby:",
-        "You receive one of the three rewards at random - the Hoop is the (ultra)rarest of the rewards. All three rewards are lore, to receive substantial return on investment do not turn in multiple rubies at once or duplicate rewards will be lost. Note: The Hoop was made even more rare on the 9/10/11 patch due to balance issues.."
+        "You receive one of the three rewards at random - the Hoop is the rarest of the rewards."
       ]
     },
     {
@@ -17991,7 +18023,7 @@
       "giver": "Dargon McPherson",
       "minLevel": 1,
       "classes": [
-        "?"
+        "All"
       ],
       "relatedZones": [
         "Everfrost Peaks"
@@ -17999,9 +18031,9 @@
       "relatedNpcs": [
         "Arnis McLish",
         "Bryndin McMill",
-        "Megan OReilly",
+        "Megan O`Reilly",
         "Snowflake",
-        "Talin ODonal"
+        "Talin O`Donal"
       ],
       "rewards": [
         {
@@ -18026,38 +18058,41 @@
           "name": "Rusty Axe"
         }
       ],
+      "requiredItems": [
+        "Full Bottle of Elixir",
+        "One Quarter of Elixir",
+        "One Half of Elixir",
+        "Empty Bottle of Elixir"
+      ],
       "expReward": true,
       "steps": [
-        "Find Dargon McPherson in northeast Halas at +470, -440 Was able to start this quest at cons Indifferent",
-        "**Update 04/27/2022** Able to start quest at Apprehensive.",
+        "Find Dargon McPherson in northeast Halas at (470, -450, 4)",
         "You say, 'Hail, Dargon McPherson'",
-        "You say, 'I am a warrior o' the Wolves.'",
-        "You say, 'I will deliver an elixir to young warriors.'",
+        "You say, 'warrior o' the Wolves'",
+        "You say, 'deliver an elixir to young warriors'",
         "You receive a Full Bottle of Elixir.",
-        "Find Talin ODonal is at +3620, +670 in the tunnel just outside Halas in Everfrost, near the two female merchants.",
-        "You say, 'Hail, Talin ODonal'",
-        "Give him the elixir.",
-        "You receive back One Quarter of Elixir. Note: It is actually a 3/4 full bottle, but its name is erroneously called \"One Quarter of Elixir\"",
-        "Find Bryndin McMill go down the ramp, then east, next to a tree and Snowflake at +2040, -1150.",
+        "Talin O`Donal is at (3620, 670, 4) in the tunnel just outside Halas in Everfrost, near the Tailoring and Smithing merchants.",
+        "You say, 'Hail, Talin O`Donal'",
+        "Give him the Full Bottle of Elixir.",
+        "In return you receive the One Quarter of Elixir. Note: It is actually a 3/4 full bottle, but its name is erroneously called \"One Quarter of Elixir\".",
+        "Find Bryndin McMill: go down the ramp, then east, next to a tree and Snowflake at (2040, -1150, -60)",
         "You say, 'Hail, Bryndin McMill'",
-        "Give him the elixir.",
-        "You receive back One Half of Elixir.",
-        "Find Arnis McLish who may be found wandering in the southwest corner of the zone near (Blackburrow zone line) at -1600, -170. If he isn't there, wait a bit and he'll come running back.",
-        "Keep your eyes open as the vengeful lyrist roams around this area as well and will end a low level character very quickly.",
+        "Give him the One Quarter of Elixir.",
+        "You receive the One Half of Elixir.",
+        "Find Arnis McLish who may be found wandering in the southwest corner of the zone near (Blackburrow zone line) at -1600, -170. He wanders to the east a bit, and back. If he isn't there, wait a bit and he'll respawn or come running back.",
         "You say, 'Hail, Arnis McLish'",
-        "Give him the elixir.",
-        "You receive back One Quarter of Elixir",
+        "Give him the One Half of Elixir.",
+        "You receive the One Quarter of Elixir.",
         "You say, 'Where is Megan?'",
-        "Head back again to the previous spot with Bryndin McMill and Snowflake +2020, -1160. (Optional?)",
+        "Optional: Head back to the previous spot with Bryndin McMill and Snowflake (2020, -1160, -60).",
         "You say, 'Hail, Snowflake'",
         "You say, 'Where is Megan?'",
-        "Follow Snowflake east across the tundra, ending up at the North Tower at +2060, -3890. If Megan is not there, wait for her return (from a patrol) or respawn (orcs attacked her).",
-        "You say, 'Hail, Megan OReilly'",
-        "Give Megan the elixir.",
-        "You receive an Empty Bottle of Elixir.",
+        "Follow Snowflake east across the tundra, ending up at the North Tower at (2060, -3890, -60). If Megan O`Reilly is not there, wait for her return (from a patrol) or respawn (orcs attacked her).",
+        "You say, 'Hail, Megan O`Reilly'",
+        "Give her the One Quarter of Elixir.",
+        "You receive the Empty Bottle of Elixir.",
         "Return to Dargon McPherson in Halas and give him the empty bottle.",
-        "You receive 1-3 copper from Dargon McPherson.",
-        "You receive a random low-level item."
+        "You receive a minor item and 1-3 silver from Dargon McPherson."
       ]
     },
     {
@@ -18081,6 +18116,7 @@
         }
       ],
       "requiredItems": [
+        "Token of Mastery",
         "Torn Page of Magi`kot pg. 1",
         "Torn Page of Magi`kot pg. 2",
         "Torn Page of Magi`kot pg. 3",
@@ -18158,7 +18194,7 @@
         "Kill mobs on the 7th island on the Plane of Sky. Loot the Crown of Elemental Mastery.",
         "Kill mobs in the Hole. Loot the Elemental Binder.",
         "Kill Quillmane in South Karana. Loot the Pegasus Feather Cloak.",
-        "Give these items to Kihun Solstin in the Plane of Air and receive the Element of Wind.",
+        "Give these items to Kihun Solstin in the Plane of Sky and receive the Element of Wind.",
         "Spell Summon Orb:",
         "Go to the Master of Elements and give him the four Elements. Receive Spell: Summon Orb.",
         "Scribe your spell and summon the Orb of Mastery!"
@@ -18483,7 +18519,8 @@
         "You say, 'hail Cappi McTarnigal'",
         "You say, 'I am a member of the white rose.' (If your faction is too low, he responds with 'The Order of the White Rose does not trust you with such a task.')",
         "Give Cappi McTarnigal 4 Mammoth Calf Hides.",
-        "Although he prompts the phrase \"[gnoll fur]\", he does not respond to it."
+        "You receive a piece of Black Wolf Armor as seen above.",
+        "Cappi does not respond to the phrase \"gnoll fur\". Say \"gnoll fur\" to Ysanna MacGibbon nearby for the Gnoll Fur quest."
       ]
     },
     {
@@ -18605,7 +18642,7 @@
         "You say, ' I am here to attend to business'",
         "You say, 'Zimbittle sent me'",
         "You say, 'Mukk'",
-        "You receive a sealed note (called what?) that reads:",
+        "You receive Sealed Letter (identifies as Letter From The Dead) that reads:",
         "Dorn, it is imperative for Grobb to send a small detachment of Bashers to raid the ogre encampment in the Western Plains of Karana.",
         "During the melee, an Ogre traitor shall retrieve the Crystal Shard from the stone and return it Neriak Foreign Quarter. Do so at once.",
         "Let no one keep the traitor from his escape. Beware the Oggok Shaman Marda has dispatched an agent also.",
@@ -18613,6 +18650,7 @@
         "You say, 'Who is Goonda?'",
         "If you take this note to Marda, she'll tell you to kill Zimbittle and bring proof of her death. Upon turning in Zimbittle's Pouch to Marda:",
         "NOTE: This isn't true. Marda does not accept the note, and this little side quest is broken here and on live.",
+        "NOTE: Chief Goonda in West Karana and Kragia in Grobb also do not accept the note.",
         "You receive a low level spell."
       ]
     },
@@ -19045,7 +19083,6 @@
         }
       ],
       "requiredItems": [
-        "A Sealed List",
         "A Sealed Letter"
       ],
       "expReward": true,
@@ -19097,6 +19134,27 @@
       "steps": [
         "Crusader Iktra is at location 2256, -812 in North Ro on the shoreline closest to Freeport.",
         "There isn't any dialogue that leads to information about this quest."
+      ]
+    },
+    {
+      "name": "Militia Seals",
+      "page": "Militia Seals",
+      "giver": "Guard Jup",
+      "minLevel": 35,
+      "classes": [
+        "All"
+      ],
+      "relatedZones": [
+        "Dulak's Harbor",
+        "Gulf of Gunthak"
+      ],
+      "relatedNpcs": [
+        "Guard Jup"
+      ],
+      "requiredItems": [
+        "Twisted Silver Torque",
+        "Militia Crate",
+        "Pirate's Seal"
       ]
     },
     {
@@ -19651,7 +19709,7 @@
         "Blue and Black Headband:",
         "These items are not the result of any quests. They drop from Monk Guildmasters in Qeynos. The Purple Headband is the highest headband you need to obtain for the Robe of the Lost Circle.",
         "Faction:",
-        "These turn ins require high amiably faction to turn in. Since all of the items are tradeable, the turn ins can be done on a new monk. If you want to do the turn ins on an Iksar monk, it will require approximately 1600 gnoll kills."
+        "These turn ins require high amiably faction to turn in. You can kill Deathfist Orcs in the Commonlands to get to Dubious and then do Note for Konem repeatedly to get your faction to amiable."
       ]
     },
     {
@@ -19929,10 +19987,9 @@
       ],
       "expReward": true,
       "steps": [
-        "Obtain Shackle of Dust",
-        "Obtain Shackle of Clay",
-        "Obtain two Iksar Bandit Masks",
-        "Turn in shackles and masks to Master Raska (to receive Shackle of Stone)"
+        "Right Hand",
+        "Left Hand with",
+        "Shackle of Rock"
       ]
     },
     {
@@ -20146,7 +20203,7 @@
       "name": "More Help for Innoruuk",
       "page": "More Help for Innoruuk",
       "startZone": "Grobb",
-      "giver": "Kaglari",
+      "giver": "Bregna",
       "minLevel": 1,
       "classes": [
         "All"
@@ -20163,9 +20220,9 @@
       ],
       "expReward": true,
       "steps": [
-        "At the end of the previous quest, Kaglari asked you whether you wanted to \"more help Innoruuk.\". Apprehensive or better is required for this quest. This means Ogres normally cannot complete it. Agnostic and Innoruuk Dark Elves can.",
+        "At the end of the previous quest, Bregna asked you whether you wanted to \"more help Innoruuk.\". Apprehensive or better is required for this quest. This means Ogres normally cannot complete it. Agnostic and Innoruuk Dark Elves can.",
         "You say, 'Meez more help Innoruuk.'",
-        "Give Kaglari a Deathfist Slashed Belt.",
+        "Give Bregna Deathfist Slashed Belt.",
         "This quest can be used to farm Dark Ones faction, but like other orc belt quests the hits are very small.",
         "Experimentation shows Frogloks of Guk faction is lowered by -10."
       ]
@@ -20235,12 +20292,11 @@
       ],
       "expReward": true,
       "steps": [
+        "Can be done with apprehensive faction.",
         "Talk to Hekzin G`Zule in the rogue guild. He will say he is working on some new type of armor.",
         "You say, 'Hail, Hekzin G`Zule'",
         "You say, 'I am interested in joining this house of rogues'",
-        "You receive an Empty Bag in which you need to combine three Snake Scales and three Snake Fangs. This produces a Bag of Snake Parts. Give this to Hekzin.",
-        "You receive between 3-12 silver from Hekzin G`Zule.",
-        "You also receive the Dark Shield of Ebon."
+        "You receive an Empty Bag in which you need to combine three Snake Scales and three Snake Fangs. This produces a Bag of Snake Parts. Give this to Hekzin."
       ]
     },
     {
@@ -20459,7 +20515,6 @@
         "Spiroc Feathers",
         "Black Silk Cape",
         "Cloak of Spiroc Feathers",
-        "Slime Blood of Cazic Thule",
         "Tome of Instruction"
       ],
       "expReward": true,
@@ -21131,6 +21186,7 @@
         "Nesiff Tallaherd"
       ],
       "requiredItems": [
+        "Claim Check",
         "Wooden Statue"
       ],
       "expReward": true,
@@ -21139,12 +21195,11 @@
         "You say, 'Hail, Vesteri Nomanoi'",
         "You say, 'What favor?'",
         "You receive a Claim Check (identifies as \"Vesteri's Claim Check\"), which reads:",
-        "CLAIM CHECK - NESIFF'S WOODEN WEAPONS - QEYNOS: ONE Custom STATUE - CUSTOMER: Vesteri Nomanoi",
         "Head to South Qeynos, inside Nesiff's Wooden Weapons (loc 440.56, -243.45):",
         "You say, 'Hail, Nesiff Tallaherd'",
         "Give Nesiff the claim check.",
         "You receive a Wooden Statue (identifies as \"Statue of Tunare\"). Take it back to Vesteri.",
-        "You receive 1 silver from Vesteri Nomanoi."
+        "You receive a small amount of coin from Vesteri Nomanoi."
       ]
     },
     {
@@ -21923,8 +21978,20 @@
       "classes": [
         "All"
       ],
+      "relatedZones": [
+        "West Commonlands",
+        "Kithicor Forest",
+        "Misty Thicket"
+      ],
       "relatedNpcs": [
-        "an orc acolyte"
+        "an orc acolyte",
+        "an orc berserker",
+        "an orc conscript",
+        "an orc fanatic",
+        "an orc medic",
+        "an orc mercenary",
+        "an orc soldier",
+        "an orc warrior"
       ],
       "requiredItems": [
         "Orc Scalp"
@@ -21936,9 +22003,8 @@
         "You say, 'What job?'",
         "You say, `What Volunteer Watch?'",
         "You say, 'What orcs?'",
-        "Turn in an Orc Scalp (you may turn in up to four at once).",
-        "Fixed amount of coin per turn in.",
-        "Notes about Experience per Scalp"
+        "He doesn't say directly, but orcs in Highpass Hold, West Commonlands, Kithicor Forest, and Misty Thicket drop Orc Scalps. Turn in a scalp to Ashlan:",
+        "You also receive 5g 2s 5c."
       ]
     },
     {
@@ -22755,13 +22821,12 @@
       ],
       "expReward": true,
       "steps": [
-        "Styria Fearnon may be found on Erollisi Isle (/loc?).",
+        "Styria Fearnon may be found on Erollisi Isle in her own hut, northeast of the dock (578, -9357).",
         "You say, 'Hail, Styria Fearnon'",
         "You say, 'What Pirates of Gunthak?'",
         "You say, 'I wish to hunt the pirates.'",
         "The pirates can be found on Seafury island at about +780, -5440. Kill them until you get a Pirate's Earring, then turn it into Styria to get:",
-        "Random reward item.",
-        "0% xp at level 9."
+        "You receive a reward item as listed above."
       ]
     },
     {
@@ -23122,7 +23187,8 @@
         "You say, 'Hail, Jras Solsier'",
         "You say, 'I will protect the peace.'",
         "You say, 'I will catch the poachers.'",
-        "Hand in a Poacher's Head to Jras. Note that the poacher's head doesn't have to be from one of the poachers in the Toxxulia Forest. The heads from the Surefall Glade poachers will also work."
+        "Hand in a Poacher's Head to Jras. Note that the poacher's head doesn't have to be from one of the poachers in the Toxxulia Forest. The heads from the Surefall Glade poachers will also work.",
+        "You get a small amount of coin and a minor item."
       ]
     },
     {
@@ -23170,7 +23236,7 @@
         "Poacher Dell and Poacher Willa share a timer with a widow hatchling. Spawn Location: Southern third of the zone, right side of the river.",
         "Poacher Hill, Poacher Topi and Poacher Shelli share a timer with a large skunk and a widow hatchling. Spawn Location: Upper left side of the zone, right side of the river.",
         "If you don't see any poachers, go find the hatchlings and large skunks and kill them. 10 seconds after ones dies, you should have a new Poacher, hatchling or skunk on track. If you don't, that wasn't one of the placeholders, go find a new placholder and try again.",
-        "I have not see a poacher in surefall glade in EQL, so I believe they have been removed. Information here on Surefall Glade in case it comes back.",
+        "Surefall Glade poacher spawns are partially verified, with a poacher appearing in the #2 spawn position below. Further verification needed.",
         "# 1 Waterfall Cave (/loc 221,-179): shared spawn point for Poacher and Mammoth (named bear). Poacher drops a regular Poacher's Head for coin and faction rewards.",
         "# 2 Hidden Cave (/loc 144,-415): behind the hidden wall cave entrance, and the shared spawn point for Gnoll Poacher, a poacher, and a bear cub. The Gnoll Poacher drops the Gnoll Head used for the Rough Elm Recurve Bow quest reward. A poacher drops a regular Poacher's Head that just nets you coin and faction rewards.",
         "The spawn timer for either spot is approximately 2.5 minutes, but the mobs in both locations will start to wander around the tunnels shortly after spawning. The will path back to their spawn points if you don't want to go looking for them though. If you blindly sit on either spawn point, you could be waiting anywhere from 7.5 - 30 minutes for the spawns to cycle through.",
@@ -23367,6 +23433,9 @@
           "name": "Star Rose Quartz"
         }
       ],
+      "requiredItems": [
+        "Preserved Leg"
+      ],
       "expReward": true,
       "steps": [
         "This is a sub-quest that takes place during the HEHE Meat Quest. You can do this quest without going through the HEHE Meat one.",
@@ -23374,16 +23443,17 @@
         "You say, 'Hail, Chef Dooga'",
         "You say, 'What is HEHE meat?'",
         "You say, 'Who is the Gobbler?'",
-        "You receive a \"Preserved Leg.\"",
-        "Find the Gobbler in Neriak Foreign Quarter at location -325, -125.",
+        "You receive a Preserved Leg.",
+        "Head to the Neriak - Foreign Quarter and find The Gobbler on the west side of the southern section with the ogres and trolls, at location -325, -125.",
         "You say, 'Hail, The Gobbler'",
         "You say, 'What is HEHE meat?'",
         "You say, 'What froggy legs?'",
         "You say, 'Who is Chef Dooga?'",
-        "You say, 'I will pick up froglok legs.'",
         "Good news is, you already have the froglok leg he wants. Upon turning in the Preserved Leg:",
-        "You receive 1-5 gold from The Gobbler.",
-        "You receive one of the rewards at random."
+        "You receive 1-5 gold from The Gobbler and possibly one of the following:",
+        "Ogre Butcher Gloves - very rare, vendors for 9g",
+        "Ogre Meat Cleaver - vendors for 9g",
+        "Star Rose Quartz - vendors for 9g"
       ]
     },
     {
@@ -23734,7 +23804,8 @@
         "Embroidered Bag of Bronze Symbols",
         "Odd Cold Iron Necklace",
         "Sealed Parchment",
-        "Hieroglyph Translations"
+        "Hieroglyph Translations",
+        "Encrypted Document"
       ],
       "expReward": true,
       "steps": [
@@ -23896,8 +23967,7 @@
         "Return a Diseased Wolf Pelt.",
         "Priestess Caulria will cast Cure Disease on you to remove Rabies and other diseases.",
         "If you turn in the Pelts at the same time as someone else, you may not receive the Cure Disease cast.",
-        "Works at apprehensive / dubious, unlike Fleshy Orbs from the same NPC.",
-        "= Exp Gain ="
+        "Works at dubious, unlike Fleshy Orbs from the same NPC."
       ]
     },
     {
@@ -23937,28 +24007,27 @@
       ],
       "requiredItems": [
         "Trueshot Longbow",
+        "Small Lantern",
+        "Tattered Toupee",
         "Crate for Tonics",
         "Fuzzlecutter Formula 5000",
         "Crate of Tonic",
-        "A Wooden Heart",
-        "Small Lantern",
-        "Tattered Toupee",
+        "Pouch of Gold Dust",
         "Clump of Gorilla Hair",
         "Lock of Hair",
-        "A Glimmering Fairie Wing",
-        "Pouch of Gold Dust"
+        "A Glimmering Fairie Wing"
       ],
       "expReward": true,
       "steps": [
-        "The Toupee",
         "Obtain Trueshot Longbow through prerequisite quests",
-        "Obtain Crate for Tonics from Sanfyrd Featherhead in Ak'Anon",
-        "Obtain 10x Fuzzlecutter Formula 5000 and combine in Crate (to yield Crate of Tonic)",
         "Obtain A Wooden Heart",
         "Loot from either a treant (Karanas),",
         "OR Jyle Windshot (West Freeport Version) by handing him Small Lanterns (about ~10% chance to get the heart per lantern).",
+        "Obtain Tattered Toupee",
+        "Obtain Crate for Tonics from Sanfyrd Featherhead in Ak'Anon",
+        "Obtain 10x Fuzzlecutter Formula 5000 and combine in Crate (to yield Crate of Tonic)",
         "Turn in Tonic Crate to Sanfyrd (to receive Tattered Toupee)",
-        "The Pouch",
+        "Obtain Pouch of Gold Dust",
         "Obtain 2x Clump of Gorilla Hair from A Hulking Gorilla in Cazic Thule",
         "Obtain a Lock of Hair from A Golden Haired Mermaid in Kedge Keep",
         "Turn in Toupee, Gorilla Hairs and a Mermaid Lock to Ping Fuzzlecutter (to receive Mane Attraction)",
@@ -24701,6 +24770,14 @@
       ]
     },
     {
+      "name": "Rathe Mountains Spiders",
+      "page": "Rathe Mountains Spiders",
+      "requiredItems": [
+        "Spiderling Eye"
+      ],
+      "expReward": true
+    },
+    {
       "name": "Rathmana's Traveling Offer",
       "page": "Rathmana's Traveling Offer",
       "startZone": "Southern Desert of Ro",
@@ -25113,6 +25190,11 @@
       "relatedNpcs": [
         "Cazic Thule (God)",
         "Innoruuk (God)"
+      ],
+      "steps": [
+        "Speak with Emissary of Zebuxoruk in Oasis of Marr.",
+        "Kill Cazic Thule (God) in the Plane of Fear.",
+        "Kill Innoruuk (God) in the Plane of Hate."
       ]
     },
     {
@@ -25375,7 +25457,7 @@
       ],
       "steps": [
         "Joyce will make a Robe of the Elements if you bring her the following:",
-        "Fire Goblin Skin (Fire Goblins in Solusek's Eye)",
+        "Fire Goblin Skin (fire goblin (others?) in Solusek's Eye)",
         "Frost Goblin Skin (An Elite Goblin Guard in Permafrost)",
         "a \"Twice-Woven Cloak\" (A Faerie Guard in Lesser Faydark)",
         "a scroll of Elemental Armor.",
@@ -25684,6 +25766,7 @@
         "Case of Spirits",
         "Gem of Stamina",
         "Gem Case",
+        "Mammoth Skin",
         "Gnoll Pup Scalp"
       ],
       "expReward": true,
@@ -25904,16 +25987,7 @@
       "giver": "Diggins",
       "minLevel": 9,
       "classes": [
-        "Bard",
-        "Enchanter",
-        "Magician",
-        "Necromancer",
-        "Ranger",
-        "Rogue",
-        "Shadow Knight",
-        "Shaman",
-        "Warrior",
-        "Wizard"
+        "Rogue"
       ],
       "relatedZones": [
         "Butcherblock Mountains"
@@ -26480,6 +26554,7 @@
       ],
       "expReward": true,
       "steps": [
+        "WARNING: Like many NPCs involved in newbie armor quests, this quest appears to be impossible to complete in Legends as Kelynn appears to have been removed.",
         "Geeda is located at -566, -145, 161 behind the Scouts of Tunare (Rogue) Guild Hall.",
         "You say, 'Hail, Geeda'",
         "You say, 'What Crushbone Citadel'",
@@ -26602,24 +26677,24 @@
       "requiredItems": [
         "Unfinished Blade Mold",
         "Unfinished Sledge Mold",
+        "Bracers of Battle",
         "Brass Earring",
         "Shiny Brass Shield",
-        "Dwarven Ringmail Tunic",
-        "Bracers of Battle"
+        "Dwarven Ringmail Tunic"
       ],
       "expReward": true,
       "steps": [
         "Pre-Quest Mini-Quest/Dialogue:",
-        "Note: You do not need to do this part to get prayer cloth. Just hail the elf and say \"The king is dead\" and he will ask for proof. Give him the BoB and receive the prayer cloth of tunare.",
+        "Note: You do not need to do this part to get prayer cloth. Just hail the elf and say \"The king is dead\" and he will ask for proof. Give him the Bracers of Battle and receive the Prayer Cloth of Tunare.",
         "Hail a dwarven slave (male) found in various locations around Crushbone.",
         "You say, 'taskmaster?'",
         "You say, 'what bronze earring?'",
         "This is the Taskmaster Earring quest. The Brass Earring (incorrectly called bronze in the dialogue) can be given to various slaves around Crushbone to free them and receive a small quest to inform their loved ones of their whereabouts. You can instead give it to a dwarven smith to get the preliminary dialogue for the Screaming Mace Quest.",
         "a dwarven smith is at location 60, 746 (inside the slaver cabin) in Crushbone.",
         "Hand a dwarven smith a Brass Earring, dropped by an orc taskmaster",
-        "You receive a Unfinished Blade Mold. (Note: this does not give any faction.)",
+        "You receive a Unfinished Blade Mold. (Note: This does not give any faction, and the mold is not needed for the quest or any other purpose. Just sell it.)",
         "Hand a dwarven smith a Shiny Brass Shield, dropped by an orc trainer",
-        "You receive an Unfinished Sledge Mold. (Note: this does not give any faction.)",
+        "You receive an Unfinished Sledge Mold. (Note: This does not give any faction, and the mold is not needed for the quest or any other purpose. Just sell it.)",
         "Quest Start:",
         "You say, 'What about ringmail?'",
         "Hand a dwarven smith the Dwarven Ringmail Tunic, dropped by Emperor Crush.",
@@ -27042,9 +27117,6 @@
         },
         {
           "name": "Inky Shadow Silk"
-        },
-        {
-          "name": "A Werebat Wing"
         },
         {
           "name": "Globe of Shadow"
@@ -27817,6 +27889,9 @@
       "rewards": [
         {
           "name": "Cast-Iron Rapier"
+        },
+        {
+          "name": "Bronze_Dagger"
         }
       ],
       "requiredItems": [
@@ -27832,6 +27907,7 @@
         "You receive a Pack for Shark, a four slot, medium capacity container. Combine 4 Shark Meat in the container to create a Pack of Meat.",
         "Hand Gallin Woodwind the Pack of Meat.",
         "10% xp every turn-in for a level 3 Halfling Druid (5% at level 4)",
+        "0.055% xp for a level 29 and a bronze dagger, no cast iron rapier - 9/2/2026",
         "You receive 7 gold, 23 copper pieces."
       ]
     },
@@ -27972,7 +28048,12 @@
         "Shining Metallic Robes"
       ],
       "steps": [
-        "Kejar the Mighty, a named imp found deep in The Hole (#9 on the map) asks you to bring him a Shining Metallic Robe. Kejar is scowls with benevolence and in elemental illusion. Blue to lvl 43 enchanter. Must be charmed to turn in? Ate SMR when mezzed.",
+        "Kejar the Mighty, a named imp found deep in The Hole (#9 on the map) asks you to bring him a Shining Metallic Robe. Kejar is scowls with benevolence and in elemental illusion. Blue to lvl 43 enchanter.",
+        "Indifferent to a 35 rogue with shroud of stealth AA. Which was sufficient for turn in.",
+        "Due to Legends Pet mechanics, the \"only\" way to turn in is rogue level 35 AA Shroud of stealth (5 AA pts).",
+        "Charming him as your OWN pet does not work (both as a bard and an ench), due to pet inventory mechanics.",
+        "Having another player charm him does not work (both as a bard and an ench), due to pet inventory mechanics.",
+        "Mezzing him and mind wiping him does not work, though he does appear indifferent at this time, he will not accept a turn in and return the item back.",
         "The Shining Metallic Robes is dropped rarely off the ghoul arch magi on the dead side of Lower Guk.",
         "In exchange for the SMR, you'll either receive either a Shiny Hunk of Metal or a Shiny Robe of the Underfoot. The former is the more common of the two.",
         "02/10/2024: Eight turn ins yielded two Robes."
@@ -28228,16 +28309,7 @@
       "giver": "Nultal Malfoot",
       "minLevel": 2,
       "classes": [
-        "Cleric",
-        "Druid",
-        "Enchanter",
-        "Magician",
-        "Necromancer",
-        "Paladin",
-        "Ranger",
-        "Shadow Knight",
-        "Shaman",
-        "Wizard"
+        "Cleric"
       ],
       "relatedZones": [
         "Butcherblock Mountains"
@@ -28544,7 +28616,6 @@
       "page": "Soldier's Brooch Quest",
       "startZone": "Rathe Mountains",
       "giver": "Gaz Commander Faltip",
-      "minLevel": 30,
       "classes": [
         "All"
       ],
@@ -28592,7 +28663,7 @@
       "expReward": true,
       "steps": [
         "General Information:",
-        "The Soldier's Brooch is a set of Range slot items with a level 30 minimum requirement, but the quest is easy to do at that level. The set of items granted all start with the name \"Soldier's Brooch Of\", and there are versions for most classes."
+        "The Soldier's Brooch is a set of Range slot items. The set of items granted all start with the name \"Soldier's Brooch Of\", and there are versions for most classes."
       ]
     },
     {
@@ -28675,47 +28746,37 @@
         "Kerra Island"
       ],
       "relatedNpcs": [
-        "kerran `amir"
+        "a kerran `amir"
       ],
       "rewards": [
         {
           "name": "Hamed's Ring of Tears"
         }
       ],
+      "requiredItems": [
+        "Desecrated Kejaar Totem"
+      ],
       "expReward": true,
       "steps": [
-        "The Kerran Sha`rr is located at 902.55, 347.27, -6.81",
+        "Please note that you must use the task system for this quest; you cannot hand in multiples of each quest item. However, you can collect multiples of each quest item beforehand and then go through the quest steps repeatedly.",
+        "The Kerran Sha`rr is located at 902.55, 347.27, -6.81, in the basement of the building in the northwest corner of Kerra Island.",
         "You say, 'Hail, The Kerran Sha`rr'",
-        "The Kerran Sha`rr says, 'Something is wrrrong. Tigerrrs of late have rrreturrrned from the trrraining pits with a hostility I have neverrrr seen. Strrrange sounds come from that island at night. The keeperrrs of the island do not come home to theirrr families. I must ask you to [explorrre the island]. Deterrrmine what is happening there.'",
         "You say, 'explorrre the island'",
         "You have been assigned the task 'Something is Wrrrong'.",
-        "The Kerran Sha`rr says, 'Be on guarrrd. I advise you limit yourrr investigation to the norrrth side of the island until we know morrre. Find some evidence that explains these strrrange happenings. Avoid the tigerrr pits to the south, rrreturn alive.'",
-        "Quest Stage 1:",
-        "Step 1 - Search the north side of the island for clues.",
-        "Text 1 - The Kerran Sha`rr has sensed that something is amiss in Kerra Isle. The trouble seems to stem from the small island south of the village. He has asked you to investigate the situation on the island and report back.",
-        "\"Locate evidence of the threat to Kerra Village\"",
-        "kerran `amir has multiple spawns around -315.25, -199.31, 5.19",
-        "Kerran `Amir spawns on the northern part of the South Island",
-        "Kill one for the Desecrated Kejaar Totem.",
-        "Faction from the kill:",
-        "Heretics -3",
-        "Deepwater Knights +5",
-        "Gate Callers +5",
-        "Craftkeepers +5",
-        "Crimson Hands +5",
-        "--You have looted a Desecrated Kejaar Totem from a kerran `amir's corpse.--",
+        "Step 1:",
+        "Search the north side of the island for clues.",
+        "The Kerran Sha`rr has sensed that something is amiss in Kerra Isle. The trouble seems to stem from the small island south of the village. He has asked you to investigate the situation on the island and report back. Locate evidence of the threat to Kerra Village.",
+        "A kerran `amir has multiple spawns on the island in the south part of the zone, but the only ones that drop the correct item are the 2 spawns on the north side of the island. Kill one for the Desecrated Kejaar Totem.",
         "Your task 'Something is Wrrrong' has been updated.",
-        "Quest Stage 1:",
-        "Step 2 - Show the Kerran Sha`rr what you have uncovered.",
-        "Text 2 - The Kerran Sha`rr has sensed that something is amiss in Kerra Isle. The trouble seems to stem from the small island south of the village. He has asked you to investigate the situation on the island and report back.",
-        "\"Locate evidence of the threat to Kerra Village\"",
-        "You offered 1 Desecrated Kejaar Totem to The Kerran Sha`rr.",
+        "Step 2:",
+        "Show the Kerran Sha`rr what you have uncovered.",
+        "The Kerran Sha`rr has sensed that something is amiss in Kerra Isle. The trouble seems to stem from the small island south of the village. He has asked you to investigate the situation on the island and report back. Locate evidence of the threat to Kerra Village.",
+        "Give the Desecrated Kejaar Totem to The Kerran Sha`rr.",
         "Your task 'Something is Wrrrong' has been updated.",
         "You validated the Kerran Sha`rr's concerns about troubling forces working against Kerra Village.",
-        "You have been given: Hamed's Ring of Tears",
+        "You receive Hamed's Ring of Tears.",
         "You have been assigned the task 'This Means Warrr'.",
-        "The Kerran Sha`rr says, 'Herrresy! No disciple of Kejaarrr would do such a thing! And even the pumas of the isle have turrrned on us, you say? I must ask yourrr aid once again. The danger is grrreat. Make any necessarrry prrreparrrations, and then storrrm the tigerrr trrraining pit on the south end of that once sacrrred island. Do not rrreturrrn until you have rrrouted what evil has taken rrroot. I fearrr anything less could mean the dawn of a new warrr.'",
-        "You complete the trade with The Kerran Sha`rr."
+        "This leads to This Means Warrr."
       ]
     },
     {
@@ -29179,9 +29240,7 @@
         "Note:",
         "The most difficult part of this quest is getting the Rod of Bone in Lake Rathetear. Stone Skeletons spawn in a tower in the southeast corner of the zone. There are two of them, very close to each other. They both have earth pet, who cast Root. So, you will have trouble single pulling them, which makes soloing this part mostly impossible before level 30 (while the skeletons are level 24-26). You might want to look for another wizard in his 20's or get a few partners to help you for this part.",
         "Note: At lvl 29 you can use Bonds of Force (aoe snare) on one of the pets, and then run to zone. At zone root the stone skeleton and zone dance, then root the pet again and quickly burst down stone skeleton. Use leatherskin.",
-        "Note: The above method did not work for me. However, I found a method that does, and I was able to solo them at 31 with a Stein of Moggok as my only int gear. Bind yourself at the tower off to the side. Port to WC and grab a sow from a druid, and stock up on bloodstones for Leatherskin, and bat wings for levitate. You will need these buffs up at all times. You can tip a cleric for buffs if you want another safety net. As always, clarity will speed up the process here. Root the stone skeleton you want to kill and then high tail it for Rathe Mountains. After you zone in, gate. Run in and fight…",
-        "Multiquestable",
-        "The quest may be multiquestable? The helper should be able to hand in all the no-drop items, then the recipient must hand in the staff."
+        "Note: The above method did not work for me. However, I found a method that does, and I was able to solo them at 31 with a Stein of Moggok as my only int gear. Bind yourself at the tower off to the side. Port to WC and grab a sow from a druid, and stock up on bloodstones for Leatherskin, and bat wings for levitate. You will need these buffs up at all times. You can tip a cleric for buffs if you want another safety net. As always, clarity will speed up the process here. Root the stone skeleton you want to kill and then high tail it for Rathe Mountains. After you zone in, gate. Run in and fight…"
       ]
     },
     {
@@ -30015,15 +30074,16 @@
         }
       ],
       "requiredItems": [
-        "Tanned Split Paw Skin (lore)"
+        "Tanned Split Paw Skin (lore)",
+        "Tanned Split Paw Skin"
       ],
       "expReward": true,
       "steps": [
-        "Edvard is located at ( ) in the yellow house next to the bank, across from the Office for the People in South Qeynos.",
+        "Edvard is located in South Qeynos in the yellow house next to the bank, across from the Office for the People.",
         "When you hail him he mentions that he is collecting Tesch Val scrolls.",
         "You say, 'Hail, Edvard Tommels'",
-        "Edvard Tommels says 'Greetings, ______. Thank you for stopping by. Had you heard I was looking for any and all information regarding the Tesch Val incursion? Perhaps you have come to help me gather knowledge? I seek the [Tesch Val scrolls]!'",
-        "You say, 'Tesch Val scrolls?'"
+        "You say, 'Tesch Val scrolls'",
+        "The scrolls in question are called Tanned Split Paw Skin. They drop from gnolls in South Karana outside the entrance to Splitpaw Lair as well as within Splitpaw itself. Be aware that there are two items with the same name: one is a rolled-up scroll , the other is unrolled . You want the rolled-up scrolls."
       ]
     },
     {
@@ -30578,9 +30638,11 @@
         "Various"
       ],
       "requiredItems": [
-        "Dwarven Ale",
+        "Dusty Ribcage",
         "Dusty Old Finger Bones",
         "Dusty Old Skull",
+        "Pick",
+        "Dwarven Ale",
         "Empty Gem Bag",
         "Diamond",
         "Star Ruby",
@@ -30588,52 +30650,44 @@
         "Fire Emerald",
         "Sapphire",
         "Fire Opal",
+        "Amber",
+        "Jade",
         "Enchanted Platinum Bar",
+        "Platinum Bar",
+        "Full Gem Bag",
+        "Gem Encrusted Casket",
         "Revenant Ash"
       ],
       "expReward": true,
       "steps": [
-        "Diggs Duggun is at 1260, -550 in the Gorge of King Xorbb.",
-        "You say, 'Hail, Diggs Duggun'",
-        "You say, 'What boon?'",
-        "Give him a Pick (found at the vendor at the Kaladim Bank) and two Dwarven Ales (not stacked).",
-        "Receive A Dusty Old Leg Bone.",
-        "Now go find the Paladin guildmaster in North Freeport by the name of Valeron Dushire.",
-        "You say, 'Hail, Valeron Dushire'",
-        "Give him the Dusty Old Leg Bone:",
-        "You say, 'Who is Diggs Duggun?'",
-        "You say, 'What hero?'",
-        "You say, 'I accept.'",
-        "You now need to collect six bones, a shield, a sword and a coffin. These are the items and locations:. *These are not actual bones, they are small bags that you pick up.",
-        "A Dusty Old Skull - Minotaur caves in Steamfont Mountains in Meldrath's room.",
-        "A Dusty Old Leg Bone - You received this from talking to Diggs Duggun in Beholder's Maze.",
-        "Dusty Ribcage - The Garden in Mistmoore Castle. This is actually in the Fountain Room #7 on the map. This can also spawn in the same room as A Dusty Old Backbone in Unrest.",
-        "A Dusty Old Backbone and Dusty Ribcage - Ghost Room Pit in Unrest. Go in the basement, then through the invisible wall, go through the lava, and the bag is in the pit.",
+        "Collect six bones, a shield, and a sword. All are ground spawns; collectable in open world or a personal instance. Suggested order to collect:",
+        "A Dusty Old Backbone and Dusty Ribcage - Both spawn in the Ghost Room Pit in Unrest. Go into the basement, then through the invisible wall, go through the lava, and the bag is in the pit. Dusty Ribcage also spawns in Mistmoore Castle. You can skip going to Mistmoore if you collect it in Unrest.",
+        "Dusty Old Finger Bones - Inside Phinigel Autropos's room in Kedge Keep.",
+        "Dusty Ribcage - Skip if you got in Unrest already. The Garden in Mistmoore Castle. This is in Fountain Room #7 on the map.",
+        "Dusty Old Skull - Minotaur caves in Steamfont Mountains in Meldrath's room.",
         "A Dusty Old Jawbone - Underwater Ice Cave (Miragul's area) in Everfrost Peaks. There are emblems on the wall in the cave. The item is under the third emblem at about 4535, -5235.",
-        "A Dusty Broken Sword - In the mines of North Kaladim in the water. Ground spawn in the water at roughly +761, +291.",
+        "A Dusty Broken Sword - In the mines of North Kaladim in the water. Ground spawn in the water at roughly +761, +332.",
+        "While in Kaladim, buy a Pick from Kadek Norkhitter in North Kaladim and two Dwarven Ales from Dura Darkfoam in South Kaladim (or any other number of vendors that sell it).",
         "A Dusty Broken Shield - On a ledge on right cliffs in Erudin from the docks. Ground spawn at -605, -725. You must swim from the docks to reach the shield.",
-        "Dusty Old Finger Bones - Inside Phinigel Autropos's room in Kedge Keep. Beware Swirlspine Seahorse (4 of them, 51 Cleric’s) can see invis! So bring a group! Swim down through the Star which is in the center of the room. There's an alcove on the SOUTH WALL with a large rock, and the bag spawns to the LEFT of the rock. Exact Location is neg 150, pos 127, neg 270.",
-        "*NOTE: The respawn timer on bones seems to be 20 minutes. Tested 6/30/2022 with two Paladins in Unrest and Mistmoore.",
-        "Gem Encrusted Casket is received from Ping Fuzzlecutter as follows:",
-        "You say, 'I have all the bones.'",
-        "Go to Ping Fuzzlecutter, outside the gates of West Freeport.",
-        "You say, 'What components?'",
-        "Ping gives you an Empty Gem Bag to combine the following items:",
-        "Diamond",
-        "Star Ruby",
-        "Pearl",
-        "Fire Emerald",
-        "Sapphire",
-        "Fire Opal",
-        "(2) Enchanted Platinum Bar (Unstacked)",
-        "Combine the gems in the bag to craft a Full Gem Bag. Give this to Ping to receive Gem Encrusted Casket.",
-        "Ping Fuzzlecutter smiles broadly as he rifles through the bag, then looks up at you and says, 'Bout time! Here is the coffin as promised.'",
-        "Put the 6 dusty bones + sword + shield in the casket and combine to craft A Gem Encrusted Casket. See Simon Aldicott in the West Commonlands.",
-        "You say, 'Hail, Simon Aldicott'",
-        "You say, 'What funeral service?'",
-        "Give him the casket. note: Was able to hand him casket as Iksar/dubious)",
-        "A Tortured Revenant will spawn and attack you (some thanks eh?). This mob is immune to changes in runspeed and has a ton of hitpoints for its level. Kill it and loot Revenant Ash (identifies as \"Ash of Darak Lightforge\").",
-        "Give the Revenant Ash to Simon and he will reward you with your new spell."
+        "A Dusty Old Leg Bone",
+        "If not done already, purchase a Pick from Kadek Norkhitter in North Kaladim and two Dwarven Ales from Dura Darkfoam in South Kaladim (or any other number of vendors that sell it).",
+        "Hand the Pick and both Dwarven Ales to Diggs Duggun in Beholder's Maze.",
+        "Get Empty Gem Bag from Ping Fuzzlecutter in West Freeport.",
+        "Say 'What components?' to Ping Fuzzlecutter.",
+        "Gather the following gems for the Empty Gem Bag:",
+        "Diamond - Drop only, various zones from level 50+ mobs.",
+        "Star Ruby - Drops in various zones. Purchaseable from various Jewelcrafting vendors.",
+        "Pearl - Drops in various zones. Purchaseable from various Jewelcrafting vendors.",
+        "Fire Emerald - Drops in various zones. Purchaseable from various Jewelcrafting vendors.",
+        "Sapphire - Drops in various zones. Purchaseable from various Jewelcrafting vendors.",
+        "Fire Opal - Drops in various zones. Purchaseable in North Freeport from Amber or Jade.",
+        "2 Enchanted Platinum Bars (Unstacked) - Platinum Bars can be purchased from various Jewelcrafting vendors and then must be enchanted by a 32+ Enchanter using the Enchant Platinum spell.",
+        "Combine the gems in the bag to craft a Full Gem Bag.",
+        "Give Full Gem Bag to Ping Fuzzlecutter to receive Gem Encrusted Casket (8-slot container version).",
+        "Combine the 6 bones, sword, and shield collected in the first step in the Gem Encrusted Casket container to receive a non-container version, also called Gem Encrusted Casket.",
+        "Give non-container Gem Encrusted Casket to Simon Aldicott in the West Commonlands. Note: this spawns A Tortured Revenant, be ready for combat.",
+        "Kill A Tortured Revenant and loot Revenant Ash (\"Ash of Darak Lightforge\")",
+        "Give the Revenant Ash to Simon Aldicott to receive Spell: Divine Might."
       ]
     },
     {
@@ -31045,45 +31099,44 @@
         }
       ],
       "requiredItems": [
-        "A Sealed List",
+        "Sealed List",
         "Human Decapitated Head",
         "Gnome Decapitated Head",
         "Dwarf Decapitated Head"
       ],
       "expReward": true,
       "steps": [
-        "Weligon Steelherder is located at -1040, -380 in Erudin.",
-        "It appears you need better than Indifferent faction, likely Amiable, for final turn-in",
+        "Note: Be aware that the three NPCs you have to kill for this quest have very large negative faction hits for the Arcane Scientists, the Eldritch Collective, and the Storm Guard.",
+        "Weligon Steelherder is in Erudin's guild for Paladins of Prexus, the Deepwater Knights.",
         "You say, 'Hail, Weligon Steelherder'",
         "You say, 'What Deepwater tasks?'",
         "You say, 'What Deepwater harpoon?'",
         "You say, 'I am ready to prove allegiance to Erudin.'",
-        "Hansl Bigroon is located at +355, -465 in South Qeynos.",
+        "You can find the list in South Qeynos, which will lead you to the architects. (Go to the second location at (275, -350) to immediately pick up the ground spawn which is the Sealed List.)",
+        "Hansl Bigroon wanders between 2 places in South Qeynos- between the bank and the casters guild at (355, -465), and a small house to the west around the corner at (275, -350).",
         "You say, 'Hail, Hansl Bigroon'",
         "You say, 'I am a traveler of sorts.'",
         "You say, 'I have been to Erudin.'",
         "You say, 'What titanic bridge?'",
-        "Hansl Bigroon walks to location +275, -350 and drops A Sealed List (identifies as \"List Of Engineers\").",
-        "Purchin Oddsbot is located at +135, -320 in the High Keep jail area.",
-        "You say, 'Hail, Purchin Oddsbot'",
-        "Auto attack is on.",
-        "Purchin Oddsbot says 'That was not a very intelligent thing to do.'",
-        "You have slain Purchin Oddsbot!",
-        "You have looted a Human Decapitated Head.",
-        "Jogl Doobraugh is located at +110, -850 in Steamfont Mountains.",
+        "You say, 'three great engineers'",
+        "You say, 'list of the engineers'",
+        "Saying \"list of the engineers\" causes the list to spawn on the ground at the other location.",
+        "He wanders over to the house at (275, -350) and waits there a while. When he gets there, he picks up the list from the ground:",
+        "After he walks away, say \"list of the engineers\" to him again, which spawns the list again.",
+        "Go back to the house and pick up the Sealed List, which identifies as \"List Of Engineers\", and has the following text:",
+        "Next, you'll need to murder all three architects.",
+        "Purchin Oddsbot is located at (135, -320) in the High Keep basement jail area. You may want to use invisibility to get past the aggressive prisoners on the way to Oddsbot's cell.",
+        "Kill Purchin Oddsbot and loot the Human Decapitated Head.",
+        "Jogl Doobraugh is located at (110, -850) in one of the central Steamfont Mountains windmills. His pet mechanical spider Charlotte assists him.",
         "You say, 'Hail, Jogl Doobraugh'",
         "Charlotte Beep.. Beep.. Beep..",
-        "Auto attack is on.",
-        "You have slain Jogl Doobraugh!",
-        "You have looted a Gnome Decapitated Head.",
-        "Charlotte does not assist.",
-        "Trantor Everhot is located at +400, -150 in Everhot Forge in North Kaladim.",
+        "Kill Jogl Doobraugh and loot the Gnome Decapitated Head.",
+        "Trantor Everhot is located either Everhot Forge or Greybloom Farms in North Kaladim.",
         "You say, 'Hail, Trantor Everhot'",
-        "You have slain Trantor Everhot!",
-        "You have looted a Dwarf Decapitated Head.",
-        "Hand Weligon Steelherder the sealed letter, Human Decapitated Head, Gnome Decapitated Head, and Dwarf Decapitated Head.",
+        "Kill Trantor Everhot and loot the Dwarf Decapitated Head.",
         "You say, 'Why is the harpoon no more?'",
-        "You receive the Deep Six Cutlass."
+        "You receive the Deep Six Cutlass.",
+        "This leads to the Sentry Xyrin Quest."
       ]
     },
     {
@@ -31226,6 +31279,20 @@
       "relatedNpcs": [
         "Milea Clothspinner",
         "Nerissa Clothspinner"
+      ],
+      "rewards": [
+        {
+          "name": "Round Shield"
+        },
+        {
+          "name": "Bronze Mace"
+        },
+        {
+          "name": "Bronze Flail"
+        },
+        {
+          "name": "Bronze Warhammer"
+        }
       ],
       "requiredItems": [
         "Monogrammed Cloth"
@@ -31605,9 +31672,10 @@
         "Obtain Miragul's Robe and Miragul's Head by killing Miragul- Only to whoever turned in the Phylactery!",
         "Final hand-in to Inte Akera",
         "Obtain access to Island 4 (Pegasus Island) of Plane of Sky, this requires several keys.",
+        "In the Plane of Sky Efreeti room, give Dason Goldblade 500pp to spawn Inte Akera -- Doing so will spawn Inte Akera in the Windmill on Island 4. Inte is a Deepwater Knight of Prexus and will unleash the Oceanlord's fury upon those deemed 'evil' in their eyes -- including your raid. Inte Akera only stays up for a few minutes, which is why you need to have access to Island 4 ahead of time. You can use invisibility to run up to Island 4 after spawning him.",
         "Give Inte Akera the Soulfire ALONE for the Blessing of Nobility. Warmly Faction Needed",
         "Give Inte Akera the Ghoulbane ALONE for the Blessing of Sacrifice. Warmly Faction Needed",
-        "Give Inte Akera the head, robe, and both blessings (TOGETHER) for the :Fiery Avenger. Warmly Faction Needed"
+        "Give Inte Akera the head, robe, and both blessings (TOGETHER) for the :Fiery Avenger. Warmly Faction Needed with Deepwater Knights (Highly recommend going to Kerra Isle and killing all mobs on the island in the far south. All mobs will give a +5 faction per kill.)"
       ]
     },
     {
@@ -31835,7 +31903,7 @@
       ],
       "expReward": true,
       "steps": [
-        "Gren Frikniller is a bodyguard for the rogue guildmaster in East Freeport. Ask him about his sister (they share the same surname):",
+        "Gren Frikniller is a bodyguard for the rogue guildmaster in East Freeport. Ask him about his sister (they share the same surname): He does see through sneak, but you can do this quest while KOS if you sneak behind him while he's moving and ask about his sister.",
         "You say, 'Who is your sister?'",
         "Take the letter to Falia Frikniller in North Freeport. Note she is on Merchants of Rivervale faction and may not deal with you if your faction is too low (dubious works):",
         "You say, 'Hail, Falia Frikniller'",
@@ -31999,7 +32067,7 @@
       "relatedNpcs": [
         "Lord Elgnub",
         "a Lteth Val Scribe",
-        "a one eyed gnoll"
+        "a one-eyed gnoll"
       ],
       "rewards": [
         {
@@ -32030,7 +32098,7 @@
         "You say, 'What true potential?'",
         "Marton Sayer says, 'The true potential of Gnoll Slayer is an enchantment which was once imbedded into a gnoll's eye which was placed into the hilt of the blade. The spell would help you fight off disease and call forth a wolf to fight beside you. Alas, the gnoll eye was stolen from the blade by a great, one-eyed, white gnoll. Along with the eye, the only book which explained how to return the enchantment was also stolen. I know not where this gnoll might be. If you can find the journal and the eye, return them with the Gnoll Slayer to me, for I have been searching for decades.'",
         "Head to Splitpaw Lair",
-        "Kill a one eyed gnoll",
+        "Kill a one-eyed gnoll",
         "Loot a Gnoll's Eye",
         "Kill a Lteth Val Scribe",
         "Loot a Journal of Greater Enchantment",
@@ -32124,13 +32192,17 @@
         "This quest follows Rat Patrol, given by Jeet, located at 563, 193, -33 outside the Ratsbone Treasury & Assay Office. You must have Amiable faction to complete this quest.",
         "You say, 'I will run to the gnome city'",
         "You say, 'I will collect the gnome profit'",
-        "clockwork scrubbers can be found roaming within Ak'Anon",
-        "You say, 'Hail, clockwork scrubber'",
-        "The clockwork scrubber does not respond, but will pause in its pathing.",
+        "You receive a Scrubber Key.",
+        "Head to Ak'Anon where clockwork scrubbers roam within.",
+        "You say, 'Hail, clockwork scrubber'. The clockwork scrubber does not respond, but will pause in its pathing.",
         "You say, '628'",
-        "If you get the prior response, give the clockwork scrubber the key you received from Jeet. You will be given the Gnome Take in return.",
-        "Hand Jeet the Gnome Take.",
-        "Alternatively, you might see the text"
+        "If you get the prior response, give the Scrubber Key to the clockwork scrubber.",
+        "You receive the Gnome Take.",
+        "There are 2 different versions of the Gnome Take, visible in their lore: \"Bad Take For Rogues\" and \"Good Take For Rogues\". They will give different rewards when handing them in, with different increases to Miners Guild 628.",
+        "When you hand Jeet the Gnome Take (Bad Take for Rogues):",
+        "You receive a minor item.",
+        "When you hand Jeet the Gnome Take (Good Take for Rogues):",
+        "You receive a better item."
       ]
     },
     {
@@ -32591,7 +32663,7 @@
       "expReward": true,
       "steps": [
         "Ajrah Leaf",
-        "Locate and Kill a kobold shaman around -990.37, -425.06, -83.46",
+        "Locate and Kill a kobold shaman around -990.37, -425.06, -83.46 (Kobold Shaman can be near Erudin, or Paineel, appears to just be a rare or uncommon. I found one by tents near Paineel and another roaming near Erudin)",
         "Return to Allix"
       ]
     },
@@ -33142,7 +33214,7 @@
         "Surefall Glade"
       ],
       "relatedNpcs": [
-        "TeAnara"
+        "Te`Anara"
       ],
       "rewards": [
         {
@@ -33150,8 +33222,10 @@
         }
       ],
       "requiredItems": [
-        "Flask of Nitrates"
+        "Flask of Nitrates",
+        "Bayle List II"
       ],
+      "expReward": true,
       "steps": [
         "Kimble Nogflop of Ak'Anon will give you a Regurgitonic, but requires a Flask of Nitrates first.",
         "Find Te`Anara in Surefall Glades at location -202, -423, 5.",
@@ -33164,8 +33238,10 @@
         "Head to Ak'Anon, and once there find Kimble Nogflop at location 1329, -808, -61 (one floor below the tiger in the zoo). Hand him the Flask of Nitrates.",
         "You receive Regurgitonic.",
         "You say, 'regurgitonic'.",
-        "If you choose to give the regurgitonic to Mammoth and give the Bayle List II to Te'Anara",
-        "You receive Spell: Invigor."
+        "If you choose to give the Regurgitonic to Mammoth:",
+        "You receive the Bayle List II.",
+        "If you give the Bayle List II to Te'Anara:",
+        "You receive a low level spell scroll."
       ]
     },
     {
@@ -33255,7 +33331,8 @@
         }
       ],
       "requiredItems": [
-        "A Locked Chest"
+        "Sealed Letter",
+        "Locked Chest"
       ],
       "expReward": true,
       "steps": [
@@ -33265,8 +33342,12 @@
         "You say, 'I will retrieve the chest.'",
         "You receive a Sealed Letter (identifies as \"Letter To Giz\") which reads:",
         "Giz Dinree. Freeport. My love, I have sent this young recruit to deliver the shipment to me. I believe he can be trusted. Please allow him to take the chest. E.J. xintldl ii",
-        "Eolorn wants you to find Giz Dinree in East Freeport. I found her at -367, -1095. She spawns at night - during the day, an NPC named Bait Masterson occupies her space; he is KOS to evil races.",
-        "Once you find Giz, she tells you that the loot is in a strongbox, and that the last courier was killed by sharks before he could deliver it. If you swim off shore a little (mind the shark guarding it) you will find a groundspawn named A Locked Chest (Loc: -406, -1150). Pick the chest up and bring it back to Eolorn for some coin and a minor item."
+        "Find Giz Dinree in East Freeport's harbor, at -367, -1095. She is only present at night between 9 PM and AM- during the day, an NPC named Bait Masterson occupies her space; he is KOS to evil races.",
+        "Give Giz the letter (also requires Amiable faction).",
+        "but no items.",
+        "If you swim off shore a little you will find a groundspawn named Locked Chest (Loc: -406, -1150). The chest has a ~14 minute spawn time, but you may be able to spawn it again by switching difficulties and creating instances (giving Giz the letter does not respawn the chest).",
+        "Pick the chest up and bring it back to Eolorn (also requires Amiable faction):",
+        "You receive coin and a minor item, possibly the Rat Pelt Cape."
       ]
     },
     {
@@ -33301,7 +33382,7 @@
         "You say, 'What orc troopers?'",
         "You say, 'What Seax?'",
         "After handing in four Wrath Orc Wristbands:",
-        "You receive Seax, a piercing weapon usable by Rogues."
+        "You receive the Seax, a piercing weapon usable by Rogues."
       ]
     },
     {
@@ -33498,7 +33579,8 @@
         "Splitpaw Lair"
       ],
       "relatedNpcs": [
-        "Khrix Abomination",
+        "Khrix Fritchoff",
+        "Khrix`s Abomination",
         "a Griffon",
         "An Ice Giant",
         "The Ishva Mal"
@@ -33510,7 +33592,7 @@
       ],
       "requiredItems": [
         "Brain of the Ishva Mal",
-        "Fire Beetle Eye",
+        "Greater Lightstone",
         "Griffon Eye",
         "Ice Giant Toes",
         "Powder of Reanimation",
@@ -33519,7 +33601,7 @@
       "expReward": true,
       "steps": [
         "Brain of the Ishva Mal",
-        "Fire Beetle Eye",
+        "Greater Lightstone",
         "Griffon Eye",
         "Ice Giant Toes",
         "Powder of Reanimation"
@@ -33848,7 +33930,7 @@
       "expReward": true,
       "steps": [
         "At the observatory past the windmills in the Steamfonts a female gnome name Brona Frugrin is a telescope lens crafter and she believes that if you can get the retina of the beholder named Borxx, who may be found in either Runnyeye or Beholder at certain times, and return it to her, she can create a telescope unlike any other.",
-        "Borxx is a L30 Evil Eye-type monster. Bringing back his loot, the evil eye lens, will yield a 2h blunt weapon called the Staff of the Observers."
+        "Borxx is a L30 Evil Eye-type monster. Bringing back her loot, the evil eye lens, will yield a 2h blunt weapon called the Staff of the Observers."
       ]
     },
     {
@@ -33932,7 +34014,8 @@
         "Chomper (NPC)"
       ],
       "requiredItems": [
-        "Torn Old Pouch"
+        "Torn Old Pouch",
+        "Large Ruby"
       ],
       "expReward": true,
       "steps": [
@@ -33976,33 +34059,51 @@
       ],
       "requiredItems": [
         "SoulFire",
+        "Dark Reaver",
         "Burning Soul of the Pious",
         "Pestilence Scythe",
         "Burning Soul of the Pestilent",
-        "Burning Soul of the Virtuous"
+        "Burning Soul of the Virtuous",
+        "Bone Chips",
+        "Fire Beetle Eye",
+        "Spiderling Silk"
       ],
       "expReward": true,
       "steps": [
         "Suggested tasks to complete first:",
         "Obtain a SoulFire via the Zimel's Blades (SoulFire) quest",
         "Obtain a Dark Reaver from A ghoul cavalier in Lower Guk",
-        "Get Bloodsabers faction Kindly or higher - there are few ways to do this.",
-        "Get Heretics faction Warmly or higher - Kill Kobolds in The Warrens",
-        "Get Dismal Rage faction Kindly or higher - Do Assist the Great Xelha quest in East Freeport (requires about 1000 bone chips to turn-ins)",
-        "Slay Brother Hayle in Splitpaw Lair prison area - cell doors open via switches !",
-        "Loot and right-click on Burning Soul of the Pious",
-        "Find Lord Grimrot in Southern Karana - MUST BE LIVING VERSION!",
-        "Give Lord Grimrot Dark Reaver and right-clicked Burning Soul of the Pious - requires Bloodsabers Kindly faction !",
+        "Get Bloodsabers faction Kindly or higher; see below for tips",
+        "Get Heretics faction Warmly or higher; see below for tips",
+        "Get Dismal Rage faction Kindly or higher; see below for tips",
+        "Get the Burning Soul of the Pious",
+        "Quest for the Soulfire first, ending with...",
+        "Find Brother Hayle in the Splitpaw Lair prison area (#6 on the map)",
+        "Kill Hayle for the Soul",
+        "Right-click the Burning Soul of the Pious to get the text.",
+        "Get the Pestilence Scythe (with soul) and the Burning Soul of the Pestilent",
+        "Make sure you have Kindly faction with Bloodsabers",
+        "Find Lord Grimrot in Southern Karana - MUST BE THE LIVING VERSION!",
+        "Give Lord Grimrot Dark Reaver and the clicked Burning Soul of the Pious",
         "Right-click the Burning Soul of the Pious he hands you back - make sure it does not have any text in the chat window; if it does, your turn-in did not work (probably due to faction) !",
         "Kill Lord Grimrot",
-        "Loot Pestilence Scythe - the one with charges; the other one doesn't matter for this quest .",
-        "Find Jotayi Ibupran in Paineel (Necromancer Guild balcony)",
-        "Give Jotayi Ibupran Pestilence Scythe (the one with charges) and Burning Soul of the Pestilent - requires Heretics Warmly Faction !",
-        "Find Dason Goldblade in Plane of Sky Efreeti Chamber (quest room) - MAKE SURE YOU ARE KEYED UP TO ISLAND 4 BEFORE SEEKING HIM OUT !",
+        "Loot Pestilence Scythe - the one with charges",
+        "Loot Burning Soul of the Pestilent and right-click it to see the text",
+        "Get the Burning Soul of the Virtuous",
+        "Make sure you have Warmly faction with Heretics",
+        "Find Jotayi Ibupran in Paineel, on the Necromancer Guild balcony",
+        "Give Jotayi Ibupran Pestilence Scythe (the one with charges and no item lore) and Burning Soul of the Pestilent",
+        "Make sure you are keyed up to Island 4 in Plane of Sky",
+        "Find Dason Goldblade in Plane of Sky Efreeti Chamber (quest room)",
         "Give Dason Goldblade 500pp to spawn Inte Akera inside the Windmill on Island 4 - be quick, he will eventually despawn .",
-        "Kill Inte Akera and loot the Burning Soul of the Virtuous. Note: If you are in a group, the soul is linked to whoever turns in the 500 platinum to spawn Inte.",
-        "Find Luxio Nulsis in East Freeport (Shadowknight spell vendor basement area)",
-        "Give Luxio Nulsis the three Souls and Soulfire - Requires Dismal Rage Kindly faction !"
+        "Invis and run up to the Windmill on Island 4",
+        "Kill Inte Akera and loot the Burning Soul of the Virtuous.",
+        "Note: If you are in a group, the soul is linked to whoever turns in the 500 platinum to spawn Inte.",
+        "Right-click the Burning Soul of the Virtuous to get the text.",
+        "Get the Torrid Corruptor",
+        "Make sure you have Kindly faction with Dismal Rage",
+        "Find Luxio Nulsis in the East Freeport Shadow Knight spell vendor basement area",
+        "Give Luxio Nulsis the three Souls and Soulfire"
       ]
     },
     {
@@ -34481,7 +34582,7 @@
       ],
       "expReward": true,
       "steps": [
-        "You must be Kindly or better with Clerics of Tunare. Anti-Mage is not needed",
+        "You must be Kindly or better with Clerics of Tunare.",
         "Vaila's Notes",
         "Part I",
         "Head to High Keep near the entrance next to the guard on your left as you enter the courtyard, Tearon Bleanix spawns. Target and say to him 'I will become a hero'. He will hand you Tearon's Bracer, 5.0Wt no AC.",
@@ -34521,22 +34622,16 @@
       "rewards": [
         {
           "name": "Reaper of the Dead"
-        },
-        {
-          "name": "Thex Mallet"
         }
       ],
       "requiredItems": [
-        "Guise of the Deceiver",
+        "Thex Mallet",
         "Mallet Stem",
         "Mallet Head",
         "Mallet Hilt"
       ],
       "expReward": true,
       "steps": [
-        "Note: This requires amiable faction (+100) with The Dead, the dark elf necromancer and shadow knight guild.",
-        "An enchanter can charm Kizdean for the note, however the final turn in NPC cannot be charmed. Raising The Dead faction is possible by killing high elf or gnome casters from Eldritch Collective or Keepers of the Art such as Linara Parlone (highly recommended: +47 faction/kill, faction hits reversible by Bat Wings quest) or Retlon Brenclog. Dark elf form (auto-granted to enchanters at level 10) or Guise of the Deceiver will also help. Faction can potentially be bypassed as both the Thex Mallet and Reaper of the Dead are tradable.",
-        "The Messages For Neriak quest can be a simple way to quickly raise The Dead as well.",
         "You say, 'Hail Loveal S`Nez'",
         "You say, 'I am interested in your appointed tasks.'",
         "You say, 'What is the Thex Mallet?'",
@@ -34571,18 +34666,36 @@
       ],
       "relatedNpcs": [
         "The Kerran Sha`rr",
-        "kerran tiger spathi"
+        "kerran tiger spahi"
       ],
       "rewards": [
         {
           "name": "Talisman of Kejaar Kerrath"
         }
       ],
+      "requiredItems": [
+        "Heretic Insurrection Orders",
+        "Desecrated Kejaar Totem"
+      ],
       "expReward": true,
       "steps": [
-        "Heretic Insurrection Orders",
-        "Locate and Kill kerran tiger spathi around -501.74, -147.13, 3.19",
-        "Return to The Kerran Sha`rr"
+        "The Kerran Sha`rr has sensed that something is amiss in Kerra Isle. The trouble seems to stem from the small island south of the village. He has asked you to investigate the situation on the island and report back.",
+        "Please note that you must use the task system for this quest; you cannot hand in multiples of each quest item. However, you can collect multiples of each quest item beforehand and then go through the quest steps repeatedly.",
+        "The Kerran Sha`rr is located at 902.55, 347.27, -6.81, in the basement of the building in the northwest corner of Kerra Island.",
+        "Following from the end of the previous quest, Something is Wrrrong...",
+        "You have been assigned the task 'This Means Warrr'.",
+        "Step 1:",
+        "Slay one of the Heretics at the Tiger Training Pits and collect their orders.",
+        "The Kerran Sha`rr has sent you to deal with the threat directly. Travel to the tiger pits of the island and eliminate one of the leaders of the heretic forces.",
+        "Head to the island in the south side of the zone. Its southwest corner has a platform surrounded by tigers, and you can find the kerran tiger spahi in the center there. Kill it and loot the Heretic Insurrection Orders.",
+        "Your task 'This Means Warrr' bas been updated.",
+        "Step 2:",
+        "Show the Heretic's orders to the Kerran Sha`rr",
+        "The Kerran Sha'rr has sent you to deal with the threat directly. Loot the Heretic Insurrection Orders.",
+        "Go back to The Kerran Sha`rr and give them the Heretic Insurrection Orders.",
+        "Your task 'This Means Warrr' has been updated.",
+        "You've dealt a blow to the Heretics attempting to seize control of Kerra Isle, but they're sure to return in time.",
+        "You receive Talisman of Kejaar Kerrath."
       ]
     },
     {
@@ -34931,6 +35044,10 @@
           "name": "Miragul's Phylactery"
         }
       ],
+      "requiredItems": [
+        "Book of Scale",
+        "Book of Turmoil"
+      ],
       "expReward": true,
       "steps": [
         "The Oracle may be found on top of a mountain at -15, -6730, -200 (?).",
@@ -35223,7 +35340,7 @@
       ],
       "steps": [
         "Fashion:",
-        "(Needs a better picture, breastplate is missing)",
+        "Ogre in full Totemic Armor",
         "General Quest Info:",
         "The quests are given out by a pair of Barbarian shamans in Lake Rathetear: Vrynn and Kyralynn, at the Barbarian Village (loc 500, 2500).",
         "Vrynn will make:",
@@ -35328,22 +35445,31 @@
         "a decaying skeleton"
       ],
       "requiredItems": [
-        "Bone Chips"
+        "Spider Venom Sac",
+        "Wolf Meat",
+        "Bone Chips",
+        "Giant Bat Fur"
       ],
       "expReward": true,
       "steps": [
+        "Vexia D`Ynth in Neriak Commons wants you to track, stalk, and hunt for the glory of Innoruuk. Bring her several different types of trophies to be rewarded, mostly in faction.",
+        "Note: You will need to understand Dark Elvish in order to understand her quest dialogue.",
         "You say, 'Hail, Vexia D`Ynth'",
-        "Vexia D`Ynth says, in Dark Elvish, '[Track].'",
         "You say, 'Track'",
-        "Vexia D`Ynth says, in Dark Elvish, '[Stalk].'",
         "You say, 'Stalk'",
-        "Vexia D`Ynth says, in Dark Elvish, '[Hunt].'",
         "You say, 'Hunt'",
-        "Vexia D`Ynth says, in Dark Elvish, 'Yes. Hunt. Track, stalk, and hunt. Ignore that silly talk about conservation. Protecting nature. Nurturing the forest. [Drivel]. It's all drivel.'",
         "You say, 'Drivel'",
-        "Vexia D`Ynth says, in Dark Elvish, 'Yes, drivel. Hunt for the joy of the kill. Hunt for Queen Cristanos and King Naythox Thex. Hunt for the [glory] of Innoruuk.'",
         "You say, 'glory'",
-        "Vexia D`Ynth says, in Dark Elvish, 'Yes. You will hunt for the Dread Slayers. You will hunt and you will learn through the doing. You do not have to hunt these all at once. I will accept each as its own task. Bring back four each of Garter Snake Tongue, Spider Venom Sac, Wolf Meat, Bone Chips, and Giant Bat Fur.'"
+        "Garter Snakes don't exist in EverQuest Legends, but she will reward you for giving her 4 at a time of:",
+        "Spider Venom Sac",
+        "Wolf Meat",
+        "Bone Chips",
+        "Giant Bat Fur",
+        "When turning in 4 Spider Venom Sac:",
+        "When turning in 4 Wolf Meat:",
+        "When turning in 4 Bone Chips:",
+        "When turning in 4 Giant Bat Fur:",
+        "The faction hits are similar for all 4 types of item turned in, though turning in Giant Bat Fur grants +10 to Dread Slayers, -2 to Guardians of the Vale, and -2 to Wolves of the North."
       ]
     },
     {
@@ -35562,7 +35688,6 @@
         "Dwarven Wire",
         "Small Lantern",
         "Wooden Shards",
-        "A Wooden Heart",
         "Spiderling silk",
         "Micro Servo",
         "Pack of Materials",
@@ -35720,7 +35845,7 @@
         "Kiola Nuts are purchased only from Cleonae Kalen, located just up the dock at 503, -9253, 12 on the Island of the Sisters of Erollisi in the Ocean of Tears, for about 2 gold each.",
         "Hand Tumpy Irontoe 1 Kiola Nut plus 1 Water Flask, and receive a Tumpy Tonic in return.",
         "Return to Trantor Everhot and hand him 2 Tumpy Tonics, unstacked.",
-        "Quest Turn in Experience gains"
+        "You receive a Dwarven Wire."
       ]
     },
     {
@@ -35730,23 +35855,10 @@
       "giver": "Tylfon",
       "minLevel": 1,
       "classes": [
-        "Bard",
-        "Enchanter",
-        "Magician",
-        "Necromancer",
-        "Ranger",
-        "Rogue",
-        "Shadow Knight",
-        "Warrior",
-        "Wizard"
+        "Rogue"
       ],
       "relatedZones": [
         "Greater Faydark"
-      ],
-      "relatedNpcs": [
-        "a decaying skeleton",
-        "Orc Pawn (Crushbone)",
-        "a pixie trickster"
       ],
       "rewards": [
         {
@@ -36135,7 +36247,7 @@
         "The Minstrel:",
         "Basher Avisk patrols through Grobb, between Da Bashin' Place and Carver Cagrek's platform.",
         "You say, 'Hail, Basher Avisk'",
-        "You say, 'What tune?'",
+        "You say, 'Where is the minstrel?'",
         "This dialogue will spawn a skeleton on the throne at the top of the Shaman guild, back near Urako where this whole business started.It should be noted that this skeleton is slightly difficult to get to without dying if you are a large newbie troll in Grobb. It is possible to fall off the throne into the pool and die!",
         "You say, 'Come back to the closet'",
         "Lizardman Scout Fifes are uncommon drops from lizardman scouts in The Feerrott. Turn in 4 of them to the skeleton on the throne.",
@@ -37309,7 +37421,7 @@
         "You say, 'What are Fangbreakers?'",
         "You say, 'What werewolves?'",
         "You say, 'What enchanted blade?'",
-        "Give him a Silver Bar. (Stacks of bars works)",
+        "Give him a Silver Bar. (Stacks of bars works. Protip: Options > Gameplay > Confirmations to access Fast Item Destroy; every turn in will put a book in your inventory.)",
         "You receive a LORE book called Fixxin Followigs Silvery Blades, which contains information about how to craft silver weapons. The chief reward is all the positive faction hits, though."
       ]
     },
@@ -37356,7 +37468,7 @@
       "name": "White Dragonscale Cloak Quest",
       "page": "White Dragonscale Cloak Quest",
       "startZone": "Rathe Mountains",
-      "giver": "Karam Dragonforge",
+      "giver": "Karam Dragonforge (4109, 918)",
       "minLevel": 45,
       "classes": [
         "All"
@@ -38002,6 +38114,7 @@
       "steps": [
         "Xelha Nevagon is located in the East Freeport tunnels at -168, -235",
         "Your Location is -1409.67, 547.72, -49.54",
+        "You must have kindly faction to do this quest.",
         "After bringing Xelha Nevagon four spiderling silks,",
         "Xelha will tell you to bring her a cyclops eye.",
         "You receive 7 gold 12 silver from Xelha Nevagon."
@@ -38141,7 +38254,7 @@
         "Go to Khonza and tell her, 'Jali sent me.'",
         "Tell Khonza , 'I will fetch them for you.'",
         "2x Panda Claws can be found from pandas in Stonebrunt.",
-        "2x Tiger Skins drop from Kejek Tigers (orange ones)- The tigers on the island in south Kerra Island have a very high drop rate and fast spawn time.",
+        "2x Tiger Skins drop from Kejek Tigers (orange ones)- The wild tigers on the island in south Kerra Island seem to drop these 100% and there are three spawns.",
         "2x Asp Poison Sac drop from Asps and Cistern Asps, most common in Oasis of Marr and the Southern Desert of Ro.",
         "1x Kejekan Palm Fruit are foraged in Stonebrunt",
         "1x Bamboo Shoot are foraged in Stonebrunt and can also drop Bamboo Shoot from pandas.",
@@ -38178,7 +38291,6 @@
         "Drom's Champagne",
         "H. K. 102",
         "Testimony",
-        "A Spider Venom Sac",
         "Cloth Shirt",
         "Token of Generosity",
         "Token of Bravery",
@@ -38199,7 +38311,7 @@
       "steps": [
         "A Sealed Note",
         "Brew/obtain Bog Juice",
-        "Brew/obtain Edible Goo",
+        "Bake/obtain Edible Goo",
         "Turn in 4x Drom's Champagne to Tykar Renlin in Seafarer's Roost bar in East Freeport (to receive Bunker Cell #1)",
         "Turn in Juice, Goo, and Bunker Cell #1 to a prisoner in West Freeport Arena prison (to receive H. K. 102)",
         "Turn in H. K. 102 to Assistant Kiolna in Highpass Keep bank (to receive A Sealed Note)",

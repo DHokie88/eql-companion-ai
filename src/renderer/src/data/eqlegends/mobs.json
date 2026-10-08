@@ -1,5 +1,5 @@
 {
-  "scrapedAt": "2026-08-22T19:26:23.025Z",
+  "scrapedAt": "2026-10-08T03:23:28.372Z",
   "source": "eqlwiki.com — Category:NPCs/Named Mobs/Merchants/Raid Encounters ∪ embeddedin Template:Namedmobpage/MerchantPage, filtered to pages opening a mob template",
   "mobs": [
     {
@@ -531,6 +531,22 @@
       ]
     },
     {
+      "page": "A bixie drone",
+      "name": "a bixie drone",
+      "level": "1 - 5",
+      "zones": [
+        "Kithicor Forest",
+        "Misty Thicket",
+        "West Commonlands"
+      ],
+      "drops": [
+        "Bixie Parts",
+        "Bixie Wing",
+        "Honeycomb",
+        "Bixie Stinger"
+      ]
+    },
+    {
       "page": "A Bixie Drone (Kithicor Forest)",
       "name": "a bixie drone",
       "level": "2",
@@ -1021,34 +1037,20 @@
         "Plane of Fear"
       ],
       "drops": [
-        "Blighted Skullcap",
-        "Blighted Robe",
-        "Blighted Sleeves",
-        "Blighted Armband",
-        "Blighted Gloves",
-        "Blighted Trousers",
-        "Blighted Boots",
-        "Nilitim's Grimoire Pg. 378",
-        "Nilitim's Grimoire Pg. 379",
-        "Nilitim's Grimoire Pg. 401",
-        "Nilitim's Grimoire Pg. 415",
-        "Nilitim's Grimoire Pg. 416",
-        "Rune of Rathe",
-        "Rune of Frost",
-        "Rune of Crippling",
-        "Words of Bondage",
-        "Eye of Fright"
+        "Anthemion Boots",
+        "Ethereal Mist Boots",
+        "Lustrous Russet Boots",
+        "Rune Etched Boots",
+        "Shadow Rage Boots",
+        "Shiverback-hide Boots",
+        "Thorny Vine Boots",
+        "Valorium Boots",
+        "Vermiculated Boots"
       ],
       "loc": [
         {
-          "ns": -176,
-          "ew": -764,
-          "pct": 14
-        },
-        {
-          "ns": -972,
-          "ew": 447,
-          "pct": 14
+          "ns": -975,
+          "ew": 415
         }
       ]
     },
@@ -5878,6 +5880,7 @@
       ],
       "drops": [
         "Illegible Scroll",
+        "Rod of Understanding",
         "Veil of Silence"
       ],
       "loc": [
@@ -6178,18 +6181,9 @@
         "Lower Guk"
       ],
       "drops": [
-        "Gold Ring",
-        "Silver Amulet",
-        "Mithril Earring",
-        "Jade Earring",
-        "Jade",
-        "Topaz",
-        "Flame Agate",
         "Spider Silk",
         "Spider Legs",
-        "Spider Venom Sac",
-        "Velishoul's Tome Pg.67",
-        "Ivory"
+        "Spider Venom Sac"
       ],
       "loc": [
         {
@@ -6385,12 +6379,20 @@
     {
       "page": "A decrepit warder",
       "name": "a decrepit warder",
+      "level": "48-52?",
       "zones": [
         "Plane of Fear"
       ],
       "drops": [
-        "Crystallized Sulfur",
-        "Opal Bracelet"
+        "Anthemion Wristguard",
+        "Ethereal Mist Bracers",
+        "Lustrous Russet Bracer",
+        "Rune Etched Bracer",
+        "Shadow Rage Wristguard",
+        "Shiverback-hide Wristbands",
+        "Thorny Vine Bracer",
+        "Valorium Bracers",
+        "Vermiculated Bracelet"
       ]
     },
     {
@@ -6471,7 +6473,8 @@
         "Rune of Contortion",
         "Words of Duration",
         "Opoline Helm",
-        "Deepwater Goblin Net"
+        "Deepwater Goblin Net",
+        "Lord Bergurgle's Crown"
       ]
     },
     {
@@ -7095,10 +7098,13 @@
         "Plane of Hate"
       ],
       "drops": [
+        "Anthemion Leggings",
+        "Cloak of the Assassin",
         "Ethereal Mist Greaves",
         "Lustrous Russet Greaves",
         "Neriak Ceremonial Robe",
         "Rune Etched Greaves",
+        "Shadow Rage Leggings",
         "Shiverback-hide Leggings",
         "Thorny Vine Greaves",
         "Valorium Greaves",
@@ -7624,18 +7630,18 @@
         "Plane of Fear"
       ],
       "drops": [
-        "Berserkers Ring",
-        "Crimson Robe of Alendine",
-        "Fearsome Shield",
-        "Grotesque Girdle",
-        "Shawl of Protection",
-        "Zombie Flesh Bracer",
         "Bone-Clasped Girdle",
         "Bone Razor",
         "Spined Dragon Claws",
         "Staff of Undead Legions",
         "Withered Totem of Widdershins",
-        "Monsoon, Sword of the Swiftwind"
+        "Monsoon, Sword of the Swiftwind",
+        "Berserkers Ring",
+        "Crimson Robe of Alendine",
+        "Fearsome Shield",
+        "Grotesque Girdle",
+        "Shawl of Protection",
+        "Zombie Flesh Bracer"
       ]
     },
     {
@@ -9448,14 +9454,15 @@
         "Plane of Fear"
       ],
       "drops": [
+        "Apothic Warband",
+        "Blighted Armband",
+        "Carmine Trinket",
         "Girdle of the Diligent",
-        "Valorium Helmet",
-        "Valorium Chestplate",
-        "Valorium Vambraces",
-        "Valorium Bracers",
-        "Valorium Gauntlets",
-        "Valorium Greaves",
-        "Valorium Boots"
+        "Imbrued Platemail Bracer",
+        "Indicolite Bracer",
+        "Insidious Manacle",
+        "Umbral Platemail Bracer",
+        "Woven Shadow Bracer"
       ]
     },
     {
@@ -10261,17 +10268,16 @@
         "Plane of Hate"
       ],
       "drops": [
-        "Insidious Sleeves",
         "Apothic Sleeves",
         "Blighted Sleeves",
         "Carmine Sleeves",
         "Imbrued Platemail Vambraces",
+        "Indicolite Vambraces",
+        "Insidious Sleeves",
+        "Midnight Clad Armbands",
         "Umbral Platemail Vambraces",
         "Woven Shadow Vambraces",
-        "Indicolite Vambraces",
-        "Midnight Clad Armbands",
         "Anthemion Armbands",
-        "Essence of a Vampire",
         "Ethereal Mist Vambraces",
         "Lustrous Russet Vambraces",
         "Rune Etched Vambraces",
@@ -10557,28 +10563,20 @@
     {
       "page": "A Frightfinger",
       "name": "a frightfinger",
-      "level": "51",
+      "level": "48-51",
       "zones": [
         "Plane of Fear"
       ],
       "drops": [
-        "Carmine Turban",
-        "Carmine Robe",
-        "Carmine Sleeves",
-        "Carmine Trinket",
+        "Apothic Gloves",
+        "Blighted Gloves",
         "Carmine Gloves",
-        "Carmine Pants",
-        "Carmine Boots",
-        "Nilitim's Grimoire Pg. 401",
-        "Nilitim's Grimoire Pg. 450",
-        "Rune of Ap`Sagor",
-        "Rune of Frost",
-        "Rune of Impetus",
-        "Tears of Prexus",
-        "Words of Requisition",
-        "Words of Acquisition (Beza)",
-        "Words of Grappling",
-        "Words of Odus"
+        "Imbrued Platemail Gauntlets",
+        "Indicolite Gauntlets",
+        "Insidious Gloves",
+        "Midnight Clad Fistwraps",
+        "Umbral Platemail Gauntlets",
+        "Woven Shadow Gauntlets"
       ],
       "loc": [
         {
@@ -14736,12 +14734,7 @@
         "Permafrost"
       ],
       "drops": [
-        "High Quality Bear Skin",
-        "Low Quality Bear Skin",
-        "Medium Quality Bear Skin",
-        "Chunk of Meat",
         "Bear Meat",
-        "Ruined Bear Pelt",
         "Giant Polar Bear Skin"
       ]
     },
@@ -15169,9 +15162,33 @@
         "Misty Thicket"
       ],
       "drops": [
+        "Large Yellowjacket Tarsus",
         "Giant Wasp Eye",
         "Giant Wasp Wing",
         "Giant Wasp Venom Sac"
+      ]
+    },
+    {
+      "page": "A gigantic wooly spider",
+      "name": "a gigantic wooly spider",
+      "level": "20-23",
+      "zones": [
+        "Everfrost Peaks"
+      ],
+      "drops": [
+        "Spider Legs",
+        "Spider Venom Sac",
+        "Ichor",
+        "Barbarian Meat",
+        "Winter Lilly",
+        "Ice Blood",
+        "Spider Silk"
+      ],
+      "loc": [
+        {
+          "ns": -1300,
+          "ew": -3150
+        }
       ]
     },
     {
@@ -15297,45 +15314,32 @@
         "Plane of Fear"
       ],
       "drops": [
-        "Fire Emerald Ring",
-        "Sapphire Necklace",
-        "Ruby Crown",
-        "Wand of Lava",
-        "Ruby",
-        "Black Sapphire",
-        "Jacinth",
-        "Nilitim's Grimoire Pg. 379",
-        "Nilitim's Grimoire Pg. 400",
-        "Nilitim's Grimoire Pg. 401",
-        "Nilitim's Grimoire Pg. 416",
-        "Nilitim's Grimoire Pg. 449",
-        "Rune of Rathe",
-        "Rune of Ap`Sagor",
-        "Rune of the Astral",
-        "Wing of Xegony",
-        "Words of Requisition",
-        "Words of Acquisition (Beza)",
-        "Words of Grappling",
-        "Words of the Ethereal",
-        "Words of Crippling Force",
-        "Crystallized Sulfur",
-        "Blue Diamond"
+        "Anthemion Jerkin",
+        "Ethereal Mist Chestplate",
+        "Rune Etched Chestplate",
+        "Shadow Rage Tunic",
+        "Shiverback-hide Jerkin",
+        "Thorny Vine Chestplate",
+        "Valorium Chestplate",
+        "Vermiculated Tunic",
+        "Wand of Lava"
       ],
       "loc": [
         {
-          "ns": 561,
-          "ew": -1093,
-          "pct": 25
+          "ns": 575,
+          "ew": -1135
         },
         {
-          "ns": -1280,
-          "ew": 277,
-          "pct": 25
+          "ns": 275,
+          "ew": -780
+        },
+        {
+          "ns": 375,
+          "ew": -715
         },
         {
           "ns": 892,
-          "ew": 497,
-          "pct": 25
+          "ew": 497
         }
       ]
     },
@@ -16280,8 +16284,10 @@
       ],
       "drops": [
         "Gnome Meat",
+        "Repurposed Pickaxe",
         "Small Raw-hide Wristbands",
-        "Small Raw-hide Skullcap"
+        "Small Raw-hide Skullcap",
+        "Spelunker's Headlamp"
       ],
       "loc": [
         {
@@ -16450,12 +16456,6 @@
       ],
       "drops": [
         "Ribcage Chest Armor"
-      ],
-      "loc": [
-        {
-          "ns": -885,
-          "ew": 1115
-        }
       ]
     },
     {
@@ -17457,8 +17457,7 @@
       "loc": [
         {
           "ns": 223,
-          "ew": 264,
-          "pct": 34
+          "ew": 264
         }
       ]
     },
@@ -18260,8 +18259,9 @@
       ],
       "loc": [
         {
-          "ns": -178,
-          "ew": -32,
+          "ns": -177,
+          "ew": -31,
+          "z": 95,
           "pct": 20
         }
       ]
@@ -18411,28 +18411,20 @@
     {
       "page": "A Gorgon",
       "name": "a gorgon",
-      "level": "49",
+      "level": "48-52",
       "zones": [
         "Plane of Fear"
       ],
       "drops": [
-        "Vermiculated Crown",
-        "Vermiculated Tunic",
-        "Vermiculated Armplates",
-        "Vermiculated Bracelet",
-        "Vermiculated Gloves",
-        "Vermiculated Leggings",
-        "Vermiculated Boots",
-        "Mithril Amulet",
-        "Fire Opal",
-        "Sapphire",
-        "Black Sapphire",
-        "Rune of Ap`Sagor",
-        "Rune of Frost",
-        "Rune of the Astral",
-        "Rune of Impetus",
-        "Words of Bondage",
-        "Words of Acquisition (Beza)"
+        "Apothic Boots",
+        "Blighted Boots",
+        "Carmine Boots",
+        "Imbrued Platemail Boots",
+        "Indicolite Boots",
+        "Insidious Slippers",
+        "Midnight Clad Footwraps",
+        "Umbral Platemail Boots",
+        "Woven Shadow Boots"
       ],
       "loc": [
         {
@@ -18930,7 +18922,8 @@
       "drops": [
         "Crown of Elemental Mastery",
         "Replica of the Wyrm Queen",
-        "Lightning Rod"
+        "Lightning Rod",
+        "Gem of Invigoration"
       ]
     },
     {
@@ -19000,6 +18993,24 @@
           "ns": 104,
           "ew": 255,
           "pct": 100
+        }
+      ]
+    },
+    {
+      "page": "A Greenmist Diplomat",
+      "name": "a Greenmist Diplomat",
+      "level": "55",
+      "zones": [
+        "Plane of Hate"
+      ],
+      "drops": [
+        "None"
+      ],
+      "loc": [
+        {
+          "ns": 130,
+          "ew": 291,
+          "z": 147
         }
       ]
     },
@@ -19622,28 +19633,6 @@
       "level": "50",
       "zones": [
         "Plane of Hate"
-      ],
-      "drops": [
-        "Shiverback-hide Boots",
-        "Cryosilk Pantaloons",
-        "Apothic Robe",
-        "Valorium Greaves",
-        "Rune Etched Bracer",
-        "Umbral Platemail Bracer",
-        "Ethereal Mist Vambraces",
-        "Lustrous Russet Bracer",
-        "Thorny Vine Boots",
-        "Indicolite Boots",
-        "Star Ruby",
-        "Fire Emerald",
-        "Sapphire",
-        "Ruby",
-        "Black Sapphire",
-        "Diamond",
-        "Words of Odus",
-        "Blue Diamond",
-        "Vermiculated Bracelet",
-        "Imbrued Platemail Vambraces"
       ],
       "loc": [
         {
@@ -20971,7 +20960,8 @@
       "drops": [
         "Spider Silk",
         "Spider Legs",
-        "Black Spider Silk"
+        "Black Spider Silk",
+        "Spiderling Silk"
       ]
     },
     {
@@ -21324,18 +21314,17 @@
     {
       "page": "A kerran `amir",
       "name": "a kerran `amir",
-      "level": "20 - 21",
+      "level": "5",
       "zones": [
         "Kerra Island"
       ],
       "drops": [
+        "Desecrated Kejaar Totem",
+        "Catman Skin",
         "Fresh Fish",
         "Bottle of Milk",
         "Raw-hide Boots",
-        "Kerran Doll",
-        "Golden Earring",
-        "Words of Derivation",
-        "Words of the Sentient (Azia)"
+        "Kerran Doll"
       ]
     },
     {
@@ -21727,6 +21716,17 @@
       ]
     },
     {
+      "page": "A kerran puma",
+      "name": "A kerran puma",
+      "level": "1-5",
+      "zones": [
+        "Kerra Isle"
+      ],
+      "drops": [
+        "None"
+      ]
+    },
+    {
       "page": "A kerran puzhal",
       "name": "a kerran puzhal",
       "level": "16",
@@ -21791,7 +21791,7 @@
     {
       "page": "A Kiraikuei",
       "name": "a kiraikuei",
-      "level": "50",
+      "level": "48-50?",
       "zones": [
         "Plane of Hate"
       ],
@@ -21802,8 +21802,8 @@
         "Imbrued Platemail Bracer",
         "Indicolite Bracer",
         "Insidious Manacle",
-        "Midnight Clad Wristbands",
         "Shuriken of the Tranquil",
+        "Midnight Clad Wristbands",
         "Umbral Platemail Bracer",
         "Woven Shadow Bracer"
       ]
@@ -22025,9 +22025,12 @@
         "Plane of Hate"
       ],
       "drops": [
+        "Anthemion Leggings",
+        "Cloak of the Assassin",
         "Ethereal Mist Greaves",
         "Lustrous Russet Greaves",
         "Rune Etched Greaves",
+        "Shadow Rage Leggings",
         "Shiverback-hide Leggings",
         "Thorny Vine Greaves",
         "Valorium Greaves",
@@ -22281,6 +22284,25 @@
           "ns": 1761,
           "ew": 491,
           "pct": 100
+        }
+      ]
+    },
+    {
+      "page": "A kobold king",
+      "name": "Solusek kobold king",
+      "level": "42",
+      "zones": [
+        "Nagafen's Lair"
+      ],
+      "drops": [
+        "Runed Mithril Bracer",
+        "Fleshripper"
+      ],
+      "loc": [
+        {
+          "ns": -549,
+          "ew": -362,
+          "pct": 50
         }
       ]
     },
@@ -23042,6 +23064,24 @@
       ]
     },
     {
+      "page": "A large gorilla",
+      "name": "a large gorilla",
+      "level": "21-24",
+      "zones": [
+        "The Feerrott"
+      ],
+      "loc": [
+        {
+          "ns": -1377,
+          "ew": -40
+        },
+        {
+          "ns": -1377,
+          "ew": -78
+        }
+      ]
+    },
+    {
       "page": "A large heart spider",
       "name": "a large heart spider",
       "level": "17-21",
@@ -23495,7 +23535,8 @@
       "drops": [
         "Basilisk Egg",
         "Basilisk Eye Stalk",
-        "Chunk of Meat"
+        "Chunk of Meat",
+        "Lava Pears"
       ]
     },
     {
@@ -24471,6 +24512,11 @@
         "Cazic Thule"
       ],
       "drops": [
+        "Rubicite Boots",
+        "Rubicite Bracers",
+        "Rubicite Helm",
+        "Rubicite Gauntlets",
+        "Rubicite Vambraces",
         "Grimy Lance"
       ],
       "loc": [
@@ -24672,59 +24718,6 @@
       ]
     },
     {
-      "page": "A loathing lich",
-      "name": "a loathing lich",
-      "level": "51",
-      "zones": [
-        "Plane of Hate"
-      ],
-      "drops": [
-        "Ruby",
-        "Black Sapphire",
-        "Diamond",
-        "Blue Diamond",
-        "Star Ruby Earring",
-        "Fire Emerald Ring",
-        "Sapphire Necklace",
-        "Ruby Crown",
-        "Crystallized Sulfur",
-        "Jacinth",
-        "Wand of Conflagration"
-      ],
-      "loc": [
-        {
-          "ns": 544,
-          "ew": -629,
-          "pct": 100
-        },
-        {
-          "ns": 151,
-          "ew": -404,
-          "pct": 100
-        },
-        {
-          "ns": 123,
-          "ew": -536,
-          "pct": 100
-        },
-        {
-          "ns": 428,
-          "ew": -150,
-          "pct": 100
-        },
-        {
-          "ns": 313,
-          "ew": -673,
-          "pct": 100
-        },
-        {
-          "ns": 557,
-          "ew": -860,
-          "pct": 100
-        }
-      ]
-    },
-    {
       "page": "A Loathling Lich",
       "name": "a loathling lich",
       "level": "51",
@@ -24909,7 +24902,7 @@
     {
       "page": "A Lteth Val Scribe",
       "name": "a Lteth Val Scribe",
-      "level": "30",
+      "level": "39",
       "zones": [
         "Splitpaw Lair"
       ],
@@ -25620,6 +25613,24 @@
         {
           "ns": 20,
           "ew": 55
+        }
+      ]
+    },
+    {
+      "page": "A Minister of Bertoxxulous",
+      "name": "a Minister of Bertoxxulous",
+      "level": "56",
+      "zones": [
+        "Plane of Hate"
+      ],
+      "drops": [
+        "None"
+      ],
+      "loc": [
+        {
+          "ns": 120.56,
+          "ew": 283.1,
+          "z": 151.84
         }
       ]
     },
@@ -26693,26 +26704,17 @@
         "Plane of Fear"
       ],
       "drops": [
-        "Greenmist Helm",
-        "Greenmist Breastplate",
-        "Greenmist Vambraces",
-        "Greenmist Bracer",
-        "Greenmist Greaves",
-        "Greenmist Boots",
-        "Greenmist Mask",
+        "Apothic Boots",
+        "Blighted Boots",
+        "Carmine Boots",
+        "Imbrued Platemail Boots",
+        "Indicolite Boots",
+        "Insidious Slippers",
         "Nightmare Hide",
-        "Wand of Darkness"
-      ],
-      "loc": [
-        {
-          "ns": 486,
-          "ew": -386,
-          "pct": 14
-        },
-        {
-          "ns": 1355,
-          "ew": -664
-        }
+        "Midnight Clad Footwraps",
+        "Umbral Platemail Boots",
+        "Wand of Darkness",
+        "Woven Shadow Boots"
       ]
     },
     {
@@ -26813,9 +26815,9 @@
       ]
     },
     {
-      "page": "A one eyed gnoll",
-      "name": "a one eyed gnoll",
-      "level": "35",
+      "page": "A one-eyed gnoll",
+      "name": "a one-eyed gnoll",
+      "level": "39",
       "zones": [
         "Splitpaw Lair"
       ],
@@ -27199,14 +27201,16 @@
         "Plane of Fear"
       ],
       "drops": [
-        "Rune of Concussion",
-        "Rune of Frost",
-        "Rune of Crippling",
-        "Tears of Prexus",
-        "Words of Requisition",
-        "Words of Acquisition (Beza)",
-        "Words of Odus",
-        "Thulian Wand"
+        "Anthemion Boots",
+        "Ethereal Mist Boots",
+        "Lustrous Russet Boots",
+        "Rune Etched Boots",
+        "Shadow Rage Boots",
+        "Shiverback-hide Boots",
+        "Thorny Vine Boots",
+        "Thulian Wand",
+        "Valorium Boots",
+        "Vermiculated Boots"
       ],
       "loc": [
         {
@@ -28409,6 +28413,8 @@
         "The Estate of Unrest"
       ],
       "drops": [
+        "Ancient Spurned Ferraiolo",
+        "Ancient Spurned Waistcoat",
         "Tarnished Bronze Key"
       ],
       "loc": [
@@ -29383,6 +29389,8 @@
         "Ipsor's Enlightenment IV",
         "Diablerie II",
         "The End of an Age",
+        "Brittle Staff",
+        "Rhodium Band",
         "Small Stone Key"
       ],
       "loc": [
@@ -29803,7 +29811,12 @@
         "Split Paw Tooth Necklace",
         "Preserved Split Paw Eye",
         "Wolves Bane",
-        "White Hellebore"
+        "White Hellebore",
+        "Tanned Split Paw Skin",
+        "Split Paw",
+        "Rain Water",
+        "Fine Steel Spear",
+        "Fine Steel Dagger"
       ],
       "loc": [
         {
@@ -30571,24 +30584,21 @@
     {
       "page": "A Samhain",
       "name": "a samhain",
-      "level": "51",
+      "level": "48-52",
       "zones": [
         "Plane of Fear"
       ],
       "drops": [
         "Fluxbladed Axe",
-        "Nilitim's Grimoire Pg. 379",
-        "Nilitim's Grimoire Pg. 415",
-        "Nilitim's Grimoire Pg. 449",
-        "Rune of Rathe",
-        "Rune of Crippling",
-        "Tears of Prexus",
-        "Words of Requisition",
-        "Words of Odus",
-        "Words of Crippling Force",
-        "Jack-O-Lantern Fungus",
-        "Blue Diamond",
-        "Scare Straw"
+        "Anthemion Wristguard",
+        "Ethereal Mist Bracers",
+        "Lustrous Russet Bracer",
+        "Rune Etched Bracer",
+        "Shadow Rage Wristguard",
+        "Shiverback-hide Wristbands",
+        "Thorny Vine Bracer",
+        "Valorium Bracers",
+        "Vermiculated Bracelet"
       ],
       "loc": [
         {
@@ -32149,30 +32159,16 @@
         "Plane of Fear"
       ],
       "drops": [
+        "Anthemion Gloves",
+        "Ethereal Mist Gauntlets",
         "Eyerazzia",
-        "Nilitim's Grimoire Pg. 379",
-        "Nilitim's Grimoire Pg. 415",
-        "Nilitim's Grimoire Pg. 416",
-        "Rune of Concussion",
-        "Rune of Ap`Sagor",
-        "Rune of the Astral",
-        "Rune of Impetus",
-        "Tears of Prexus",
-        "Words of Bondage",
-        "Breath of Ro (Item)",
-        "Words of Requisition",
-        "Words of Acquisition (Beza)",
-        "Words of Odus",
-        "Words of the Ethereal",
-        "Words of Crippling Force",
-        "Crystallized Sulfur",
-        "Fire Opal",
-        "Star Ruby",
-        "Fire Emerald",
-        "Ruby",
-        "Emerald Ring",
-        "Opal Bracelet",
-        "Mithril Amulet"
+        "Lustrous Russet Gauntlets",
+        "Rune Etched Gauntlets",
+        "Shadow Rage Gloves",
+        "Shiverback-hide Gloves",
+        "Thorny Vine Gauntlets",
+        "Valorium Gauntlets",
+        "Vermiculated Gloves"
       ]
     },
     {
@@ -32226,7 +32222,7 @@
     {
       "page": "A Scorn Banshee",
       "name": "a scorn banshee",
-      "level": "50",
+      "level": "47-51?",
       "zones": [
         "Plane of Hate"
       ],
@@ -32241,53 +32237,6 @@
         "Thorny Vine Bracer",
         "Valorium Bracers",
         "Vermiculated Bracelet"
-      ],
-      "loc": [
-        {
-          "ns": -25,
-          "ew": -342,
-          "pct": 3
-        },
-        {
-          "ns": 169,
-          "ew": 285,
-          "pct": 3
-        },
-        {
-          "ns": 409,
-          "ew": -4,
-          "pct": 3
-        },
-        {
-          "ns": -374,
-          "ew": 280,
-          "pct": 3
-        },
-        {
-          "ns": -335,
-          "ew": 325,
-          "pct": 3
-        },
-        {
-          "ns": 459,
-          "ew": 1,
-          "pct": 3
-        },
-        {
-          "ns": -358,
-          "ew": 253,
-          "pct": 3
-        },
-        {
-          "ns": -375,
-          "ew": -195,
-          "pct": 3
-        },
-        {
-          "ns": -384,
-          "ew": -186,
-          "pct": 3
-        }
       ]
     },
     {
@@ -33542,6 +33491,7 @@
         "Shadowed Rapier",
         "Eye of Shadow",
         "Hand of Shadow",
+        "Shadowed Essence",
         "Words of Transcendence"
       ]
     },
@@ -34499,9 +34449,20 @@
     {
       "page": "A Shiverback",
       "name": "a shiverback",
-      "level": "49-51(?)",
+      "level": "49-52",
       "zones": [
         "Plane of Fear"
+      ],
+      "drops": [
+        "Anthemion Gloves",
+        "Ethereal Mist Gauntlets",
+        "Lustrous Russet Gauntlets",
+        "Rune Etched Gauntlets",
+        "Shadow Rage Gloves",
+        "Shiverback-hide Gloves",
+        "Thorny Vine Gauntlets",
+        "Valorium Gauntlets",
+        "Vermiculated Gloves"
       ]
     },
     {
@@ -34774,6 +34735,24 @@
           "ns": 945,
           "ew": 587,
           "z": 5
+        }
+      ]
+    },
+    {
+      "page": "A Silverflank guardian",
+      "name": "a Silverflank guardian",
+      "level": "30",
+      "zones": [
+        "The Feerrott"
+      ],
+      "loc": [
+        {
+          "ns": -1377,
+          "ew": -40
+        },
+        {
+          "ns": -1377,
+          "ew": -78
         }
       ]
     },
@@ -36284,6 +36263,18 @@
       ]
     },
     {
+      "page": "A spectral shimmer",
+      "name": "a spectral shimmer",
+      "level": "1",
+      "loc": [
+        {
+          "ns": 1279,
+          "ew": -1655,
+          "z": -67
+        }
+      ]
+    },
+    {
       "page": "A Spectre",
       "name": "a spectre",
       "level": "33 - 37",
@@ -36408,6 +36399,15 @@
         "Plane of Fear"
       ],
       "drops": [
+        "Apothic Warband",
+        "Blighted Armband",
+        "Carmine Trinket",
+        "Imbrued Platemail Bracer",
+        "Indicolite Bracer",
+        "Insidious Manacle",
+        "Midnight Clad Wristbands",
+        "Umbral Platemail Bracer",
+        "Woven Shadow Bracer",
         "Cryosilk Cap",
         "Cryosilk Veil",
         "Cryosilk Choker",
@@ -36418,8 +36418,7 @@
         "Cryosilk Gloves",
         "Cryosilk Pantaloons",
         "Cryosilk Lined Shoes",
-        "Cryosilk Webshield",
-        "Swatch of Cryosilk"
+        "Cryosilk Webshield"
       ]
     },
     {
@@ -37073,15 +37072,26 @@
         "Cazic Thule"
       ],
       "drops": [
-        "Golem Metal Rod",
+        "Rubicite Gauntlets",
         "Ravenscale Gloves",
-        "Rubicite Gauntlets"
+        "Golem Metal Wand"
       ],
       "loc": [
         {
           "ns": 188,
           "ew": -279
         }
+      ]
+    },
+    {
+      "page": "A Steel Warrior",
+      "name": "a Steel Warrior",
+      "level": "56",
+      "zones": [
+        "Plane of Hate"
+      ],
+      "drops": [
+        "None"
       ]
     },
     {
@@ -37104,9 +37114,9 @@
         "Cazic Thule"
       ],
       "drops": [
+        "Rubicite Helm",
         "Ravenscale Coif",
-        "Shard of Golem Stone",
-        "Rubicite Helm"
+        "Shard of Golem Stone"
       ]
     },
     {
@@ -37990,19 +38000,36 @@
     {
       "page": "A tentacle tormentor",
       "name": "a tentacle tormentor",
-      "level": "50",
+      "level": "48-52",
       "zones": [
         "Plane of Fear"
       ],
       "drops": [
+        "Anthemion Jerkin",
         "Dweamorvine Garland",
-        "Thorny Vine Helm",
+        "Ethereal Mist Chestplate",
+        "Lustrous Russet Breastplate",
+        "Shadow Rage Tunic",
+        "Shiverback-hide Jerkin",
+        "Rune Etched Chestplate",
         "Thorny Vine Chestplate",
-        "Thorny Vine Vambraces",
-        "Thorny Vine Bracer",
-        "Thorny Vine Gauntlets",
-        "Thorny Vine Greaves",
-        "Thorny Vine Boots"
+        "Valorium Chestplate",
+        "Vermiculated Tunic"
+      ],
+      "loc": [
+        {
+          "ns": -420,
+          "ew": 710
+        },
+        {
+          "ns": 40,
+          "ew": 635
+        },
+        {
+          "ns": 902,
+          "ew": 390,
+          "z": 113
+        }
       ]
     },
     {
@@ -38426,11 +38453,9 @@
     {
       "page": "A thought bleeder",
       "name": "a thought bleeder",
-      "level": "Blue @ lvl50",
+      "level": "48",
       "zones": [
-        "Plane of Fear",
-        "Erud's Crossing",
-        "Lavastorm Mountains"
+        "Plane of Fear"
       ]
     },
     {
@@ -39756,15 +39781,22 @@
     {
       "page": "A turmoil toad",
       "name": "a turmoil toad",
-      "level": "51",
+      "level": "48-51",
       "zones": [
         "Plane of Fear"
       ],
       "drops": [
+        "Apothic Gloves",
+        "Blighted Gloves",
+        "Carmine Gloves",
         "Flayed Turmoilskin Belt",
+        "Imbrued Platemail Gauntlets",
+        "Indicolite Gauntlets",
+        "Insidious Gloves",
+        "Midnight Clad Fistwraps",
         "Turmoil Warts",
-        "Black Sapphire",
-        "Blue Diamond"
+        "Umbral Platemail Gauntlets",
+        "Woven Shadow Gauntlets"
       ]
     },
     {
@@ -40358,16 +40390,6 @@
       ],
       "drops": [
         "Emissary Mask",
-        "Fine Steel Long Sword",
-        "Fine Steel Two Handed Sword",
-        "Fine Steel Short Sword",
-        "Fine Steel Scimitar",
-        "Fine Steel Warhammer",
-        "Fine Steel Morning Star",
-        "Fine Steel Great Staff",
-        "Fine Steel Dagger",
-        "Fine Steel Spear",
-        "Fine Steel Rapier",
         "Traveling Greaves"
       ],
       "loc": [
@@ -40720,7 +40742,7 @@
         "Topaz",
         "Flame Agate",
         "Thick Caustic Fluid",
-        "A Werebat Wing"
+        "Werebat Wing"
       ]
     },
     {
@@ -40889,7 +40911,7 @@
     {
       "page": "A wild tiger",
       "name": "a wild tiger",
-      "level": "17",
+      "level": "14-17",
       "zones": [
         "Kerra Island"
       ],
@@ -41121,6 +41143,7 @@
       "drops": [
         "Mammoth Meat",
         "Mammoth Calf Hide",
+        "Ice Blood",
         "Small Mammoth Tusks",
         "Winter Lilly"
       ],
@@ -41215,37 +41238,16 @@
         "Plane of Fear"
       ],
       "drops": [
-        "Wraithstone",
+        "Apothic Gloves",
+        "Blighted Gloves",
+        "Carmine Gloves",
+        "Imbrued Platemail Gauntlets",
+        "Indicolite Gauntlets",
+        "Insidious Gloves",
+        "Midnight Clad Fistwraps",
+        "Umbral Platemail Gauntlets",
         "Wand of Allure",
-        "Nilitim's Grimoire Pg. 378",
-        "Nilitim's Grimoire Pg. 379",
-        "Nilitim's Grimoire Pg. 401",
-        "Nilitim's Grimoire Pg. 415",
-        "Nilitim's Grimoire Pg. 416",
-        "Rune of the Astral",
-        "Rune of Crippling",
-        "Words of Bondage",
-        "Words of Requisition",
-        "Words of Grappling",
-        "Ruby",
-        "Black Sapphire",
-        "Star Ruby Earring",
-        "Fire Emerald Ring",
-        "Sapphire Necklace",
-        "Ruby Crown",
-        "Jacinth",
-        "Nilitim's Grimoire Pg. 400",
-        "Blue Diamond",
-        "Nilitim's Grimoire Pg. 449",
-        "Nilitim's Grimoire Pg. 450",
-        "Rune of Concussion",
-        "Rune of Rathe",
-        "Tears of Prexus",
-        "Wing of Xegony",
-        "Words of Acquisition (Beza)",
-        "Words of Odus",
-        "Words of the Ethereal",
-        "Words of Crippling Force"
+        "Woven Shadow Gauntlets"
       ],
       "loc": [
         {
@@ -41957,7 +41959,7 @@
     {
       "page": "Aanina Rockfinder",
       "name": "Aanina Rockfinder",
-      "level": "41",
+      "level": "50",
       "zones": [
         "North Kaladim"
       ],
@@ -44584,20 +44586,16 @@
         "Plane of Fear"
       ],
       "drops": [
-        "Umbral Platemail Helm",
+        "Apothic Robe",
+        "Blighted Robe",
+        "Carmine Robe",
+        "Imbrued Platemail Breastplate",
+        "Indicolite Breastplate",
+        "Insidious Robe",
+        "Midnight Clad Straps",
         "Umbral Platemail Breastplate",
-        "Umbral Platemail Vambraces",
-        "Umbral Platemail Bracer",
-        "Umbral Platemail Gauntlets",
-        "Umbral Platemail Greaves",
-        "Umbral Platemail Boots",
-        "Jacinth",
-        "Nilitim's Grimoire Pg. 379",
-        "Nilitim's Grimoire Pg. 449",
-        "Rune of Ap`Sagor",
-        "Rune of Frost",
-        "Rune of Impetus",
-        "Rune of Crippling"
+        "Woven Shadow Chestplate",
+        "Amygdalan Tendril"
       ]
     },
     {
@@ -44610,16 +44608,15 @@
       "drops": [
         "Amygdalan Tendril",
         "Nautilus Shield",
-        "Emerald Ring",
-        "Fire Emerald",
-        "Nilitim's Grimoire Pg. 449",
-        "Rune of Concussion",
-        "Rune of Rathe",
-        "Rune of Crippling",
-        "Words of Bondage",
-        "Breath of Ro (Item)",
-        "Words of Requisition",
-        "Words of Crippling Force"
+        "Apothic Robe",
+        "Blighted Robe",
+        "Carmine Robe",
+        "Imbrued Platemail Breastplate",
+        "Indicolite Breastplate",
+        "Insidious Robe",
+        "Midnight Clad Straps",
+        "Umbral Platemail Breastplate",
+        "Woven Shadow Chestplate"
       ]
     },
     {
@@ -45398,7 +45395,8 @@
         "Rusty Warhammer",
         "Raw-hide Shoulderpads",
         "Raw-hide Skullcap",
-        "Raw-hide Wristbands"
+        "Raw-hide Wristbands",
+        "Lake Pebble"
       ],
       "loc": [
         {
@@ -45471,7 +45469,8 @@
         "Ration",
         "Rusty Mace",
         "Small Box",
-        "Worn Great Staff"
+        "Worn Great Staff",
+        "Lake Pebble"
       ],
       "loc": [
         {
@@ -45673,7 +45672,6 @@
         "Ashenbone Shield",
         "Blighted Sleeves",
         "Carmine Sleeves",
-        "Decrepit Hide",
         "Imbrued Platemail Vambraces",
         "Indicolite Vambraces",
         "Insidious Sleeves",
@@ -46523,8 +46521,10 @@
       ],
       "drops": [
         "Ethereal Mist Greaves",
+        "Ethereal Mist Boots",
         "Lustrous Russet Greaves",
         "Rune Etched Greaves",
+        "Shadow Rage Leggings",
         "Shiverback-hide Leggings",
         "Thorny Vine Greaves",
         "Valorium Greaves",
@@ -47807,23 +47807,6 @@
       "level": "48",
       "zones": [
         "Plane of Hate"
-      ],
-      "loc": [
-        {
-          "ns": -424,
-          "ew": 303,
-          "pct": 34
-        },
-        {
-          "ns": -422,
-          "ew": 360,
-          "pct": 34
-        },
-        {
-          "ns": -366,
-          "ew": 362,
-          "pct": 34
-        }
       ]
     },
     {
@@ -50235,7 +50218,7 @@
         "Greater Faydark"
       ],
       "drops": [
-        "Orcish Arsons Torch"
+        "Orcish Arsonist's Torch"
       ],
       "loc": [
         {
@@ -51120,6 +51103,8 @@
         "The Estate of Unrest"
       ],
       "drops": [
+        "Brewer's Bracer",
+        "Brewer's Mittens",
         "Preserved Hops"
       ],
       "loc": [
@@ -51495,7 +51480,11 @@
       ],
       "drops": [
         "Rusty Scimitar",
-        "Bone Chips"
+        "Bone Chips",
+        "Tome Insert Page 1",
+        "Tome Insert Page 2",
+        "Tome Insert Page 3",
+        "Tome Insert Page 4"
       ]
     },
     {
@@ -51836,6 +51825,14 @@
           "ns": -2223,
           "ew": 577
         }
+      ]
+    },
+    {
+      "page": "Animist Kratho",
+      "name": "Animist Kratho",
+      "level": "55",
+      "zones": [
+        "Plane of Sky"
       ]
     },
     {
@@ -52792,8 +52789,7 @@
       "loc": [
         {
           "ns": -1,
-          "ew": -263,
-          "pct": 50
+          "ew": -263
         }
       ]
     },
@@ -53146,29 +53142,30 @@
         "Plane of Hate"
       ],
       "drops": [
-        "Woven Shadow Helm",
-        "Woven Shadow Chestplate",
-        "Woven Shadow Vambraces",
-        "Woven Shadow Bracer",
-        "Woven Shadow Gauntlets",
-        "Woven Shadow Greaves",
-        "Woven Shadow Boots",
-        "Vexthorne"
+        "Vexthorne",
+        "Shrieking Ahlspiess"
       ],
       "loc": [
         {
-          "ns": -72,
-          "ew": 273,
-          "pct": 100
+          "ns": -117,
+          "ew": -65,
+          "z": 50
         }
       ]
     },
     {
       "page": "Avatar of Dread",
       "name": "avatar of dread",
-      "level": "?",
+      "level": "40",
       "zones": [
         "Paineel"
+      ],
+      "loc": [
+        {
+          "ns": 1231,
+          "ew": 472,
+          "z": -38
+        }
       ]
     },
     {
@@ -53179,9 +53176,9 @@
         "Cazic Thule"
       ],
       "drops": [
-        "Bladed Thulian Claws",
+        "Rubicite Breastplate",
         "Ravenscale Chestguard",
-        "Rubicite Breastplate"
+        "Bladed Thulian Claws"
       ],
       "loc": [
         {
@@ -55200,12 +55197,13 @@
       "drops": [
         "Acidic Venom",
         "Adamantium Earring",
+        "Amulet of Woven Hair",
         "Bixie Stinger (Bixie God's Stinger)",
         "Bixie Sword Blade",
         "Divine Honeycomb",
         "Box of Winds",
         "Corrosive Venom",
-        "Dull Dragon Scale",
+        "Key of Scale",
         "Fine Wool Cloak",
         "Ganoric Poison",
         "Glowing Sapphire",
@@ -56074,7 +56072,6 @@
       "drops": [
         "Acidic Venom",
         "Adamantium Bands",
-        "Amulet of Woven Hair",
         "Bitter Honey",
         "Bixie Essence",
         "Blood Sky Amethyst",
@@ -56112,6 +56109,17 @@
           "ew": -119,
           "pct": 100
         }
+      ]
+    },
+    {
+      "page": "Bizzzzt",
+      "name": "Bizzzzt",
+      "level": "60",
+      "zones": [
+        "Plane of Sky"
+      ],
+      "drops": [
+        "None"
       ]
     },
     {
@@ -58175,8 +58183,8 @@
       ],
       "loc": [
         {
-          "ns": -258,
-          "ew": -235,
+          "ns": -61,
+          "ew": -460,
           "pct": 50
         }
       ]
@@ -58204,6 +58212,10 @@
       "level": "7",
       "zones": [
         "Surefall Glade"
+      ],
+      "drops": [
+        "Human Blood",
+        "Rusty Long Sword"
       ],
       "loc": [
         {
@@ -60377,6 +60389,7 @@
       ],
       "drops": [
         "Rusty Rapier",
+        "Lute",
         "Mandolin"
       ],
       "loc": [
@@ -60486,7 +60499,8 @@
         "Highpass Hold"
       ],
       "drops": [
-        "Fine Steel Short Sword"
+        "Fine Steel Short Sword",
+        "Rusty Long Sword"
       ],
       "loc": [
         {
@@ -60948,7 +60962,7 @@
     {
       "page": "Captain Tillin",
       "name": "Captain Tillin",
-      "level": "61",
+      "level": "70",
       "zones": [
         "South Qeynos"
       ],
@@ -61346,9 +61360,11 @@
         "Cazic Thule"
       ],
       "drops": [
+        "Rubicite Boots",
         "Ravenscale Boots",
+        "Lizard Meat",
         "Lizard Blood Potion",
-        "Rubicite Boots"
+        "Lizard Tail"
       ],
       "loc": [
         {
@@ -61358,20 +61374,13 @@
       ]
     },
     {
-      "page": "Cazic Thule (God)",
+      "page": "Cazic-Thule (God)",
       "name": "Cazic Thule",
       "level": "70",
       "zones": [
         "Plane of Fear"
       ],
       "drops": [
-        "Bile Etched Obsidian Choker",
-        "Brain of Cazic Thule",
-        "Cloak of the Fearsome",
-        "Eye of Cazic Thule",
-        "Halo of the Enlightened",
-        "Pauldrons of Ferocity",
-        "Robe of Inspiration",
         "Amulet of Necropotence",
         "Barbarian Spiritist`s Hammer",
         "Blood Fire",
@@ -61382,7 +61391,14 @@
         "Puppet Strings",
         "Shield of Rainbow Hues",
         "Soul Leech, Dark Sword of Blood",
-        "Staff of the Earthcrafter"
+        "Staff of the Earthcrafter",
+        "Bile Etched Obsidian Choker",
+        "Brain of Cazic Thule",
+        "Cloak of the Fearsome",
+        "Eye of Cazic Thule",
+        "Halo of the Enlightened",
+        "Pauldrons of Ferocity",
+        "Robe of Inspiration"
       ]
     },
     {
@@ -62615,6 +62631,14 @@
       ]
     },
     {
+      "page": "Cilin Spellsinger",
+      "name": "Cilin Spellsinger",
+      "level": "55",
+      "zones": [
+        "Plane of Sky"
+      ]
+    },
+    {
       "page": "Cinder Goblin",
       "name": "cinder goblin",
       "level": "19-20",
@@ -62932,54 +62956,8 @@
         "Shadow Rage Helm",
         "Thorny Vine Helm",
         "Valorium Helmet",
-        "Vermiculated Crown"
-      ],
-      "loc": [
-        {
-          "ns": 227,
-          "ew": 38,
-          "pct": 100
-        },
-        {
-          "ns": 204,
-          "ew": -138,
-          "pct": 100
-        },
-        {
-          "ns": 28,
-          "ew": -125,
-          "pct": 100
-        },
-        {
-          "ns": 66,
-          "ew": -323,
-          "pct": 100
-        },
-        {
-          "ns": -75,
-          "ew": -467,
-          "pct": 100
-        },
-        {
-          "ns": -106,
-          "ew": -55,
-          "pct": 100
-        },
-        {
-          "ns": -113,
-          "ew": -151,
-          "pct": 100
-        },
-        {
-          "ns": -135,
-          "ew": -73,
-          "pct": 100
-        },
-        {
-          "ns": -102,
-          "ew": -75,
-          "pct": 100
-        }
+        "Vermiculated Crown",
+        "Woven Shadow Helm"
       ]
     },
     {
@@ -64717,17 +64695,9 @@
         "Plane of Hate"
       ],
       "drops": [
-        "Insidious Halo",
-        "Insidious Robe",
-        "Insidious Sleeves",
-        "Insidious Manacle",
-        "Insidious Gloves",
-        "Insidious Pantaloons",
-        "Insidious Slippers",
         "Rod of Infinite Thought",
         "Wand of Swiftness",
         "Eye of Innoruuk",
-        "Blue Diamond",
         "Essence of a Vampire",
         "Shattered Emerald of Corruption"
       ],
@@ -65094,7 +65064,7 @@
     {
       "page": "Cordelia Minster",
       "name": "Cordelia Minster",
-      "level": "18-22",
+      "level": "18",
       "zones": [
         "Northern Karana"
       ],
@@ -65410,7 +65380,7 @@
         "Surefall Glade"
       ],
       "drops": [
-        "Staff"
+        "Worn Great Staff"
       ],
       "loc": [
         {
@@ -65722,6 +65692,10 @@
           "ns": -6641,
           "ew": 1835,
           "z": 59
+        },
+        {
+          "ns": -3800,
+          "ew": -1380
         }
       ]
     },
@@ -69482,9 +69456,9 @@
       ],
       "loc": [
         {
-          "ns": -2,
+          "ns": -1,
           "ew": 395,
-          "pct": 50
+          "z": 161
         }
       ]
     },
@@ -70844,6 +70818,9 @@
       "zones": [
         "Lesser Faydark"
       ],
+      "drops": [
+        "Fish Wine"
+      ],
       "loc": [
         {
           "ns": -902,
@@ -71006,6 +70983,14 @@
       "drops": [
         "Scale Hide Whip",
         "Barbed Scale Whip"
+      ]
+    },
+    {
+      "page": "Drakis Bloodcaster",
+      "name": "Drakis Bloodcaster",
+      "level": "55",
+      "zones": [
+        "Plane of Sky"
       ]
     },
     {
@@ -71735,6 +71720,12 @@
       ],
       "drops": [
         "Note"
+      ],
+      "loc": [
+        {
+          "ns": -408,
+          "ew": 2780
+        }
       ]
     },
     {
@@ -72696,6 +72687,7 @@
         {
           "ns": -482,
           "ew": 321,
+          "z": 79,
           "pct": 10
         }
       ]
@@ -73761,6 +73753,14 @@
       ]
     },
     {
+      "page": "Enchanter Jolas",
+      "name": "Enchanter Jolas",
+      "level": "55",
+      "zones": [
+        "Plane of Sky"
+      ]
+    },
+    {
       "page": "Endan Halson",
       "name": "Endan Halson",
       "level": "14",
@@ -74077,6 +74077,14 @@
         {
           "ns": 866,
           "ew": 9
+        },
+        {
+          "ns": -241,
+          "ew": -674
+        },
+        {
+          "ns": -647,
+          "ew": 2812
         }
       ]
     },
@@ -74814,8 +74822,8 @@
         "Hazy Opal",
         "Large Opal",
         "Large Sky Diamond",
+        "Large Sky Lapis",
         "Large Sky Sapphire",
-        "Large Sky Sapphire (Enchanter)",
         "Mithril Bands",
         "Nebulous Diamond",
         "Shimmering Pearl",
@@ -76972,6 +76980,9 @@
       "level": "31",
       "zones": [
         "Surefall Glade"
+      ],
+      "drops": [
+        "Longbow"
       ],
       "loc": [
         {
@@ -80699,7 +80710,7 @@
     {
       "page": "Girgak the Bloody",
       "name": "Girgak the Bloody",
-      "level": "23-24",
+      "level": "19",
       "zones": [
         "Stonebrunt Mountains"
       ],
@@ -81300,6 +81311,16 @@
       "drops": [
         "Gnawfang's Pelt",
         "Gnawfang's Tooth"
+      ],
+      "loc": [
+        {
+          "ns": -2170,
+          "ew": 2735
+        },
+        {
+          "ns": -3750,
+          "ew": 3500
+        }
       ]
     },
     {
@@ -82071,6 +82092,7 @@
         "Plane of Sky"
       ],
       "drops": [
+        "Key of Beasts",
         "Azure Ring",
         "Feathered Cape",
         "Finely Crafted Amulet",
@@ -82084,8 +82106,7 @@
         "Light Woolen Mask",
         "Silken Strands",
         "Silver Hoop",
-        "Worn Leather Mask",
-        "Animal Figurine"
+        "Worn Leather Mask"
       ]
     },
     {
@@ -82791,12 +82812,6 @@
         "Plane of Hate"
       ],
       "drops": [
-        "Indicolite Helm",
-        "Indicolite Breastplate",
-        "Indicolite Vambraces",
-        "Indicolite Gauntlets",
-        "Indicolite Greaves",
-        "Indicolite Boots",
         "Sunderfury",
         "Shuriken of the Tranquil",
         "Sode of Empowerment",
@@ -82808,8 +82823,7 @@
       "loc": [
         {
           "ns": -64,
-          "ew": -452,
-          "pct": 50
+          "ew": -452
         }
       ]
     },
@@ -83040,7 +83054,14 @@
         "Kobold Hide",
         "Words of Cazic-Thule",
         "Black Henbane",
-        "Death Cap"
+        "Death Cap",
+        "Amber",
+        "Ivory",
+        "Flame Agate",
+        "Weighted Gloves",
+        "Mithril Earring",
+        "Jade Earring",
+        "Pearl"
       ]
     },
     {
@@ -83424,7 +83445,7 @@
     {
       "page": "Gregor Nasin",
       "name": "Gregor Nasin",
-      "level": "19",
+      "level": "50",
       "zones": [
         "East Freeport"
       ],
@@ -83635,6 +83656,47 @@
       "level": "11",
       "zones": [
         "High Keep"
+      ]
+    },
+    {
+      "page": "Gribnor the Small",
+      "name": "Gribnor the Small",
+      "level": "52",
+      "zones": [
+        "Neriak Third Gate"
+      ],
+      "drops": [
+        "Zraxthril Forged Flamberge"
+      ],
+      "loc": [
+        {
+          "ns": 1277,
+          "ew": -1643,
+          "z": -67
+        }
+      ]
+    },
+    {
+      "page": "Gribnor's Thug",
+      "name": "Gribnor's Thug",
+      "level": "50",
+      "zones": [
+        "Neriak Third Gate"
+      ],
+      "drops": [
+        "Rusty Bastard Sword"
+      ],
+      "loc": [
+        {
+          "ns": 1282,
+          "ew": -1628,
+          "z": -67
+        },
+        {
+          "ns": 1282,
+          "ew": -1659,
+          "z": -67
+        }
       ]
     },
     {
@@ -84094,7 +84156,7 @@
     },
     {
       "page": "Grynnaf Einoom",
-      "name": "Grynnaf Einoo",
+      "name": "Grynnaf Einoom",
       "level": "14",
       "zones": [
         "Lesser Faydark"
@@ -89803,7 +89865,7 @@
     {
       "page": "Guard Perelin",
       "name": "Guard Perelin",
-      "level": "14-15",
+      "level": "14-16",
       "zones": [
         "Paineel"
       ],
@@ -90785,7 +90847,8 @@
       ],
       "drops": [
         "Rusty Long Sword",
-        "Qeynos Kite Shield"
+        "Qeynos Kite Shield",
+        "Cracked Corrupt Guard Helm"
       ],
       "loc": [
         {
@@ -93771,7 +93834,7 @@
     {
       "page": "Hand of the Maestro (Mob)",
       "name": "Hand of the Maestro",
-      "level": "?",
+      "level": "17",
       "zones": [
         "Plane of Hate"
       ],
@@ -94791,11 +94854,6 @@
         "Plane of Hate"
       ],
       "drops": [
-        "Ethereal Mist Chestplate",
-        "Ethereal Mist Helm",
-        "Ethereal Mist Boots",
-        "Ethereal Mist Bracers",
-        "Ethereal Mist Greaves",
         "Truesight Hammer",
         "Prismatic Shield"
       ],
@@ -95159,6 +95217,14 @@
           "ew": -16,
           "pct": 100
         }
+      ]
+    },
+    {
+      "page": "Holwin",
+      "name": "Holwin",
+      "level": "55",
+      "zones": [
+        "Plane of Sky"
       ]
     },
     {
@@ -95756,6 +95822,25 @@
           "ns": 714,
           "ew": -146,
           "pct": 100
+        }
+      ]
+    },
+    {
+      "page": "Ice goblin caster",
+      "name": "ice goblin caster",
+      "level": "2-4",
+      "zones": [
+        "Everfrost Peaks"
+      ],
+      "drops": [
+        "Caster Beads",
+        "Shattered Caster Beads"
+      ],
+      "loc": [
+        {
+          "ns": 1600,
+          "ew": -4400,
+          "z": -214
         }
       ]
     },
@@ -97111,6 +97196,24 @@
       ]
     },
     {
+      "page": "Initiate Xabbis",
+      "name": "Initiate Xabbis",
+      "level": "12",
+      "zones": [
+        "Rathe Mountains"
+      ],
+      "drops": [
+        "Tattered Codex"
+      ],
+      "loc": [
+        {
+          "ns": -540,
+          "ew": -1950,
+          "z": 13.5
+        }
+      ]
+    },
+    {
       "page": "Inkeeper Freegraze",
       "name": "Innkeeper Freegraze",
       "level": "40",
@@ -97728,7 +97831,15 @@
         "Ring of Pureblood",
         "Shattered Emerald of Corruption",
         "Skinner's Belt",
-        "Triumphant Mask"
+        "Triumphant Mask",
+        "Rod of Unbound Thought"
+      ],
+      "loc": [
+        {
+          "ns": 230,
+          "ew": 10,
+          "z": 150
+        }
       ]
     },
     {
@@ -97782,24 +97893,29 @@
         "Plane of Hate"
       ],
       "drops": [
+        "Anthemion Leggings",
         "Ethereal Mist Greaves",
+        "Indicolite Breastplate",
         "Lustrous Russet Greaves",
         "Rune Etched Greaves",
+        "Shadow Rage Leggings",
         "Shiverback-hide Leggings",
         "Thorny Vine Greaves",
         "Valorium Greaves",
         "Vermiculated Leggings",
-        "Indicolite Breastplate",
         "Apothic Kilt",
         "Blighted Trousers",
         "Carmine Pants",
         "Imbrued Platemail Greaves",
+        "Indicolite Bracer",
         "Indicolite Greaves",
         "Insidious Pantaloons",
         "Midnight Clad Leggings",
         "Umbral Platemail Greaves",
         "Woven Shadow Greaves",
-        "Indicolite Bracer"
+        "Indicolite Boots",
+        "Indicolite Gauntlets",
+        "Indicolite Helm"
       ]
     },
     {
@@ -97979,12 +98095,12 @@
       ],
       "loc": [
         {
-          "ns": 411,
-          "ew": -714
+          "ns": 366,
+          "ew": -188
         },
         {
-          "ns": 397,
-          "ew": -537
+          "ns": 423,
+          "ew": -746
         }
       ]
     },
@@ -98539,6 +98655,19 @@
         {
           "ns": -169,
           "ew": 202
+        }
+      ]
+    },
+    {
+      "page": "Jade (NPC)",
+      "name": "Jade (NPC)",
+      "zones": [
+        "North Freeport"
+      ],
+      "loc": [
+        {
+          "ns": -178,
+          "ew": 203
         }
       ]
     },
@@ -101518,6 +101647,7 @@
         "Plane of Sky"
       ],
       "drops": [
+        "Avian Key",
         "Black Silk Cape",
         "Ceramic Mask",
         "Cracked Leather Eyepatch",
@@ -102052,7 +102182,7 @@
     {
       "page": "Kerran tiger spahi",
       "name": "kerran tiger spahi",
-      "level": "22",
+      "level": "12",
       "zones": [
         "Kerra Island"
       ],
@@ -102325,23 +102455,6 @@
       ]
     },
     {
-      "page": "Khrix Abomination",
-      "name": "Khrix Abomination",
-      "level": "38-40",
-      "zones": [
-        "The Estate of Unrest"
-      ],
-      "drops": [
-        "Powder of Reanimation"
-      ],
-      "loc": [
-        {
-          "ns": 620,
-          "ew": 56
-        }
-      ]
-    },
-    {
       "page": "Khrix Fritchoff",
       "name": "Khrix Fritchoff",
       "level": "35",
@@ -102350,7 +102463,9 @@
       ],
       "drops": [
         "Cloth Shirt",
-        "Gnome Meat"
+        "Gnome Meat",
+        "Scaredy Cap",
+        "Shawl of Less-Than Invisibility"
       ],
       "loc": [
         {
@@ -102358,6 +102473,25 @@
           "ew": 61,
           "z": 20,
           "pct": 100
+        }
+      ]
+    },
+    {
+      "page": "Khrix`s Abomination",
+      "name": "Khrix Abomination",
+      "level": "38-40",
+      "zones": [
+        "The Estate of Unrest"
+      ],
+      "drops": [
+        "Powder of Reanimation",
+        "Rotted Chestwraps",
+        "Fistwraps of Raw Flesh"
+      ],
+      "loc": [
+        {
+          "ns": 620,
+          "ew": 56
         }
       ]
     },
@@ -102488,9 +102622,16 @@
       ],
       "loc": [
         {
-          "ns": -10,
-          "ew": -780,
-          "pct": 10
+          "ns": 25,
+          "ew": -550
+        },
+        {
+          "ns": 33,
+          "ew": -680
+        },
+        {
+          "ns": 5,
+          "ew": -770
         }
       ]
     },
@@ -102666,12 +102807,8 @@
       ],
       "loc": [
         {
-          "ns": 672,
-          "ew": -207
-        },
-        {
-          "ns": 867,
-          "ew": -920
+          "ns": 658,
+          "ew": -1796
         }
       ]
     },
@@ -102747,8 +102884,9 @@
       ],
       "loc": [
         {
-          "ns": 389,
-          "ew": -652
+          "ns": -48.7,
+          "ew": 215.71,
+          "z": 3.5
         }
       ]
     },
@@ -105114,6 +105252,11 @@
       "zones": [
         "Surefall Glade"
       ],
+      "drops": [
+        "Fine Steel Short Sword",
+        "Longbow",
+        "Arrow"
+      ],
       "loc": [
         {
           "ns": -9.75,
@@ -105240,16 +105383,16 @@
     },
     {
       "page": "Kurrpok Splitpaw",
-      "name": "South Karana",
+      "name": "Kurrpok Splitpaw",
       "level": "25",
       "zones": [
-        "Splitpaw Lair"
+        "Splitpaw Lair",
+        "Southern Karana"
       ],
       "drops": [
+        "Bottle of Kalish",
         "Ruby Pendant",
-        "Dagger of Dropping",
-        "Split Paw Hide Mask",
-        "Bronze Bastard Sword"
+        "Runed Totem Staff"
       ],
       "loc": [
         {
@@ -106118,9 +106261,16 @@
     {
       "page": "Laren",
       "name": "Laren",
-      "level": "40",
+      "level": "70",
       "zones": [
         "Greater Faydark"
+      ],
+      "loc": [
+        {
+          "ns": -363,
+          "ew": -333,
+          "z": 163
+        }
       ]
     },
     {
@@ -109182,7 +109332,7 @@
         {
           "ns": -5,
           "ew": 411,
-          "pct": 50
+          "z": 161
         }
       ]
     },
@@ -109764,7 +109914,8 @@
         "Dwarven Axe",
         "Dwarven Two-Handed Axe",
         "Torn Elvish Tapestry",
-        "Bandolier of Teeth"
+        "Bandolier of Teeth",
+        "Crushbone Battle Plans"
       ],
       "loc": [
         {
@@ -109957,7 +110108,8 @@
       ],
       "drops": [
         "Pestilence Scythe",
-        "Pestilence Scythe (droppable)"
+        "Pestilence Scythe (droppable)",
+        "Burning Soul of the Pestilent"
       ],
       "loc": [
         {
@@ -111444,6 +111596,7 @@
       ],
       "drops": [
         "Evensong",
+        "Eye of Innoruuk",
         "Hand of the Maestro",
         "Kelin`s Seven Stringed Lute",
         "Mempo of Likato",
@@ -111534,13 +111687,6 @@
         "Plane of Hate"
       ],
       "drops": [
-        "Apothic Crown",
-        "Apothic Robe",
-        "Apothic Sleeves",
-        "Apothic Warband",
-        "Apothic Gloves",
-        "Apothic Kilt",
-        "Apothic Boots",
         "Staff of Elemental Mastery: Earth",
         "Wand of Swords",
         "Eye of Innoruuk",
@@ -111548,8 +111694,8 @@
       ],
       "loc": [
         {
-          "ns": -115,
-          "ew": -66
+          "ns": -371,
+          "ew": -164
         }
       ]
     },
@@ -112724,16 +112870,10 @@
         "Plane of Hate"
       ],
       "drops": [
-        "Rune Etched Helm",
-        "Rune Etched Chestplate",
-        "Rune Etched Vambraces",
-        "Rune Etched Bracer",
-        "Rune Etched Gauntlets",
-        "Rune Etched Greaves",
-        "Rune Etched Boots",
         "Spitestone Shield",
         "Gardash",
-        "Shattered Emerald of Corruption"
+        "Shattered Emerald of Corruption",
+        "Tunarian Scimitar"
       ],
       "loc": [
         {
@@ -112798,6 +112938,24 @@
       ]
     },
     {
+      "page": "Master Scribe Uklo",
+      "name": "Master Scribe Uklo",
+      "level": "70",
+      "zones": [
+        "Rathe Mountains"
+      ],
+      "drops": [
+        "None"
+      ],
+      "loc": [
+        {
+          "ns": -1937,
+          "ew": 454,
+          "z": 1
+        }
+      ]
+    },
+    {
       "page": "Master Whoopal",
       "name": "Master Whoopal",
       "level": "13",
@@ -112856,7 +113014,8 @@
         "Imbued Granite Spaulders",
         "Loam Encrusted Robe",
         "Brell's Girdle",
-        "Fusible Earthen Ore"
+        "Fusible Earthen Ore",
+        "Drop of Mercury"
       ],
       "loc": [
         {
@@ -112907,8 +113066,9 @@
       ],
       "loc": [
         {
-          "ns": -470,
-          "ew": -285
+          "ns": 463,
+          "ew": 439,
+          "z": 4.44
         }
       ]
     },
@@ -113072,6 +113232,14 @@
       ]
     },
     {
+      "page": "Medicine Man Veetra",
+      "name": "Medicine Man Veetra",
+      "level": "55",
+      "zones": [
+        "Plane of Sky"
+      ]
+    },
+    {
       "page": "Medoris Flalzm",
       "name": "Medoris Flalzm",
       "level": "35",
@@ -113229,7 +113397,7 @@
       ]
     },
     {
-      "page": "Megan OReilly",
+      "page": "Megan O`Reilly",
       "name": "Megan OReilly",
       "level": "3",
       "zones": [
@@ -113322,9 +113490,9 @@
       ],
       "loc": [
         {
-          "ns": 1690,
-          "ew": -2209,
-          "pct": 100
+          "ns": 1699,
+          "ew": -2192,
+          "z": -100
         }
       ]
     },
@@ -114294,6 +114462,9 @@
       "zones": [
         "Surefall Glade"
       ],
+      "drops": [
+        "Human Blood"
+      ],
       "loc": [
         {
           "ns": 243,
@@ -115190,13 +115361,6 @@
         "Plane of Hate"
       ],
       "drops": [
-        "Imbrued Platemail Helm",
-        "Imbrued Platemail Breastplate",
-        "Imbrued Platemail Vambraces",
-        "Imbrued Platemail Bracer",
-        "Imbrued Platemail Gauntlets",
-        "Imbrued Platemail Greaves",
-        "Imbrued Platemail Boots",
         "Dawnchaser",
         "Martune Rapier",
         "Shattered Emerald of Corruption",
@@ -115604,7 +115768,8 @@
       "drops": [
         "Clay Totem",
         "Shattered Warbeads",
-        "RunnyEye Warbeads"
+        "RunnyEye Warbeads",
+        "Elven Charm Necklace"
       ],
       "loc": [
         {
@@ -115807,7 +115972,7 @@
     {
       "page": "Mortificator Syythrak",
       "name": "Mortificator Syythrak",
-      "level": "40",
+      "level": "38-40",
       "zones": [
         "Rathe Mountains"
       ],
@@ -117029,6 +117194,20 @@
       ]
     },
     {
+      "page": "Nekola N`Ryt",
+      "name": "Nekola N`Ryt",
+      "level": "50",
+      "zones": [
+        "Neriak Commons"
+      ],
+      "loc": [
+        {
+          "ns": 82,
+          "ew": -931
+        }
+      ]
+    },
+    {
       "page": "Nelaarn the Ebon Claw",
       "name": "Nelaarn the Ebon Claw",
       "level": "63",
@@ -117458,6 +117637,9 @@
       "zones": [
         "Surefall Glade"
       ],
+      "drops": [
+        "Human Blood"
+      ],
       "loc": [
         {
           "ns": 111.34,
@@ -117751,6 +117933,21 @@
       ]
     },
     {
+      "page": "Nisch Mal Gnoll",
+      "name": "Nisch Mal Gnoll",
+      "zones": [
+        "The Lair of the Splitpaw"
+      ],
+      "drops": [
+        "Wolves Bane",
+        "White Hellebore",
+        "Rain Water",
+        "Preserved Split Paw Eye",
+        "Tanned Split Paw Skin",
+        "Split Paw"
+      ]
+    },
+    {
       "page": "Nisch Val Torash Mashk",
       "name": "Nisch Val Torash Mashk",
       "level": "39",
@@ -117775,7 +117972,7 @@
     {
       "page": "Nivold Predd",
       "name": "Nivold Predd",
-      "level": "61",
+      "level": "70",
       "zones": [
         "Paineel"
       ],
@@ -117826,17 +118023,11 @@
         "Plane of Sky"
       ],
       "drops": [
-        "Golden Efreeti Turban",
-        "Golden Efreeti Chestplate",
-        "Golden Efreeti Vambraces",
-        "Golden Efreeti Bracers",
-        "Golden Efreeti Gauntlets",
-        "Golden Efreeti Greaves",
+        "Brass_Knuckles",
         "Efreeti War Shield",
         "Efreeti War Axe",
         "Efreeti Scimitar",
         "Efreeti Wind Staff",
-        "Efreeti Great Staff",
         "Efreeti Mace",
         "Efreeti Dirk",
         "Efreeti Standard",
@@ -117851,7 +118042,12 @@
         "Efreeti Belt",
         "Efreeti Battle Axe",
         "Efreeti Zweihander",
-        "Brass_Knuckles",
+        "Golden Efreeti Turban",
+        "Golden Efreeti Chestplate",
+        "Golden Efreeti Vambraces",
+        "Golden Efreeti Bracers",
+        "Golden Efreeti Gauntlets",
+        "Golden Efreeti Greaves",
         "Large Sky Pearl"
       ]
     },
@@ -120621,27 +120817,32 @@
         "Plane of Sky"
       ],
       "drops": [
-        "Brass Knuckles",
+        "Brass_Knuckles",
+        "Efreeti War Shield",
+        "Efreeti War Axe",
+        "Efreeti Scimitar",
+        "Efreeti Wind Staff",
+        "Efreeti Mace",
+        "Efreeti Dirk",
+        "Efreeti Standard",
+        "Efreeti War Horn",
+        "Efreeti War Maul",
+        "Efreeti War Spear",
+        "Efreeti War Staff",
+        "Efreeti War Club",
+        "Efreeti Long Sword",
+        "Efreeti War Bow",
+        "Efreeti Magi Staff",
+        "Efreeti Belt",
+        "Efreeti Battle Axe",
+        "Efreeti Zweihander",
         "Golden Efreeti Turban",
         "Golden Efreeti Chestplate",
         "Golden Efreeti Vambraces",
         "Golden Efreeti Bracers",
         "Golden Efreeti Gauntlets",
         "Golden Efreeti Greaves",
-        "Fine Steel Dagger",
-        "Large Sky Pearl",
-        "Efreeti War Axe",
-        "Efreeti Zweihander",
-        "Efreeti Scimitar",
-        "Efreeti Mace",
-        "Efreeti War Horn",
-        "Efreeti War Spear",
-        "Efreeti War Club",
-        "Efreeti War Bow",
-        "Efreeti Magi Staff",
-        "Efreeti Dirk",
-        "Efreeti Battle Axe",
-        "Efreeti War Shield"
+        "Large Sky Pearl"
       ]
     },
     {
@@ -121729,36 +121930,6 @@
       "level": "48-51",
       "zones": [
         "Plane of Fear"
-      ],
-      "drops": [
-        "Shiverback-hide Gloves",
-        "Shiverback-hide Boots",
-        "Cryosilk Sleeves",
-        "Vermiculated Armplates",
-        "Umbral Platemail Vambraces",
-        "Valorium Bracers",
-        "Imbrued Platemail Bracer",
-        "Rune Etched Boots",
-        "Ethereal Mist Helm",
-        "Ethereal Mist Boots",
-        "Thorny Vine Greaves",
-        "Woven Shadow Bracer",
-        "Woven Shadow Gauntlets",
-        "Woven Shadow Greaves",
-        "Indicolite Gauntlets",
-        "Nilitim's Grimoire Pg. 379",
-        "Nilitim's Grimoire Pg. 400",
-        "Nilitim's Grimoire Pg. 401",
-        "Nilitim's Grimoire Pg. 450",
-        "Rune of Rathe",
-        "Rune of Ap`Sagor",
-        "Rune of the Astral",
-        "Tears of Prexus",
-        "Wing of Xegony",
-        "Words of Requisition",
-        "Words of Acquisition (Beza)",
-        "Words of Grappling",
-        "Words of Crippling Force"
       ],
       "loc": [
         {
@@ -123083,7 +123254,7 @@
         {
           "ns": -131,
           "ew": 23,
-          "pct": 33
+          "z": 152.77
         }
       ]
     },
@@ -123291,13 +123462,12 @@
         "Ethereal Sapphire",
         "Finely Woven Gold Mesh",
         "Gem of Invigoration",
+        "Key of Misfortune",
         "Sky Emerald",
         "Small Ruby",
         "Songbird Statuette",
         "Sphinx Eye Opal",
-        "Ysgaril Root",
-        "Wind Rune Ozah",
-        "Broken Mirror"
+        "Ysgaril Root"
       ]
     },
     {
@@ -123458,7 +123628,8 @@
         "Neriak Foreign Quarter"
       ],
       "drops": [
-        "Ogre Head"
+        "Ogre Head",
+        "Cinctured Whip"
       ],
       "loc": [
         {
@@ -124716,7 +124887,7 @@
         "Surefall Glade"
       ],
       "drops": [
-        "Great Staff"
+        "Fine Steel Great Staff"
       ],
       "loc": [
         {
@@ -124755,6 +124926,14 @@
           "ns": 526,
           "ew": -33
         }
+      ]
+    },
+    {
+      "page": "Ranger Spirit",
+      "name": "Ranger Spirit",
+      "level": "55",
+      "zones": [
+        "Plane of Sky"
       ]
     },
     {
@@ -125954,6 +126133,28 @@
       ]
     },
     {
+      "page": "Retseth Tretse",
+      "name": "Retseth Tretse",
+      "level": "~53",
+      "zones": [
+        "The Hole"
+      ],
+      "drops": [
+        "Empyran Jerkin",
+        "Mudman Enforcer",
+        "Essence of Earth",
+        "Stonemelder's Band",
+        "Idol of the Underking"
+      ],
+      "loc": [
+        {
+          "ns": -178.33,
+          "ew": 265.9,
+          "z": -292.63
+        }
+      ]
+    },
+    {
       "page": "Rexx Frostweaver",
       "name": "Rexx Frostweaver",
       "level": "30",
@@ -126165,6 +126366,11 @@
           "ns": 161,
           "ew": -339,
           "pct": 100
+        },
+        {
+          "ns": 195.8,
+          "ew": 267.81,
+          "z": 2.56
         }
       ]
     },
@@ -128279,6 +128485,14 @@
           "ew": 838,
           "pct": 25
         }
+      ]
+    },
+    {
+      "page": "Sarkis Ebonblade",
+      "name": "Sarkis Ebonblade",
+      "level": "55",
+      "zones": [
+        "Plane of Sky"
       ]
     },
     {
@@ -133381,6 +133595,14 @@
       ]
     },
     {
+      "page": "Sergeant Herptol",
+      "name": "Sergeant Herptol",
+      "level": "12",
+      "zones": [
+        "Rathe Mountains"
+      ]
+    },
+    {
       "page": "Sergeant J`Narus",
       "name": "Sergeant J`Narus",
       "level": "25",
@@ -135328,13 +135550,6 @@
       "level": "8",
       "zones": [
         "Lavastorm Mountains"
-      ],
-      "loc": [
-        {
-          "ns": 1507,
-          "ew": 924,
-          "pct": 100
-        }
       ]
     },
     {
@@ -135390,7 +135605,10 @@
       "drops": [
         "Boots of Brawn",
         "Fordel Short Sword",
-        "Words of Bondage"
+        "Words of Bondage",
+        "Damaged Militia Helm",
+        "Long Sword",
+        "Short Sword"
       ],
       "loc": [
         {
@@ -135800,7 +136018,7 @@
         "Sphinxian Circlet",
         "Sphinxian Ring",
         "Spiritualist`s Ring",
-        "Replica of the Wyrm Queen"
+        "Veeshan's Key"
       ]
     },
     {
@@ -135836,6 +136054,9 @@
       "level": "25",
       "zones": [
         "Surefall Glade"
+      ],
+      "drops": [
+        "Human Blood"
       ],
       "loc": [
         {
@@ -136571,7 +136792,7 @@
     {
       "page": "Slansin",
       "name": "Slansin",
-      "level": "10",
+      "level": "50",
       "zones": [
         "Erudin Palace"
       ],
@@ -137247,7 +137468,8 @@
       "loc": [
         {
           "ns": -85,
-          "ew": -286
+          "ew": -286,
+          "z": -62
         }
       ]
     },
@@ -137421,25 +137643,6 @@
       ]
     },
     {
-      "page": "Solusek kobold king",
-      "name": "Solusek kobold king",
-      "level": "42",
-      "zones": [
-        "Nagafen's Lair"
-      ],
-      "drops": [
-        "Runed Mithril Bracer",
-        "Fleshripper"
-      ],
-      "loc": [
-        {
-          "ns": -549,
-          "ew": -362,
-          "pct": 50
-        }
-      ]
-    },
-    {
       "page": "Solusek Kobold Shaman",
       "name": "Solusek kobold shaman",
       "level": "36-38",
@@ -137592,7 +137795,8 @@
       ],
       "drops": [
         "Giant Bat Fur",
-        "Giant Bat Wing"
+        "Giant Bat Wing",
+        "Bat Blood"
       ],
       "loc": [
         {
@@ -138935,6 +139139,40 @@
       "level": "35",
       "zones": [
         "East Freeport"
+      ],
+      "loc": [
+        {
+          "ns": -168,
+          "ew": -724
+        }
+      ]
+    },
+    {
+      "page": "Stable Hand Kaye",
+      "name": "Stable Hand Kaye",
+      "level": "35",
+      "zones": [
+        "North Qeynos"
+      ],
+      "loc": [
+        {
+          "ns": 201,
+          "ew": 572
+        }
+      ]
+    },
+    {
+      "page": "Stablehand Fleeb",
+      "name": "Stablehand Fleeb",
+      "level": "60",
+      "zones": [
+        "Rathe Mountains"
+      ],
+      "loc": [
+        {
+          "ns": -2244,
+          "ew": 589
+        }
       ]
     },
     {
@@ -139491,6 +139729,22 @@
       ]
     },
     {
+      "page": "Stragen The Hewer",
+      "name": "Stragen The Hewer",
+      "level": "55",
+      "zones": [
+        "Plane of Sky"
+      ]
+    },
+    {
+      "page": "Strandar Pinemist",
+      "name": "Strandar Pinemist",
+      "level": "55",
+      "zones": [
+        "Plane of Sky"
+      ]
+    },
+    {
       "page": "Strathbone Healer",
       "name": "strathbone healer",
       "level": "30",
@@ -139686,25 +139940,6 @@
       "name": "Sugal the Fist"
     },
     {
-      "page": "Sulgar",
-      "name": "Sulgar",
-      "level": "50",
-      "zones": [
-        "Everfrost Peaks"
-      ],
-      "drops": [
-        "Robe of the Evoker",
-        "Human Blood"
-      ],
-      "loc": [
-        {
-          "ns": 3032,
-          "ew": -2395,
-          "pct": 100
-        }
-      ]
-    },
-    {
       "page": "Sulon McMoor",
       "name": "Sulon McMoor",
       "level": "61",
@@ -139832,6 +140067,20 @@
         {
           "ns": 3992,
           "ew": -1383
+        }
+      ]
+    },
+    {
+      "page": "Sven Felligan",
+      "name": "Sven Felligan",
+      "zones": [
+        "Everfrost Peaks"
+      ],
+      "loc": [
+        {
+          "ns": 2885,
+          "ew": -3483,
+          "z": -37
         }
       ]
     },
@@ -140230,12 +140479,6 @@
       "zones": [
         "Cazic Thule"
       ],
-      "drops": [
-        "Lizardscale Belt",
-        "Ravenscale Armguards",
-        "Short Sword",
-        "Rubicite Vambraces"
-      ],
       "loc": [
         {
           "ns": 930,
@@ -140251,9 +140494,10 @@
         "Cazic Thule"
       ],
       "drops": [
-        "Lizardscale Mantle",
+        "Rubicite Bracers",
         "Ravenscale Bracer",
-        "Rubicite Bracers"
+        "Lizard Meat",
+        "Lizardscale Mantle"
       ],
       "loc": [
         {
@@ -140271,10 +140515,11 @@
         "Cazic Thule"
       ],
       "drops": [
-        "Lizardscale Cloak",
+        "Rubicite Greaves",
         "Ravenscale Leggings",
         "Goblin Shin Splinter",
-        "Rubicite Greaves"
+        "Lizard Meat",
+        "Lizardscale Cloak"
       ],
       "loc": [
         {
@@ -140977,7 +141222,8 @@
       "level": "15",
       "zones": [
         "Surefall Glade",
-        "Qeynos Hills"
+        "Qeynos Hills",
+        "East Freeport"
       ],
       "drops": [
         "Barbarian Head (Talym's Head)"
@@ -140987,6 +141233,10 @@
           "ns": 144,
           "ew": -415,
           "pct": 100
+        },
+        {
+          "ns": -211,
+          "ew": -885
         }
       ]
     },
@@ -141300,7 +141550,7 @@
     {
       "page": "Tarker Gargurd",
       "name": "Tarker Gargurd",
-      "level": "45",
+      "level": "50",
       "zones": [
         "East Freeport"
       ],
@@ -142244,11 +142494,12 @@
         "Splitpaw Lair"
       ],
       "drops": [
+        "Dagger of Dropping",
         "Kicsh Der Pavz",
+        "Preserved Split Paw Eye",
+        "Rune of the Helix",
         "Thick Amber Potion",
         "Tanned Split Paw Skin",
-        "Dagger of Dropping",
-        "Rune of the Helix",
         "Words of Descrying"
       ],
       "loc": [
@@ -142342,6 +142593,14 @@
           "ns": 105,
           "ew": -202
         }
+      ]
+    },
+    {
+      "page": "Thalik Silenthand",
+      "name": "Thalik Silenthand",
+      "level": "55",
+      "zones": [
+        "Plane of Sky"
       ]
     },
     {
@@ -142934,22 +143193,32 @@
         "Plane of Sky"
       ],
       "drops": [
-        "Brass Knuckles",
-        "Belt of Transience",
-        "White Satin Gloves",
-        "Large Sky Pearl",
-        "Efreeti Mace",
-        "Efreeti Magi Staff",
-        "Efreeti War Staff",
+        "Brass_Knuckles",
+        "Efreeti War Shield",
+        "Efreeti War Axe",
+        "Efreeti Scimitar",
         "Efreeti Wind Staff",
+        "Efreeti Mace",
+        "Efreeti Dirk",
+        "Efreeti Standard",
         "Efreeti War Horn",
-        "Efreeti Belt",
+        "Efreeti War Maul",
+        "Efreeti War Spear",
+        "Efreeti War Staff",
+        "Efreeti War Club",
+        "Efreeti Long Sword",
         "Efreeti War Bow",
-        "Fine Steel Dagger",
-        "Wind Etched Bracers of Ro",
-        "Wind Etched Boots of Ro",
-        "Belt of Contention",
-        "Belt of the Pine"
+        "Efreeti Magi Staff",
+        "Efreeti Belt",
+        "Efreeti Battle Axe",
+        "Efreeti Zweihander",
+        "Golden Efreeti Turban",
+        "Golden Efreeti Chestplate",
+        "Golden Efreeti Vambraces",
+        "Golden Efreeti Bracers",
+        "Golden Efreeti Gauntlets",
+        "Golden Efreeti Greaves",
+        "Large Sky Pearl"
       ]
     },
     {
@@ -143139,13 +143408,15 @@
       "loc": [
         {
           "ns": 86,
-          "ew": -62,
-          "pct": 50
+          "ew": -62
         },
         {
           "ns": 310,
-          "ew": 20,
-          "pct": 50
+          "ew": 20
+        },
+        {
+          "ns": -6,
+          "ew": 162
         }
       ]
     },
@@ -143726,7 +143997,7 @@
     {
       "page": "Thomas",
       "name": "Thomas",
-      "level": "61",
+      "level": "70",
       "zones": [
         "Rathe Mountains"
       ],
@@ -143933,22 +144204,6 @@
         "Plane of Sky"
       ],
       "drops": [
-        "White Satin Gloves",
-        "Belt of Tranquility",
-        "Belt of Iniquity",
-        "Belt of Virtue",
-        "Belt of Concordance",
-        "Belt of Contention",
-        "Belt of Transience",
-        "Weight of the Gods",
-        "Blade of Abrogation",
-        "Whitened Treant Fists",
-        "Treant Tear",
-        "Symbol of Marr",
-        "Stein of Flowing Ichor",
-        "Bracelet of Cessation",
-        "Bracelet of Exertion",
-        "Bracelet of Quiescence",
         "Key of Swords",
         "Key of the Misplaced"
       ],
@@ -146184,14 +146439,9 @@
     {
       "page": "Trissa Whistlesong",
       "name": "Trissa Whistlesong",
-      "level": "35, previously 15",
+      "level": "35",
       "zones": [
         "West Freeport"
-      ],
-      "drops": [
-        "Mandolin",
-        "Wooden Flute",
-        "Unfinished Brass Trumpet"
       ],
       "loc": [
         {
@@ -149581,6 +149831,7 @@
         {
           "ns": -236,
           "ew": -855,
+          "z": -52,
           "pct": 14
         }
       ]
@@ -149664,7 +149915,8 @@
       ],
       "drops": [
         "Leather Whip",
-        "Clawed Knuckle-Ring"
+        "Clawed Knuckle-Ring",
+        "Backpack"
       ],
       "loc": [
         {
@@ -151998,7 +152250,7 @@
     {
       "page": "Vesteri Nomanoi",
       "name": "Vesteri Nomanoi",
-      "level": "36",
+      "level": "70",
       "zones": [
         "Surefall Glade"
       ],
@@ -155866,14 +156118,15 @@
     {
       "page": "Weligon Steelherder",
       "name": "Weligon Steelherder",
-      "level": "61",
+      "level": "70",
       "zones": [
         "Erudin"
       ],
       "loc": [
         {
           "ns": -1041,
-          "ew": -395
+          "ew": -395,
+          "z": 51
         }
       ]
     },
@@ -156118,9 +156371,12 @@
       ],
       "loc": [
         {
-          "ns": 1082,
-          "ew": -142,
-          "pct": 33
+          "ns": 1448,
+          "ew": 1193
+        },
+        {
+          "ns": -330,
+          "ew": -1060
         }
       ]
     },
@@ -156405,6 +156661,14 @@
       ]
     },
     {
+      "page": "Wizard Schrock",
+      "name": "Wizard Schrock",
+      "level": "55",
+      "zones": [
+        "Plane of Sky"
+      ]
+    },
+    {
       "page": "Wolfmaster Berglind",
       "name": "Wolfmaster Berglind",
       "level": "38",
@@ -156512,13 +156776,6 @@
         "Plane of Fear"
       ],
       "drops": [
-        "Vermiculated Crown",
-        "Vermiculated Tunic",
-        "Vermiculated Armplates",
-        "Vermiculated Bracelet",
-        "Vermiculated Gloves",
-        "Vermiculated Leggings",
-        "Vermiculated Boots",
         "Head of the Serpent"
       ],
       "loc": [
@@ -156912,7 +157169,7 @@
     {
       "page": "Xicotl",
       "name": "Xicotl",
-      "level": "40",
+      "level": "39-41",
       "zones": [
         "Mistmoore Castle"
       ],
@@ -157913,9 +158170,9 @@
       ],
       "loc": [
         {
-          "ns": 1237,
-          "ew": -2023,
-          "pct": 100
+          "ns": 694,
+          "ew": -1115,
+          "z": 24
         }
       ]
     },
@@ -158740,6 +158997,8 @@
       ],
       "drops": [
         "Charred Ruby",
+        "Cursed Blade",
+        "Dark Plate Leggings",
         "Grave Mold"
       ],
       "loc": [

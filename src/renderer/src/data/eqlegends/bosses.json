@@ -1,5 +1,5 @@
 {
-  "scrapedAt": "2026-08-02T06:37:16.108Z",
+  "scrapedAt": "2026-10-08T03:45:25.359Z",
   "targets": [
     {
       "name": "Lord Nagafen",
@@ -8,7 +8,7 @@
         "Lord Nagafen"
       ],
       "zone": "Nagafen's Lair",
-      "image": "https://wiki.project1999.com/images/thumb/Npc_lord_nagafen.png/300px-Npc_lord_nagafen.png"
+      "image": "https://eqlwiki.com/images/thumb/e/ee/Npc_lord_nagafen.png/900px-Npc_lord_nagafen.png"
     },
     {
       "name": "Lady Vox",
@@ -17,7 +17,7 @@
         "Lady Vox"
       ],
       "zone": "Permafrost Keep",
-      "image": "https://wiki.project1999.com/images/thumb/Npc_lady_vox.png/200px-Npc_lady_vox.png"
+      "image": "https://eqlwiki.com/images/thumb/b/b3/Npc_lady_vox.png/900px-Npc_lady_vox.png"
     },
     {
       "name": "Master Yael",
@@ -26,7 +26,7 @@
         "Master Yael"
       ],
       "zone": "The Hole",
-      "image": "https://wiki.project1999.com/images/Npc_master_yael.png"
+      "image": "https://eqlwiki.com/images/7/7e/Npc_master_yael.jpg"
     },
     {
       "name": "Phinigel Autropos",
@@ -34,7 +34,8 @@
       "match": [
         "Phinigel Autropos"
       ],
-      "zone": "Kedge Keep"
+      "zone": "Kedge Keep",
+      "image": "https://eqlwiki.com/images/thumb/6/66/RaidVoidling_Phingel.png/300px-RaidVoidling_Phingel.png"
     },
     {
       "name": "Cazic Thule",
@@ -44,7 +45,7 @@
         "Cazic-Thule"
       ],
       "zone": "Plane of Fear",
-      "image": "https://wiki.project1999.com/images/thumb/Npc_cazic_thule.png/200px-Npc_cazic_thule.png"
+      "image": "https://eqlwiki.com/images/7/7f/Ct.jpg"
     },
     {
       "name": "Dread",
@@ -53,7 +54,7 @@
         "Dread"
       ],
       "zone": "Plane of Fear",
-      "image": "https://wiki.project1999.com/images/thumb/Npc_dread.png/200px-Npc_dread.png"
+      "image": "https://eqlwiki.com/images/4/4d/Npc_dread.png"
     },
     {
       "name": "Terror",
@@ -62,7 +63,7 @@
         "Terror"
       ],
       "zone": "Plane of Fear",
-      "image": "https://wiki.project1999.com/images/thumb/Npc_terror.png/200px-Npc_terror.png"
+      "image": "https://eqlwiki.com/images/4/4d/Npc_terror.png"
     },
     {
       "name": "Fright",
@@ -71,7 +72,7 @@
         "Fright"
       ],
       "zone": "Plane of Fear",
-      "image": "https://wiki.project1999.com/images/thumb/Npc_fright.png/200px-Npc_fright.png"
+      "image": "https://eqlwiki.com/images/thumb/d/dd/Npc_fright.png/900px-Npc_fright.png"
     },
     {
       "name": "A dracoliche",
@@ -81,7 +82,7 @@
         "A dracoliche"
       ],
       "zone": "Plane of Fear",
-      "image": "https://wiki.project1999.com/images/thumb/Npc_dracoliche.jpg/300px-Npc_dracoliche.jpg"
+      "image": "https://eqlwiki.com/images/thumb/3/3a/Npc_dracoliche.jpg/900px-Npc_dracoliche.jpg"
     },
     {
       "name": "Innoruuk",
@@ -91,7 +92,7 @@
         "Innoruuk"
       ],
       "zone": "Plane of Hate",
-      "image": "https://wiki.project1999.com/images/Innoruuk.PNG"
+      "image": "https://eqlwiki.com/images/8/87/Innoruuk.PNG"
     },
     {
       "name": "Maestro of Rancor",
@@ -100,7 +101,7 @@
         "Maestro of Rancor"
       ],
       "zone": "Plane of Hate",
-      "image": "https://wiki.project1999.com/images/Npc_maestro_of_rancor.jpg"
+      "image": "https://eqlwiki.com/images/0/04/Maestro_of_Rancor.png"
     },
     {
       "name": "Lord of Loathing",
@@ -109,7 +110,7 @@
         "Lord of Loathing"
       ],
       "zone": "Plane of Hate",
-      "image": "https://wiki.project1999.com/images/Npc_lord_of_loathing.png"
+      "image": "https://eqlwiki.com/images/d/d2/Npc_lord_of_loathing.png"
     },
     {
       "name": "Lord of Ire",
@@ -118,7 +119,7 @@
         "Lord of Ire"
       ],
       "zone": "Plane of Hate",
-      "image": "https://wiki.project1999.com/images/Lord_Of_Ire.png"
+      "image": "https://eqlwiki.com/images/a/ab/Lord_Of_Ire.png"
     },
     {
       "name": "Master of Spite",
@@ -126,7 +127,8 @@
       "match": [
         "Master of Spite"
       ],
-      "zone": "Plane of Hate"
+      "zone": "Plane of Hate",
+      "image": "https://eqlwiki.com/images/3/3b/Npc_master_of_spite.png"
     },
     {
       "name": "Mistress of Scorn",
@@ -135,7 +137,7 @@
         "Mistress of Scorn"
       ],
       "zone": "Plane of Hate",
-      "image": "https://wiki.project1999.com/images/Mistress_of_scorn.jpg"
+      "image": "https://eqlwiki.com/images/8/81/Mistress_of_scorn.jpg"
     },
     {
       "name": "High Priest M`kari",
@@ -144,7 +146,7 @@
         "High Priest M`kari"
       ],
       "zone": "Plane of Hate",
-      "image": "https://wiki.project1999.com/images/Npc_high_priest_mkari.png"
+      "image": "https://eqlwiki.com/images/b/b2/Npc_high_priest_mkari.png"
     },
     {
       "name": "Magi P`tasa",
@@ -161,7 +163,7 @@
         "Coercer T`vala"
       ],
       "zone": "Plane of Hate",
-      "image": "https://wiki.project1999.com/images/Npc_coercer_t%60vala.png"
+      "image": "https://eqlwiki.com/images/1/1f/Npc_coercer_t%60vala.png"
     },
     {
       "name": "Grandmaster R`Tal",
@@ -170,7 +172,7 @@
         "Grandmaster R`Tal"
       ],
       "zone": "Plane of Hate",
-      "image": "https://wiki.project1999.com/images/Npc_grandmaster_r%60tal.png"
+      "image": "https://eqlwiki.com/images/d/d8/Npc_grandmaster_r%60tal.png"
     },
     {
       "name": "Ashenbone Broodmaster",
@@ -179,7 +181,7 @@
         "Ashenbone Broodmaster"
       ],
       "zone": "Plane of Hate",
-      "image": "https://wiki.project1999.com/images/Npc_ashenbone_broodmaster.png"
+      "image": "https://eqlwiki.com/images/d/dc/Npc_ashenbone_broodmaster.png"
     },
     {
       "name": "Avatar of Abhorrence",
@@ -188,7 +190,7 @@
         "Avatar of Abhorrence"
       ],
       "zone": "Plane of Hate",
-      "image": "https://wiki.project1999.com/images/Npc_avatar_of_abhorrence.png"
+      "image": "https://eqlwiki.com/images/d/d7/Npc_avatar_of_abhorrence.png"
     },
     {
       "name": "Thunder Spirit Princess",
@@ -197,7 +199,7 @@
         "Thunder Spirit Princess"
       ],
       "zone": "Plane of Sky — Island 1",
-      "image": "https://wiki.project1999.com/images/Npc_a_thunder_spirit_princess.png"
+      "image": "https://eqlwiki.com/images/e/e0/Npc_a_thunder_spirit_princess.png"
     },
     {
       "name": "Noble Dojorn",
@@ -206,7 +208,7 @@
         "Noble Dojorn"
       ],
       "zone": "Plane of Sky — Island 1.5",
-      "image": "https://wiki.project1999.com/images/thumb/Npc_noble_dojorn.png/200px-Npc_noble_dojorn.png"
+      "image": "https://eqlwiki.com/images/6/6b/Npc_noble_dojorn.png"
     },
     {
       "name": "Protector of Sky",
@@ -215,7 +217,7 @@
         "Protector of Sky"
       ],
       "zone": "Plane of Sky — Island 2",
-      "image": "https://wiki.project1999.com/images/Npc_protector_of_sky.png"
+      "image": "https://eqlwiki.com/images/f/f9/Item_.png"
     },
     {
       "name": "Gorgalosk",
@@ -224,7 +226,7 @@
         "Gorgalosk"
       ],
       "zone": "Plane of Sky — Island 3",
-      "image": "https://wiki.project1999.com/images/Npc_gorgalosk.png"
+      "image": "https://eqlwiki.com/images/b/bf/Npc_gorgalosk.png"
     },
     {
       "name": "Keeper of Souls",
@@ -233,7 +235,7 @@
         "Keeper of Souls"
       ],
       "zone": "Plane of Sky — Island 4",
-      "image": "https://wiki.project1999.com/images/thumb/Npc_keeper_of_souls.png/200px-Npc_keeper_of_souls.png"
+      "image": "https://eqlwiki.com/images/e/e9/Keeper_of_souls.png"
     },
     {
       "name": "The Spiroc Lord",
@@ -242,7 +244,7 @@
         "The Spiroc Lord"
       ],
       "zone": "Plane of Sky — Island 5",
-      "image": "https://wiki.project1999.com/images/thumb/Pos_tsl1.png/200px-Pos_tsl1.png"
+      "image": "https://eqlwiki.com/images/1/11/Pos_tsl1.png"
     },
     {
       "name": "Bazzt Zzzt",
@@ -251,7 +253,7 @@
         "Bazzt Zzzt"
       ],
       "zone": "Plane of Sky — Island 6",
-      "image": "https://wiki.project1999.com/images/thumb/Npc_bazzt_zzzt.png/200px-Npc_bazzt_zzzt.png"
+      "image": "https://eqlwiki.com/images/d/dc/Npc_bazzt_zzzt.png"
     },
     {
       "name": "Sister of the Spire",
@@ -260,7 +262,7 @@
         "Sister of the Spire"
       ],
       "zone": "Plane of Sky — Island 7",
-      "image": "https://wiki.project1999.com/images/thumb/Npc_sister_of_the_spire.png/200px-Npc_sister_of_the_spire.png"
+      "image": "https://eqlwiki.com/images/thumb/3/37/Pic.png/900px-Pic.png"
     },
     {
       "name": "Eye of Veeshan",
@@ -269,7 +271,7 @@
         "Eye of Veeshan"
       ],
       "zone": "Plane of Sky — Island 8",
-      "image": "https://wiki.project1999.com/images/thumb/Npc_eye_of_veeshan.png/200px-Npc_eye_of_veeshan.png"
+      "image": "https://eqlwiki.com/images/7/7c/Npc_eye_of_veeshan.jpg"
     },
     {
       "name": "Overseer of Air",
@@ -278,7 +280,7 @@
         "Overseer of Air"
       ],
       "zone": "Plane of Sky — Efreeti Cycle (Island 4)",
-      "image": "https://wiki.project1999.com/images/thumb/Npc_overseer_of_air.png/200px-Npc_overseer_of_air.png"
+      "image": "https://eqlwiki.com/images/thumb/7/71/Npc_overseer_of_air.png/900px-Npc_overseer_of_air.png"
     },
     {
       "name": "The Hand of Veeshan",
@@ -288,7 +290,7 @@
         "the Hand of Veeshan"
       ],
       "zone": "Plane of Sky — Efreeti Cycle (Island 8)",
-      "image": "https://wiki.project1999.com/images/thumb/Npc_the_hand_of_veeshan.png/200px-Npc_the_hand_of_veeshan.png"
+      "image": "https://eqlwiki.com/images/1/15/Npc_the_hand_of_veeshan.png"
     }
   ]
 }
