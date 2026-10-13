@@ -1,0 +1,46 @@
+{
+  "project": "eql-companion-ai",
+  "created": "2026-10-13",
+  "status": "local development fork; hosted GitHub fork pending authentication",
+  "baseline": {
+    "repository": "https://github.com/Zeratfule/EQ-Zera",
+    "tag": "v1.26.0",
+    "commit": "b95051bf5eb24dca10f1a505233d60e8b863c2c4",
+    "branch": "ai-foundation",
+    "reason": "Continued Companion development with quest, gear, crafting and farming surfaces suitable for character-aware AI. This is a development-base choice, not a verified ranking of all apps."
+  },
+  "secondary": {
+    "repository": "https://github.com/brianmontanaweb/everquest-companion",
+    "tag": "v1.17.0",
+    "release_notes_date": "2026-09-19",
+    "identification": "Matches the user's pasted release notes exactly.",
+    "review_candidates": [
+      "XP lines containing '(with a bonus)' and raid lockout credit",
+      "Manual base-rung clears",
+      "Sky over-hand-in counts",
+      "Character-name meter labels and combat scope selector",
+      "Feedback log scrubbing and loot ledger scrolling"
+    ],
+    "merge_status": "Reference only; no changes merged. Check equivalent fixes before importing."
+  },
+  "existing_ai_backend": "/home/andrew/eql-spell-chat",
+  "verified_integration_surfaces": [
+    "src/preload/planner.ts: plannerInventory, plannerDonors, gearIndex, getExaltPlans",
+    "src/preload/knowledge.ts: spell and item lookups, level unlocks, resist evidence",
+    "src/main/ipc/planner.ts: main-process planner handlers"
+  ],
+  "first_implementation_milestone": [
+    "Establish a clean Windows build and existing test baseline.",
+    "Give this fork its own product identity, settings directory and update policy before launching a packaged build.",
+    "Add an Ask AI view backed by the existing Qwen proxy.",
+    "Expose validated read-only character, worn-gear, exaltation and combat queries to Qwen through main-process handlers.",
+    "Keep spell calculations in deterministic tools; label missing EQL modifiers and preserve evidence provenance.",
+    "Validate Supernova versus Bard Denon's Desperate Dirge against the selected build and observed logs."
+  ],
+  "validation": {
+    "application_code_modified": false,
+    "application_tests_run": false,
+    "application_installed": false,
+    "ai_panel_implemented": false
+  }
+}
