@@ -1,7 +1,8 @@
 {
   "project": "eql-companion-ai",
   "created": "2026-10-13",
-  "status": "local development fork; hosted GitHub fork pending authentication",
+  "status": "hosted development fork created; AI implementation pending",
+  "fork_repository": "https://github.com/DHokie88/eql-companion-ai",
   "baseline": {
     "repository": "https://github.com/Zeratfule/EQ-Zera",
     "tag": "v1.26.0",
