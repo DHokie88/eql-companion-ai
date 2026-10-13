@@ -16,7 +16,7 @@ import { OVERLAY_KIND_LABEL } from '@shared/overlayLabels'
 import { track } from '../lib/telemetry'
 import PerfChip from './PerfChip'
 import { isDragSurfaceDoubleClick } from './titleBarDrag'
-import { FONTS, NEON, PALETTE, withAlpha } from '../../../shared/palette'
+import { PALETTE, withAlpha } from '../../../shared/palette'
 
 /**
  * Frameless window title bar (Task #23). Replaces BOTH the OS chrome and the old
@@ -391,43 +391,17 @@ export default function TitleBar({
         alignItems: 'center',
         gap: 1.5,
         pl: 2,
-        position: 'relative',
+        borderBottom: 1,
+        borderColor: 'divider',
         bgcolor: 'background.paper',
-        userSelect: 'none',
-        // The signature rule, along the bar's bottom edge: magenta → violet → cyan.
-        '&::after': {
-          content: '""',
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          bottom: 0,
-          height: 2,
-          backgroundImage: NEON,
-          opacity: 0.85,
-          pointerEvents: 'none'
-        }
+        userSelect: 'none'
       }}
     >
-      {/* THE BRAND: a three-bar cartridge glyph in the three neons, then the name in the display
-          face, tracked wide. Plain text — the e2e harness reads the bar by testid, not by copy. */}
-      <Box aria-hidden sx={{ display: 'flex', flexDirection: 'column', gap: '3px', mr: 0.25 }}>
-        {[PALETTE.magenta, PALETTE.accent, PALETTE.cyan].map((c) => (
-          <Box key={c} sx={{ width: 14, height: 3, borderRadius: 0.5, bgcolor: c, boxShadow: `0 0 6px ${withAlpha(c, 0.7)}` }} />
-        ))}
-      </Box>
       <Typography
-        component="span"
-        sx={{
-          fontFamily: FONTS.display,
-          fontWeight: 700,
-          fontSize: 13,
-          letterSpacing: '0.22em',
-          color: 'text.primary',
-          whiteSpace: 'nowrap',
-          textShadow: `0 0 12px ${withAlpha(PALETTE.accent, 0.55)}`
-        }}
+        variant="subtitle2"
+        sx={{ color: 'primary.main', fontWeight: 700, whiteSpace: 'nowrap' }}
       >
-        EQ ZERA
+        EQL Companion Fork
       </Typography>
 
       {/* Drag spacer between brand and the right-hand controls. */}

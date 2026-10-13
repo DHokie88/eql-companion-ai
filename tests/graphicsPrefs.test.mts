@@ -160,10 +160,10 @@ test('an opaque overlay is built on the SAME colour the page already paints', ()
   assert.equal(overlayBackgroundColor(false), TRANSPARENT_OVERLAY_BG)
   assert.equal(overlayBackgroundColor(true), OPAQUE_OVERLAY_BG)
   // The identity is the point: `withAlpha(PALETTE.bg, α)` (OverlayMeter / HealMeter / EventLogOverlay)
-  // composited onto #0b0f1a is #0b0f1a at every α — the bgAlpha look with the alpha taken out,
+  // composited onto #0f1115 is #0f1115 at every α — the bgAlpha look with the alpha taken out,
   // never a second palette. If those components ever change colour, this assertion is where the
   // compatibility mode finds out.
-  assert.equal(OPAQUE_OVERLAY_BG.toLowerCase(), '#0b0f1a')
+  assert.equal(OPAQUE_OVERLAY_BG.toLowerCase(), '#0f1115')
   assert.equal(TRANSPARENT_OVERLAY_BG, '#00000000')
 })
 

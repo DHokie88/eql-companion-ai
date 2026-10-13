@@ -39,9 +39,25 @@
     "Validate Supernova versus Bard Denon's Desperate Dirge against the selected build and observed logs."
   ],
   "validation": {
-    "application_code_modified": false,
-    "application_tests_run": false,
+    "application_code_modified": true,
+    "application_tests_run": true,
     "application_installed": false,
     "ai_panel_implemented": false
+  },
+  "windows_development": {
+    "checkout": "C:/Users/andrew/eql-companion-ai",
+    "launcher": "Open-Fork.cmd",
+    "desktop_shortcut": "EQL Companion Fork",
+    "settings": "%APPDATA%/everquest-companion-dev",
+    "engine": "Reused the matching installed EQ Zera 1.26.0 release binary; Rust source unchanged.",
+    "engine_sha256": "42b517d2f79656d9b1e9bf4338a1330c88f4248416ccc9675245f00b27c1440d"
+  },
+  "appearance": {
+    "reference": "brianmontanaweb/everquest-companion v1.17.0",
+    "changes": ["System fonts", "Dark-and-gold theme", "220px icon-and-text sidebar", "Plain title bar and component styling"],
+    "preserved": ["Zera feature routes", "Quests", "Zone Loot", "Gear and exaltation planner"],
+    "review": "Hermes using local Qwen38; findings checked against source and the live application.",
+    "checks": ["87 focused unit regressions", "Typecheck", "Lint", "Desktop build", "Live Electron font, colour and navigation checks"],
+    "e2e_harness_limit": "The upstream title-bar harness requires a local Cargo rebuild; Rust/Cargo is absent on AORUS. Live UI checks use the matching shipped engine instead."
   }
 }

@@ -1,81 +1,39 @@
 import type { JSX } from 'react'
-import { Box, Chip, Divider, Drawer, List, ListItemButton, ListItemIcon, Typography, type SxProps, type Theme } from '@mui/material'
-// The rail's own marks (railIcons.tsx) — drawn for this app, not the Material set. TriageMark is
-// dev-only like the row that uses it: a named export whose only use sits inside a `false &&`
-// branch is tree-shaken out with the branch.
 import {
-  AlertsMark,
-  BossesMark,
-  BuffsMark,
-  CombatMark,
-  FeedbackMark,
-  GearMark,
-  LevelingMark,
-  LootMark,
-  MapsMark,
-  MobsMark,
-  OverviewMark,
-  PoskyMark,
-  PreferencesMark,
-  QuestsMark,
-  TimersMark,
-  TriageMark,
-  ZoneLootMark
-} from './railIcons'
+  Box,
+  Chip,
+  Divider,
+  Drawer,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+} from '@mui/material'
+import SettingsIcon from '@mui/icons-material/Settings'
+import ShieldMoonIcon from '@mui/icons-material/ShieldMoon'
+import BarChartIcon from '@mui/icons-material/BarChart'
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong'
+import TrendingUpIcon from '@mui/icons-material/TrendingUp'
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents'
+import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive'
+import TimerIcon from '@mui/icons-material/Timer'
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh'
+import PetsIcon from '@mui/icons-material/Pets'
+import MapIcon from '@mui/icons-material/Map'
+import SpaceDashboardIcon from '@mui/icons-material/SpaceDashboard'
+import CheckroomIcon from '@mui/icons-material/Checkroom'
+import FeedbackIcon from '@mui/icons-material/Feedback'
+import AssignmentIcon from '@mui/icons-material/Assignment'
+import TravelExploreIcon from '@mui/icons-material/TravelExplore'
+// Dev-only, and its import goes with it: MUI's icon packages declare `sideEffects: false`, so
+// an icon whose only use sits inside a `false &&` branch is tree-shaken out with the branch.
+import RuleFolderIcon from '@mui/icons-material/RuleFolder'
 import UpdateChip from './UpdateChip'
 import { OWNER_TOOLS } from '../devFlags'
 import type { PrefsRouting } from '../appRouting'
 import { GEAR_AREA_VIEWS, VIEW_LABELS, loadGearTab, type View } from '../appViews'
-import { FONTS, NEON_VERTICAL, PALETTE, withAlpha } from '../../../shared/palette'
 
-// THE CONSOLE RAIL (EQ Zera, 2026-09-06). The nav is a narrow rail of icon-over-label cells in
-// the display face — a console's mode selector — rather than the upstream text list. 96px fits
-// the longest label ("PLANE OF SKY", "SEND FEEDBACK") on two centred lines at this size.
-export const DRAWER_WIDTH = 96
-
-/** One rail cell. The selected cell lights a vertical neon marker on the rail's edge and the
- *  accent on its icon; everything else stays quiet so the lit one is the only thing that reads. */
-const CELL_SX: SxProps<Theme> = {
-  position: 'relative',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: 0.4,
-  minHeight: 52,
-  px: 0.5,
-  py: 0.75,
-  borderRadius: 0,
-  color: 'text.secondary',
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    left: 0,
-    top: 10,
-    bottom: 10,
-    width: 3,
-    borderRadius: '0 2px 2px 0',
-    backgroundImage: NEON_VERTICAL,
-    opacity: 0,
-    transition: 'opacity 140ms ease'
-  },
-  '&.Mui-selected': {
-    color: 'primary.main',
-    '&::before': { opacity: 1 },
-    '& .MuiListItemIcon-root': { color: 'primary.main', filter: `drop-shadow(0 0 5px ${withAlpha(PALETTE.accent, 0.7)})` }
-  },
-  '& .MuiListItemIcon-root': { minWidth: 0, color: 'inherit', '& svg': { fontSize: 20 } }
-}
-
-/** The cell's label: the display face, tiny and tracked, allowed a second line. */
-const LABEL_SX: SxProps<Theme> = {
-  fontFamily: FONTS.display,
-  fontSize: 8.5,
-  fontWeight: 500,
-  letterSpacing: '0.12em',
-  textTransform: 'uppercase',
-  textAlign: 'center',
-  lineHeight: 1.3
-}
+export const DRAWER_WIDTH = 220
 
 /** A row is a view + an icon. The LABEL is not a field: it comes from `VIEW_LABELS`, the one
  *  place a tab is named, because a drill's Back button now says those names too (navOrigin.ts). */
@@ -110,7 +68,7 @@ const BETA = (
     size="small"
     label="beta"
     variant="outlined"
-    sx={{ height: 14, fontSize: 8, color: 'text.secondary', '& .MuiChip-label': { px: 0.5 } }}
+    sx={{ height: 18, fontSize: 10, color: 'text.secondary', '& .MuiChip-label': { px: 0.75 } }}
   />
 )
 
@@ -133,19 +91,12 @@ const BETA = (
 // opens the one you last used. The law that survives is the one that mattered: a row is a
 // DESTINATION, and clicking it takes you somewhere real.
 const ROWS: NavRow[] = [
-  { view: 'overview', icon: <OverviewMark /> },
-  { view: 'combat', icon: <CombatMark /> },
-  { view: 'mobs', icon: <MobsMark /> },
-  { view: 'loot', icon: <LootMark /> },
-  // QUESTS (EQ Zera, 2026-09-06): the scraped quest catalog with its steps, joined to the loot
-  // history. It follows Loot because that is the join a player comes here to make — "I looted
-  // this; what is it for?" — and it is one file plus this row (features/quests/QuestsView.tsx).
-  { view: 'quests', icon: <QuestsMark /> },
-  // ZONE LOOT (EQ Zera, ROADMAP §2): pick a zone, see every mob in it and what each drops, with
-  // your own counts and per-hour beside the wiki's list. It follows Quests for the reason Loot
-  // follows Mobs — it is another face of "what drops it, and did I get one" over the same
-  // committed corpus, and its rows link straight into both of those tabs.
-  { view: 'zoneloot', icon: <ZoneLootMark /> },
+  { view: 'overview', icon: <SpaceDashboardIcon /> },
+  { view: 'combat', icon: <BarChartIcon /> },
+  { view: 'mobs', icon: <PetsIcon /> },
+  { view: 'loot', icon: <ReceiptLongIcon /> },
+  { view: 'quests', icon: <AssignmentIcon /> },
+  { view: 'zoneloot', icon: <TravelExploreIcon /> },
   // THE GEAR AREA follows Loot for the same reason Loot follows Mobs: it is the far side of one
   // question — what drops it, what did I get, and then what should I wear, farm for and want. It
   // reads the same committed corpus and links back into the same Loot drill-down. The row keeps
@@ -153,30 +104,30 @@ const ROWS: NavRow[] = [
   // `VIEW_LABELS`, the one place any of this app's tabs is named.
   {
     view: 'gear',
-    icon: <GearMark />,
+    icon: <CheckroomIcon />,
     badge: BETA,
     area: GEAR_AREA_VIEWS,
-    opens: loadGearTab
+    opens: loadGearTab,
   },
-  { view: 'maps', icon: <MapsMark /> },
-  { view: 'bosses', icon: <BossesMark /> },
-  { view: 'posky', icon: <PoskyMark /> },
-  { view: 'alerts', icon: <AlertsMark /> },
-  { view: 'leveling', icon: <LevelingMark /> },
-  { view: 'buffs', icon: <BuffsMark /> },
+  { view: 'maps', icon: <MapIcon /> },
+  { view: 'bosses', icon: <EmojiEventsIcon /> },
+  { view: 'posky', icon: <ShieldMoonIcon /> },
+  { view: 'alerts', icon: <NotificationsActiveIcon /> },
+  { view: 'leveling', icon: <TrendingUpIcon /> },
+  { view: 'buffs', icon: <AutoFixHighIcon /> },
   // Respawn clocks (JOS-194) sit beside Buffs because both tabs are the same shape of answer —
   // a list of things counting down — and a player checking one is usually checking the other.
-  { view: 'timers', icon: <TimersMark /> }
+  { view: 'timers', icon: <TimerIcon /> },
 ]
 
 /** Bottom-aligned, outside ROWS — it is not a feature view and never moves. */
-const PREFERENCES: NavRow = { view: 'preferences', icon: <PreferencesMark /> }
+const PREFERENCES: NavRow = { view: 'preferences', icon: <SettingsIcon /> }
 
 /** One nav row. `data-testid="nav-<view>"` is the stable handle the e2e clicks. */
 function NavRowButton({
   row,
   view,
-  onSelect
+  onSelect,
 }: {
   row: NavRow
   view: View
@@ -187,13 +138,10 @@ function NavRowButton({
       data-testid={`nav-${row.view}`}
       selected={row.area ? row.area.includes(view) : view === row.view}
       onClick={() => onSelect(row.opens ? row.opens() : row.view)}
-      sx={CELL_SX}
     >
       <ListItemIcon>{row.icon}</ListItemIcon>
-      <Typography component="span" sx={LABEL_SX}>
-        {VIEW_LABELS[row.view]}
-      </Typography>
-      {row.badge && <Box sx={{ position: 'absolute', top: 4, right: 4 }}>{row.badge}</Box>}
+      <ListItemText primary={VIEW_LABELS[row.view]} />
+      {row.badge}
     </ListItemButton>
   )
 }
@@ -211,7 +159,7 @@ export default function NavDrawer({
   view,
   onSelect,
   onSendFeedback,
-  prefs
+  prefs,
 }: {
   view: View
   onSelect: (v: View) => void
@@ -236,15 +184,11 @@ export default function NavDrawer({
           position: 'relative',
           height: '100%',
           borderTop: 'none',
-          borderRight: `1px solid ${withAlpha(PALETTE.accent, 0.18)}`,
-          bgcolor: 'background.paper',
-          // Thirteen cells outrun a short window; the rail still scrolls, but a 12px gutter
-          // beside 96px of rail is a quarter of it gone, so this one scroller hides its bar.
-          '&::-webkit-scrollbar': { display: 'none' }
-        }
+          overflow: 'hidden',
+        },
       }}
     >
-      <List>
+      <List sx={{ flex: '1 1 auto', minHeight: 0, overflowY: 'auto' }}>
         {ROWS.map((row) => (
           <NavRowButton key={row.view} row={row} view={view} onSelect={onSelect} />
         ))}
@@ -270,7 +214,7 @@ export default function NavDrawer({
           <NavRowButton
             row={{
               view: 'triage',
-              icon: <TriageMark />,
+              icon: <RuleFolderIcon />,
               badge: (
                 <Chip
                   size="small"
@@ -279,7 +223,7 @@ export default function NavDrawer({
                   color="warning"
                   sx={{ height: 18, fontSize: 10, '& .MuiChip-label': { px: 0.75 } }}
                 />
-              )
+              ),
             }}
             view={view}
             onSelect={onSelect}
@@ -288,23 +232,21 @@ export default function NavDrawer({
       </List>
 
       {/* Bottom-aligned Preferences (Task #55) — replaces the old update-channel block. */}
-      <Box sx={{ mt: 'auto' }}>
+      <Box sx={{ mt: 'auto', flexShrink: 0 }}>
         <Divider />
         <List disablePadding>
           {/* Send feedback (Task #65): a dialog, so it is a plain action row — no `selected`
               state to own, because nothing in the nav stays "on" while it is open. */}
-          <ListItemButton data-testid="nav-feedback" onClick={onSendFeedback} sx={CELL_SX}>
+          <ListItemButton data-testid="nav-feedback" onClick={onSendFeedback}>
             <ListItemIcon>
-              <FeedbackMark />
+              <FeedbackIcon />
             </ListItemIcon>
-            <Typography component="span" sx={LABEL_SX}>
-              Send feedback
-            </Typography>
+            <ListItemText primary="Send feedback" />
           </ListItemButton>
           <NavRowButton row={PREFERENCES} view={view} onSelect={onSelect} />
         </List>
         {/* …and directly beneath it, the AMBIENT update affordance (Task #60):
-            an accent-coloured "Restart to update" chip when a build is downloaded and
+            a gold "Restart to update" chip when a build is downloaded and
             staged, otherwise a muted "checked 2h ago" line. Never a nag —
             ignoring it just means apply-on-quit does the work silently.
             That muted line is also where the app states the version you are

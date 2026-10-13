@@ -1,5 +1,5 @@
 /**
- * THE APP'S COLOUR TOKENS, IN ONE PLACE — "Midnight & arcane" (EQ Zera, 2026-09-06).
+ * Shared colours for the Companion 1.17 dark-and-gold appearance.
  *
  * Plain constants rather than an MUI palette, because the MUI theme is not the only consumer:
  * `renderer/src/theme/theme.ts` builds the main window's theme FROM these, but the overlay, tray
@@ -19,25 +19,25 @@
  */
 export const PALETTE = {
   /** window / page ground — and what the main process builds every window on */
-  bg: '#0b0f1a',
+  bg: '#0f1115',
   /** cards, panels, the tray notice's buttons */
-  paper: '#131a2b',
+  paper: '#171a21',
   /** near-black foreground on a saturated chip (the tier chips); the theme's ink */
-  ink: '#0b0f1a',
+  ink: '#0f1115',
   /** body text */
-  text: '#e5e9f5',
+  text: '#ffffff',
   /** THE ACCENT: buttons, links, the active tab, the damage meter's chrome, "you" in a meter */
-  accent: '#a78bfa',
+  accent: '#d9b25f',
   /** the accent's highlight — the icon's bright edge */
-  accentHi: '#c4b5fd',
+  accentHi: '#e4c781',
   /** secondary actions; "pet", DoTs, the cold axis */
-  cyan: '#38bdf8',
+  cyan: '#6fb3d2',
   /** a dimmer, cooler wash of `cyan` — somebody ELSE's pet (KIND_COLOR.allyPet) */
   cyanDim: '#3a86ad',
   /** success; healing, quests, the poison axis */
-  green: '#4ade80',
+  green: '#5fbf72',
   /** warning; the series slot the old purple held (spells, invocations, AA points, D3) */
-  amber: '#fbbf24',
+  amber: '#e0a94a',
   /** error; the enemy, damage shields */
   red: '#f87171',
   /** the retro-wave second neon — gradients and glows only, never a series colour */
@@ -45,15 +45,12 @@ export const PALETTE = {
 } as const
 
 /**
- * THE THREE TYPEFACES (EQ Zera, 2026-09-06). Orbitron and Share Tech Mono are bundled under
- * renderer/src/assets/fonts (scripts/fetch-fonts.mts); the body stack is whatever the machine has.
- *   display — headings, the nav rail, buttons, tabs, table heads: the geometric retro-wave face.
- *   mono    — the "console readout": big figures (h4), timers, anything a player scans as a number.
- *   body    — prose and dense data rows, unchanged: readability first.
+ * Use the same readable system face for headings, data and standalone overlays.
+ * Keep the three keys for existing consumers; none requests a decorative font.
  */
 export const FONTS = {
-  display: "'Orbitron', 'Segoe UI', Roboto, system-ui, sans-serif",
-  mono: "'Share Tech Mono', Consolas, 'Courier New', monospace",
+  display: "Inter, 'Segoe UI', Roboto, system-ui, sans-serif",
+  mono: "Inter, 'Segoe UI', Roboto, system-ui, sans-serif",
   body: "Inter, 'Segoe UI', Roboto, system-ui, sans-serif"
 } as const
 

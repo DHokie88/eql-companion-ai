@@ -3,8 +3,6 @@ import ReactDOM from 'react-dom/client'
 import { ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { theme } from './theme/theme'
-// The two bundled display faces (scripts/fetch-fonts.mts); the theme names them by family.
-import './assets/fonts/fonts.css'
 import App from './App'
 import { ErrorBoundary } from './lib/ErrorBoundary'
 // The mouse's Back button (JOS-201). ABOVE App on purpose — the app-level answer is a fallback

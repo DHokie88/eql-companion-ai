@@ -36,10 +36,10 @@ test('every token is a lowercase six-digit hex', () => {
 })
 
 test('withAlpha spells a token as the rgba() the overlays paint', () => {
-  assert.equal(withAlpha(PALETTE.accent, 0.5), 'rgba(167,139,250,0.5)')
-  assert.equal(withAlpha(PALETTE.bg, 0), 'rgba(11,15,26,0)')
+  assert.equal(withAlpha(PALETTE.accent, 0.5), 'rgba(217,178,95,0.5)')
+  assert.equal(withAlpha(PALETTE.bg, 0), 'rgba(15,17,21,0)')
   // A template expression may hand it a string — the overlays pass `String(bgAlpha)`.
-  assert.equal(withAlpha(PALETTE.bg, '0.65'), 'rgba(11,15,26,0.65)')
+  assert.equal(withAlpha(PALETTE.bg, '0.65'), 'rgba(15,17,21,0.65)')
 })
 
 test('body text and every coloured token clear WCAG AA on the paper ground', () => {
