@@ -170,6 +170,12 @@ jobs:
       - name: Build the engine (release)
         run: npm run build:engine
 
+      - name: Build the app
+        run: npm run build
+
+      - name: Desktop startup smoke (actual fork launcher)
+        run: npm run test:startup
+
       # --- Build + publish ----------------------------------------------------
       # `--publish always` hands the installer, its .blockmap and latest.yml to
       # electron-builder's GitHub publisher, which creates the release as a
@@ -206,7 +212,6 @@ jobs:
           } else {
             Write-Host "Code signing: skipped (SIGNING_ENABLED is not true)."
           }
-          npm run build
           npx electron-builder --win --publish always
 
       # --- main-channel bridge, asset assertion, then the atomic flip ---------

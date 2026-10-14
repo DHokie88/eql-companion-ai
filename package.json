@@ -39,6 +39,7 @@
     "lint:ratchet": "tsx scripts/lint-report.mts --ratchet",
     "test": "node --import tsx scripts/testGate.mts unit -- node --import tsx --test --test-concurrency=auto tests/*.test.mts",
     "test:e2e": "node --import tsx scripts/testGate.mts e2e -- node --import tsx tests/e2e/run-all.mts",
+    "test:startup": "node --import tsx scripts/testGate.mts e2e -- node --import tsx --test tests/forkStartup.mts",
     "smoke:release": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/sandbox/run-smoke-feedback.ps1",
     "oracle:rust-parser": "node --import tsx tests/bench/rustParity.mts",
     "oracle:rust-fold": "node --import tsx tests/bench/rustParity.mts --snapshots",
@@ -50,8 +51,8 @@
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json",
     "typecheck": "npm run typecheck:node && npm run typecheck:web && npm run typecheck:share",
     "build:engine": "tsx scripts/build-engine.mts",
-    "dist": "npm run build && npm run build:engine && electron-builder --win",
-    "dist:dir": "npm run build && npm run build:engine && electron-builder --win --dir",
+    "dist": "npm run build && npm run build:engine && npm run test:startup && electron-builder --win",
+    "dist:dir": "npm run build && npm run build:engine && npm run test:startup && electron-builder --win --dir",
     "share:dev": "wrangler dev --config share-server/wrangler.toml",
     "share:deploy": "wrangler deploy --config share-server/wrangler.toml",
     "typecheck:share": "tsc --noEmit -p share-server/tsconfig.json"

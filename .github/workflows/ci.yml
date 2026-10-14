@@ -1,4 +1,4 @@
-# CI for the EQ Zera fork — verify on every push to main and every pull request.
+# CI for the EQ Zera fork — verify on every branch push and every pull request.
 #
 # This is upstream's `build.yml` with the fork's realities applied. What was
 # removed and why:
@@ -40,7 +40,7 @@ name: ci
 
 on:
   push:
-    branches: [main]
+    branches: ['**']
   pull_request:
   workflow_dispatch:
 
@@ -110,7 +110,7 @@ jobs:
       - name: Test
         run: npm test
 
-      # e2e IS DELIBERATELY NOT HERE, and this is not an oversight.
+      # The FULL e2e suite remains local; the desktop startup smoke below is mandatory.
       # TODO(ci-v2): upstream's build.yml never ran `npm run test:e2e` on
       # windows-latest — not on main, not on tags — so there is no green
       # incantation to copy and no evidence the harness survives a shared
@@ -160,6 +160,12 @@ jobs:
       - name: Build the engine (release)
         run: npm run build:engine
 
+      - name: Build the app
+        run: npm run build
+
+      - name: Desktop startup smoke (actual fork launcher)
+        run: npm run test:startup
+
       # UNSIGNED, and with NO signing env at all: this job verifies and produces
       # a CI artifact, it publishes nothing, so it has no business holding
       # signing credentials even once they exist (least privilege — the same
@@ -170,9 +176,7 @@ jobs:
       # release anyway.
       - name: Build installer
         shell: pwsh
-        run: |
-          npm run build
-          npx electron-builder --win --publish never
+        run: npx electron-builder --win --publish never
 
       # The installer, its .blockmap and the update-feed yml, kept as a CI
       # record for two weeks. Long enough to bisect a "the build from Tuesday

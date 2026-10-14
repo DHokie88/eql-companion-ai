@@ -1,5 +1,11 @@
 # AGENTS.md — EQ Legends Companion
 
+Fork startup gate: every fork code change must pass `npm run build` and
+`npm run test:startup` on Windows before it is considered verified. The startup
+test runs the real `Open-Fork.cmd`, built renderer/preload and release engine in
+an isolated test profile. Build the matching engine with `npm run build:engine`
+when engine code changes; a successful compile alone does not prove the app loads.
+
 Distilled operating manual. Per-task history lives in `git log` and Linear;
 this file holds only repeatable rules and load-bearing design. Long-form war
 stories were MOVED verbatim to `docs/agents-archive.md` (JOS-252) — a cut
