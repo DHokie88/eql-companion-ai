@@ -66,7 +66,18 @@ The app opens with hot reload. In EverQuest type `/log on`. Dev builds keep thei
 npm run typecheck
 npm run lint
 npm test
+npm run build
+npm run test:startup
 ```
+
+`test:startup` is required for every fork code change on Windows. Build the matching release
+engine first with `npm run build:engine` if it is missing or engine code changed. The test launches
+the actual `Open-Fork.cmd` and verifies the built Overview screen, preload IPC and engine readiness.
+It uses a temporary profile and a committed log fixture, hides the windows, mutes audio, blocks
+renderer network traffic and closes only its own process tree. It never opens your live game log.
+`npm test` also checks the launcher's actual Windows argument parsing from a path containing spaces.
+CI checks every branch push and pull request; CI, releases and local installer builds require the
+startup smoke to pass before packaging.
 
 ## Refreshing the wiki data
 
