@@ -402,7 +402,11 @@ test('a tier that is NOT downloaded says exactly that, and never spawns a worker
   engine.dispose()
 })
 
-test('a DOWNLOADED tier whose worker dies is engine-failed, not "not installed"', async () => {
+test('a DOWNLOADED tier whose worker dies is engine-failed, not "not installed"', { timeout: 10_000 }, async (t) => {
+  // The engine unrefs its worker because Electron owns the app lifetime. This standalone
+  // test needs a bounded ref while waiting for that worker's failure event.
+  const keepAlive = setTimeout(() => undefined, 15_000)
+  t.after(() => clearTimeout(keepAlive))
   const root = tempRoot()
   const errors: string[] = []
   const engine = createSpeechEngine({
@@ -411,6 +415,7 @@ test('a DOWNLOADED tier whose worker dies is engine-failed, not "not installed"'
     isInstalled: () => true,
     onError: (message) => errors.push(message)
   })
+  t.after(() => engine.dispose())
   assert.deepEqual(await engine.say('charm break', 'af_heart'), { ok: false, reason: 'engine-failed' })
   // A DEAD WORKER STAYS DEAD: the second utterance answers from the latch rather than spawning
   // a second thread that would fail identically and file a second report.
@@ -419,10 +424,11 @@ test('a DOWNLOADED tier whose worker dies is engine-failed, not "not installed"'
     errors.some((m) => m.includes('the synthesis worker failed')),
     errors.join(' | ')
   )
-  engine.dispose()
 })
 
-test('ERR_DLOPEN_FAILED is its OWN answer — the engine cannot load on this PC', async () => {
+test('ERR_DLOPEN_FAILED is its OWN answer — the engine cannot load on this PC', { timeout: 10_000 }, async (t) => {
+  const keepAlive = setTimeout(() => undefined, 15_000)
+  t.after(() => clearTimeout(keepAlive))
   // The field report's exact shape (0.20.0, 2026-08-11): code=ERR_DLOPEN_FAILED with
   // node:internal/modules/cjs frames, i.e. the thread died while requiring onnxruntime-node. It
   // is a different sentence to the user (a remedy exists, and it is not "download the model"),
@@ -436,6 +442,7 @@ test('ERR_DLOPEN_FAILED is its OWN answer — the engine cannot load on this PC'
     isInstalled: () => true,
     onError: (message) => errors.push(message)
   })
+  t.after(() => engine.dispose())
   assert.deepEqual(await engine.say('charm break', 'af_heart'), {
     ok: false,
     reason: 'engine-unloadable'
@@ -444,7 +451,6 @@ test('ERR_DLOPEN_FAILED is its OWN answer — the engine cannot load on this PC'
     errors.some((m) => m.includes('ERR_DLOPEN_FAILED') && m.includes('Visual C++')),
     'the log line names the code AND the measured missing piece: ' + errors.join(' | ')
   )
-  engine.dispose()
 })
 
 test('an unknown voice id falls back to the tier default rather than refusing to speak', () => {

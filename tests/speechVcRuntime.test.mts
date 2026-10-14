@@ -436,7 +436,11 @@ test('an app update wipes the placement and the CACHE puts it back, offline', as
 
 // ---------------------------------------------------------------- 6. the re-probe
 
-test('a repair unlatches the engine fault; nothing else does', async () => {
+test('a repair unlatches the engine fault; nothing else does', { timeout: 10_000 }, async (t) => {
+  // The engine's worker is unref'd for Electron. Keep this standalone test alive until its
+  // failure events arrive, while the test timeout still bounds a missing response.
+  const keepAlive = setTimeout(() => undefined, 15_000)
+  t.after(() => clearTimeout(keepAlive))
   const root = tempRoot()
   const worker = join(root, 'dying-worker.cjs')
   writeFileSync(worker, "const e = new Error('dlopen failed'); e.code = 'ERR_DLOPEN_FAILED'; throw e\n")
@@ -445,6 +449,7 @@ test('a repair unlatches the engine fault; nothing else does', async () => {
     workerPath: worker,
     isInstalled: () => true
   })
+  t.after(() => engine.dispose())
   assert.deepEqual(await engine.say('charm break', 'af_heart'), {
     ok: false,
     reason: 'engine-unloadable'
@@ -464,5 +469,4 @@ test('a repair unlatches the engine fault; nothing else does', async () => {
     ok: false,
     reason: 'engine-unloadable'
   })
-  engine.dispose()
 })
