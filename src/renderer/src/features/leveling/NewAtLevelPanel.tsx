@@ -7,12 +7,8 @@
 //
 // THE COMBO IS JOINED AT READ (law 10) and never guessed at (law 1). Chips are FILLED for the
 // classes the module has actually resolved and OUTLINED for candidates of a slot it has only
-// narrowed; when any slot is unresolved the header says `~ambiguous` and the lists are honestly
-// an upper bound — the classes you might be running, not the ones you are.
-//
-// A LOADOUT WITH NO SPELLS IS NOT AN ERROR. BER, MNK and WAR have zero Template:Spellpage spells
-// (measured, wave O1): their spells list is empty at every level and says so in words, while the
-// skills list carries everything they actually gain.
+// narrowed. Candidate classes remain an upper bound for skills. Captured spell eligibility uses
+// only resolved classes, matching the expanded Spells view, and preserves numeric IDs and ranks.
 //
 // AND THE WAY OUT IS ON SCREEN WHETHER OR NOT THE LOADOUT IS KNOWN (JOS-192, trigger report
 // 01KZP6SDZJK6BPEWA4Z0MF5ANG). This panel pointed at the fix ONLY in its loadout-UNKNOWN state —
@@ -30,15 +26,10 @@
 // and the height budget is not zero. The tooltip stays anyway: this is a chip's provenance, which
 // is what the tooltip diet is FOR.
 //
-// AND WHAT THIS SERVER HAS NOT OPENED IS NOT NEW AT THIS LEVEL (JOS-393). The spell list folds the
-// rows eqlwiki badges out of era behind a `+N out of era` disclosure — the drops precedent, the same
-// phrase — so a level-50 shaman is no longer told `Sloths Healing` (`{{Kunark Era}}`) is his. The
-// SEARCH below is untouched by the fold and marks those rows instead: a search is a question the
-// player asked, and the honest answer to it includes the spell and says what it is.
+// Captured client eligibility does not claim ownership, availability, or acquisition. The worker
+// and exact-ID detail page own spell facts; the wiki-based skill list retains its provenance.
 //
-// AND THE LISTS BELOW ARE AS TALL AS THEY NEED TO BE (JOS-289). `UnlockList` was a 120px windowed
-// porthole — the surface the owner named as cramped — and is now plain rows at their honest
-// height, with the full `SpellTooltip` card behind every spell name.
+// NO INNER SCROLLER (JOS-289). Compact spell rows expand on the page and link to the full catalog.
 //
 // A TOAST'S DEEP LINK NOW LANDS ON THIS PANEL RATHER THAN NEAR IT (JOS-330). The two consequences
 // of the layout above met here: the page is one tall scroller and this panel is the BOTTOM of the
@@ -48,17 +39,15 @@
 // and pulses its edge for two seconds on arrival — on EVERY link, including a repeat of the same
 // level, and on no plain tab switch at all.
 
-import { type JSX, useMemo, useState } from 'react'
+import { type JSX, useMemo } from 'react'
 import { Box, Paper, Stack, Typography, Chip } from '@mui/material'
 import { comboClassSet, unlocksAtLevel } from '@shared/levelUnlocks'
-import { tokenizeSpellQuery } from '@shared/spellSearch'
-import { EMPTY_UNLOCK_SEARCH, searchUnlockSpells } from '@shared/unlockSearch'
 import { Tooltip } from '../../lib/Tooltip'
 import { useObservedSpellRanks } from '../../lib/useObservedSpellRanks'
 import { ProvenanceChip } from '../profiles/ClassComboChips'
 import { useComboSnap } from '../profiles/ClassComboData'
 import { UnlockList } from './UnlockList'
-import { UnlockSearchField, UnlockSearchResultsList } from './NewAtLevelSearch'
+import { LevelingSpellUnlocks } from './LevelingSpellUnlocks'
 import { LANDING_PULSE_SX, useFocusLanding } from './useFocusLanding'
 import { useCurrentComboClasses, useLevelUnlocks } from './useLevelUnlocks'
 import { useSpellSets } from './useSpellSets'
@@ -141,10 +130,6 @@ export function NewAtLevelPanel({
   // The same OPEN interval `useCurrentComboClasses` reduces to strings — kept whole here for the
   // one thing the strings drop: where the loadout came from.
   const current = useComboSnap().current
-  // THE SEARCH (JOS-392). An empty box is the level view, byte for byte — the state below is the
-  // only thing that switches the body, and nothing about the level view reads it.
-  const [query, setQuery] = useState('')
-  const searching = query.trim() !== ''
 
   // THE DEEP LINK (appRouting `openLeveling`), and the whole arrival lives in `useFocusLanding`.
   // Keyed on the NONCE and consumed the moment it is applied, so returning to this tab later does
@@ -175,16 +160,6 @@ export function NewAtLevelPanel({
   const resolved = useMemo(() => new Set<string>(combo.resolved), [combo])
   const known = classes.length > 0
 
-  // THE FILTER runs over the ~1,450 already-cached rows, so it is memoized on the query and the
-  // loadout rather than deferred: there is no IPC on this path and nothing to debounce. An empty
-  // box computes nothing at all — the level view must cost exactly what it cost before.
-  const results = useMemo(
-    () =>
-      searching
-        ? searchUnlockSpells(data.spells, tokenizeSpellQuery(query), { classes, currentLevel })
-        : EMPTY_UNLOCK_SEARCH,
-    [searching, data.spells, query, classes, currentLevel]
-  )
 
   return (
     // `position: relative` is the pulse's anchor and nothing else; `data-highlighted` states the
@@ -202,14 +177,10 @@ export function NewAtLevelPanel({
       {landing.seq !== null && <Box key={landing.seq} aria-hidden sx={LANDING_PULSE_SX} />}
       <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap" useFlexGap sx={{ mb: 0.75 }}>
         <Typography variant="subtitle2">New at this level</Typography>
-        <LevelStepper level={level} onChange={(n) => onPick(n)} dimmed={searching} testidPrefix="new-at-level" />
-        {/* ONE QUIET WORD, ONCE (JOS-391, AGENTS.md's caveat diet). The row figures are base
-            values with no crits, focus or AA in them; that is a property of the whole panel,
-            said here in a word rather than footnoted on twelve rows. The per-second figures DO
-            carry the re-use timer now (JOS-444) - they are sustained numbers, not cast-window
-            ones - which is a change in the arithmetic and not in what this word covers. */}
+        <LevelStepper level={level} onChange={(n) => onPick(n)} testidPrefix="new-at-level" />
+        {/* Spells now use captured numeric records; skill and discipline provenance stays intact. */}
         <Typography variant="caption" color="text.disabled" data-testid="new-at-level-directional">
-          directional
+          client eligibility
         </Typography>
         {picked !== null && currentLevel !== null && picked !== currentLevel && (
           <Chip
@@ -225,24 +196,10 @@ export function NewAtLevelPanel({
         {known && current && <ProvenanceChip interval={current} />}
       </Stack>
 
-      <UnlockSearchField query={query} onChange={setQuery} />
-
-      {/* THE SEARCH ANSWERS WHETHER OR NOT THE LOADOUT IS KNOWN. The level lists are a claim about
-          YOUR trio and say so when there is no trio; a search is a question about the game, and a
-          player who has not typed `/who` yet can still ask where Complete Heal sits. */}
-      {searching ? (
-        <UnlockSearchResultsList results={results} resolved={resolved} sets={sets} ranks={ranks} />
-      ) : known ? (
+      {/* Spell searches are worker-backed and scoped to this level; skills retain their own join. */}
+      {known ? (
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <UnlockList
-            title="Spells"
-            rows={unlocks.spells}
-            outOfEra={unlocks.outOfEraSpells}
-            resolved={resolved}
-            sets={sets}
-            ranks={ranks}
-            empty={`no new spells at level ${String(level)} for this loadout`}
-          />
+          <LevelingSpellUnlocks key={level} level={level} />
           <UnlockList
             title="Skills, disciplines & innates"
             rows={unlocks.skills}
