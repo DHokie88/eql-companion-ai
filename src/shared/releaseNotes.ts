@@ -135,6 +135,30 @@ export interface ReleaseNote {
  * still sees exactly the releases above it.
  */
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
+  // The 2026-10-18 data refresh: two wiki rescrapes (2026-10-07 and 2026-10-18) covering the
+  // September 15 through October 13 patches, plus the parser fixes the new wiki markup needed.
+  {
+    version: '1.26.1',
+    date: '2026-10-18',
+    entries: [
+      {
+        kind: 'changed',
+        text: 'Item, mob, quest, spell and Plane of Sky data refreshed from the EQ Legends wiki as of October 18, covering the patches through October 13. New items, mobs and quests are in, and changed stats, drops and rewards now match the wiki.'
+      },
+      {
+        kind: 'fixed',
+        text: 'Mob loot written as plain wiki links is now read, so 255 mobs that showed no drops have them and 391 mobs gained drops in total. Zone Loot and item sources fill in to match.'
+      },
+      {
+        kind: 'fixed',
+        text: 'Brass Knuckles and other Plane of Sky drops are credited to their efreeti again, three shields list their Secondary slot correctly, and the ghoul lord in Lower Guk has a respawn time again.'
+      },
+      {
+        kind: 'changed',
+        text: 'Dungeon Crawl progress no longer counts the named NPCs the September 22 patch removed from crawl requirements, such as Boondin Babbinsbort in Befallen and Ssynthi in Mistmoore.'
+      }
+    ]
+  },
   // EQ Zera on a phone (docs/plans/phone-link.md): a second screen, paired by a QR code, relayed
   // through share.eqzera.com as ciphertext the service cannot read.
   {
