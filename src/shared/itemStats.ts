@@ -341,15 +341,27 @@ const TEXT_FIELDS: Record<string, 'skill' | 'weight' | 'size' | 'range'> = {
 const LIST_FIELDS: Record<string, 'classes' | 'races'> = { CLASS: 'classes', RACE: 'races' }
 
 /** `Slot:` is two different fields wearing one key — an exaltation socket, or the equip slot. */
-function applySlot(out: ItemStatBlock, value: string): void {
+function applySlot(out: ItemStatBlock, raw: string): void {
   // `Slot: Ornamentation: empty` — an EXALTATION socket row, not the equip slot.
-  const sub = /^(\w+)\s*:\s*(.*)$/.exec(value)
+  const sub = /^(\w+)\s*:\s*(.*)$/.exec(raw)
   if (sub && EXALT_SLOT_NAMES.some((n) => n.toLowerCase() === sub[1].toLowerCase())) {
     const content = sub[2].trim()
     out.exaltationSlots.push(
       /^empty$/i.test(content) ? { type: titleCase(sub[1]), empty: true } : { type: titleCase(sub[1]), content }
     )
     return
+  }
+  // `Slot: SECONDARY Type: Shield` — the item TYPE riding on the slot line. The 2026-10-07
+  // rescrape found three pages (Crested Mistmoore Shield, Obtenebrate Mithril Guard, Shield of the
+  // Stalwart Seas) rewritten in the in-game window's layout, which prints the type after the slot;
+  // read as slot text it became two unknown slot tokens, `Type:` and `Shield`. `Type` is NOT made
+  // a key of its own: "Recast Delay: 300 seconds, Recast Type: 19" would split on it. It is split
+  // off HERE, where it can only mean the item type, and kept verbatim in `extras` (never dropped).
+  let value = raw
+  const typed = /^(.*?)\s*\bType\s*:\s*(.+)$/i.exec(raw)
+  if (typed) {
+    out.extras.push(`Type: ${typed[2].trim()}`)
+    value = typed[1].trim()
   }
   if (value) out.slot = out.slot ? `${out.slot} ${value}` : value
 }

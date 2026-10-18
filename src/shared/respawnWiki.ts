@@ -193,6 +193,32 @@ export interface WikiRespawn {
   seconds?: number
 }
 
+/** A trailing parenthetical: ` (Hoptor Thaggelum)`, ` (Mad)`, ` (Howling Stones)`. */
+const TRAILING_QUALIFIER_RE = /^(.*?)\s*\([^()]*\)\s*$/
+
+/**
+ * The join key for one catalog page: its in-game `name`, lowercased — EXCEPT when that name is the
+ * page's own TITLE plus a trailing parenthetical, in which case it is the title, lowercased.
+ *
+ * WHY (2026-10-07 rescrape): `The Ghoul Lord`'s `|name` reads `the ghoul lord (Hoptor
+ * Thaggelum)`, so its row keyed under a name no death line prints and Lower Guk's named silently
+ * lost its 9-minute floor (the 2026-08-22 file keyed it `the ghoul lord`). The parenthetical is the
+ * wiki's DISAMBIGUATOR — 18 catalog names carry one (`Kaiaren (Mad)`, `a bottomless devourer
+ * (Howling Stones)`, …) and the game prints none of them.
+ *
+ * This is not a string rule over names. It fires only when the wiki's own TITLE states the same
+ * name without the qualifier, so the bare spelling is the wiki's claim, not ours; a title that
+ * keeps its qualifier (`A kobold (Warrens)`, `Jade (NPC)`, `Clockwork Merchant (LG-16)`) keys
+ * exactly as before. `mobKey` deliberately keeps word parentheticals (shared/mobKey.ts) and is
+ * untouched: this decides which of a page's two spellings is the in-game one, at scrape time.
+ */
+export function respawnKey(name: string, title: string): string {
+  const m = TRAILING_QUALIFIER_RE.exec(name)
+  const bare = m ? m[1].trim().toLowerCase() : ''
+  if (bare !== '' && bare === title.trim().toLowerCase()) return bare
+  return name.toLowerCase()
+}
+
 /** The committed file's shape (`src/main/data/respawns.json`). */
 export interface WikiRespawnData {
   source: string

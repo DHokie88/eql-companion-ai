@@ -201,10 +201,15 @@ const REAL: RunState = runTracker({
   deaths: FIX.deaths
 })
 
-test('the owner’s real crawl matches twelve of the thirteen creatures it named', () => {
+test('the owner’s real crawl matches eleven of the thirteen creatures it named', () => {
   assert.equal(REAL.base, 'Befallen')
   const p = crawlProgress(REAL, rosterForZone(REAL.base, TABLE))
   assert.ok(p !== null)
+  // Twelve until the 2026-10-07 data refresh: the 2026-09-22 patch notes removed Boondin
+  // Babbinsbort from the Dungeon Crawl requirement
+  // (https://www.everquestlegends.com/patch-notes/eql-update-notes-9-22-2026), so Befallen's
+  // committed row no longer lists him. The log still killed him; the roster simply does not count
+  // him, the same way it does not count `ice boned skeleton` below.
   assert.deepEqual(p.rareNames, [
     'Skeleton Lrodd',
     'Asaka L`Rei',
@@ -214,12 +219,13 @@ test('the owner’s real crawl matches twelve of the thirteen creatures it named
     'Kahaptra Z`Taj',
     'Priest Amiaz',
     'Arisen Thaumaturgist',
-    'Boondin Babbinsbort',
     'Korven Nisere',
     'Soldier of V`Zher',
     'Baron Telyx V`Zher'
   ])
-  assert.equal(p.raresKilled, 12)
+  assert.equal(p.raresKilled, 11)
+  assert.ok(REAL.named.some((n) => n.name === 'Boondin Babbinsbort'), 'the kill is still in the log')
+  assert.ok(!(TABLE.Befallen?.rares ?? []).includes('Boondin Babbinsbort'), 'patch 9-22 removed him')
   // The names are the ROSTER's spelling, in the order the log killed them: `Skeleton Lrodd` leads
   // because `skeleton L`rodd` went down at +1:34, and it is only in this list at all because the
   // match key drops the apostrophe the wiki's row does not have.

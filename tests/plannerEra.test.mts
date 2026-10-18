@@ -46,9 +46,12 @@ import {
 } from '../src/shared/planner/era'
 import { ZONES, zoneKey } from '../src/shared/zones'
 import mobsJson from '../src/renderer/src/data/eqlegends/mobs.json'
+import itemsJson from '../src/main/data/items.json'
+import type { ItemDbFile } from '../src/main/itemsDb'
 import type { MobData } from '../src/shared/types'
 
 const catalog = mobsJson as unknown as MobData
+const items = itemsJson as unknown as ItemDbFile
 
 /** Every distinct zone string the catalog states, with how many mob pages state it. */
 const CATALOG_ZONES = ((): Map<string, number> => {
@@ -242,11 +245,27 @@ test('eraFromTag is the hand-authored table, token for token (law 12)', () => {
   // The evidence that used to justify `classic` is re-derived here anyway, because it is still
   // TRUE and still not enough: the Greenmist droppers really do live in a zone this server ships,
   // and the armour is still out-of-era, because the zone cannot speak for a revamped drop table.
-  const greenmist = catalog.mobs.filter((m) => (m.drops ?? []).some((d) => /^Greenmist /i.test(d)))
-  assert.ok(greenmist.length > 0, 'the catalog no longer lists Greenmist armour at all')
-  for (const mob of greenmist) {
-    assert.equal(eraVerdict(mob.zones ?? []), 'in-era', `${mob.name} ${JSON.stringify(mob.zones)}`)
-    assert.equal(layeredVerdict(mob.zones ?? [], 'FearHateRevamp'), 'out-of-era', mob.name)
+  //
+  // THE WITNESS MOVED ON THE 2026-10-07 RESCRAPE. The mob catalog no longer lists Greenmist armour
+  // at all: the wiki took the set off `A Nightmare`'s `|known_loot` and its description now reads
+  // "Drops the Greenmist Armor set, which is not currently in Everquest Legends" - the wiki
+  // agreeing with the verdict below, not a parse loss. The ITEM pages still name their dropper and
+  // its zone (`|dropsfrom` = a nightmare, Plane of Fear) under the same banner, so the evidence is
+  // re-derived from there - the same claim, read off the source that still states it.
+  const greenmist = Object.values(items.items).filter(
+    (e) => /^Greenmist (Helm|Breastplate|Vambraces|Bracer|Greaves|Boots|Mask)$/.test(e.page)
+  )
+  assert.equal(greenmist.length, 7, 'the seven Greenmist armour pages left the item corpus')
+  assert.ok(
+    catalog.mobs.every((m) => !(m.drops ?? []).some((d) => /^Greenmist /i.test(d))),
+    'a mob page lists Greenmist armour again - re-read it before trusting either witness'
+  )
+  for (const entry of greenmist) {
+    const zones = (entry.dropsFrom ?? []).flatMap((s) => (s.zone === undefined ? [] : [s.zone]))
+    assert.ok(zones.length > 0, `${entry.page} no longer names a drop zone`)
+    assert.equal(entry.eraTag, 'FearHateRevamp', entry.page)
+    assert.equal(eraVerdict(zones), 'in-era', `${entry.page} ${JSON.stringify(zones)}`)
+    assert.equal(layeredVerdict(zones, entry.eraTag), 'out-of-era', entry.page)
   }
 
   // CASE is folded (the corpus's one `{{kunark Era}}` typo), whitespace is already normalized by

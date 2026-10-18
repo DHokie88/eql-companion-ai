@@ -352,6 +352,22 @@ function readCraftDetail(body: string, cur: ItemCraftRecipe | null, leftovers: s
  * ingredient rows (`{{SmIcon|nnn}} 1 x [[Item]] - Bought, Dropped`). A `*` bullet with no
  * link is NOT a tradeskill (Coin of Tash's `Non-Tradeskill (Quest)`) — it becomes `note`.
  */
+/**
+ * Unlinked `|playercrafted` headings that ARE a recipe heading, hand-verified, each mapped to the
+ * tradeskill string the rest of the corpus links. Never widened by guesswork: an unlinked heading
+ * is freeform prose by default (Coin of Tash's `Non-Tradeskill (Quest)`), and only a row here
+ * turns one into a structured recipe.
+ *
+ *   `No Skill Combine` — Dark Green Dye, 2026-10-07 rescrape (the only page in the corpus that
+ *   writes it). The 2026-08-22 page read `* [[Non-Tradeskill]]`; the rewrite unlinked the heading
+ *   but kept a fully structured recipe under it (`** '''Yield: Dark Green Dye''' x1`, `** In
+ *   [[Medium Clay Jar]]:`, two `::` ingredient rows). It is the same no-skill combine every
+ *   other `[[Non-Tradeskill]]` heading states, so it reads as one.
+ */
+const UNLINKED_CRAFT_HEADINGS: Record<string, string> = {
+  'no skill combine': 'Non-Tradeskill'
+}
+
 export function parseCraftRecipes(block: string): { recipes: ItemCraftRecipe[]; note?: string } {
   const recipes: ItemCraftRecipe[] = []
   const leftovers: string[] = []
@@ -372,14 +388,16 @@ export function parseCraftRecipes(block: string): { recipes: ItemCraftRecipe[]; 
       readCraftDetail(body, cur, leftovers)
       continue
     }
-    // Top-level bullet = a new recipe, but ONLY when it names a tradeskill by link.
+    // Top-level bullet = a new recipe, but ONLY when it names a tradeskill by link, or is one of
+    // the hand-verified unlinked headings below.
     const link = firstLink(body)
-    if (!link) {
+    const named = link?.label ?? UNLINKED_CRAFT_HEADINGS[body.replace(TRIVIAL_RE, '').trim().toLowerCase()]
+    if (!named) {
       cur = null
       if (body) leftovers.push(body)
       continue
     }
-    cur = { tradeskill: link.label, ingredients: [] }
+    cur = { tradeskill: named, ingredients: [] }
     const tm = TRIVIAL_RE.exec(body)
     if (tm) cur.trivial = Number(tm[1])
     recipes.push(cur)

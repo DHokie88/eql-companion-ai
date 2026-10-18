@@ -53,7 +53,7 @@ import { logError } from './errorLog'
 // has ONE answer to writing a whole file, and since JOS-371 it has an asynchronous one.
 import { writeFileDurableAsync } from './telemetry/durableWrite'
 import { MobLootIndex, mobKey, parseMobWikitext } from './mobLookupParse'
-import { annotateDropEras } from './mobDropEra'
+import { annotateDropEras, isCorpusItemPage } from './mobDropEra'
 import { knowledgeFromCatalog, localMobEntry, mergeLocalKnowledge } from './mobLookupLocal'
 import { type MobIdentity, poisonedAliasKeys, resolveMobIdentity } from './mobAliases'
 import type { MobKnowledge } from '../shared/types'
@@ -348,7 +348,7 @@ export async function lookupMob(name: string): Promise<MobKnowledge> {
     const wt = await fetchWikitext(res.title)
     if (wt === null) return finish({ offline: true })
     if (wt === '') return finish({ notFound: true })
-    const facts = parseMobWikitext(wt)
+    const facts = parseMobWikitext(wt, { isItem: isCorpusItemPage })
     // IDENTITY GATE for a non-exact search hit: accept it only when the page says it IS this
     // mob. Search happily returns a cousin for a name it doesn't have, and hanging that
     // cousin's drop table off this mob would be inventing loot (law 1). "Is this mob" now spans

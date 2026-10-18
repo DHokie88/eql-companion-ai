@@ -21,7 +21,8 @@
 // MEASURED CLASS INVENTORY (24 distinct tokens): the 16 ClassAbbr codes (+ `War`, the one
 //   Title Case code the 2026-08-22 rescrape added — the case fold absorbs it), plus ALL 5509 /
 //   All 1, NONE 204 / None 23, the prose marker `except` 757, and two level annotations
-//   "(35)" "(48)" (one page: "Class: CLR (35) PAL (48)") which are dropped as noise.
+//   "(35)" "(48)" (one page: "Class: CLR (35) PAL (48)") which are dropped as noise. The
+//   2026-10-07 rescrape added one typo, `RND` (Bracers of Erollisi), renamed to RNG below.
 
 import { CLASS_ABBRS, isClassAbbr, type ClassAbbr } from '../classCombo'
 import type { ItemEffectKind } from '../itemStats'
@@ -38,6 +39,16 @@ const SLOT_RENAMES: Record<string, EquipSlot> = {
 
 /** Punctuation the wiki leaves between slot names. Dropped SILENTLY — it is not an unknown slot. */
 const SLOT_NOISE: ReadonlySet<string> = new Set(['/', '-', '&', 'OR', 'AND'])
+
+/**
+ * Hand-verified stray WORDS on a `Slot:` line, dropped like the punctuation above. Never widened by
+ * guesswork.
+ *
+ * `SPECIAL` (2026-10-18 rescrape, one page: Soldier's Brooch of the Corrupt, `Slot: SPECIAL RANGE`).
+ * Its seven sibling Soldier's Brooch pages all read `Slot: RANGE`, and the same page read
+ * `Slot: RANGE` in the 2026-10-07 scrape. No equip slot is called Special.
+ */
+const SLOT_STRAY_WORDS: ReadonlySet<string> = new Set(['SPECIAL'])
 
 /** Strip the trailing punctuation the wiki leaves on a token ("BACK," → "BACK") and fold case. */
 function cleanToken(raw: string): string {
@@ -56,7 +67,7 @@ export function normalizeSlotTokens(slot?: string): { slots: EquipSlot[]; unknow
   const unknown: string[] = []
   for (const raw of (slot ?? '').split(/\s+/)) {
     const token = cleanToken(raw)
-    if (token === '' || SLOT_NOISE.has(token)) continue
+    if (token === '' || SLOT_NOISE.has(token) || SLOT_STRAY_WORDS.has(token)) continue
     const mapped = SLOT_RENAMES[token] ?? (SLOT_SET.has(token) ? (token as EquipSlot) : undefined)
     if (mapped === undefined) {
       if (!unknown.includes(raw)) unknown.push(raw)
@@ -75,11 +86,24 @@ interface ClassTokens {
   excluded: ClassAbbr[]
 }
 
+/**
+ * Hand-verified class-code typos → the real code. Never widened by guesswork.
+ *
+ * `RND` (2026-10-07 rescrape, one page: Bracers of Erollisi, `Class: WAR CLR PAL RND DRU MNK BRD
+ * ROG SHM`). It is RNG: it sits exactly where RNG falls in the game's class order (PAL, RNG, …,
+ * DRU), and the same page before its rewrite (2026-08-22 scrape) read `ALL except SHD NEC WIZ MAG
+ * ENC`, which includes Ranger. Without the rename the row silently lost a class.
+ */
+const CLASS_RENAMES: ReadonlyMap<string, ClassAbbr> = new Map<string, ClassAbbr>([
+  ['RND', 'RNG']
+])
+
 /** One pass over the `Class:` tokens, sorting them into the four things the wiki can say. */
 function readClassTokens(raw: string[]): ClassTokens {
   const out: ClassTokens = { all: false, none: false, sawExcept: false, listed: [], excluded: [] }
   for (const token of raw) {
-    const t = cleanToken(token)
+    const cleaned = cleanToken(token)
+    const t: string = CLASS_RENAMES.get(cleaned) ?? cleaned
     if (t === 'EXCEPT') out.sawExcept = true
     else if (t === 'ALL') out.all = true
     else if (t === 'NONE') out.none = true

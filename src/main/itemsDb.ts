@@ -83,6 +83,29 @@ export function knowledgeFromDb(entry: ItemDbEntry): Omit<ItemKnowledge, 'cached
   }
 }
 
+/** A wiki page title in MediaWiki's canonical form: `_` is a space, runs of space collapse, and
+ *  the FIRST letter is case-insensitive (so it is upper-cased); every other letter is significant. */
+export function canonicalTitle(title: string): string {
+  const t = title.replace(/_/g, ' ').replace(/\s+/g, ' ').trim()
+  return t.charAt(0).toUpperCase() + t.slice(1)
+}
+
+/**
+ * PURE: the corpus's `items` record → "is this wiki page title an ITEM PAGE?". The test a mob
+ * page's `[[Item]]` loot link must pass to count as a drop (`parseMobLoot`).
+ *
+ * BY PAGE TITLE, NOT BY `itemKey`. A record is filed under its `|itemname` too, and that alias is
+ * not a page: `quiver of marr` keys the record whose page is `Quiver of Marr (Item)`, while the
+ * link `[[Quiver of Marr|Spell: Quiver of Marr]]` on a mob's loot list points at the SPELL page.
+ * Matching the key read 15 such spell links as the summoned quiver (measured on the 2026-10-18
+ * cache). A link resolves to the page its target names, so the membership test is the record's
+ * own `page`, compared under the MediaWiki title rules above.
+ */
+export function corpusItemTest(items: Readonly<Record<string, ItemDbEntry>>): (title: string) => boolean {
+  const pages = new Set(Object.values(items).map((e) => canonicalTitle(e.page)))
+  return (title) => pages.has(canonicalTitle(title))
+}
+
 /**
  * PURE: the committed file → a lookup index. Kept as a function (rather than a bare
  * `Object.entries` at the use site) so the test can build the index from the COMMITTED bytes

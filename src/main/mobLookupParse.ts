@@ -35,6 +35,13 @@
 //       the field ("Does not drop coin."):
 //           <li> {{:A Piece of Rat Fur}}   <span class='drare'>(18.4%)</span>
 //
+//   (5) since then (2026-10-18 cache: 317 pages link-only, 548 mixed) — plain `[[Item]]` /
+//       `[[Item|label]]` LINKS in the same list markup, e.g. Tae Ew Archon:
+//         <li>[[Rubicite Vambraces]] <span class="drare">(Rare)</span><br>…</li>
+//         <li>Various [[Fine Steel Weapons]] <span class="drare">(Common)</span></li>
+//       A link is read ONLY when the caller's item-corpus test says its target is an item page
+//       (`MobLootOptions.isItem`); "Fine Steel Weapons" is a group page and is ignored.
+//
 // So `rarity` is whatever text the page put in parentheses right after the item, VERBATIM
 // ("Uncommon", "Ultra Rare", "18.4%"), and absent when there was none. It is never mapped onto a
 // scale of our own — the wiki uses at least two incompatible ones (law 1).
@@ -44,6 +51,7 @@
 // simply comes back with no `dropsWiki`.
 
 import { templateField } from './itemLookupParse'
+import { canonicalTitle } from './itemsDb'
 import type { MobDrop, MobLoc, MobQuestUse, MobSeenDrop } from '../shared/types'
 import { mobKey } from '../shared/mobKey'
 
@@ -79,26 +87,83 @@ export function unlink(value: string): string {
     .trim()
 }
 
+export interface MobLootOptions {
+  /**
+   * Is this wiki page title an ITEM PAGE in the committed item corpus? When given, a plain
+   * `[[Item]]` / `[[Item|label]]` link in the loot field is read as a drop, but ONLY when this
+   * says yes. Absent, only `{{:Item}}` transclusions are read (the pre-link behaviour). The test
+   * is the caller's, so this module stays pure: the scraper and the live lookup both build it
+   * with `corpusItemTest` over `src/main/data/items.json`.
+   */
+  isItem?: (title: string) => boolean
+}
+
+/** One drop's anchor in the loot field: the item it names and where its markup sits. */
+interface LootMark {
+  item: string
+  start: number
+  end: number
+}
+
+/** A wiki link's TARGET as a canonical page title: no `:` prefix, no `#section`, then the
+ *  MediaWiki title rules (`canonicalTitle`). The label after `|` is display text and never read. */
+function linkTitle(inner: string): string {
+  const pipe = inner.indexOf('|')
+  const target = (pipe >= 0 ? inner.slice(0, pipe) : inner).replace(/^\s*:/, '')
+  const hash = target.indexOf('#')
+  return canonicalTitle(hash >= 0 ? target.slice(0, hash) : target)
+}
+
+/**
+ * Every drop anchor in the field, in page order: each `{{:Item}}` transclusion, plus each
+ * `[[link]]` whose target `isItem` accepts.
+ */
+function lootMarks(block: string, isItem: ((title: string) => boolean) | undefined): LootMark[] {
+  const re = /\{\{:\s*([^}|]+?)\s*\}\}/g
+  const marks: LootMark[] = []
+  let m: RegExpExecArray | null
+  // The transclusion target is a PAGE TITLE, and MediaWiki treats `_` and a space in a title as
+  // the same character. Pages do write it both ways: on 2026-09-21 the wiki re-pasted the
+  // Overseer of Air / the Hand of Veeshan loot lists as `{{:Brass_Knuckles}}` (Noble Dojorn
+  // already said it that way), and the raw string then joined no item, so the 2026-10-07
+  // rescrape left Brass Knuckles with no Sky dropper at all. Fold to the spaced form the item
+  // catalog and the game both print.
+  while ((m = re.exec(block)) !== null)
+    marks.push({ item: m[1].replace(/_/g, ' ').replace(/\s+/g, ' ').trim(), start: m.index, end: re.lastIndex })
+  if (!isItem) return marks
+  // THE LINK FORM. The wiki increasingly writes loot as `[[Item]]` / `[[Item|label]]` instead of
+  // a transclusion (2026-10-18 cache: 317 mob pages list loot ONLY as links, 548 mix both, and
+  // Tae Ew Archon lost every drop when its page was rewritten that way). But a loot field also
+  // links group pages ("Fine Steel Weapons"), zones and SPELL pages
+  // (`[[Cripple|Spell: Cripple]]`), so a link counts ONLY when its target is an item page. A link
+  // that is not one is ignored, never guessed.
+  const linkRe = /\[\[([^\]]+?)\]\]/g
+  while ((m = linkRe.exec(block)) !== null) {
+    const title = linkTitle(m[1])
+    if (title && isItem(title)) marks.push({ item: title, start: m.index, end: linkRe.lastIndex })
+  }
+  return marks.sort((a, b) => a.start - b.start)
+}
+
 /**
  * Parse a mob page's `|known_loot` field into drops. Anchored on the `{{:Item}}` transclusion
- * (the one invariant across all four observed shapes); the rarity is the FIRST parenthesized
- * run that follows it, before the next transclusion — which covers the `<span class='drare'>`
- * wrapper, the bare-parenthesis form and the bare-percentage form alike, and yields nothing for
- * the empty-span form. `[Overall: 25.0%]` / `[3] 1x 55% (33%)` drop-rate spans sit AFTER the
- * rarity and are deliberately not read: they are square-bracketed DB dumps in three mutually
- * incompatible formats, and the rarity word is what a glanceable card wants.
+ * (the one invariant across the four original shapes) and, given `opts.isItem`, on an item-page
+ * `[[link]]` (shape 5); the rarity is the FIRST parenthesized run that follows it, before the
+ * next anchor — which covers the `<span class='drare'>` wrapper, the bare-parenthesis form and
+ * the bare-percentage form alike, and yields nothing for the empty-span form.
+ * `[Overall: 25.0%]` / `[3] 1x 55% (33%)` drop-rate spans sit AFTER the rarity and are
+ * deliberately not read: they are square-bracketed DB dumps in three mutually incompatible
+ * formats, and the rarity word is what a glanceable card wants. An item named twice (a link and
+ * a transclusion of it, or either form repeated) is ONE drop, with the first-named rarity.
  */
-export function parseMobLoot(block: string): MobDrop[] {
+export function parseMobLoot(block: string, opts?: MobLootOptions): MobDrop[] {
   const drops: MobDrop[] = []
   const seen = new Set<string>()
-  const re = /\{\{:\s*([^}|]+?)\s*\}\}/g
-  const marks: { item: string; end: number }[] = []
-  let m: RegExpExecArray | null
-  while ((m = re.exec(block)) !== null) marks.push({ item: m[1].trim(), end: re.lastIndex })
+  const marks = lootMarks(block, opts?.isItem)
   for (let i = 0; i < marks.length; i++) {
     const item = marks[i].item
     if (!item) continue
-    // Look only as far as the NEXT transclusion, so one item can never borrow another's rarity.
+    // Look only as far as the NEXT anchor, so one item can never borrow another's rarity.
     const tail = block.slice(marks[i].end, i + 1 < marks.length ? marks[i + 1].end : undefined)
     // The rarity annotation, in any of its three spellings. `[^()]*` keeps it to a single
     // parenthesized run; the leading `[^[]*?` stops the scan at a `[Overall: …]` DB span.
@@ -196,7 +261,7 @@ export interface MobPageFacts {
  * A page with no `|known_loot` field (a MerchantPage, a stub) yields no `dropsWiki` at all,
  * which is the honest answer: we did not read a drop list, so we do not have one.
  */
-export function parseMobWikitext(wikitext: string): MobPageFacts {
+export function parseMobWikitext(wikitext: string, opts?: MobLootOptions): MobPageFacts {
   const out: MobPageFacts = {}
   const name = templateField(wikitext, 'name')
   if (name) out.pageName = unlink(name)
@@ -212,7 +277,7 @@ export function parseMobWikitext(wikitext: string): MobPageFacts {
   }
   const loot = templateField(wikitext, 'known_loot')
   if (loot) {
-    const drops = parseMobLoot(loot)
+    const drops = parseMobLoot(loot, opts)
     if (drops.length) out.dropsWiki = drops
   }
   const quests = templateField(wikitext, 'related_quests')

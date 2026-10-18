@@ -178,7 +178,8 @@ async function stepDrawsTheRun(overlay: Page): Promise<void> {
     JSON.stringify(seen)
   )
   // THE CRAWL ESTIMATE, drawn from the committed community table rather than from the log (the fold
-  // and the twelve names are pinned in tests/crawlRoster.test.mts). Befallen's row is `inferred`, so
+  // and the names are pinned in tests/crawlRoster.test.mts). Eleven since 2026-10-07: the 2026-09-22
+  // patch took Boondin Babbinsbort out of Befallen's crawl requirement, so his kill no longer counts. Befallen's row is `inferred`, so
   // the honest shape here is a bare count with no denominator - and the caption is what makes the
   // whole block legible as an estimate rather than as the game's own meter.
   const crawl = await overlay.evaluate(
@@ -188,7 +189,7 @@ async function stepDrawsTheRun(overlay: Page): Promise<void> {
     'the crawl block estimates his rares against the community roster, and says it is an estimate',
     crawl.includes('Crawl (estimated)') &&
       crawl.includes('Rares killed') &&
-      crawl.includes('12') &&
+      crawl.includes('11') &&
       crawl.includes("not the game's own tracker"),
     crawl.slice(0, 200)
   )

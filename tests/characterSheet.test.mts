@@ -237,12 +237,14 @@ test('the totals are SCALED by the worn ` +N`, through the one algorithm (owner,
 // Character tab"). The reporter's own dump is not reproduced here and never becomes a fixture — the
 // ONE fact taken from it is the item and its item level, and the stat block below is the COMMITTED
 // corpus's own record for the wiki page `Cloak of Flames`, which the assertion under it re-checks.
+// The 2026-10-18 rescrape: the wiki now flags the cloak `Attunable` (was `Magic Item`) and lists
+// AGI before DEX. Same four values; the order is pinned because the assertion compares the arrays.
 const COF_BASE: ItemStatBlock = block({
-  flags: ['Magic Item'],
+  flags: ['Attunable'],
   ac: 10,
   stats: [
-    { key: 'DEX', value: '+9' },
     { key: 'AGI', value: '+9' },
+    { key: 'DEX', value: '+9' },
     { key: 'HP', value: '+50' },
     { key: 'HASTE', value: '+36%' }
   ],
