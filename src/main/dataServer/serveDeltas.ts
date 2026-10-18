@@ -80,6 +80,7 @@ import { sendToModuleOverlays } from '../worldRebuilt'
 import { sendToMain } from '../windows'
 import { noteTailLine } from '../switchNudge'
 import { noteEventKind } from '../telemetry/breadcrumbs'
+import { notifySpellModifierInputs } from '../spellLibrary/modifierEvents'
 
 /**
  * THE GATE IS GONE (JOS-499 item 9). It was the second half of "does the engine answer this
@@ -106,6 +107,7 @@ function push(frame: ModuleChanged): void {
  */
 export function pushModuleChanged(moduleId: string, seq: number): void {
   if (!SERVE_ASKED) return
+  if (['observedSpellRanks', 'character', 'combo'].includes(moduleId)) notifySpellModifierInputs()
   push({ moduleId, seq })
   // THE TWO LIVE SIGNALS THAT USED TO RIDE THE TAIL (JOS-499). Both were fed by
   // `session.ts startTailer`'s line handler — the app's hottest path — and both are questions
@@ -182,5 +184,6 @@ function notifyCombatActivity(): void {
  */
 export function pushWorldChanged(): void {
   if (!SERVE_ASKED) return
+  notifySpellModifierInputs()
   push({ moduleId: MODULE_WORLD_CHANGED, seq: -1 })
 }

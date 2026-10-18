@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { SpellLibraryService, type SpellRpc } from '../src/main/spellLibrary/service'
 import type { SpellDataset } from '../src/shared/spellLibrary'
+import { defaultSpellModifierPreferences, type SpellModifierContext } from '../src/shared/spellModifiers'
 
 function deferred<T>() {
   let resolve!: (value: T) => void
@@ -13,7 +14,7 @@ function dataset(root: string): SpellDataset {
     firstObserved: '2026-10-18T00:00:00Z', recordCount: 3,
     hashes: { 'spells_us.txt': 'a', 'spells_us_str.txt': 'b', 'dbstr_us.txt': 'c' } }
 }
-function rig(check: (root: string) => Promise<unknown>, readerResponse?: () => Promise<unknown>) {
+function rig(check: (root: string) => Promise<unknown>, readerResponse?: () => Promise<unknown>, modifierContext?: () => Promise<SpellModifierContext>) {
   let root = 'A'
   let onReady: (() => void) | null = null
   const installs: string[] = [], queries: { method: string; args: unknown }[] = []
@@ -29,6 +30,7 @@ function rig(check: (root: string) => Promise<unknown>, readerResponse?: () => P
     queries.push({ method, args }); return (readerResponse ? await readerResponse() : { okay: true }) as T
   }, stop() { /* Fake worker has no resources. */ } }
   const service = new SpellLibraryService({ userData: 'profile', workerDirectory: 'workers', root: () => root,
+    modifierContext,
     changed(status) { if (status.phase === 'ready') onReady?.() }, log: (e) => errors.push(e),
     selectInstallation() { /* Isolation is pinned by installReference calls below. */ },
     prepareReference: async () => ({}), installReference: (r) => installs.push(r),
@@ -101,5 +103,26 @@ test('a manual check requested at the ready notification captures a fresh bundle
     await r.service.check('startup')
     await repeated
     assert.equal(checks, 2)
+  } finally { r.service.stop() }
+})
+
+test('evaluated requests pin main-owned character inputs and reject a reply after those inputs change', async () => {
+  const pending = deferred<unknown>()
+  let revision = 'one'
+  const getContext = async (): Promise<SpellModifierContext> => ({ revision, modelVersion: '1',
+    character: { key: 'test', name: 'Test', server: 'test' }, preferences: { ...defaultSpellModifierPreferences(), mode: 'mine' },
+    ranks: {}, inventory: { state: 'missing', exportedAt: null, candidates: [], warnings: [] }, warnings: [] })
+  const r = rig(async (root) => published(root), () => pending.promise, getContext)
+  try {
+    await r.service.check('startup')
+    const request = r.service.query('compare', { ids: [1], level: 50, metric: 'damage', evaluation: { mode: 'mine', contextRevision: 'one' } })
+    const refusal = assert.rejects(request, /inputs changed/)
+    // Wait for the fake reader to receive the pinned context, without racing promise continuation.
+    for (let i = 0; i < 10 && !r.queries.length; i++) await Promise.resolve()
+    assert.equal((r.queries[0].args as { modifiers: SpellModifierContext }).modifiers.revision, 'one')
+    revision = 'two'; pending.resolve({ results: [] })
+    await refusal
+    await assert.rejects(r.service.query('compare', { evaluation: { mode: 'mine', contextRevision: 'one' } }), /inputs changed/)
+    assert.equal(r.service.status().phase, 'ready')
   } finally { r.service.stop() }
 })

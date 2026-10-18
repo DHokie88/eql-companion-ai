@@ -3,11 +3,14 @@ import type { SpellCheckReason, SpellDataset, SpellLibraryStatus, SpellObservati
 import { SpellWorkerRpc } from './rpc'
 import type { SpellResistTable } from '../../shared/resistTypes'
 import { setSpellActivation } from './activation'
+import type { SpellModifierContext } from '../../shared/spellModifiers'
+import { evaluationArg } from './queryValidation'
 
 interface Published { dataset: SpellDataset; observation?: SpellObservation; materializedDir: string }
 interface SavedStatus { dataset: SpellDataset | null; installId: string; storageBytes: number; checkedAt: string | null }
 export interface SpellRpc { call<T>(method: string, args?: unknown): Promise<T>; stop(): void }
 export interface SpellLibraryDeps {
+  modifierContext?: () => Promise<SpellModifierContext>
   userData: string
   workerDirectory: string
   root: () => string
@@ -171,9 +174,25 @@ export class SpellLibraryService {
       this.installId = saved.installId
     }
     const scoped = this.scopeQuery(method, query)
-    const result = await this.reader.call<T>(method, { installId: this.installId, query: scoped })
+    const modifiers = await this.modifiersFor(query)
     if (!this.owns(root, generation)) throw new Error('EQ installation changed. Please retry the query.')
+    const result = await this.reader.call<T>(method, { installId: this.installId, query: scoped, ...(modifiers ? { modifiers } : {}) })
+    if (!this.owns(root, generation)) throw new Error('EQ installation changed. Please retry the query.')
+    if (modifiers && (await this.deps.modifierContext?.())?.revision !== modifiers.revision) {
+      throw new Error('Spell modifier inputs changed. Refresh the results.')
+    }
     return result
+  }
+  private async modifiersFor(query: unknown): Promise<SpellModifierContext | undefined> {
+    if (!query || typeof query !== 'object' || Array.isArray(query)) return undefined
+    const options = evaluationArg((query as Record<string, unknown>).evaluation)
+    if (!options) return undefined
+    const context = await this.deps.modifierContext?.()
+    if (context?.revision !== options.contextRevision || context.preferences.mode !== options.mode) {
+      throw new Error('Spell modifier inputs changed. Refresh the results.')
+    }
+    if (options.mode === 'mine' && !context.character) throw new Error('Select a character to use Show mine.')
+    return context
   }
   private scopeQuery(method: string, query: unknown): unknown {
     if (!query || typeof query !== 'object' || Array.isArray(query)) return query

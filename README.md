@@ -23,6 +23,10 @@ guide is [`AGENTS.md`](AGENTS.md) and is still the best map of the code.
   healing, and inspect captured versions and field changes in History. Oracle checks all three
   spell files on startup, detected client launches, installation changes, and manual request.
   SQLite and compressed source history stay under the existing profile's `spells/` directory.
+- **Character spell estimates.** Switch between Client values, Show mine, and Emulate for measured
+  mote upgrades and qualifying worn damage/healing focus. Preview exact ranks and real focus
+  effects, inspect partial coverage and roll ranges, and retain the unchanged client baseline.
+  See [the modifier model](docs/plans/eq-oracle-spell-modifiers.md) for supported inputs and exclusions.
   History begins at the first captured baseline and is retained indefinitely. See
   [`docs/plans/eq-oracle-spells.md`](docs/plans/eq-oracle-spells.md).
 - **The Z Engine.** The Rust log engine (`engine/`) is the fork's own line of development now: the

@@ -13,7 +13,7 @@ export function EstimateAmount({ calculation }: { calculation: SpellCalculation 
     <Typography variant="body2">
       {changedMode && `${amount(modifier.baseline.total)} → `}{amount(calculation.total)}
     </Typography>
-    {modifier?.range && changedMode && <Typography variant="caption">Range {amount(modifier.range.min)}–{amount(modifier.range.max)}</Typography>}
+    {modifier?.range && changedMode && <Typography variant="caption">Range {amount(modifier.range.min)} - {amount(modifier.range.max)}</Typography>}
     <EstimateBadges calculation={calculation} />
   </Stack>
 }
@@ -42,7 +42,7 @@ export function EstimateExplanation({ calculation }: { calculation: SpellCalcula
 function FocusExplanation({ calculation }: { calculation: SpellCalculation }): JSX.Element {
   const focus = calculation.modifiers?.focus
   if (!focus) return <Typography variant="caption">No qualifying modeled focus applied.</Typography>
-  return <Typography variant="caption">{focus.name}{focus.item ? ` from ${focus.item}` : ''}: {focus.pct}% midpoint ({focus.minPct}%–{focus.maxPct}% focus roll).</Typography>
+  return <Typography variant="caption">{focus.name}{focus.item ? ` from ${focus.item}` : ''}: {focus.pct}% midpoint ({focus.minPct}% - {focus.maxPct}% focus roll).</Typography>
 }
 
 export function rankLabel(rank: number): string {

@@ -3,7 +3,7 @@ import type {
   SpellDataset, SpellHistoryResult, SpellRankingResult, SpellSearchResult, SpellSummary,
   SpellTimelineResult, SpellCalculation, SpellMetric
 } from '../../shared/spellLibrary'
-import { calculateClientSpell, CLIENT_SPELL_CALCULATION_SCOPE } from '../../shared/clientSpellCalculations'
+import { WorkerSpellEvaluation, spellEvaluationScope, type SpellCalculator } from './workerEvaluation'
 import { changeKind, spellDifferences } from './differences'
 import { SpellLibraryStorage } from './storage'
 import { integerArg, objectArgs, stringArg } from './workerProtocol'
@@ -16,6 +16,15 @@ export function spellSummary(record: ClientSpellRecord): SpellSummary {
 function available(record: ClientSpellRecord, classes: ReturnType<typeof classesArg>, level?: number): boolean {
   if (!classes?.length && level === undefined) return true
   return record.classes.some((entry) => (!classes?.length || classes.includes(entry.code)) && (level === undefined || entry.level <= level))
+}
+function hpCalculations(record: ClientSpellRecord, level: number, calculate: SpellCalculator): SpellCalculation[] {
+  if (!record.effects.some((e) => [0, 79, 100, 101, 334].includes(e.spa))) return []
+  return [calculate(record, level, record.beneficial ? 'healing' : 'damage')]
+}
+function evaluatedSummary(record: ClientSpellRecord, query: Record<string, unknown>, calculate: SpellCalculator): SpellSummary {
+  const summary = spellSummary(record)
+  if (query.evaluation !== undefined) summary.calculations = hpCalculations(record, levelArg(query.level), calculate)
+  return summary
 }
 function amount(calculation: SpellCalculation, ranking: 'amount' | 'efficiency'): number {
   return (ranking === 'efficiency' ? calculation.perMana : calculation.total) ?? -Infinity
@@ -47,8 +56,8 @@ interface RankedGroups {
   direct: SpellCalculation[]; periodic: SpellCalculation[]; zeroMana: SpellCalculation[]; excluded: SpellCalculation[]
   eligible: number; excludedCount: number
 }
-function collectRank(record: ClientSpellRecord, options: { level: number; metric: SpellMetric; limit: number }, groups: RankedGroups): void {
-  const calculation = calculateClientSpell(record, options.level, options.metric)
+function collectRank(record: ClientSpellRecord, options: { level: number; metric: SpellMetric; limit: number }, groups: RankedGroups, calculate: SpellCalculator): void {
+  const calculation = calculate(record, options.level, options.metric)
   if (calculation.total === null || calculation.total <= 0) {
     groups.excludedCount++
     if (groups.excluded.length < options.limit) groups.excluded.push(calculation)
@@ -62,21 +71,24 @@ function collectRank(record: ClientSpellRecord, options: { level: number; metric
 
 /** A request pins one read transaction. Even a concurrent publication cannot mix snapshots. */
 export class SpellLibraryQueries {
-  constructor(readonly storage: SpellLibraryStorage) {}
+  private evaluation: WorkerSpellEvaluation
+  constructor(readonly storage: SpellLibraryStorage) { this.evaluation = new WorkerSpellEvaluation(storage) }
   handle(method: string, input: unknown): unknown {
     const args = objectArgs(input)
     const installId = stringArg(args.installId, 'installId')
     if (!/^i-[a-f0-9]{64}$/.test(installId)) throw new Error('Invalid installId')
-    return this.storage.readConsistent(() => this.dispatch(method, installId, args.query))
+    return this.storage.readConsistent(() => this.dispatch(method, installId, args))
   }
-  private dispatch(method: string, installId: string, query: unknown): unknown {
+  private dispatch(method: string, installId: string, args: Record<string, unknown>): unknown {
+    const query = args.query
     switch (method) {
       case 'active': return this.storage.active(installId)
       case 'status': return this.storage.status(installId)
-      case 'search': return this.search(installId, query)
-      case 'detail': return this.detail(installId, query)
-      case 'compare': return this.compare(installId, query)
-      case 'rank': return this.rank(installId, query)
+      case 'search': return this.search(installId, query, args.modifiers)
+      case 'detail': return this.detail(installId, query, args.modifiers)
+      case 'compare': return this.compare(installId, query, args.modifiers)
+      case 'rank': return this.rank(installId, query, args.modifiers)
+      case 'focusOptions': return this.focusOptions(installId, query)
       case 'history': return this.history(installId, query)
       case 'changes': return this.changes(installId, query)
       case 'beforeAfter': return this.beforeAfter(installId, query)
@@ -88,50 +100,57 @@ export class SpellLibraryQueries {
     const snapshot = snapshotArg(query.snapshotId)
     return snapshot ? this.storage.dataset(installId, snapshot) : this.storage.active(installId)
   }
-  private search(installId: string, input: unknown): SpellSearchResult {
-    const query = queryObject(input, ['snapshotId', 'text', 'classes', 'level', 'category', 'effect', 'allSpells', 'page', 'pageSize'])
+  private search(installId: string, input: unknown, context: unknown): SpellSearchResult {
+    const query = queryObject(input, ['snapshotId', 'text', 'classes', 'level', 'category', 'effect', 'allSpells', 'page', 'pageSize', 'evaluation'])
     const { page, pageSize } = pageArgs(query)
     const options = searchOptions(query)
     const dataset = this.dataset(installId, query)
+    const calculate = this.evaluation.calculator(dataset, query, context)
     const records: SpellSummary[] = []
     const categories = new Set<string>()
     let total = 0
     if (dataset) for (const record of this.storage.records(dataset.snapshotId)) {
       if (record.category) categories.add(record.category)
       if (!matchesSearch(record, options)) continue
-      if (total >= (page - 1) * pageSize && records.length < pageSize) records.push(spellSummary(record))
+      if (total >= (page - 1) * pageSize && records.length < pageSize) {
+        records.push(evaluatedSummary(record, query, calculate))
+      }
       total++
     }
     return { dataset, total, page, pageSize, records, categories: [...categories].sort() }
   }
-  private detail(installId: string, input: unknown): { dataset: SpellDataset | null; record: ClientSpellRecord | null } {
-    const query = queryObject(input, ['snapshotId', 'id'])
+  private detail(installId: string, input: unknown, context: unknown) {
+    const query = queryObject(input, ['snapshotId', 'id', 'level', 'evaluation'])
     const id = spellId(query.id)
     const dataset = this.dataset(installId, query)
-    return { dataset, record: dataset ? this.storage.record(dataset.snapshotId, id) : null }
+    const record = dataset ? this.storage.record(dataset.snapshotId, id) : null
+    const calculate = this.evaluation.calculator(dataset, query, context)
+    return { dataset, record, ...(query.evaluation !== undefined && record ? { calculations: hpCalculations(record, levelArg(query.level), calculate) } : {}) }
   }
-  private compare(installId: string, input: unknown): SpellComparisonResult {
-    const query = queryObject(input, ['snapshotId', 'ids', 'level', 'metric'])
+  private compare(installId: string, input: unknown, context: unknown): SpellComparisonResult {
+    const query = queryObject(input, ['snapshotId', 'ids', 'level', 'metric', 'evaluation'])
     if (!Array.isArray(query.ids) || query.ids.length > 4) throw new Error('Compare at most four spells')
     const ids = [...new Set(query.ids.map(spellId))]
     const level = levelArg(query.level)
     const metric = metricArg(query.metric)
     const dataset = this.dataset(installId, query)
+    const calculate = this.evaluation.calculator(dataset, query, context)
     const results: SpellCalculation[] = []
     if (dataset) for (const id of ids) {
       const record = this.storage.record(dataset.snapshotId, id)
-      if (record) results.push(calculateClientSpell(record, level, metric))
+      if (record) results.push(calculate(record, level, metric))
     }
-    return { dataset, level, scope: CLIENT_SPELL_CALCULATION_SCOPE, results }
+    return { dataset, level, scope: spellEvaluationScope(query), results }
   }
-  private rank(installId: string, input: unknown): SpellRankingResult {
-    const query = queryObject(input, ['snapshotId', 'classes', 'level', 'metric', 'ranking', 'limit'])
+  private rank(installId: string, input: unknown, context: unknown): SpellRankingResult {
+    const query = queryObject(input, ['snapshotId', 'classes', 'level', 'metric', 'ranking', 'limit', 'evaluation'])
     const level = levelArg(query.level)
     const metric = metricArg(query.metric)
     const classes = classesArg(query.classes)
     const limit = integerArg(query.limit ?? 25, 'limit', 1, 200)
     if (query.ranking !== 'amount' && query.ranking !== 'efficiency') throw new Error('Invalid ranking')
     const dataset = this.dataset(installId, query)
+    const calculate = this.evaluation.calculator(dataset, query, context)
     const groups: RankedGroups = { direct: [], periodic: [], zeroMana: [], excluded: [], eligible: 0, excludedCount: 0 }
     let scanned = 0
     if (dataset) for (const record of this.storage.records(dataset.snapshotId)) {
@@ -139,12 +158,20 @@ export class SpellLibraryQueries {
       if (!available(record, classes, level)) continue
       const sign = metric === 'damage' ? -1 : 1
       if (record.beneficial !== (metric === 'healing') || !record.effects.some((e) => [0, 79, 100, 101, 334].includes(e.spa) && e.base * sign > 0)) continue
-      collectRank(record, { level, metric, limit }, groups)
+      collectRank(record, { level, metric, limit }, groups, calculate)
     }
     const rankedDirect = ranked(groups.direct, query.ranking, limit), rankedPeriodic = ranked(groups.periodic, query.ranking, limit)
-    return { dataset, level, scope: CLIENT_SPELL_CALCULATION_SCOPE, results: [...rankedDirect, ...rankedPeriodic],
+    return { dataset, level, scope: spellEvaluationScope(query), results: [...rankedDirect, ...rankedPeriodic],
       scanned, eligible: groups.eligible, direct: rankedDirect, periodic: rankedPeriodic,
       zeroMana: ranked(groups.zeroMana, 'amount', limit), excluded: groups.excluded, excludedCount: groups.excludedCount }
+  }
+  private focusOptions(installId: string, input: unknown) {
+    const query = queryObject(input, ['text', 'page'])
+    const text = optionalText(query.text, 'text') ?? ''
+    const page = integerArg(query.page ?? 1, 'page', 1, 1000000)
+    const dataset = this.storage.active(installId)
+    if (!dataset) return { datasetId: null, total: 0, records: [] }
+    return { datasetId: dataset.snapshotId, ...this.evaluation.catalog(dataset).focusOptions(text, page) }
   }
   private history(installId: string, input: unknown): SpellHistoryResult {
     const query = queryObject(input, ['page', 'pageSize'])

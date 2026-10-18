@@ -1,5 +1,15 @@
 import { SPELL_CLASSES, type SpellClass, type SpellMetric } from '../../shared/spellLibrary'
 import { integerArg, objectArgs, stringArg } from './workerProtocol'
+import type { SpellEvaluationOptions } from '../../shared/spellModifiers'
+
+export function evaluationArg(input: unknown): SpellEvaluationOptions | undefined {
+  if (input === undefined) return undefined
+  const value = queryObject(input, ['mode', 'contextRevision', 'classes'])
+  if (!['client', 'mine', 'emulate'].includes(String(value.mode))) throw new Error('Invalid spell value mode')
+  const revision = stringArg(value.contextRevision, 'contextRevision')
+  if (revision.length > 256) throw new Error('Invalid context revision')
+  return { mode: value.mode as SpellEvaluationOptions['mode'], contextRevision: revision, classes: classesArg(value.classes) }
+}
 
 export function queryObject(input: unknown, allowed: string[]): Record<string, unknown> {
   const query = input === undefined ? {} : objectArgs(input)

@@ -10,15 +10,23 @@ import { EqClientLaunches } from '../../shared/eqClientProcess'
 import { IPC } from '../../shared/ipc'
 import { SpellLibraryService } from './service'
 import { activateCapturedSpellTable, prepareCapturedSpellTable, selectSpellInstallation } from '../resist/spellTable'
+import { getModifierContext, stopModifierContext } from './modifierRuntime'
+import { notifySpellModifierInputs } from './modifierEvents'
 
 let service: SpellLibraryService | null = null
 let releasePresence: (() => void) | null = null
 let releaseClients: (() => void) | null = null
+let modifierSource = ''
 
 export function spellLibrary(): SpellLibraryService {
   service ??= new SpellLibraryService({
     userData: app.getPath('userData'), workerDirectory: __dirname, root: effectiveEqRoot,
-    changed: (status) => sendToMain(IPC.spellLibraryStatusChanged, status),
+    changed: (status) => {
+      sendToMain(IPC.spellLibraryStatusChanged, status)
+      const source = `${status.installation ?? ''}:${status.dataset?.snapshotId ?? ''}`
+      if (source !== modifierSource) { modifierSource = source; notifySpellModifierInputs() }
+    },
+    modifierContext: getModifierContext,
     log: (error) => logError('main:spellLibrary', error),
     selectInstallation: selectSpellInstallation,
     prepareReference: prepareCapturedSpellTable,
@@ -43,6 +51,7 @@ export function startSpellLibrary(): void {
   })
 }
 export function stopSpellLibrary(): void {
+  stopModifierContext()
   releaseClients?.()
   releasePresence?.()
   releaseClients = releasePresence = null

@@ -85,6 +85,7 @@ import { connectToEngine } from './socketChannel'
 // the only thing it cannot get for itself — the engine's own `moduleChanged` frames, and the two
 // edges where the world that answers a read changes hands.
 import { pushModuleChanged, pushWorldChanged } from './serveDeltas'
+import { notifySpellModifierInputs } from '../spellLibrary/modifierEvents'
 // THE MIRROR ARM (JOS-496). The census's other fourteen readers are SYNCHRONOUS and have nowhere to
 // put an await, so they read a pushed cache instead of a promise. It hears the same two things the
 // delta arm does — a cursor, and the world changing hands — and it holds no import of this file, so
@@ -208,6 +209,7 @@ function bumpGen(): number {
   // measured on the world somebody has since replaced is a fact about a different log, and a
   // synchronous reader holding it would answer with authority about a character the app has left.
   resetMirrors()
+  notifySpellModifierInputs()
   return gen
 }
 

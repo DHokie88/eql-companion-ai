@@ -49,18 +49,18 @@ export default function SpellsView({ routing }: { routing: AppRouting }): JSX.El
       <Tabs value={tab} onChange={(_e, value: string) => { setTab(value); routing.clearLibrarySpellFocus() }} aria-label="Spell library views">
         <Tab label="Browse" value="browse" data-testid="spells-tab-browse" /><Tab label={`Compare${selected.length ? ` (${selected.length}/4)` : ''}`} value="compare" data-testid="spells-tab-compare" /><Tab label="History" value="history" data-testid="spells-tab-history" />
       </Tabs>
-      <LibraryContent routing={routing} tab={tab} timelineId={timelineId} loading={modifiers.loading} evaluation={evaluation} classes={classes} level={level} mode={mode} selected={selected} toggle={toggle} onHistory={(id) => { setTimelineId(id); routing.clearLibrarySpellFocus(); setTab('history') }} />
+      <LibraryContent routing={routing} tab={tab} timelineId={timelineId} evaluation={evaluation} classes={classes} level={level} mode={mode} selected={selected} toggle={toggle} onHistory={(id) => { setTimelineId(id); routing.clearLibrarySpellFocus(); setTab('history') }} />
     </Stack>
   )
 }
 
-function LibraryContent({ routing, tab, timelineId, loading, evaluation, classes, level, mode, selected, toggle, onHistory }: {
-  routing: AppRouting; tab: string; timelineId: number | null; loading: boolean; evaluation?: SpellEvaluationOptions
+function LibraryContent({ routing, tab, timelineId, evaluation, classes, level, mode, selected, toggle, onHistory }: {
+  routing: AppRouting; tab: string; timelineId: number | null; evaluation?: SpellEvaluationOptions
   classes: SpellClass[]; level: number; mode: 'character' | 'custom' | 'all'; selected: number[]
   toggle: (id: number) => void; onHistory: (id: number) => void
 }): JSX.Element {
   if (tab === 'history' && routing.librarySpellId === null) return <SpellHistory focusId={timelineId} onOpen={routing.openLibrarySpell} />
-  if (loading || !evaluation) return <CircularProgress size={22} aria-label="Loading calculation context" />
+  if (!evaluation) return <CircularProgress size={22} aria-label="Loading calculation context" />
   if (routing.librarySpellId !== null) return <LibrarySpellDetail id={routing.librarySpellId} level={level} evaluation={evaluation} onBack={() => { routing.clearLibrarySpellFocus(); if (routing.nav.origin) routing.nav.back() }} onWiki={routing.openSpell} onHistory={onHistory} />
   return <>
     {tab === 'browse' && <SpellBrowse classes={classes} level={level} evaluation={evaluation} allSpells={mode === 'all'} enabled={mode === 'all' || classes.length > 0} selected={selected} onToggle={toggle} onOpen={routing.openLibrarySpell} />}

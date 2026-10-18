@@ -29,7 +29,7 @@ async function mode(page: Page, value: 'client' | 'mine' | 'emulate'): Promise<v
 }
 
 async function modifiers(page: Page): Promise<void> {
-  const summary = page.locator('[data-testid="spells-modifiers-panel"] .MuiAccordionSummary-root')
+  const summary = page.locator('[data-testid="spells-modifiers-panel"] .MuiAccordionSummary-root').first()
   if (await summary.getAttribute('aria-expanded') !== 'true') await summary.click()
 }
 
@@ -41,6 +41,29 @@ async function choose(page: Page, testId: string, option: string): Promise<void>
 
 async function amountText(page: Page, id = 101): Promise<string> {
   return page.locator(`[data-testid="spells-amount-${id}-damage"]`).first().innerText()
+}
+
+async function engineEpoch(page: Page): Promise<number> {
+  return page.evaluate(async () => {
+    const connection = await window.eq.engineConnect()
+    if (!connection) throw new Error('Engine did not connect')
+    return new Promise<number>((resolve, reject) => {
+      let buffer = ''
+      const timer = setTimeout(() => { connection.close(); reject(new Error('Engine health timed out')) }, 10_000)
+      connection.onData((bytes) => {
+        buffer += bytes
+        for (;;) {
+          const end = buffer.indexOf('\n')
+          if (end < 0) break
+          const message = JSON.parse(buffer.slice(0, end)) as { kind: string; id?: number; result?: { epoch: number } }
+          buffer = buffer.slice(end + 1)
+          if (message.kind === 'hello') connection.write(JSON.stringify({ id: 1, op: 'session.health', params: {} }) + '\n')
+          if (message.id === 1 && message.result) { clearTimeout(timer); connection.close(); resolve(message.result.epoch) }
+        }
+      })
+      connection.write(JSON.stringify({ op: 'hello', token: connection.token, protocolVersion: 1 }) + '\n')
+    })
+  })
 }
 
 function stageSources(staged: FixtureLog): void {
@@ -62,7 +85,10 @@ async function detectedAndSimulated(page: Page): Promise<void> {
   await modifiers(page)
   assert.match(await page.locator('[data-testid="spells-detected-inputs"]').innerText(), /No inventory export/)
   await page.locator('[data-testid="spells-compare-101"]').click()
+  await page.locator('[data-testid="spells-search"]').fill('Test Ember')
   await mode(page, 'emulate')
+  assert.equal(await page.locator('[data-testid="spells-search"]').inputValue(), 'Test Ember', 'mode changes preserve the current search')
+  await page.locator('[data-testid="spells-search"]').fill('')
   await choose(page, 'spells-global-rank', 'Set all to Base / I')
   await choose(page, 'spells-rank-101', 'V')
   await choose(page, 'spells-focus-mode', 'No damage/healing focus')
@@ -78,7 +104,7 @@ async function detectedAndSimulated(page: Page): Promise<void> {
   assert.match(await page.locator('[data-testid="spells-ranked-count"]').innerText(), /Scanned 3/)
   // The smaller client amount wins after the exact-ID override across the entire eligible catalog.
   const rows = page.locator('[data-testid="spells-calculation"]')
-  assert.match(await rows.nth(1).innerText(), /Test Ember/)
+  assert.match(await rows.nth(1).innerText(), /Test Ember/i)
   await mode(page, 'mine')
   await settle(() => amountText(page), (text) => text.includes('40 → 61'))
   await mode(page, 'emulate')
@@ -91,7 +117,9 @@ async function focusAndReset(page: Page): Promise<void> {
   await page.locator('[data-testid="spells-focus-110"]').click()
   await context(page, (value) => value.preferences.emulation.focusIds.includes(110))
   await settle(() => amountText(page), (text) => text.includes('40 → 59'))
-  assert.match(await page.locator('[data-testid="spells-calculation"]').first().innerText(), /10%–20%/)
+  assert.match(await page.locator('[data-testid="spells-calculation"]').first().innerText(), /10% - 20%/)
+  await page.locator('[data-testid="spells-modifiers-panel"] .MuiAccordionSummary-root').first().click()
+  await dumpArtifacts(page, 'spell-modifiers-ready')
   const history = await page.evaluate(() => window.eq.spellLibrary.history())
   assert.equal(history.snapshots.length, 1, 'modifiers never create a source snapshot')
   await page.locator('[data-testid="spells-tab-history"]').click()
@@ -128,8 +156,16 @@ let page = await mainWindow(launch.app)
 page.setDefaultTimeout(20_000)
 try {
   await context(page, (value) => Object.values(value.ranks ?? {}).some((rank) => rank.name === 'Test Ember' && rank.rank === 9))
+  const epoch = await engineEpoch(page)
   await detectedAndSimulated(page)
+  await mode(page, 'mine')
+  staged.append('You begin casting Test Ember X.')
+  await context(page, (value) => Object.values(value.ranks ?? {}).some((rank) => rank.name === 'Test Ember' && rank.rank === 10))
+  await settle(() => amountText(page), (text) => text.includes('40 → 64'))
+  await mode(page, 'emulate')
+  await settle(() => amountText(page), (text) => text.includes('40 → 52'))
   await focusAndReset(page)
+  assert.equal(await engineEpoch(page), epoch, 'modifier settings and live rank updates do not reattach the engine')
   await launch.close()
   launch = await launchOnFixture(staged, { userData })
   page = await mainWindow(launch.app)
@@ -154,5 +190,5 @@ try {
 } finally {
   await launch.close()
   await removeUserData(userData)
-  staged.cleanup()
+  await staged.dispose()
 }

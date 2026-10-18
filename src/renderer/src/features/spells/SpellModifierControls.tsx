@@ -14,11 +14,7 @@ export function SpellModifierControls({ state, ids }: { state: SpellModifiersSta
     {error && <Alert severity="error">{error}</Alert>}
     {!context && !error && <CircularProgress size={20} aria-label="Loading spell modifiers" />}
     {context && preferences && <>
-      <ToggleButtonGroup size="small" exclusive value={preferences.mode} disabled={disabled} onChange={(_event, mode: SpellValueMode | null) => { if (mode) update({ ...preferences, mode }) }} aria-label="Spell value mode">
-        <ToggleButton value="client" data-testid="spells-mode-client">Client values</ToggleButton>
-        <ToggleButton value="mine" disabled={!context.character} data-testid="spells-mode-mine">Show mine</ToggleButton>
-        <ToggleButton value="emulate" data-testid="spells-mode-emulate">Emulate</ToggleButton>
-      </ToggleButtonGroup>
+      <ValueModeButtons context={context} disabled={disabled} onChange={update} />
       {!context.character && <Typography variant="caption" color="text.secondary">Select a character to use Show mine. Characterless emulation lasts for this session.</Typography>}
       {saving && <Typography variant="caption">Saving modifier settings…</Typography>}
       <Accordion data-testid="spells-modifiers-panel">
@@ -31,6 +27,16 @@ export function SpellModifierControls({ state, ids }: { state: SpellModifiersSta
       </Accordion>
     </>}
   </Stack>
+}
+
+function ValueModeButtons({ context, disabled, onChange }: {
+  context: SpellModifierContext; disabled: boolean; onChange: (preferences: SpellModifierPreferences) => void
+}): JSX.Element {
+  return <ToggleButtonGroup size="small" exclusive value={context.preferences.mode} disabled={disabled} onChange={(_event, mode: SpellValueMode | null) => { if (mode) onChange({ ...context.preferences, mode }) }} aria-label="Spell value mode">
+    <ToggleButton value="client" data-testid="spells-mode-client">Client values</ToggleButton>
+    <ToggleButton value="mine" disabled={disabled || !context.character} data-testid="spells-mode-mine">Show mine</ToggleButton>
+    <ToggleButton value="emulate" data-testid="spells-mode-emulate">Emulate</ToggleButton>
+  </ToggleButtonGroup>
 }
 
 function DetectedInputs({ context }: { context: SpellModifierContext }): JSX.Element {

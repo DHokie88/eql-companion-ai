@@ -62,6 +62,7 @@ import { timeSeam } from './perfAttribution'
 import { beginSwitch, type SwitchTurn } from './switchController'
 import { sendToMain } from './windows'
 import type { CharacterRef, EqConfig } from '../shared/types'
+import { notifySpellModifierInputs } from './spellLibrary/modifierEvents'
 
 let character: CharacterRef | null = null
 let inventoryWatch: OutputKindWatch | null = null
@@ -197,6 +198,7 @@ export async function applyEqDirChange(): Promise<EqConfig> {
     achievementsWatch?.close()
     achievementsWatch = null
     character = null
+    notifySpellModifierInputs()
     // Every window that folds a module, not just the main one (JOS-172): an overlay left open
     // over an install whose log went away must empty with everything else.
     sendWorldRebuilt(null)
@@ -398,6 +400,7 @@ export async function tailCharacter(ref: CharacterRef): Promise<boolean> {
   await Promise.resolve()
   if (!turn.owns()) return preempted(ref, turn) !== null
   character = ref
+  notifySpellModifierInputs()
   setActiveLogPath(ref.logPath)
   logInfo(`[everquest-companion] Tailing ${ref.name}@${ref.server}: ${ref.logPath}`)
   // THE FIRST-RUN FUNNEL'S `logDetected`, at the one moment that is unambiguously "we found a log
@@ -539,6 +542,7 @@ function loadInventoryNow(ref: CharacterRef, why: 'startup' | 'watch'): void {
     logInfo(
       `[everquest-companion] Inventory ${why === 'startup' ? 'loaded at startup' : 'auto-reloaded'}: ${res.path}`
     )
+    notifySpellModifierInputs()
     sendToMain(IPC.onInventoryReload, { path: res.path, loadedAt: res.loadedAt })
     sendToMain(IPC.onProgress, getProgress(activeCharId()))
   })

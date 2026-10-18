@@ -4,6 +4,14 @@ import type { SpellLibraryBridge, SpellLibraryStatus } from '../shared/spellLibr
 
 const query = <T>(method: string, args: unknown): Promise<T> => ipcRenderer.invoke(IPC.spellLibraryQuery, method, args)
 export const spellLibrary: SpellLibraryBridge = {
+  modifierContext: () => ipcRenderer.invoke(IPC.spellLibraryModifierContext),
+  updateModifiers: (update) => ipcRenderer.invoke(IPC.spellLibraryUpdateModifiers, update),
+  focusOptions: (q) => query('focusOptions', q),
+  onModifiersChanged: (callback) => {
+    const listener = (_event: Electron.IpcRendererEvent, revision: string): void => callback(revision)
+    ipcRenderer.on(IPC.spellLibraryModifiersChanged, listener)
+    return () => { ipcRenderer.removeListener(IPC.spellLibraryModifiersChanged, listener) }
+  },
   status: () => ipcRenderer.invoke(IPC.spellLibraryStatus),
   check: () => ipcRenderer.invoke(IPC.spellLibraryCheck),
   search: (q) => query('search', q), detail: (q) => query('detail', q),
