@@ -298,7 +298,10 @@ export function parseSpellsUs(text: string): SpellResistTable {
   const seen = new Map<string, { info: SpellResistInfo; playable: boolean }>()
   for (const line of text.split('\n')) {
     if (!line) continue
-    const f = line.split('^')
+    const sourceFields = line.replace(/\r$/, '').split('^')
+    // Newer clients insert one column at 74. Keep the legacy projection's
+    // canonical-name selection unchanged, but read its verified columns correctly.
+    const f = sourceFields.length === 174 ? [...sourceFields.slice(0, 74), ...sourceFields.slice(75)] : sourceFields
     if (f.length < F_SLOTS) continue
     const name = f[F_NAME]
     if (!name || !Number.isFinite(Number(f[F_ID]))) continue
