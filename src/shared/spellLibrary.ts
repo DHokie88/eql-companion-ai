@@ -1,4 +1,5 @@
 import type { SpellEvaluationOptions, SpellFocusOptions, SpellModifierApplied, SpellModifierContext, SpellModifierUpdate } from './spellModifiers'
+import type { SpellAnalysis, SpellAnalysisOptions, SpellByLevelQuery, SpellByLevelResult, SpellRankingsQuery, SpellRankingsResult } from './spellAnalysis'
 /** Local client catalog contract. Source bytes and filesystem paths never cross this bridge. */
 export const SPELL_SOURCE_FILES = ['spells_us.txt', 'spells_us_str.txt', 'dbstr_us.txt'] as const
 export type SpellSourceFile = (typeof SPELL_SOURCE_FILES)[number]
@@ -58,6 +59,7 @@ export type SpellBrowseSort = typeof SPELL_BROWSE_SORTS[number]
 export type SpellSortDirection = 'asc' | 'desc'
 export type SpellBrowseType = 'dd' | 'dot' | 'aoe' | 'heal' | 'hot' | 'other'
 export interface SpellSearchQuery extends SpellQueryContext {
+  analysis?: SpellAnalysisOptions
   minLevel?: number
   maxLevel?: number
   allLevels?: boolean
@@ -78,7 +80,7 @@ export interface SpellSearchQuery extends SpellQueryContext {
   page?: number
   pageSize?: number
 }
-export type SpellSummary = Pick<ClientSpellRecord, 'id' | 'name' | 'rank' | 'classes' | 'mana' | 'category' | 'subcategory' | 'beneficial' | 'target'> & { calculations?: SpellCalculation[]; learnedLevel?: number | null; spellType?: SpellBrowseType }
+export type SpellSummary = Pick<ClientSpellRecord, 'id' | 'name' | 'rank' | 'classes' | 'mana' | 'category' | 'subcategory' | 'beneficial' | 'target'> & { calculations?: SpellCalculation[]; learnedLevel?: number | null; spellType?: SpellBrowseType; description?: string; detectedRank?: number | null }
 export interface SpellSearchResult {
   dataset: SpellDataset | null
   total: number
@@ -88,10 +90,11 @@ export interface SpellSearchResult {
   categories: string[]
   subcategories: string[]
 }
-export interface SpellDetailQuery extends SpellQueryContext { id: number; level?: number; evaluation?: SpellEvaluationOptions }
+export interface SpellDetailQuery extends SpellQueryContext { id: number; level?: number; evaluation?: SpellEvaluationOptions; analysis?: SpellAnalysisOptions }
 export interface SpellDetailResult { dataset: SpellDataset | null; record: ClientSpellRecord | null; calculations?: SpellCalculation[] }
 export type SpellMetric = 'damage' | 'healing'
 export interface SpellCalculation {
+  analysis?: SpellAnalysis
   modifiers?: SpellModifierApplied
   id: number
   name: string
@@ -106,7 +109,7 @@ export interface SpellCalculation {
   reasons: string[]
   restrictions: string[]
 }
-export interface SpellComparisonQuery extends SpellQueryContext { ids: number[]; level: number; metric: SpellMetric; evaluation?: SpellEvaluationOptions }
+export interface SpellComparisonQuery extends SpellQueryContext { ids: number[]; level: number; metric: SpellMetric; evaluation?: SpellEvaluationOptions; analysis?: SpellAnalysisOptions }
 export interface SpellComparisonResult { dataset: SpellDataset | null; level: number; scope: string; results: SpellCalculation[] }
 export interface SpellRankingQuery extends SpellQueryContext {
   evaluation?: SpellEvaluationOptions
@@ -165,6 +168,8 @@ export interface SpellBeforeAfterResult {
 export interface SpellTimelineQuery { id: number }
 export interface SpellTimelineResult { dataset: SpellDataset | null; entries: { observation: SpellObservation; record: SpellSummary | null }[] }
 export interface SpellLibraryBridge {
+  rankings(query: SpellRankingsQuery): Promise<SpellRankingsResult>
+  byLevel(query: SpellByLevelQuery): Promise<SpellByLevelResult>
   modifierContext(): Promise<SpellModifierContext>
   updateModifiers(update: SpellModifierUpdate): Promise<SpellModifierContext>
   focusOptions(query: { text?: string; page?: number }): Promise<SpellFocusOptions>

@@ -8,7 +8,7 @@ export interface SpellEmulation {
   focus: 'detected' | 'none' | 'selected'
   focusIds: number[]
 }
-export interface SpellModifierPreferences { mode: SpellValueMode; emulation: SpellEmulation }
+export interface SpellModifierPreferences { mode: SpellValueMode; emulation: SpellEmulation; targets?: import('./spellAnalysis').SpellTargetCount }
 export function defaultSpellModifierPreferences(): SpellModifierPreferences {
   return { mode: 'client', emulation: { rank: null, ranks: {}, focus: 'detected', focusIds: [] } }
 }
