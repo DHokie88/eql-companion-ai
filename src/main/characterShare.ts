@@ -74,5 +74,5 @@ export function shareImageName(name: string): string {
   // Anything that is not a plain name character becomes a dash: this string reaches a save
   // dialog's default path, and the renderer supplied it.
   const stem = name.replace(/[^A-Za-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40)
-  return `eq-zera-${stem || 'character'}-${day}.png`
+  return `eq-oracle-${stem || 'character'}-${day}.png`
 }

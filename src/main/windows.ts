@@ -19,7 +19,9 @@
 // to Electron: the shared webPreferences object and the per-webContents / per-session
 // hardening that installs those predicates.
 
-import { BrowserWindow, shell } from 'electron'
+import { app, BrowserWindow, shell } from 'electron'
+import appIconAsset from '../../build/icon.png?asset'
+import taskbarIconAsset from '../../build/icon.ico?asset'
 import { join } from 'path'
 import { IPC } from '../shared/ipc'
 // The mouse's Back button (JOS-201). Its own module, and never installed per-overlay — the
@@ -372,7 +374,8 @@ export function createMainWindow(): void {
     // native drag/double-click-maximize via -webkit-app-region on the bar. Keep
     // backgroundColor + min sizes + bounds so the rest of the window UX is intact.
     frame: false,
-    title: 'EQ Zera',
+    title: 'EQ Oracle',
+    icon: appIconAsset,
     backgroundColor: PALETTE.bg,
     webPreferences: {
       ...WEB_PREFERENCES(join(__dirname, '../preload/index.js')),
@@ -385,6 +388,18 @@ export function createMainWindow(): void {
       zoomFactor: getUiScale()
     }
   })
+
+  if (process.platform === 'win32') {
+    mainWindow.setAppDetails({
+      appId: 'com.eqoracle.app',
+      appIconPath: taskbarIconAsset,
+      appIconIndex: 0,
+      relaunchCommand: app.isPackaged
+        ? `"${process.execPath}"`
+        : `"${process.execPath}" "${app.getAppPath()}"`,
+      relaunchDisplayName: 'EQ Oracle'
+    })
+  }
 
   // E2E: never show (and therefore never focus) the window — the harness drives it
   // entirely through the renderer's DOM while the user is playing.

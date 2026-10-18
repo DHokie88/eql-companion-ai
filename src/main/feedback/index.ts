@@ -194,11 +194,11 @@ export async function buildLogSlice(windowMinutes: number): Promise<FeedbackSlic
   }
 }
 
-/** `eqcompanion-log-2026-08-03-1432.log` — sortable, and obviously ours in a Downloads folder. */
+/** `eq-oracle-log-2026-08-03-1432.log` — sortable, and obviously ours in a Downloads folder. */
 function defaultSliceName(toMs: number): string {
   const d = new Date(toMs)
   const p = (n: number): string => String(n).padStart(2, '0')
-  return `eqcompanion-log-${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}.log`
+  return `eq-oracle-log-${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}.log`
 }
 
 /**

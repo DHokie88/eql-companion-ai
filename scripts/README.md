@@ -7,7 +7,7 @@ Node on PATH (`export PATH="/c/Program Files/nodejs:$PATH"` on this machine).
 
 | Script | `npm run` | What it does |
 | --- | --- | --- |
-| `gen-icon.mts` | `gen:icon` | Generates `build/icon.png`, `build/icon.ico` and `build/icon-tray.png` (the EQZ retro-wave cartridge mark, docs/plans/app-icon.md) with zero deps. Re-run after editing the design. |
+| `gen-icon.mts` | `gen:icon` | Packages the approved gold EQO crest from `build/icon-source.png` into the app, tray, Windows ICO, site and share-server logo using Electron. Re-run after replacing the source image. |
 | `scrape-posky.ts` / `scrape-bosses.ts` | `scrape:posky` / `scrape:bosses` | Refresh quest / raid-target data (offline, committed output). |
 
 ## Fixture extractors (`tests/extract-*.mjs`) — run them under **tsx**

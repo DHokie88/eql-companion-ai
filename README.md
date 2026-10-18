@@ -1,6 +1,4 @@
-# EQ Zera
-
-**Website and download:** [eqzera.com](https://eqzera.com)
+# EQ Oracle (EQO)
 
 A Windows desktop companion for **EverQuest Legends**. It reads the log file the game already
 writes and turns it into live views: a DPS meter, floating overlays, Plane of Sky quest tracking,
@@ -11,8 +9,8 @@ memory is read, nothing is automated.
 
 ## Origin
 
-EQ Zera is a fork of [everquest-companion](https://github.com/jmoyers/everquest-companion)
-("EQ Legends Companion") by Josh Moyers, forked in September 2026. The original app is still
+EQ Oracle (EQO) is a development fork of EQ Zera / [everquest-companion](https://github.com/jmoyers/everquest-companion)
+("EQ Legends Companion") by Josh Moyers. The original app is still
 published and still works for the game: get it from its
 [releases page](https://github.com/jmoyers/everquest-companion/releases/latest). The upstream
 README is preserved as [`README.upstream.md`](README.upstream.md); the upstream architecture
@@ -20,14 +18,16 @@ guide is [`AGENTS.md`](AGENTS.md) and is still the best map of the code.
 
 ## What changed in the fork
 
-- **Renamed** to EQ Zera (the upstream license reserves the original product name).
+- **Renamed** to EQ Oracle (EQO).
 - **The Z Engine.** The Rust log engine (`engine/`) is the fork's own line of development now: the
   process is `zengine.exe`, its cost on a real log is measured by `npm run engine:baseline` and
   recorded under `docs/zengine/`, and the program of work is in `docs/zengine/README.md`.
-- **Auto-update is on, and releases are signed.** The feed is this repository's GitHub
-  Releases (`publish:` in `electron-builder.yml`); every release from v1.20.1 is signed through
-  Azure Trusted Signing under the publisher "Jack Thomas", and the app refuses an update that is
-  not. SECURITY.md has the details.
+- **Auto-update is disabled for Oracle.** There is no Oracle release feed yet. The upstream
+  EQ Zera feed is disabled so it cannot replace this fork. Existing signing checks remain in
+  place for when an Oracle release channel is configured. The inherited release workflow is
+  dormant until Oracle publishing, signing and updater metadata are configured together.
+- **Gold EQO crest.** `npm run gen:icon` packages `build/icon-source.png` into the desktop,
+  taskbar, tray, installer, site and share-page icon assets.
 - **Telemetry and feedback are dark.** No endpoint is compiled in
   (`src/main/telemetry/net.ts`, `src/main/feedback/net.ts`). Nothing leaves your machine
   except the same third-party lookups upstream made: eqlwiki.com (items/mobs/images),
@@ -46,5 +46,4 @@ See [`SETUP.md`](SETUP.md). Feature plans are in [`ROADMAP.md`](ROADMAP.md).
 Functional Source License 1.1 with MIT future license (FSL-1.1-MIT). See [`LICENSE`](LICENSE)
 and [`NOTICE`](NOTICE). In short: use, modify, and share it freely for any non-commercial
 purpose; do not sell it or offer it as a paid service until the MIT conversion date.
-Copyright (c) 2026 Josh Moyers (original work). Copyright (c) 2026 Jack Thomas (EQ Zera
-additions since September 2026, under the same license). See [`NOTICE`](NOTICE).
+Copyright (c) 2026 Josh Moyers (original work). Copyright (c) 2026 Jack Thomas and contributors (EQ Oracle additions, under the same license). See [`NOTICE`](NOTICE).

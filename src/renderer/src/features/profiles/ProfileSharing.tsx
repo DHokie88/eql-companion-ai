@@ -49,7 +49,7 @@ export function ExportSettingsSetting(): JSX.Element {
     setBusy(true)
     try {
       const text = await window.eq.exportSettingsShare(readUiPrefs())
-      const res = await window.eq.saveShareFile(text, 'eq-companion-settings.eqshare')
+      const res = await window.eq.saveShareFile(text, 'eq-oracle-settings.eqshare')
       if (res.ok) setToast({ severity: 'success', text: `Saved to ${res.path}` })
       else if (res.error) setToast({ severity: 'warning', text: res.error })
     } finally {

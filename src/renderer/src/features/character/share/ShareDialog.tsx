@@ -2,7 +2,7 @@
 //
 //   Copy image        the card, photographed by main and put on the clipboard as an IMAGE
 //   Save image…       the same photograph, through the OS save dialog
-//   Copy share string  the `EQC1-` string, which another EQ Zera reader pastes into the viewer
+//   Copy share string  the `EQC1-` string, which another EQ Oracle reader pastes into the viewer
 //   Copy text          a plain summary, for a chat client that would mangle a long string
 //   Copy link         the same card published as a share.eqzera.com page, which unfurls in chat
 //   Post to Discord   that same link, posted into a channel the user connected once (2026-09-11)

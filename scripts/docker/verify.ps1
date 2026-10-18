@@ -7,9 +7,9 @@ $ErrorActionPreference = 'Stop'
 
 Write-Host '=== everquest-companion installer file-level verification (Server Core) ==='
 
-$setup = Get-ChildItem -Path 'C:\test\release' -Recurse -Filter 'eq-zera-Setup-*.exe' |
+$setup = Get-ChildItem -Path 'C:\test\release' -Recurse -Filter 'eq-oracle-Setup-*.exe' |
   Sort-Object LastWriteTime -Descending | Select-Object -First 1
-if (-not $setup) { throw 'No eq-zera-Setup-*.exe found under C:\test\release' }
+if (-not $setup) { throw 'No eq-oracle-Setup-*.exe found under C:\test\release' }
 Write-Host "installer: $($setup.FullName)"
 
 # Silent install.
@@ -17,9 +17,9 @@ $p = Start-Process -FilePath $setup.FullName -ArgumentList '/S' -PassThru -Wait
 if ($p.ExitCode -ne 0) { throw "installer exited $($p.ExitCode)" }
 Start-Sleep -Seconds 3
 
-$installDir = Join-Path $env:LOCALAPPDATA 'Programs\eq-zera'
-$exe = Join-Path $installDir 'EQ Zera.exe'
-$uninstaller = Join-Path $installDir 'Uninstall EQ Zera.exe'
+$installDir = Join-Path $env:LOCALAPPDATA 'Programs\eq-oracle'
+$exe = Join-Path $installDir 'EQ Oracle.exe'
+$uninstaller = Join-Path $installDir 'Uninstall EQ Oracle.exe'
 
 if (-not (Test-Path $installDir)) { throw "install dir missing: $installDir" }
 if (-not (Test-Path $exe)) { throw "app exe missing: $exe" }
@@ -38,18 +38,18 @@ function Get-ArpEntry {
   foreach ($root in $arpRoots) {
     foreach ($key in @(Get-ChildItem $root -ErrorAction SilentlyContinue)) {
       $props = Get-ItemProperty $key.PSPath -ErrorAction SilentlyContinue
-      if ($props -and $props.DisplayName -like 'EQ Zera*') { return $props }
+      if ($props -and $props.DisplayName -like 'EQ Oracle*') { return $props }
     }
   }
   return $null
 }
 $expectedVersion = ''
-if ($setup.Name -match '^eq-zera-Setup-(.+)\.exe$') { $expectedVersion = $Matches[1] }
+if ($setup.Name -match '^eq-oracle-Setup-(.+)\.exe$') { $expectedVersion = $Matches[1] }
 $arp = Get-ArpEntry
-if (-not $arp) { throw "Add/Remove Programs entry missing: no uninstall key with DisplayName like 'EQ Zera*' under $($arpRoots -join '; ')" }
+if (-not $arp) { throw "Add/Remove Programs entry missing: no uninstall key with DisplayName like 'EQ Oracle*' under $($arpRoots -join '; ')" }
 if ($arp.DisplayVersion -ne $expectedVersion) { throw "ARP DisplayVersion '$($arp.DisplayVersion)' != expected '$expectedVersion'" }
 if ([string]::IsNullOrWhiteSpace($arp.Publisher)) { throw 'ARP Publisher is empty' }
-if ([string]$arp.UninstallString -notlike '*Uninstall EQ Zera.exe*') { throw "ARP UninstallString does not point at our uninstaller: '$($arp.UninstallString)'" }
+if ([string]$arp.UninstallString -notlike '*Uninstall EQ Oracle.exe*') { throw "ARP UninstallString does not point at our uninstaller: '$($arp.UninstallString)'" }
 if ($arp.InstallLocation -ne $installDir) { throw "ARP InstallLocation '$($arp.InstallLocation)' != expected '$installDir'" }
 Write-Host "PASS  add/remove programs: '$($arp.DisplayName)' -> $($arp.UninstallString)"
 

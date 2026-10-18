@@ -53,7 +53,7 @@ function Get-ArpEntry {
   foreach ($root in $arpRoots) {
     foreach ($key in @(Get-ChildItem $root -ErrorAction SilentlyContinue)) {
       $props = Get-ItemProperty $key.PSPath -ErrorAction SilentlyContinue
-      if ($props -and $props.DisplayName -like 'EQ Zera*') {
+      if ($props -and $props.DisplayName -like 'EQ Oracle*') {
         Add-Member -InputObject $props -NotePropertyName '_ArpKeyPath' -NotePropertyValue "$root\$($key.PSChildName)" -Force
         return $props
       }
@@ -69,11 +69,11 @@ try {
 
   # 1. Find the newest installer in the mapped read-only release folder. The glob is the
   #    CURRENT artifactName; a release/ holding only pre-rename builds must fail loudly.
-  $setup = Get-ChildItem -Path 'C:\release' -Recurse -Filter 'eq-zera-Setup-*.exe' -ErrorAction SilentlyContinue |
+  $setup = Get-ChildItem -Path 'C:\release' -Recurse -Filter 'eq-oracle-Setup-*.exe' -ErrorAction SilentlyContinue |
     Sort-Object LastWriteTime -Descending | Select-Object -First 1
   if (-not $setup) {
     $other = @(Get-ChildItem -Path 'C:\release' -Recurse -Filter '*Setup*.exe' -ErrorAction SilentlyContinue | ForEach-Object { $_.Name })
-    $why = 'no eq-zera-Setup-*.exe under C:\release'
+    $why = 'no eq-oracle-Setup-*.exe under C:\release'
     if ($other.Count) { $why += " -- only stale-named build(s) present: $($other -join ', '). Run 'npm run dist' and re-launch the sandbox." }
     else { $why += " -- release/ is empty. Run 'npm run dist' to completion BEFORE launching the sandbox." }
     Check 'installer-present' $false $why
@@ -81,10 +81,10 @@ try {
   }
   Check 'installer-present' $true "$($setup.FullName) (built $($setup.LastWriteTime.ToString('o')))"
 
-  # Version comes from the artifact name (eq-zera-Setup-<version>.exe) so the
+  # Version comes from the artifact name (eq-oracle-Setup-<version>.exe) so the
   # Add/Remove-Programs assertions below do not need package.json in the sandbox.
   $expectedVersion = ''
-  if ($setup.Name -match '^eq-zera-Setup-(.+)\.exe$') { $expectedVersion = $Matches[1] }
+  if ($setup.Name -match '^eq-oracle-Setup-(.+)\.exe$') { $expectedVersion = $Matches[1] }
   Log "expected version: $expectedVersion"
 
   # 2. Silent install.
@@ -94,13 +94,13 @@ try {
 
   # 3. Verify install path + key files (per-user under %LOCALAPPDATA%\Programs). The
   #    install dir derives from package.json `name`, NOT productName.
-  $installDir = Join-Path $env:LOCALAPPDATA 'Programs\eq-zera'
-  $exe = Join-Path $installDir 'EQ Zera.exe'
+  $installDir = Join-Path $env:LOCALAPPDATA 'Programs\eq-oracle'
+  $exe = Join-Path $installDir 'EQ Oracle.exe'
   Check 'install-dir-exists' (Test-Path $installDir) $installDir
   Check 'app-exe-exists' (Test-Path $exe)
 
   # 4. Start-menu shortcut.
-  $startMenu = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\EQ Zera.lnk'
+  $startMenu = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\EQ Oracle.lnk'
   Check 'start-menu-shortcut' (Test-Path $startMenu) $startMenu
 
   # 4b. Add/Remove Programs registration - the ONLY route a normal user has to uninstall
@@ -109,15 +109,15 @@ try {
   #     the bug this block exists to catch, so each field is named individually.
   $arp = Get-ArpEntry
   if ($null -eq $arp) {
-    Check 'arp-entry-exists' $false ("no uninstall key with DisplayName like 'EQ Zera*' under: " + ($arpRoots -join '; ') + " - the app will NOT appear in Settings -> Apps")
+    Check 'arp-entry-exists' $false ("no uninstall key with DisplayName like 'EQ Oracle*' under: " + ($arpRoots -join '; ') + " - the app will NOT appear in Settings -> Apps")
   }
   else {
     Check 'arp-entry-exists' $true "($($arp._ArpKeyPath))"
-    Check 'arp-DisplayName' ($arp.DisplayName -like 'EQ Zera*') "(DisplayName='$($arp.DisplayName)')"
+    Check 'arp-DisplayName' ($arp.DisplayName -like 'EQ Oracle*') "(DisplayName='$($arp.DisplayName)')"
     Check 'arp-DisplayVersion' ($arp.DisplayVersion -eq $expectedVersion) "(DisplayVersion='$($arp.DisplayVersion)' expected '$expectedVersion')"
     Check 'arp-Publisher' (-not [string]::IsNullOrWhiteSpace($arp.Publisher)) "(Publisher='$($arp.Publisher)')"
     $unStr = [string]$arp.UninstallString
-    Check 'arp-UninstallString-points-at-uninstaller' ($unStr -like '*Uninstall EQ Zera.exe*') "(UninstallString='$unStr')"
+    Check 'arp-UninstallString-points-at-uninstaller' ($unStr -like '*Uninstall EQ Oracle.exe*') "(UninstallString='$unStr')"
     $unExe = ''
     if ($unStr -match '^"([^"]+)"') { $unExe = $Matches[1] } else { $unExe = ($unStr -split ' ')[0] }
     Check 'arp-UninstallString-exe-exists' ((-not [string]::IsNullOrWhiteSpace($unExe)) -and (Test-Path $unExe)) "(resolved '$unExe')"
@@ -154,7 +154,7 @@ try {
   # 6. Silent uninstall + cleanup check. NSIS relaunches the uninstaller from %TEMP% and
   #    the process we waited on exits immediately, so poll for real completion (install
   #    dir gone AND the ARP entry - which the uninstaller deletes LAST - gone).
-  $uninstaller = Join-Path $installDir 'Uninstall EQ Zera.exe'
+  $uninstaller = Join-Path $installDir 'Uninstall EQ Oracle.exe'
   if (Test-Path $uninstaller) {
     $u = Start-Process -FilePath $uninstaller -ArgumentList '/S' -PassThru -Wait
     Check 'uninstaller-exit-0' ($u.ExitCode -eq 0) "(exit $($u.ExitCode))"

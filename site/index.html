@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>EQ Legends Companion, a DPS meter and log reader for EverQuest Legends</title>
+    <title>EQ Oracle, a DPS meter and log reader for EverQuest Legends</title>
     <meta
       name="description"
       content="A Windows desktop companion for EverQuest Legends: a live DPS meter, optional floating overlays, quest and loot tracking, and sound alerts."
@@ -11,7 +11,7 @@
     <meta name="theme-color" content="#0f1017" />
     <link rel="icon" href="assets/icon.png" />
     <link rel="stylesheet" href="style.css" />
-    <meta property="og:title" content="EQ Legends Companion" />
+    <meta property="og:title" content="EQ Oracle" />
     <meta
       property="og:description"
       content="A desktop companion for EverQuest Legends: live DPS meter, optional floating overlays, quest and loot tracking, and sound alerts."
@@ -25,14 +25,14 @@
       <div class="wrap topbar-inner">
         <a class="brand" href="#top" aria-label="Back to top">
           <img class="brand-mark" src="assets/icon.png" alt="" width="24" height="24" />
-          <span>EQ Legends Companion</span>
+          <span>EQ Oracle</span>
           <span class="badge-beta" title="In active development — expect rough edges, and please report them">beta</span>
         </a>
         <nav class="topnav">
           <a href="#features">Features</a>
           <a href="#author">Author</a>
           <a href="launch.html">Launch</a>
-          <a href="https://github.com/jmoyers/everquest-companion">GitHub</a>
+          <a href="https://github.com/jmoyers/everquest-companion">Upstream GitHub</a>
         </nav>
       </div>
     </header>
@@ -42,7 +42,7 @@
       <section class="hero">
         <div class="wrap hero-grid">
           <div class="hero-copy">
-            <h1>EQ Legends Companion</h1>
+            <h1>EQ Oracle</h1>
             <p class="pitch">
               A Windows app for <strong>EverQuest Legends</strong>. A DPS meter, optional floating
               overlays, quest and loot tracking, and sound alerts.
@@ -52,7 +52,7 @@
               <a
                 class="btn"
                 id="download"
-                href="https://github.com/jmoyers/everquest-companion/releases/latest/download/everquest-companion-Setup.exe"
+                href="#install"
               >
                 <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
                   <path
@@ -60,16 +60,11 @@
                     d="M12 3v10.6l3.3-3.3 1.4 1.4L12 16.4l-4.7-4.7 1.4-1.4 3.3 3.3V3h2zM5 18h14v2H5v-2z"
                   />
                 </svg>
-                Download for Windows
+                Build EQ Oracle
               </a>
               <p class="relmeta" id="relmeta">
                 <span id="relmeta-text"
-                  >Latest release. Windows 10/11. One-click install, no admin prompt.</span
-                >
-                <span
-                  class="badge-signed"
-                  title="Code-signed: Joshua Moyers · Microsoft Artifact Signing. Updates are verified against this signature before they install."
-                  >&#10003; signed</span
+                  >Development fork. No Oracle installer has been published yet; build from this checkout.</span
                 >
               </p>
             </div>
@@ -526,7 +521,7 @@
                     <b>Charm break</b>
                     <code>event:uncharm</code>
                   </span>
-                  <span class="voice"><span>EQ Zera Console · alarm</span></span>
+                  <span class="voice"><span>EQ Oracle Console · alarm</span></span>
                   <span class="acts">▶ ⧉ ✎</span>
                 </div>
                 <div class="arow">
@@ -535,7 +530,7 @@
                     <b>Reckless Strength faded</b>
                     <code>event:buffExpired {spell=Reckless Strength}</code>
                   </span>
-                  <span class="voice"><span>EQ Zera Console · siren</span></span>
+                  <span class="voice"><span>EQ Oracle Console · siren</span></span>
                   <span class="acts">▶ ⧉ ✎</span>
                 </div>
                 <div class="arow arow--off">
@@ -606,7 +601,7 @@
               <h3>Raid targets</h3>
               <p>
                 Track your progress against raid targets and have fun pushing your character to its
-                limits. EQ Legends Companion is aware of tiers of difficulty and tracks your kill
+                limits. EQ Oracle is aware of tiers of difficulty and tracks your kill
                 progression for every raid target.
               </p>
             </div>
@@ -695,67 +690,23 @@
               file paths, no window positions, no progress.
             </li>
             <li>
-              <strong>Updates itself</strong>
-              New builds download in the background from GitHub Releases.
+              <strong>Development fork</strong>
+              Updates stay disabled until EQ Oracle has its own release channel.
             </li>
           </ul>
         </div>
       </section>
 
       <!-- =========================== GETTING STARTED =========================== -->
-      <section class="start">
+      <section id="install" class="start">
         <div class="wrap">
-          <h2 class="section-title">Getting started</h2>
+          <h2 class="section-title">Build EQ Oracle</h2>
+          <p>This is a personal development fork. There is no published Oracle installer yet.</p>
           <ol class="steps">
-            <li>
-              <span class="step-n">1</span>
-              <p>
-                Download and run the installer. It is a one-click, per-user install, like Discord.
-                No admin prompt, no wizard. You get a Start menu and a desktop shortcut.
-                <strong>It needs 64-bit Windows 10 or 11</strong> — on Windows 8.1 or older the
-                installer stops and tells you, instead of leaving an app that cannot start.
-              </p>
-            </li>
-            <li>
-              <span class="step-n">2</span>
-              <p>In EverQuest, type <code>/log on</code>.</p>
-            </li>
-            <li>
-              <span class="step-n">3</span>
-              <p>
-                That is it. The app finds your log on its own, usually under
-                <code>…\EverQuest Legends\Logs\</code>. If your install lives somewhere else, point
-                it at the right folder in <strong>Settings</strong> — it attaches immediately, and
-                if you have not typed <code>/log on</code> yet it attaches the moment you do.
-              </p>
-            </li>
+            <li><span class="step-n">1</span><p>Follow <code>SETUP.md</code> in the checkout to install dependencies and build the matching log engine.</p></li>
+            <li><span class="step-n">2</span><p>Run <code>npm run build</code>, then open <code>Open-Fork.cmd</code> or the EQ Oracle desktop shortcut.</p></li>
+            <li><span class="step-n">3</span><p>In EverQuest, type <code>/log on</code> and select your character in Oracle.</p></li>
           </ol>
-          <!-- Mac note: the app is Windows-only, but plenty of people run EQ Legends under
-               CrossOver. Two things bite them — installing into a different bottle than the
-               game (the Companion then cannot see the Logs folder), and the installer's
-               running-app check, which false-positives on Wine's unreliable process list. -->
-          <ul class="steps">
-            <li>
-              <h3 class="section-title">Mac (CrossOver)</h3>
-              <p>
-                The Companion is a Windows app, and it runs under CrossOver alongside the game.
-                Install it into the <strong>same bottle</strong> as EverQuest Legends — that is
-                what lets it find <code>…\EverQuest Legends\Logs\</code> on its own. If the
-                installer claims the app is already running when it is not, force-quit the bottle
-                (CrossOver &rarr; the bottle's <strong>Force Quit</strong>, or
-                <code>wineserver -k</code>) and run it again. From the next release the installer
-                detects Wine and skips that check automatically, so this should stop happening.
-              </p>
-            </li>
-          </ul>
-          <p class="cta cta--inline">
-            <a
-              class="btn btn--ghost"
-              href="https://github.com/jmoyers/everquest-companion/releases/latest/download/everquest-companion-Setup.exe"
-              id="download-2"
-              >Download for Windows</a
-            >
-          </p>
         </div>
       </section>
 
@@ -765,21 +716,14 @@
           <div>
             <h2 class="section-title">Who built this</h2>
             <p>
-              I'm Josh. I have been building software for about 22 years. I'm the CTO at
-              <strong>Encamp</strong>, an environmental compliance platform. Before that I ran
-              engineering at <strong>Sococo</strong>, a virtual office that carried millions of
-              audio minutes a week.
+              EQ Oracle is Andrew's personal development fork of EQ Zera, built on
+              EverQuest Companion by Josh Moyers. The upstream authors created the
+              log engine, meters and much of the foundation this fork builds on.
             </p>
             <p>
-              I have been playing EverQuest since I was 15. I'm 41 now. I do not miss corpse runs,
-              but I do miss sitting on a camp half the night waiting for a named to pop, and this
-              app is partly an excuse to go back.
-            </p>
-            <p>
-              I'm telling you this because you are about to run an installer from someone on the
-              internet. The source is on GitHub under my name, the license is FSL-1.1-MIT
-              (source-available today, MIT two years after each release), and the only file the app
-              opens is your log. You can go read that part yourself.
+              The original source and author links below are retained as attribution.
+              They refer to upstream projects. Oracle releases and an Oracle download
+              destination have not been configured yet.
             </p>
             <p class="fine">
               <a href="https://jmoyers.org">jmoyers.org</a>
@@ -821,9 +765,9 @@
     <footer class="footer">
       <div class="wrap footer-inner">
         <p class="footer-links">
-          <a href="https://github.com/jmoyers/everquest-companion">Source on GitHub</a>
+          <a href="https://github.com/jmoyers/everquest-companion">Upstream source on GitHub</a>
           <span class="dot">·</span>
-          <a href="https://github.com/jmoyers/everquest-companion/releases">Releases</a>
+          <a href="https://github.com/jmoyers/everquest-companion/releases">Upstream releases</a>
           <span class="dot">·</span>
           <a href="launch.html">The launch, in numbers</a>
           <span class="dot">·</span>
@@ -839,69 +783,6 @@
       </div>
     </footer>
 
-    <script>
-      // Fill in version · date · size from the GitHub Releases API, and swap the
-      // download href to the exact versioned asset when we can see one.
-      //
-      // The button already works with JS disabled (and forever): its static href
-      // is the /releases/latest/download/<stable name> redirect, and CI uploads a
-      // stable-named copy of the installer on every tagged release for exactly
-      // this. Everything below is a nicety. Any failure leaves the static link
-      // and the neutral placeholder text in place.
-      ;(function () {
-        var API = 'https://api.github.com/repos/jmoyers/everquest-companion/releases/latest'
-        var out = document.getElementById('relmeta-text')
-        if (!out || !window.fetch) return
-
-        function mb(bytes) {
-          return (bytes / 1048576).toFixed(1) + ' MB'
-        }
-
-        fetch(API, { headers: { Accept: 'application/vnd.github+json' } })
-          .then(function (r) {
-            if (!r.ok) throw new Error('http ' + r.status)
-            return r.json()
-          })
-          .then(function (rel) {
-            var assets = rel.assets || []
-            var exes = assets.filter(function (a) {
-              return /^everquest-companion-Setup.*\.exe$/i.test(a.name)
-            })
-            // Prefer the versioned asset (everquest-companion-Setup-1.2.3.exe)
-            // over the stable alias, so the link is unambiguous once resolved.
-            var versioned = exes.filter(function (a) {
-              return /-\d/.test(a.name)
-            })
-            var asset = versioned[0] || exes[0]
-
-            if (asset && asset.browser_download_url) {
-              var links = [document.getElementById('download'), document.getElementById('download-2')]
-              for (var i = 0; i < links.length; i++) {
-                if (links[i]) links[i].href = asset.browser_download_url
-              }
-            }
-
-            var bits = []
-            if (rel.tag_name) bits.push(rel.tag_name)
-            if (rel.published_at) {
-              var d = new Date(rel.published_at)
-              if (!isNaN(d)) {
-                bits.push(
-                  d.toLocaleDateString(undefined, {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric'
-                  })
-                )
-              }
-            }
-            if (asset && asset.size) bits.push(mb(asset.size))
-            if (bits.length) out.textContent = bits.join(' · ') + ' · Windows 10/11'
-          })
-          .catch(function () {
-            /* keep the static text and the permanent download link */
-          })
-      })()
-    </script>
+    <!-- Oracle release metadata is disabled until this fork has its own release channel. -->
   </body>
 </html>

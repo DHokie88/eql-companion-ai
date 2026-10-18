@@ -680,7 +680,8 @@ function registerUpdaterEvents(
  * `npm run dev` is never packaged, so the machinery is skipped there either way.
  */
 function autoUpdateDisabled(): boolean {
-  return false
+  // Oracle has no release feed yet. Taking EQ Zera updates would replace this fork.
+  return true
 }
 const AUTO_UPDATE_DISABLED = autoUpdateDisabled()
 
@@ -722,7 +723,7 @@ export function initUpdater(
     // No toast action handler is registered on this path, so the `toast:action` channel is UNARMED
     // for the whole life of an unpackaged process: nothing here can build an update card, and a
     // message naming one is dropped by main/toast.ts with no handler to reach.
-    logInfo('[eq-zera] Auto-update skipped (unpackaged build).')
+    logInfo('[eq-oracle] Auto-update disabled for this fork (no Oracle release feed).')
     return
   }
 

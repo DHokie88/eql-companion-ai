@@ -158,7 +158,7 @@ export function SharingSetting(): JSX.Element {
  * threshold. The words somebody types to find this setting belong with the setting.
  *
  * A SECTION rather than a line under Profiles, because Profiles is about SETTINGS bundles you
- * hand to another EQ Zera user, and this is about where your character card gets posted. They
+ * hand to another EQ Oracle user, and this is about where your character card gets posted. They
  * share a verb and nothing else.
  */
 export function sharingSection(): PrefSection {

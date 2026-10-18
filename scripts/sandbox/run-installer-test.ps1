@@ -39,7 +39,7 @@ $wsb = Join-Path $sandboxDir 'installer-test.wsb'
 $resultsDir = Join-Path $sandboxDir 'results'
 $resultFile = Join-Path $resultsDir 'result.txt'
 $releaseDir = Join-Path $repoRoot 'release'
-$setupGlob = 'everquest-companion-Setup-*.exe'
+$setupGlob = 'eq-oracle-Setup-*.exe'
 
 . (Join-Path $PSScriptRoot 'sandbox-lifecycle.ps1')
 

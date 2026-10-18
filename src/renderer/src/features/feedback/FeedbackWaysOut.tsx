@@ -64,10 +64,10 @@ function buildReport(
   })
 }
 
-/** `EQ Zera bug report - v1.7.0`. The version is in the subject because it is the first thing
+/** `EQ Oracle bug report - v1.7.0`. The version is in the subject because it is the first thing
  *  the reader needs and the last thing a person remembers to include. */
 function mailSubject(state: FeedbackState, ctx: FeedbackContext): string {
-  return `EQ Zera ${state.fields.type} report - v${ctx.env.appVersion}`
+  return `EQ Oracle ${state.fields.type} report - v${ctx.env.appVersion}`
 }
 
 /** The copy button's transient state: a label that says "Copied" for a moment, the CopyButton
@@ -126,13 +126,13 @@ export default function FeedbackWaysOut({
       <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
         <Button
           size="small"
-          variant="contained"
+          variant="outlined"
           disabled={blocked}
           data-testid="feedback-mail"
           startIcon={<MailOutlineIcon fontSize="small" />}
           onClick={mail}
         >
-          Send by email
+          Email upstream maintainer
         </Button>
         <Button
           size="small"
@@ -148,11 +148,11 @@ export default function FeedbackWaysOut({
           // clipboard on the way out - the same promise the mail button makes.
           onClick={() => void copyText(report)}
         >
-          Open a GitHub issue
+          Open upstream issue
         </Button>
         <Button
           size="small"
-          variant="outlined"
+          variant="contained"
           disabled={blocked}
           data-testid="feedback-copy"
           startIcon={<ContentCopyIcon fontSize="small" />}
@@ -161,6 +161,9 @@ export default function FeedbackWaysOut({
           {copied ? 'Copied' : 'Copy report'}
         </Button>
       </Stack>
+      <Typography variant="caption" color="text.secondary">
+        Email and issue links contact the upstream project. For an Oracle-specific issue, copy the report.
+      </Typography>
       {issueUrl === null && (
         <Typography variant="caption" color="text.secondary" data-testid="feedback-issue-note">
           {ISSUE_UNAVAILABLE}

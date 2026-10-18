@@ -1,4 +1,4 @@
-// PhoneSetting — EQ ZERA ON YOUR PHONE (owner, 2026-09-19; docs/plans/phone-link.md).
+// PhoneSetting — EQ ORACLE ON YOUR PHONE (owner, 2026-09-19; docs/plans/phone-link.md).
 //
 // Its own file for the reason SharingSetting.tsx and SyncSetting.tsx are: PreferencesView.tsx is
 // the settings TABLE, and a section's actual UI lives beside it rather than inside it.

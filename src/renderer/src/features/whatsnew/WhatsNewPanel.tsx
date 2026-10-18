@@ -254,7 +254,7 @@ export function WhatsNewPanel(): JSX.Element {
         data-testid="whats-new-github"
         sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, alignSelf: 'flex-start' }}
       >
-        All releases on GitHub
+        Upstream release history on GitHub
         <OpenInNewIcon sx={{ fontSize: 13 }} />
       </Link>
       {/* DEV-only, and it lives on THIS card rather than beside the dev restart button for the

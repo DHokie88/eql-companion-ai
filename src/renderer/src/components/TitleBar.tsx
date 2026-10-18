@@ -401,7 +401,7 @@ export default function TitleBar({
         variant="subtitle2"
         sx={{ color: 'primary.main', fontWeight: 700, whiteSpace: 'nowrap' }}
       >
-        EQL Companion Fork
+        EQ Oracle (EQO)
       </Typography>
 
       {/* Drag spacer between brand and the right-hand controls. */}

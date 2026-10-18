@@ -101,7 +101,7 @@ export const UPSTREAM_CREDIT = {
 
 /**
  * The card that says where the CODE comes from, beside the one that says where the art does.
- * EQ Zera is a fork: the log engine, the meters, the overlays and most of what the app knows how
+ * EQ Oracle is a fork: the log engine, the meters, the overlays and most of what the app knows how
  * to do began as EverQuest Companion. The FSL-1.1-MIT licence permits the fork and withholds the
  * original's name and marks, which is why this app is called something else; the credit is here
  * because a reader deserves to know whose work they are looking at, not because a file demands it.
@@ -112,7 +112,7 @@ export function BuiltOnSetting(): JSX.Element {
   return (
     <Stack spacing={0.75} data-testid="prefs-built-on">
       <Typography variant="body2">
-        EQ Zera is built on {UPSTREAM_CREDIT.name} by {UPSTREAM_CREDIT.author}, which is the
+        EQ Oracle is built on {UPSTREAM_CREDIT.name} by {UPSTREAM_CREDIT.author}, which is the
         inspiration for this app and the source it started from. The engine that reads your log,
         the meters, the overlays and most of what this app understands about the game began there.
       </Typography>
@@ -127,7 +127,7 @@ export function BuiltOnSetting(): JSX.Element {
       </Link>
       <Typography variant="caption" color="text.secondary">
         Used under the {UPSTREAM_CREDIT.license} licence, which is also the licence this app carries
-        (see LICENSE and NOTICE). EQ Zera is not affiliated with or endorsed by the original author.
+        (see LICENSE and NOTICE). EQ Oracle is not affiliated with or endorsed by the original author.
       </Typography>
     </Stack>
   )

@@ -212,7 +212,7 @@ test("this app's own windows never look like EverQuest", () => {
   // claim them either — the ring is positioned from an EQ match, and it must not jump onto an
   // overlay.
   for (const title of [
-    'EQ Zera',
+    'EQ Oracle',
     'Fight Overlay',
     'Zone Overlay',
     'Event Log Overlay',

@@ -69,9 +69,11 @@ test('the fork desktop launcher loads the built UI, preload and matching release
     const [port, endpoint] = readFileSync(portFile, 'utf8').trim().split(/\r?\n/)
     browser = await chromium.connectOverCDP(`ws://127.0.0.1:${port}${endpoint}`, { timeout: Math.max(1, deadline - Date.now()) })
     const page = await mainPage(browser, deadline)
+    assert.equal(await page.title(), 'EQ Oracle', 'the built main window must use the Oracle brand')
     const pageErrors: string[] = []
     page.on('pageerror', (error) => pageErrors.push(error.message))
     await page.locator('[data-testid="overview-grid"]').waitFor({ state: 'attached', timeout: Math.max(1, deadline - Date.now()) })
+    assert.equal(await page.getByText('EQ Oracle (EQO)', { exact: true }).count(), 1, 'the title bar must use the Oracle brand')
     await page.waitForFunction(async () => (await window.eq.engineLaunchState()).phase === 'live', undefined, {
       timeout: Math.max(1, deadline - Date.now())
     })

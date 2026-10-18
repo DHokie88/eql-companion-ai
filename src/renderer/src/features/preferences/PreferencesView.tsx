@@ -392,7 +392,7 @@ function buildSections({ version, status, onSendFeedback, onWhatsNew }: SectionI
       ]
     },
     // NEXT TO Profiles and not inside it (owner, 2026-09-10). Both say 'share', and they share
-    // nothing else: Profiles hands another EQ Zera user your settings, this decides where your
+    // nothing else: Profiles hands another EQ Oracle user your settings, this decides where your
     // CHARACTER CARD gets posted. Adjacent so the rail reads as one neighbourhood, separate so a
     // person looking for one is never shown the other.
     sharingSection(),

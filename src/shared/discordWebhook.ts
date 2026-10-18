@@ -75,7 +75,7 @@ export interface DiscordEmbed {
 /** The whole POST body. `content` is empty on purpose: the embed IS the message. */
 export interface DiscordWebhookBody {
   username: string
-  avatar_url: string
+  avatar_url?: string
   content: string
   embeds: DiscordEmbed[]
 }
@@ -191,8 +191,8 @@ const EMBED_COLOR = 0x5ee6ff
  * (share-server/src/logo.ts serves `/logo.png`). The two URLs this app actually builds - the link
  * and the card - are still minted from `SHARE_ORIGIN` by the caller and are never spelled here.
  */
-const POST_USERNAME = 'EQ Zera'
-const POST_AVATAR = 'https://share.eqzera.com/logo.png'
+const POST_USERNAME = 'EQ Oracle'
+// Let the configured webhook supply its avatar until Oracle has its own hosted icon.
 
 /**
  * Discord's own ceilings. Every string below is cut to one of them before it is sent.
@@ -317,7 +317,7 @@ export function discordEmbedFor(
     color: EMBED_COLOR,
     image: { url: cardUrl },
     fields: scoreFields(profile),
-    footer: { text: cut('EQ Zera · eqzera.com', LIMIT.footer) },
+    footer: { text: cut('EQ Oracle', LIMIT.footer) },
     timestamp: embedTimestamp(profile.capturedAt)
   }
   return discordPostBody(embed)
@@ -332,13 +332,13 @@ export function discordEmbedFor(
  * on both for the reason it always was - the embed IS the message.
  */
 export function discordPostBody(embed: DiscordEmbed): DiscordWebhookBody {
-  return { username: POST_USERNAME, avatar_url: POST_AVATAR, content: '', embeds: [embed] }
+  return { username: POST_USERNAME, content: '', embeds: [embed] }
 }
 
 /** What the Test button posts: one plain line, no embed, so a channel sees the wiring work. */
 export function discordTestBody(): { username: string; content: string } {
   return {
     username: POST_USERNAME,
-    content: 'EQ Zera connected. Character cards you post will appear here.'
+    content: 'EQ Oracle connected. Character cards you post will appear here.'
   }
 }

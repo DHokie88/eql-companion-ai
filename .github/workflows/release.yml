@@ -84,6 +84,8 @@ concurrency:
 
 jobs:
   release:
+    # Oracle has no release feed/signing configuration yet. Keep inherited publishing dormant.
+    if: ${{ false }}
     runs-on: windows-latest
     permissions:
       contents: write # create/update the GitHub Release + upload its assets
@@ -242,7 +244,7 @@ jobs:
           $tag = $env:GITHUB_REF_NAME
           $ver = $tag -replace '^v', ''
           $feed = "release/$ver/latest.yml"
-          $exe  = "release/$ver/eq-zera-Setup-$ver.exe"
+          $exe  = "release/$ver/eq-oracle-Setup-$ver.exe"
           if (-not (Test-Path $feed)) { throw "expected feed file not found: $feed" }
           if (-not (Test-Path $exe))  { throw "expected installer not found: $exe" }
 
@@ -260,20 +262,20 @@ jobs:
 
           # THE STABLE-NAME COPY (2026-09-08, eqzera.com). The website Download
           # button is a plain link and cannot know the version, so it points at
-          # releases/latest/download/eq-zera-Setup.exe - a name that only resolves
+          # releases/latest/download/eq-oracle-Setup.exe - a name that only resolves
           # if every release carries an asset called exactly that. Same bytes as
           # the versioned installer; the updater never reads it (latest.yml names
           # the versioned file), so it is a download convenience and nothing more.
-          Copy-Item $exe eq-zera-Setup.exe
-          gh release upload $tag eq-zera-Setup.exe --clobber
-          if ($LASTEXITCODE -ne 0) { throw "upload of eq-zera-Setup.exe failed" }
+          Copy-Item $exe eq-oracle-Setup.exe
+          gh release upload $tag eq-oracle-Setup.exe --clobber
+          if ($LASTEXITCODE -ne 0) { throw "upload of eq-oracle-Setup.exe failed" }
 
           $assets = (gh release view $tag --json assets --jq '.assets[].name') -split "`n" |
             ForEach-Object { $_.Trim() } | Where-Object { $_ }
           $required = @(
-            "eq-zera-Setup-$ver.exe",
-            "eq-zera-Setup-$ver.exe.blockmap",
-            "eq-zera-Setup.exe",
+            "eq-oracle-Setup-$ver.exe",
+            "eq-oracle-Setup-$ver.exe.blockmap",
+            "eq-oracle-Setup.exe",
             "latest.yml",
             "main.yml"
           )
@@ -298,7 +300,7 @@ jobs:
           # written here would be silently eaten (or, on 5.1, turn into whatever
           # the unrecognised escape resolves to). Bold and plain text only.
           $notes = @(
-            "**Download:** the eq-zera-Setup-$ver.exe asset below. Windows 10 or later; it installs",
+            "**Download:** the eq-oracle-Setup-$ver.exe asset below. Windows 10 or later; it installs",
             'per-user under %LOCALAPPDATA%\Programs, with no admin prompt.',
             '',
             '**This installer is code signed** through Azure Trusted Signing; the publisher Windows',

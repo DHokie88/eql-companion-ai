@@ -1,6 +1,6 @@
-appId: com.eqzera.app
-productName: EQ Zera
-copyright: Copyright © 2026 EQ Zera contributors. Based on everquest-companion, Copyright © 2026 Josh Moyers (FSL-1.1-MIT).
+appId: com.eqoracle.app
+productName: EQ Oracle
+copyright: Copyright © 2026 EQ Oracle contributors. Based on everquest-companion, Copyright © 2026 Josh Moyers (FSL-1.1-MIT).
 
 directories:
   buildResources: build
@@ -179,10 +179,8 @@ npmRebuild: false
 # protect it is Authenticode, because there is no certificate yet and
 # `publisherName` is commented out below. See that comment, SECURITY.md and
 # SETUP.md, "Releasing" — all three say the same thing in the same words.
-publish:
-  provider: github
-  owner: Zeratfule
-  repo: EQ-Zera
+# Oracle must not generate an updater feed pointing at its upstream fork.
+publish: null
 
 win:
   target:
@@ -256,5 +254,5 @@ nsis:
   deleteAppDataOnUninstall: false
   createDesktopShortcut: true
   createStartMenuShortcut: true
-  shortcutName: EQ Zera
-  artifactName: eq-zera-Setup-${version}.${ext}
+  shortcutName: EQ Oracle
+  artifactName: eq-oracle-Setup-${version}.${ext}

@@ -47,7 +47,7 @@
   "windows_development": {
     "checkout": "C:/Users/andrew/eql-companion-ai",
     "launcher": "Open-Fork.cmd",
-    "desktop_shortcut": "EQL Companion Fork",
+    "desktop_shortcut": "EQ Oracle (EQO)",
     "settings": "%APPDATA%/everquest-companion-dev",
     "engine": "Reused the matching installed EQ Zera 1.26.0 release binary; Rust source unchanged.",
     "engine_sha256": "42b517d2f79656d9b1e9bf4338a1330c88f4248416ccc9675245f00b27c1440d"

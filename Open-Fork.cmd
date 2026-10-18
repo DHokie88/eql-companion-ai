@@ -17,4 +17,4 @@ if not exist "engine\target\release\zengine.exe" (
   exit /b 1
 )
 rem The dot keeps a trailing backslash from escaping the closing quote in Electron's argv.
-start "EQL Companion development fork" "%~dp0node_modules\electron\dist\electron.exe" "%~dp0." %*
+start "EQ Oracle (EQO) development fork" "%~dp0node_modules\electron\dist\electron.exe" "%~dp0." %*

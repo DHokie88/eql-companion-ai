@@ -54,7 +54,7 @@ const src = (rel: string): string =>
 const PACKS: SoundPack[] = [
   {
     id: 'eq-zera-console',
-    name: 'EQ Zera Console',
+    name: 'EQ Oracle Console',
     source: 'bundled',
     sounds: {
       'charm-break': { file: 'charm.wav', label: 'Alarm, alternating' },

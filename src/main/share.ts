@@ -88,7 +88,7 @@ export function exportAlertsString(appVersion: string, ids?: string[]): string {
 export function shareFileName(kind: 'settings' | 'alerts', count?: number): string {
   const day = new Date().toISOString().slice(0, 10)
   const what = kind === 'alerts' ? `alerts${count ? `-${count}` : ''}` : 'settings'
-  return `eq-companion-${what}-${day}.eqshare`
+  return `eq-oracle-${what}-${day}.eqshare`
 }
 
 function emptyPreview(text: string, error: string): SharePreview {

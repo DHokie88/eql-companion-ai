@@ -200,10 +200,11 @@ test('a v1 share still renders: badges from the tier, nothing to open, the chara
 
 // ---- the top bar, the score explainer, the hover tooltips ----------------------------------
 
-test('the page opens with the EQ Zera mark linking home and a download link, and explains the scores', () => {
+test('the page uses the Oracle mark, labels upstream honestly and explains the scores', () => {
   const html = render(v2Profile())
-  assert.ok(html.includes('<nav class="brand"><a class="home" href="https://eqzera.com/"><img src="/logo.png"'))
-  assert.ok(html.includes('href="https://eqzera.com/#install"'), 'the download link goes to the site')
+  assert.ok(html.includes('<nav class="brand"><span class="home"><img src="/logo.png"'))
+  assert.ok(html.includes('href="https://eqzera.com/">Upstream project</a>'))
+  assert.ok(!html.includes('Get the app') && !html.includes('Install it'), 'Oracle must not advertise an upstream installer as its own')
   assert.ok(html.indexOf('<nav class="brand">') < html.indexOf('<h1>'), 'the bar sits above the name')
   assert.ok(html.includes('<summary>How these are scored</summary>'))
   assert.ok(html.includes('best set the same rules could build'), 'the meter is explained as current over best reachable')

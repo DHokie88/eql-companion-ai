@@ -253,7 +253,7 @@ test('the text summary states who, then the scores, then one line per worn slot'
   assert.ok(lines[2].includes('Charisma'), 'and it runs to the last attribute the totals carry')
   assert.match(lines[3], /^AC \d+ from \d+ of 22 worn items$/)
   assert.equal(lines[4], '')
-  assert.equal(lines.at(-1), 'Shared from EQ Zera')
+  assert.equal(lines.at(-1), 'Shared from EQ Oracle')
   // One line per WORN slot and not one per place: the empty two say nothing.
   const gear = lines.slice(5, lines.length - 2)
   assert.equal(gear.length, 22)
@@ -276,8 +276,8 @@ test('the summary says nothing it was not told', () => {
 // ---- the image's file name --------------------------------------------------------------
 
 test('the save dialog default is dated and can never be path-shaped', () => {
-  assert.match(shareImageName('Primitive'), /^eq-zera-Primitive-\d{4}-\d{2}-\d{2}\.png$/)
-  assert.match(shareImageName('..\\..\\Windows\\System32'), /^eq-zera-[A-Za-z0-9_-]+-\d{4}-\d{2}-\d{2}\.png$/)
+  assert.match(shareImageName('Primitive'), /^eq-oracle-Primitive-\d{4}-\d{2}-\d{2}\.png$/)
+  assert.match(shareImageName('..\\..\\Windows\\System32'), /^eq-oracle-[A-Za-z0-9_-]+-\d{4}-\d{2}-\d{2}\.png$/)
   assert.ok(!shareImageName('../evil').includes('/'))
-  assert.match(shareImageName(''), /^eq-zera-character-\d{4}-\d{2}-\d{2}\.png$/)
+  assert.match(shareImageName(''), /^eq-oracle-character-\d{4}-\d{2}-\d{2}\.png$/)
 })

@@ -128,4 +128,7 @@ function resolveUserData(): string {
 export const USER_DATA = resolveUserData()
 
 app.setPath('userData', USER_DATA)
+// Keep the existing profile above while giving Windows the fork's display identity.
+app.setName('EQ Oracle')
+if (process.platform === 'win32') app.setAppUserModelId('com.eqoracle.app')
 logInfo(`[everquest-companion] channel=${CHANNEL} userData=${USER_DATA}`)

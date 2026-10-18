@@ -77,7 +77,7 @@ export function sessionImageName(name: string): string {
     .replace(/[^A-Za-z0-9_-]+/g, '-')
     .replace(/^-+|-+$/g, '')
     .slice(0, 40)
-  return `eq-zera-session-${stem || 'play'}-${day}.png`
+  return `eq-oracle-session-${stem || 'play'}-${day}.png`
 }
 
 /** The captured card as the file a post attaches, or null when there is nothing postable. */
