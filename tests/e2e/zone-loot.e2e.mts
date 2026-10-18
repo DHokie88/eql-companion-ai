@@ -51,12 +51,14 @@ const LOOT = '[data-testid="loot-detail"]'
 
 /** The zone this spec drives, and what the committed corpus says about it. */
 const ZONE = 'Kaesora'
-const LISTED = 111
-const OUT_OF_ERA = 67
+// 2026-10-18: the loot parse now reads [[Item]] links (Strathbone spider gained 6 drops, 5 out of era):
+// 111 -> 117 listed, 67 -> 72 out of era, 10 -> 11 mobs in era, 24 -> 25 mobs listed.
+const LISTED = 117
+const OUT_OF_ERA = 72
 const IN_ERA = LISTED - OUT_OF_ERA
 /** Mobs with at least one drop, in each half — the footer's first number. */
-const MOBS_IN_ERA = 10
-const MOBS_LISTED = 24
+const MOBS_IN_ERA = 11
+const MOBS_LISTED = 25
 /** A search that matches ITEMS only — nine Fine Steel drops off three mobs, all of them in era. */
 const NEEDLE = 'fine steel'
 const NEEDLE_DROPS = 9
