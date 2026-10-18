@@ -177,6 +177,10 @@ struct State {
     /// ingest's own `report_*` calls. The handle is cloned out under the lock and the parse happens
     /// with the lock released.
     client_spells: Option<std::sync::Arc<crate::spells::ClientSpells>>,
+    /// Authorizes captured reference files. Never used as an arbitrary filesystem reader.
+    client_spells_state_dir: Option<PathBuf>,
+    /// Independent of the log generation: prevents a slow preload overwriting a newer request.
+    client_spells_activation: u64,
     /// Where the character logs live, as the app named it. `None` until a `logs.setDir` arrives,
     /// which is what makes `logs.list` refusable rather than emptily wrong.
     ///
@@ -386,6 +390,8 @@ impl World {
                     defines: std::collections::BTreeMap::new(),
                     write_to: None,
                     client_spells: None,
+                    client_spells_state_dir: None,
+                    client_spells_activation: 0,
                     log_dir: crate::logs::LogDir::default(),
                 }),
             }),
@@ -863,6 +869,75 @@ impl World {
         self.lock().client_spells.clone()
     }
 
+    /// Preload a captured spell reference without holding the world lock, then swap only its Arc.
+    /// The profile boundary and current install are checked before reading; attach and concurrent
+    /// activation guards are checked again at publication. No live ingest state is touched.
+    pub fn activate_client_spells(
+        &self,
+        root: &str,
+        snapshot_id: &str,
+        spells_path: &str,
+        dbstr_path: &str,
+    ) -> Result<bool, String> {
+        let canonical = |path: &Path| std::fs::canonicalize(path).map_err(|e| e.to_string());
+        let root = canonical(Path::new(root))?;
+        let (epoch, activation, profile) = {
+            let mut state = self.lock();
+            let attached = state
+                .fold
+                .log
+                .as_ref()
+                .and_then(|p| p.parent())
+                .and_then(|p| p.parent())
+                .ok_or("no log is attached")?;
+            if canonical(attached)? != root {
+                return Err("captured spell install does not match the attached log".into());
+            }
+            let profile = state
+                .client_spells_state_dir
+                .clone()
+                .ok_or("the attached session has no profile state directory")?;
+            state.client_spells_activation += 1;
+            (state.epoch, state.client_spells_activation, profile)
+        };
+        if snapshot_id.is_empty() || snapshot_id.len() > 256 {
+            return Err("invalid captured spell snapshot identity".into());
+        }
+        let boundary = canonical(&profile.join("spells").join("materialized"))?;
+        let spells = canonical(Path::new(spells_path))?;
+        let dbstr = canonical(Path::new(dbstr_path))?;
+        let generation = spells
+            .parent()
+            .ok_or("captured spell directory is missing")?;
+        if generation.parent() != Some(boundary.as_path())
+            || dbstr.parent() != Some(generation)
+            || spells.file_name().and_then(|s| s.to_str()) != Some("spells_us.txt")
+            || dbstr.file_name().and_then(|s| s.to_str()) != Some("dbstr_us.txt")
+        {
+            return Err("captured spell files must share a generation beneath the profile spells/materialized directory".into());
+        }
+        let replacement = Arc::new(crate::spells::ClientSpells::captured(
+            spells,
+            dbstr,
+            snapshot_id.to_owned(),
+        )?);
+        Ok(self.publish_client_spells(epoch, activation, replacement))
+    }
+
+    fn publish_client_spells(
+        &self,
+        epoch: i64,
+        activation: u64,
+        replacement: Arc<crate::spells::ClientSpells>,
+    ) -> bool {
+        let mut state = self.lock();
+        if state.epoch != epoch || state.client_spells_activation != activation {
+            return false;
+        }
+        state.client_spells = Some(replacement);
+        true
+    }
+
     /// Post one ask through the one door and wait for it — the shape `module_snapshot` and
     /// `perf_snapshot` each spell out by hand.
     ///
@@ -1316,6 +1391,8 @@ impl World {
             // that by comparing paths would be a cache with an invalidation rule. A re-attach onto
             // the same install pays one lazy re-read, once, if anybody asks.
             state.client_spells = crate::spells::ClientSpells::beside_log(&log).map(Arc::new);
+            state.client_spells_state_dir = state_dir.clone();
+            state.client_spells_activation += 1;
             let announcement = EngineMessage::EpochMessage(EpochMessage {
                 kind: EpochMessageKind::Epoch,
                 epoch: Epoch(state.epoch),
@@ -1616,7 +1693,9 @@ mod tests {
     use super::{FoldMark, World};
     use crate::views::{self, Meter};
     use protocol::generated::{EngineMessage, EpochReason, HealthResultStatus, ViewDescriptor};
+    use std::path::{Path, PathBuf};
     use std::sync::Arc;
+    use std::sync::{atomic::Ordering, mpsc::channel};
 
     /// A validated view over a registered source. These tests are about the epoch, the generation
     /// and the subscription bookkeeping; the view is the smallest real one there is, and
@@ -1708,6 +1787,151 @@ mod tests {
             "absent for the scan, `true` for the tail - never `false`, which would put a field \
              with no reader on every frame of every historical fold"
         );
+    }
+
+    /// A synthetic install/profile; never reads a player's client or log.
+    fn captured_reference() -> (PathBuf, PathBuf, PathBuf, PathBuf) {
+        static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+        let dir = std::env::temp_dir().join(format!(
+            "oracle-activation-{}-{}",
+            std::process::id(),
+            NEXT.fetch_add(1, Ordering::SeqCst)
+        ));
+        let install = dir.join("game");
+        let profile = dir.join("profile");
+        let captured = profile.join("spells/materialized/captured-generation");
+        std::fs::create_dir_all(install.join("Logs")).unwrap();
+        std::fs::create_dir_all(&captured).unwrap();
+        let fixture: serde_json::Value =
+            serde_json::from_str(include_str!("../../../../tests/fixtures/spell-parity.json"))
+                .unwrap();
+        std::fs::write(
+            captured.join("spells_us.txt"),
+            fixture[1]["row"].as_str().unwrap(),
+        )
+        .unwrap();
+        std::fs::write(
+            captured.join("dbstr_us.txt"),
+            "114^5^Synthetic Taps
+43^5^Synthetic Health
+",
+        )
+        .unwrap();
+        (dir, install, profile, captured)
+    }
+
+    #[test]
+    fn captured_reference_swaps_without_changing_live_world_state() {
+        let (dir, install, profile, captured) = captured_reference();
+        let world = world();
+        world.attach(
+            install.join("Logs/eqlog_Test_server.txt").to_str().unwrap(),
+            profile.to_str(),
+            eqlog::ZoneHint::default(),
+        );
+        let token = generation(&world);
+        land(&world, token, mark(47, 100.0));
+        let (writes, _) = channel();
+        let (asks, _) = channel();
+        {
+            let mut state = world.lock();
+            state.write_to = Some(writes);
+            state.asks = Some(asks);
+        }
+        let before = world.mark();
+        let epoch = *world.health().epoch;
+        let previous = world.client_spells().unwrap();
+        assert!(world
+            .activate_client_spells(
+                install.to_str().unwrap(),
+                "snapshot-a",
+                captured.join("spells_us.txt").to_str().unwrap(),
+                captured.join("dbstr_us.txt").to_str().unwrap()
+            )
+            .unwrap());
+        let active = world.client_spells().unwrap();
+        assert_eq!(active.snapshot_id(), Some("snapshot-a"));
+        assert!(active.spell("Oracle Synthetic Ember II").is_some());
+        assert_eq!(
+            active.category_names().get(&114).map(String::as_str),
+            Some("Synthetic Taps")
+        );
+        assert!(previous.snapshot_id().is_none());
+        assert_eq!(*world.health().epoch, epoch);
+        assert_eq!(generation(&world), token);
+        assert_eq!(world.mark(), before);
+        let state = world.lock();
+        assert!(state.write_to.is_some());
+        assert!(state.asks.is_some());
+        drop(state);
+        std::fs::remove_dir_all(dir).unwrap();
+    }
+
+    #[test]
+    fn rejected_capture_preserves_the_previous_reference() {
+        let (dir, install, profile, captured) = captured_reference();
+        let world = world();
+        let activate = |root: &Path, path: &Path| {
+            world.activate_client_spells(
+                root.to_str().unwrap(),
+                "snapshot",
+                path.join("spells_us.txt").to_str().unwrap(),
+                path.join("dbstr_us.txt").to_str().unwrap(),
+            )
+        };
+        assert!(
+            activate(&install, &captured).is_err(),
+            "activation requires attach"
+        );
+        world.attach(
+            install.join("Logs/eqlog_Test_server.txt").to_str().unwrap(),
+            profile.to_str(),
+            eqlog::ZoneHint::default(),
+        );
+        let previous = world.client_spells().unwrap();
+        assert!(activate(&profile, &captured).is_err(), "wrong install");
+        std::fs::write(install.join("spells_us.txt"), "outside profile").unwrap();
+        std::fs::write(install.join("dbstr_us.txt"), "outside profile").unwrap();
+        assert!(activate(&install, &install).is_err(), "outside profile");
+        std::fs::write(captured.join("spells_us.txt"), "malformed").unwrap();
+        assert!(activate(&install, &captured).is_err(), "malformed file");
+        assert!(Arc::ptr_eq(&previous, &world.client_spells().unwrap()));
+        std::fs::remove_dir_all(dir).unwrap();
+    }
+
+    #[test]
+    fn superseded_capture_and_reattach_cannot_publish_an_old_handle() {
+        let (dir, install, profile, captured) = captured_reference();
+        let world = world();
+        let log = install.join("Logs/eqlog_Test_server.txt");
+        world.attach(
+            log.to_str().unwrap(),
+            profile.to_str(),
+            eqlog::ZoneHint::default(),
+        );
+        let replacement = Arc::new(
+            crate::spells::ClientSpells::captured(
+                captured.join("spells_us.txt"),
+                captured.join("dbstr_us.txt"),
+                "old".into(),
+            )
+            .unwrap(),
+        );
+        let (epoch, ticket) = {
+            let state = world.lock();
+            (state.epoch, state.client_spells_activation)
+        };
+        world.lock().client_spells_activation += 1;
+        assert!(!world.publish_client_spells(epoch, ticket, replacement.clone()));
+        let ticket = world.lock().client_spells_activation;
+        world.attach(
+            log.to_str().unwrap(),
+            profile.to_str(),
+            eqlog::ZoneHint::default(),
+        );
+        assert!(!world.publish_client_spells(epoch, ticket, replacement));
+        assert!(world.client_spells().unwrap().snapshot_id().is_none());
+        std::fs::remove_dir_all(dir).unwrap();
     }
 
     #[test]

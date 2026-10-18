@@ -8,7 +8,7 @@
 // schema edit that lands without regenerating turns tests/protocolSchema.test.mts red on the
 // TypeScript side and the protocol-codegen staleness test red on the Rust side.
 //
-// schema-digest: sha256:3ca9599ff8fb504a5505aeb8263ecb51476a6d35ff378964bb44b501fb949563
+// schema-digest: sha256:cadf31311e94675996c7099d4a826ee4eb940030735e73a5026c91569892664e
 
 /**
  * Anything that can travel the wire, in either direction. The transport adapters are generic over exactly this: a transport moves ProtocolMessages and knows nothing else about the protocol.
@@ -48,6 +48,7 @@ export type ClientMessage =
   | SpellsSearchRequest
   | LogsSetDirRequest
   | LogsListRequest
+  | ClientSpellsActivateRequest
 /**
  * The per-launch shared secret. Minted by Electron main at spawn, handed to the engine out of band, presented once at hello. It is never persisted and never reused across launches. Compare it in CONSTANT TIME (src/main/dataServer/token.ts, engine/crates/protocol/src/token.rs) - a byte-at-a-time compare over a loopback socket is a timing oracle. The shape rules are environment-neutral and live in src/shared/dataServer/token.ts.
  */
@@ -136,6 +137,7 @@ export type ReplyResult =
   | ResistSpellResult
   | SpellsSearchResult
   | LogsListResult
+  | ClientSpellsActivateResult
 /**
  * The world's generation. Monotonic within one engine process. A client that sees an epoch it did not expect DROPS ALL STATE and waits for the reset — it never reconciles across a bump.
  */
@@ -715,6 +717,20 @@ export interface LogsListRequest {
   params: NoParams
 }
 /**
+ * Activate one captured immutable client spell reference without restarting the attached log session. Trusted main process only; files must be beneath the attached profile spells/materialized directory.
+ */
+export interface ClientSpellsActivateRequest {
+  id: RequestId
+  op: 'clientSpells.activate'
+  params: ClientSpellsActivateParams
+}
+export interface ClientSpellsActivateParams {
+  root: string
+  snapshotId: string
+  spellsPath: string
+  dbstrPath: string
+}
+/**
  * The handshake answer. `ok: false` is a courtesy sent immediately before the engine closes the connection — a client must treat a closed connection with no reply as the same outcome.
  */
 export interface HelloReply {
@@ -1113,6 +1129,10 @@ export interface ResistSpellResult {
    */
   path: string
   spell?: ClientSpell
+  /**
+   * Captured immutable source revision, absent for legacy live-install references.
+   */
+  snapshotId?: string
 }
 /**
  * One row of `spells_us.txt` as the app's own `SpellResistInfo` describes it, field for field. THE OPTIONALS ARE ABSENT-MEANS-NOTHING and each absence was measured rather than chosen: a zero recast is the file saying there is no re-use timer, a zero `aeMaxTargets` is what 71,864 of ~74k rows read, and a zero mana is what every bard song says. Storing those zeros would cost a field on most of the table to state what the absence already states.
@@ -1182,6 +1202,10 @@ export interface SpellsSearchResult {
    * Where this engine looked for `spells_us.txt`. Present always, because the sentence a missing table produces has to name a place.
    */
   path: string
+  /**
+   * Captured immutable source revision, absent for legacy live-install references.
+   */
+  snapshotId?: string
 }
 /**
  * One spell as the Actions/Spells window draws it: a name, a level, and the two words it is filed under. The CATEGORY AND SUBCATEGORY ARRIVE AS WORDS AND NEVER AS IDS - a client receiving `114` would have to join it against a table it is not allowed to have, which is exactly the munging ruling 4 forbids.
@@ -1256,6 +1280,14 @@ export interface LogCharacter {
    * The file's last-modified time in epoch milliseconds, TRUNCATED to an integer, which is the sort key the picker orders by. ABSENT MEANS THE ENGINE COULD NOT STATE IT - a file that vanished between the readdir and the stat, or a filesystem with no modification time - and never zero, which would draw a real date in 1970 beside a real character name. It is the same fact and the same rule `HealthResult.logMtimeMs` carries for the attached log, and it stays a served PROCESS fact rather than fold state (ruling 18): no module holds it, and no replay can produce it.
    */
   lastPlayed?: number
+}
+/**
+ * False means a newer activation or attach superseded this preload. The existing session and prior valid reference are preserved on failure.
+ */
+export interface ClientSpellsActivateResult {
+  clientSpellsActivated: boolean
+  root: string
+  snapshotId: string
 }
 /**
  * A refused request. An error is always a reply to a request id — a failure with no request behind it closes the connection instead.

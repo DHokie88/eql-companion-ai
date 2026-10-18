@@ -8,7 +8,7 @@
 //! and a schema edit that lands without regenerating turns the protocol-codegen staleness
 //! test red on this side and tests/protocolSchema.test.mts red on the other.
 //!
-//! schema-digest: sha256:3ca9599ff8fb504a5505aeb8263ecb51476a6d35ff378964bb44b501fb949563
+//! schema-digest: sha256:cadf31311e94675996c7099d4a826ee4eb940030735e73a5026c91569892664e
 #![allow(missing_docs, clippy::all, clippy::pedantic)]
 
 /// Error types.
@@ -680,6 +680,9 @@ impl ::std::convert::TryFrom<::std::string::String> for ClassAbbr {
 ///    },
 ///    {
 ///      "$ref": "#/$defs/LogsListRequest"
+///    },
+///    {
+///      "$ref": "#/$defs/ClientSpellsActivateRequest"
 ///    }
 ///  ]
 ///}
@@ -718,6 +721,7 @@ pub enum ClientMessage {
     SpellsSearchRequest(SpellsSearchRequest),
     LogsSetDirRequest(LogsSetDirRequest),
     LogsListRequest(LogsListRequest),
+    ClientSpellsActivateRequest(ClientSpellsActivateRequest),
 }
 impl ::std::convert::From<Hello> for ClientMessage {
     fn from(value: Hello) -> Self {
@@ -867,6 +871,11 @@ impl ::std::convert::From<LogsSetDirRequest> for ClientMessage {
 impl ::std::convert::From<LogsListRequest> for ClientMessage {
     fn from(value: LogsListRequest) -> Self {
         Self::LogsListRequest(value)
+    }
+}
+impl ::std::convert::From<ClientSpellsActivateRequest> for ClientMessage {
+    fn from(value: ClientSpellsActivateRequest) -> Self {
+        Self::ClientSpellsActivateRequest(value)
     }
 }
 ///One row of `spells_us.txt` as the app's own `SpellResistInfo` describes it, field for field. THE OPTIONALS ARE ABSENT-MEANS-NOTHING and each absence was measured rather than chosen: a zero recast is the file saying there is no re-use timer, a zero `aeMaxTargets` is what 71,864 of ~74k rows read, and a zero mana is what every bard song says. Storing those zeros would cost a field on most of the table to state what the absence already states.
@@ -1142,6 +1151,193 @@ pub struct ClientSpellSlot {
     pub base: f64,
     pub calc: f64,
     pub max: f64,
+}
+///`ClientSpellsActivateParams`
+///
+/// <details><summary>JSON schema</summary>
+///
+/// ```json
+///{
+///  "title": "ClientSpellsActivateParams",
+///  "type": "object",
+///  "required": [
+///    "dbstrPath",
+///    "root",
+///    "snapshotId",
+///    "spellsPath"
+///  ],
+///  "properties": {
+///    "dbstrPath": {
+///      "type": "string"
+///    },
+///    "root": {
+///      "type": "string"
+///    },
+///    "snapshotId": {
+///      "type": "string"
+///    },
+///    "spellsPath": {
+///      "type": "string"
+///    }
+///  },
+///  "additionalProperties": false
+///}
+/// ```
+/// </details>
+#[derive(::serde::Deserialize, ::serde::Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct ClientSpellsActivateParams {
+    #[serde(rename = "dbstrPath")]
+    pub dbstr_path: ::std::string::String,
+    pub root: ::std::string::String,
+    #[serde(rename = "snapshotId")]
+    pub snapshot_id: ::std::string::String,
+    #[serde(rename = "spellsPath")]
+    pub spells_path: ::std::string::String,
+}
+///Activate one captured immutable client spell reference without restarting the attached log session. Trusted main process only; files must be beneath the attached profile spells/materialized directory.
+///
+/// <details><summary>JSON schema</summary>
+///
+/// ```json
+///{
+///  "title": "ClientSpellsActivateRequest",
+///  "description": "Activate one captured immutable client spell reference without restarting the attached log session. Trusted main process only; files must be beneath the attached profile spells/materialized directory.",
+///  "type": "object",
+///  "required": [
+///    "id",
+///    "op",
+///    "params"
+///  ],
+///  "properties": {
+///    "id": {
+///      "$ref": "#/$defs/RequestId"
+///    },
+///    "op": {
+///      "type": "string",
+///      "enum": [
+///        "clientSpells.activate"
+///      ]
+///    },
+///    "params": {
+///      "$ref": "#/$defs/ClientSpellsActivateParams"
+///    }
+///  },
+///  "additionalProperties": false
+///}
+/// ```
+/// </details>
+#[derive(::serde::Deserialize, ::serde::Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct ClientSpellsActivateRequest {
+    pub id: RequestId,
+    pub op: ClientSpellsActivateRequestOp,
+    pub params: ClientSpellsActivateParams,
+}
+///`ClientSpellsActivateRequestOp`
+///
+/// <details><summary>JSON schema</summary>
+///
+/// ```json
+///{
+///  "type": "string",
+///  "enum": [
+///    "clientSpells.activate"
+///  ]
+///}
+/// ```
+/// </details>
+#[derive(
+    ::serde::Deserialize,
+    ::serde::Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+)]
+pub enum ClientSpellsActivateRequestOp {
+    #[serde(rename = "clientSpells.activate")]
+    ClientSpellsActivate,
+}
+impl ::std::fmt::Display for ClientSpellsActivateRequestOp {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::ClientSpellsActivate => f.write_str("clientSpells.activate"),
+        }
+    }
+}
+impl ::std::str::FromStr for ClientSpellsActivateRequestOp {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "clientSpells.activate" => Ok(Self::ClientSpellsActivate),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for ClientSpellsActivateRequestOp {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<&::std::string::String> for ClientSpellsActivateRequestOp {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for ClientSpellsActivateRequestOp {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+///False means a newer activation or attach superseded this preload. The existing session and prior valid reference are preserved on failure.
+///
+/// <details><summary>JSON schema</summary>
+///
+/// ```json
+///{
+///  "title": "ClientSpellsActivateResult",
+///  "description": "False means a newer activation or attach superseded this preload. The existing session and prior valid reference are preserved on failure.",
+///  "type": "object",
+///  "required": [
+///    "clientSpellsActivated",
+///    "root",
+///    "snapshotId"
+///  ],
+///  "properties": {
+///    "clientSpellsActivated": {
+///      "type": "boolean"
+///    },
+///    "root": {
+///      "type": "string"
+///    },
+///    "snapshotId": {
+///      "type": "string"
+///    }
+///  },
+///  "additionalProperties": false
+///}
+/// ```
+/// </details>
+#[derive(::serde::Deserialize, ::serde::Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct ClientSpellsActivateResult {
+    #[serde(rename = "clientSpellsActivated")]
+    pub client_spells_activated: bool,
+    pub root: ::std::string::String,
+    #[serde(rename = "snapshotId")]
+    pub snapshot_id: ::std::string::String,
 }
 ///THE HOST'S OWN ANSWER TO 'WHAT ZONE IS THIS MACHINE ON', pushed in because the engine's platform probe can fail silently and a log stamp is a zone-less local wall clock. On Windows the probe is a WinRT call Wine does not implement, so it errors and the engine falls back to UTC — every stamp then parses hours away from the wall clock the game wrote it with, and everything the 1 s heartbeat ages (fights, buffs, timers) is skewed by that whole number of hours. ABSENT MEANS THE ENGINE RESOLVES ALONE, which is what the parity runner and every test say. The two fields are two different kinds of evidence and the engine ranks them: a NAME carries DST rules a fixed offset cannot, and an OFFSET is a measurement of the same ICU clock that stamped the log — so when both are present and they disagree at the current instant, the offset wins and the name is discarded.
 ///
@@ -7117,6 +7313,9 @@ impl ::std::convert::TryFrom<::std::string::String> for ReplyKind {
 ///    },
 ///    {
 ///      "$ref": "#/$defs/LogsListResult"
+///    },
+///    {
+///      "$ref": "#/$defs/ClientSpellsActivateResult"
 ///    }
 ///  ]
 ///}
@@ -7144,6 +7343,7 @@ pub enum ReplyResult {
     ResistSpellResult(ResistSpellResult),
     SpellsSearchResult(SpellsSearchResult),
     LogsListResult(LogsListResult),
+    ClientSpellsActivateResult(ClientSpellsActivateResult),
 }
 impl ::std::convert::From<EchoResult> for ReplyResult {
     fn from(value: EchoResult) -> Self {
@@ -7238,6 +7438,11 @@ impl ::std::convert::From<SpellsSearchResult> for ReplyResult {
 impl ::std::convert::From<LogsListResult> for ReplyResult {
     fn from(value: LogsListResult) -> Self {
         Self::LogsListResult(value)
+    }
+}
+impl ::std::convert::From<ClientSpellsActivateResult> for ReplyResult {
+    fn from(value: ClientSpellsActivateResult) -> Self {
+        Self::ClientSpellsActivateResult(value)
     }
 }
 ///Client-chosen correlation id. A reply carries the id of its request; every stream message carries the id of the subscribe request that opened it.
@@ -8210,6 +8415,10 @@ impl ::std::convert::TryFrom<::std::string::String> for ResistSpellRequestOp {
 ///      "description": "Where this engine looked. Present always, because the sentence a missing table produces has to name a place.",
 ///      "type": "string"
 ///    },
+///    "snapshotId": {
+///      "description": "Captured immutable source revision, absent for legacy live-install references.",
+///      "type": "string"
+///    },
 ///    "spell": {
 ///      "$ref": "#/$defs/ClientSpell"
 ///    },
@@ -8230,6 +8439,13 @@ impl ::std::convert::TryFrom<::std::string::String> for ResistSpellRequestOp {
 pub struct ResistSpellResult {
     ///Where this engine looked. Present always, because the sentence a missing table produces has to name a place.
     pub path: ::std::string::String,
+    ///Captured immutable source revision, absent for legacy live-install references.
+    #[serde(
+        rename = "snapshotId",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub snapshot_id: ::std::option::Option<::std::string::String>,
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub spell: ::std::option::Option<ClientSpell>,
     ///The name as it was asked for, echoed back - never the folded key.
@@ -10189,6 +10405,10 @@ impl ::std::convert::TryFrom<::std::string::String> for SpellsSearchRequestOp {
 ///      "description": "Where this engine looked for `spells_us.txt`. Present always, because the sentence a missing table produces has to name a place.",
 ///      "type": "string"
 ///    },
+///    "snapshotId": {
+///      "description": "Captured immutable source revision, absent for legacy live-install references.",
+///      "type": "string"
+///    },
 ///    "spellTable": {
 ///      "$ref": "#/$defs/SpellTableState"
 ///    },
@@ -10219,6 +10439,13 @@ pub struct SpellsSearchResult {
     pub offset: i64,
     ///Where this engine looked for `spells_us.txt`. Present always, because the sentence a missing table produces has to name a place.
     pub path: ::std::string::String,
+    ///Captured immutable source revision, absent for legacy live-install references.
+    #[serde(
+        rename = "snapshotId",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub snapshot_id: ::std::option::Option<::std::string::String>,
     #[serde(rename = "spellTable")]
     pub spell_table: SpellTableState,
     ///The window. Filtered, sorted and bounded by the request - the renderer draws these in the order they arrive and never re-sorts or re-filters them (ruling 4).
