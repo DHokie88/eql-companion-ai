@@ -88,6 +88,9 @@ test('the `Other` bucket keeps the wiki’s own words — the census, as an equa
     if (recipe.skill !== 'Other') continue
     labels.set(recipe.skillLabel, (labels.get(recipe.skillLabel) ?? 0) + 1)
   }
+  // 123 survived the 2026-10-07 rescrape only because of a parser row: Dark Green Dye's page
+  // unlinked its heading to `* No Skill Combine` (was `* [[Non-Tradeskill]]`) and the recipe fell
+  // to prose, reading 122. `UNLINKED_CRAFT_HEADINGS` (src/main/itemLookupParse.ts) reads it back.
   assert.deepEqual(
     Object.fromEntries([...labels].sort((a, b) => b[1] - a[1])),
     { 'Not a tradeskill': 123, Fishing: 5, 'Cobalt drake armor': 1, 'Wooly Fungus Quest': 1 }

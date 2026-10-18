@@ -147,7 +147,11 @@ const crown = byKey.get('crown of king tranix')
 test('Thelvorn and the Crown arrive as the numbers tests/itemUpgrade pins', () => {
   assert.ok(thelvorn && crown, 'both verification items must be in the corpus')
   // Thelvorn, Blade of Light — DMG 20, Atk Delay 26, WIS +15, WT 3.0 (itemUpgrade.test.mts).
-  assert.deepEqual(thelvorn.stats, { WIS: 15, DMG: 20, DELAY: 26, WEIGHT: 3 })
+  // DMG_BONUS 12 is new with the 2026-10-07 rescrape: the page was rewritten in the in-game
+  // window's layout and now states `DMG: 20 DMG Bonus: 12 @ lvl 50` where the 2026-08-22 page
+  // said only `DMG: 20`. A stated number, read by the existing `DMG Bonus` key, not a mis-parse
+  // (corpus-wide, 48 pages state a damage bonus now, against 24 before).
+  assert.deepEqual(thelvorn.stats, { WIS: 15, DMG: 20, DELAY: 26, DMG_BONUS: 12, WEIGHT: 3 })
   assert.deepEqual(thelvorn.slots, ['PRIMARY'])
   assert.deepEqual(thelvorn.classes, ['PAL'])
   assert.equal(thelvorn.skill, '1H Slashing')
@@ -268,30 +272,32 @@ test('scaling all rows at one state is fast enough to move a slider', () => {
   assert.equal(scaled.length, rows.length)
   assert.ok(ms < 500, `scaling every row took ${ms.toFixed(1)} ms — the index is being rebuilt`)
   // A pure map: the base rows are untouched, so the next state starts from the same numbers.
-  assert.deepEqual(thelvorn?.stats, { WIS: 15, DMG: 20, DELAY: 26, WEIGHT: 3 })
+  // (DMG_BONUS 12: stated by the page since the 2026-10-07 rescrape, see the Thelvorn test.)
+  assert.deepEqual(thelvorn?.stats, { WIS: 15, DMG: 20, DELAY: 26, DMG_BONUS: 12, WEIGHT: 3 })
 })
 
 // =================================================================================
 // THE CENSUSES — law 1 lives here rather than on the rows
 // =================================================================================
 
-test('the unindexed stat keys are exactly the five the corpus states', () => {
+test('the unindexed stat keys are exactly the four the corpus states', () => {
   // CHARGES / COOLDOWN / CAST TIME / REQUIRED LEVEL are per-item facts, not gear comparisons
   // (shared/planner/gear.ts says why they are out of the vector). A key here that is NOT one of
   // those is a stat the gear table would silently not have a column for.
   //
-  // `REQ_LEVEL` is the fifth, and it arrived with the 2026-08-13 refresh: 8 pages now abbreviate
-  // the required level that 5 others still spell out. It is the SAME per-item fact under a second
-  // spelling, so nothing on screen changes — both are outside the vector either way — and the
-  // census is updated rather than the alias table, because splitting one fact across two keys is
-  // the wiki's editing, not ours to canonicalize (law 2 canonicalizes at boundaries we own).
-  // This assertion is an EQUALITY on purpose: the sixth spelling should stop the suite too.
+  // `REQ_LEVEL` was a fifth from the 2026-08-13 refresh to the 2026-10-07 rescrape: 8 pages (the
+  // eight Soldier's Brooch pages) abbreviated the required level that 5 others spell out. The
+  // 2026-10-07 rescrape found all eight rewritten WITHOUT any required-level line, so the
+  // abbreviation is gone from the corpus (REQUIRED LEVEL still 5 pages). The wiki removed the
+  // text; nothing mis-reads it. If it comes back, it is the same per-item fact under a second
+  // spelling and goes back in this census, not the alias table (law 2 canonicalizes at
+  // boundaries we own). This assertion is an EQUALITY on purpose: a new spelling should stop the
+  // suite too.
   assert.deepEqual(Object.keys(index.stats.unindexedStatKeys).sort(), [
     'CAST_TIME',
     'CHARGES',
     'COOLDOWN',
-    'REQUIRED_LEVEL',
-    'REQ_LEVEL'
+    'REQUIRED_LEVEL'
   ])
 })
 
