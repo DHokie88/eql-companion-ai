@@ -139,6 +139,9 @@
       "zones": [
         "Timorous Deep"
       ],
+      "drops": [
+        "Small Box"
+      ],
       "loc": [
         {
           "ns": 5756,
@@ -264,6 +267,9 @@
       "level": "18-20",
       "zones": [
         "Timorous Deep"
+      ],
+      "drops": [
+        "Ale"
       ],
       "loc": [
         {
@@ -704,6 +710,10 @@
       "level": "59-61",
       "zones": [
         "Plane of Sky"
+      ],
+      "drops": [
+        "Symbol of Marr",
+        "Belt of Iniquity"
       ]
     },
     {
@@ -814,6 +824,12 @@
       "level": "38",
       "zones": [
         "Mistmoore Castle"
+      ],
+      "drops": [
+        "Chunk of Meat",
+        "Mist Wolf Pelt",
+        "Ruined Wolf Pelt",
+        "Wolf Meat"
       ],
       "loc": [
         {
@@ -1663,6 +1679,8 @@
         "Cobalt Scar"
       ],
       "drops": [
+        "Improved Invis vs Undead",
+        "Flawed Sea Sapphire",
         "Silver Ring",
         "Bulthar Trunk",
         "Bulthar Hide"
@@ -1921,6 +1939,12 @@
       "zones": [
         "Mines of Nurga"
       ],
+      "drops": [
+        "Rusty Mining Pick",
+        "Eye of RokGus",
+        "Burynai Legion Gi",
+        "Mountain Death Belt"
+      ],
       "loc": [
         {
           "ns": -2162,
@@ -2104,7 +2128,8 @@
         "Shark Tooth",
         "Shark Skin",
         "Shark Meat",
-        "Shark Bones"
+        "Shark Bones",
+        "Flame of Vox"
       ],
       "loc": [
         {
@@ -2527,7 +2552,8 @@
         "Flawless Diamond",
         "Velium Great Staff",
         "Old Dragon Horn",
-        "Chetari Wardstaff"
+        "Chetari Wardstaff",
+        "Improved Invis vs Undead"
       ],
       "loc": [
         {
@@ -2563,7 +2589,8 @@
         "Flayed Paebala Leggings",
         "Flayed Paebala Tunic",
         "Flayed Paebala Boots",
-        "Flayed Paebala Gloves"
+        "Flayed Paebala Gloves",
+        "Improved Invis vs Undead"
       ],
       "loc": [
         {
@@ -2609,7 +2636,8 @@
         "Flawed Flame Emerald",
         "Flawed Lava Ruby",
         "Chipped Onyx Sapphire",
-        "Imperfect Diamond"
+        "Imperfect Diamond",
+        "Improved Invis vs Undead"
       ],
       "loc": [
         {
@@ -2978,7 +3006,8 @@
         "Velium Morning Star",
         "Velium Great Staff",
         "Velium Spear",
-        "Velium Rapier"
+        "Velium Rapier",
+        "Improved Invis vs Undead"
       ],
       "loc": [
         {
@@ -3473,6 +3502,7 @@
       "drops": [
         "Starmetal Ore",
         "Part of Tasarin's Grimoire Pg. 390 (Left)",
+        "Tears of Prexus",
         "Charcoal",
         "Peridot",
         "Onyx",
@@ -3948,6 +3978,9 @@
       "zones": [
         "Crypt of Dalnir"
       ],
+      "drops": [
+        "Iksar Blood"
+      ],
       "loc": [
         {
           "ns": 250,
@@ -4118,6 +4151,9 @@
       "level": "25-27",
       "zones": [
         "Crypt of Dalnir"
+      ],
+      "drops": [
+        "Iksar Blood"
       ],
       "loc": [
         {
@@ -4790,6 +4826,9 @@
       "zones": [
         "Butcherblock Mountains"
       ],
+      "drops": [
+        "Blade of Nobility"
+      ],
       "loc": [
         {
           "ns": 1335,
@@ -5352,7 +5391,9 @@
         "White Scaled Leggings",
         "Shardwurm Eye",
         "Shardwurm Skin",
-        "Shard Wurm Fang"
+        "Shard Wurm Fang",
+        "Star Ruby",
+        "Fire Opal"
       ],
       "loc": [
         {
@@ -6509,6 +6550,9 @@
       "zones": [
         "Southern Desert of Ro",
         "Oasis of Marr"
+      ],
+      "drops": [
+        "Water Flask"
       ]
     },
     {
@@ -6517,6 +6561,9 @@
       "level": "7-9",
       "zones": [
         "Northern Desert of Ro"
+      ],
+      "drops": [
+        "Spider Silk"
       ]
     },
     {
@@ -6588,6 +6635,9 @@
       "level": "49",
       "zones": [
         "Chardok"
+      ],
+      "drops": [
+        "Stave of Shielding"
       ]
     },
     {
@@ -8421,6 +8471,14 @@
       "zones": [
         "Butcherblock Mountains"
       ],
+      "drops": [
+        "Rusty Dagger",
+        "Rusty Shortened Spear",
+        "Rusty Spear",
+        "Rusty Rapier",
+        "Dwarf Meat",
+        "Dwarven Blood"
+      ],
       "loc": [
         {
           "ns": 1094,
@@ -8435,6 +8493,9 @@
       "level": "1",
       "zones": [
         "Cazic-Thule"
+      ],
+      "drops": [
+        "Dwarf Meat"
       ],
       "loc": [
         {
@@ -8605,8 +8666,10 @@
         "Pearl",
         "Topaz",
         "Words of the Spoken",
+        "Faerie Wing",
         "Sylvan Berries",
         "Morning Dew",
+        "Fairy Dust",
         "Ivory"
       ],
       "loc": [
@@ -9002,6 +9065,9 @@
       "zones": [
         "Timorous Deep"
       ],
+      "drops": [
+        "Words of Materials"
+      ],
       "loc": [
         {
           "ns": 5799,
@@ -9141,7 +9207,8 @@
       ],
       "drops": [
         "Alligator Skin",
-        "Ogre Arm"
+        "Ogre Arm",
+        "An Alligator Tooth"
       ],
       "loc": [
         {
@@ -9879,6 +9946,10 @@
       "level": "26-30",
       "zones": [
         "Lavastorm Mountains"
+      ],
+      "drops": [
+        "Rune of Scale",
+        "Chunk of Meat"
       ],
       "loc": [
         {
@@ -11127,6 +11198,7 @@
       "drops": [
         "Moss Mask",
         "Vial of Egg Whites",
+        "Pouch of Ghoul Ash",
         "Froglok Meat",
         "Froglok Blood",
         "Mesh Helm",
@@ -11952,6 +12024,13 @@
         "Innothule Swamp",
         "The Feerrott",
         "Swamp of No Hope"
+      ],
+      "drops": [
+        "Froglok Meat",
+        "Froglok Blood",
+        "Froglok Tad Tongue",
+        "Froglok Tadpole Eye",
+        "Froglok Tadpole Flesh"
       ]
     },
     {
@@ -13018,7 +13097,8 @@
         "Kael Drakkel"
       ],
       "drops": [
-        "Frost Giant Meat"
+        "Frost Giant Meat",
+        "Frost Giant Toes"
       ],
       "loc": [
         {
@@ -13307,6 +13387,9 @@
       "level": "1",
       "zones": [
         "Innothule Swamp"
+      ],
+      "drops": [
+        "A Spore Mushroom"
       ]
     },
     {
@@ -13538,6 +13621,9 @@
       "level": "30-33",
       "zones": [
         "Splitpaw Lair"
+      ],
+      "drops": [
+        "Giant Snake Rattle"
       ],
       "loc": [
         {
@@ -14231,7 +14317,9 @@
         "West Commonlands"
       ],
       "drops": [
-        "Rune of Nagafen"
+        "Rusty Scythe",
+        "Rune of Nagafen",
+        "Words of Dissolution"
       ]
     },
     {
@@ -14465,6 +14553,10 @@
       "level": "18-22",
       "zones": [
         "Najena"
+      ],
+      "drops": [
+        "Spider Silk",
+        "Spider Legs"
       ]
     },
     {
@@ -15228,6 +15320,9 @@
       "zones": [
         "Western Wastes"
       ],
+      "drops": [
+        "Velium Mastodon Fur"
+      ],
       "loc": [
         {
           "ns": -3995,
@@ -15244,6 +15339,7 @@
         "Dreadlands"
       ],
       "drops": [
+        "Frosty Datura",
         "Black Pearl",
         "Emerald",
         "Flame Agate",
@@ -16265,6 +16361,9 @@
       "zones": [
         "Steamfont Mountains"
       ],
+      "drops": [
+        "Rusty Mining Pick"
+      ],
       "loc": [
         {
           "ns": 1511,
@@ -16279,6 +16378,9 @@
       "level": "1",
       "zones": [
         "Cazic-Thule"
+      ],
+      "drops": [
+        "Gnome Meat"
       ],
       "loc": [
         {
@@ -16519,6 +16621,8 @@
       ],
       "drops": [
         "Goblin Forged Iron Boots",
+        "Green Goblin Skin",
+        "Mt. Death Mineral Salts",
         "Drogan Warlord's Insignia",
         "Peridot",
         "Velishoul's Tome Pg. 9",
@@ -16663,6 +16767,9 @@
         "Temple of Droga",
         "Mines of Nurga",
         "Frontier Mountains"
+      ],
+      "drops": [
+        "Green Goblin Skin"
       ]
     },
     {
@@ -16673,6 +16780,9 @@
         "Temple of Droga",
         "Mines of Nurga",
         "Frontier Mountains"
+      ],
+      "drops": [
+        "Green Goblin Skin"
       ]
     },
     {
@@ -16697,6 +16807,9 @@
       "zones": [
         "Lake of Ill Omen",
         "Warslik's Woods"
+      ],
+      "drops": [
+        "Goblin Bracer"
       ]
     },
     {
@@ -16816,6 +16929,11 @@
       "level": "33-35",
       "zones": [
         "Temple of Droga"
+      ],
+      "drops": [
+        "Green Goblin Skin",
+        "Blade of the Earthcaller",
+        "Sainy's Singing Dagger"
       ]
     },
     {
@@ -17105,7 +17223,10 @@
         "Small Box",
         "Iron Ration",
         "Ration",
-        "Ale"
+        "Ale",
+        "Jasper",
+        "Carnelian",
+        "Turquoise"
       ]
     },
     {
@@ -17440,6 +17561,7 @@
       ],
       "drops": [
         "Green Goblin Skin",
+        "Mt. Death Mineral Salts",
         "Goblin Plaguebeads",
         "Words of Possession",
         "Pearl Ring",
@@ -17837,6 +17959,9 @@
         "Temple of Droga",
         "Mines of Nurga",
         "Frontier Mountains"
+      ],
+      "drops": [
+        "Green Goblin Skin"
       ]
     },
     {
@@ -17907,6 +18032,10 @@
       "zones": [
         "Temple of Droga"
       ],
+      "drops": [
+        "Hollow Bone Shank",
+        "Goblin Scribblings"
+      ],
       "loc": [
         {
           "ns": -400,
@@ -17943,7 +18072,8 @@
         "Blade of the Earthcaller",
         "Drogan Obsidian Dagger",
         "Green Goblin Skin",
-        "Mt. Death Mineral Salts"
+        "Mt. Death Mineral Salts",
+        "Leather Whip"
       ]
     },
     {
@@ -18245,6 +18375,10 @@
         "Kithicor Forest",
         "Misty Thicket",
         "Runnyeye Citadel"
+      ],
+      "drops": [
+        "Rusty Short Sword",
+        "Rusty Long Sword"
       ]
     },
     {
@@ -18946,7 +19080,8 @@
         "Lake Rathetear"
       ],
       "drops": [
-        "Zombie Skin"
+        "Zombie Skin",
+        "Words of Absorption"
       ]
     },
     {
@@ -19147,7 +19282,8 @@
         "Najena"
       ],
       "drops": [
-        "Guard's Keyring"
+        "Guard's Keyring",
+        "Whore's Bane"
       ],
       "loc": [
         {
@@ -19270,6 +19406,7 @@
         "Skyfire Mountains"
       ],
       "drops": [
+        "Tears of Prexus",
         "Crystallized Sulfur",
         "Emerald Ring",
         "Fire Emerald",
@@ -20074,6 +20211,8 @@
         "Mistmoore Castle"
       ],
       "drops": [
+        "Blood Spirit",
+        "Blood Wine",
         "Wine Thief"
       ],
       "loc": [
@@ -20159,6 +20298,14 @@
         "Southern Karana"
       ],
       "drops": [
+        "Fine Steel Dagger",
+        "Fine Steel Great Staff",
+        "Fine Steel Long Sword",
+        "Fine Steel Two Handed Sword",
+        "Fine Steel Rapier",
+        "Fine Steel Scimitar",
+        "Fine Steel Morning Star",
+        "Fine Steel Spear",
         "Winds of Karana sheet 1",
         "Cracked Flute"
       ],
@@ -24232,6 +24379,9 @@
       "level": "21-23",
       "zones": [
         "Cazic Thule"
+      ],
+      "drops": [
+        "Velishoul's Tome Pg. 43"
       ]
     },
     {
@@ -24265,6 +24415,11 @@
       "level": "32-34",
       "zones": [
         "Cazic Thule"
+      ],
+      "drops": [
+        "Words of Detention",
+        "Words of Coercion",
+        "Words of Abatement"
       ],
       "loc": [
         {
@@ -24309,7 +24464,9 @@
       ],
       "drops": [
         "Mystic Doll",
-        "Allize Volew Medicine Bag"
+        "Allize Volew Medicine Bag",
+        "Lizard Tail",
+        "Lizard Meat"
       ]
     },
     {
@@ -24490,6 +24647,10 @@
       "level": "23-25",
       "zones": [
         "Cazic Thule"
+      ],
+      "drops": [
+        "Ogreskin Chamois",
+        "Words of Allure"
       ]
     },
     {
@@ -24558,6 +24719,10 @@
       "level": "18-20",
       "zones": [
         "Cazic Thule"
+      ],
+      "drops": [
+        "Lizard Tail",
+        "Lizard Meat"
       ]
     },
     {
@@ -25035,6 +25200,8 @@
         "A Broom",
         "A Shovel",
         "a Torch",
+        "Stein (of Water)",
+        "Snake Scales",
         "Torn Page of Mastery Fire",
         "Torn Page of Mastery Wind",
         "Torn Page of Mastery Earth",
@@ -25117,6 +25284,9 @@
         "North Qeynos",
         "Qeynos Hills",
         "Misty Thicket"
+      ],
+      "drops": [
+        "Rat Head"
       ]
     },
     {
@@ -25475,6 +25645,7 @@
       ],
       "drops": [
         "Wurm Meat",
+        "Wurm Scale",
         "Immortals"
       ]
     },
@@ -25951,7 +26122,8 @@
         "Burning Woods"
       ],
       "drops": [
-        "Onyx Earring"
+        "Onyx Earring",
+        "Flight Arrow"
       ]
     },
     {
@@ -26011,6 +26183,9 @@
       "level": "50 - 54",
       "zones": [
         "Howling Stones"
+      ],
+      "drops": [
+        "Dusty Rusted Vambraces"
       ]
     },
     {
@@ -26605,7 +26780,8 @@
         "Netted Kelp Pantaloons",
         "Netted Kelp Tunic",
         "Netted Kelp Sleeves",
-        "Netted Kelp Lined Shoes"
+        "Netted Kelp Lined Shoes",
+        "Improved Invis vs Undead"
       ]
     },
     {
@@ -26774,6 +26950,11 @@
       "level": "35-38",
       "zones": [
         "Splitpaw Lair"
+      ],
+      "drops": [
+        "Fine Steel Spear",
+        "Split Paw Tooth Necklace",
+        "Ringmail Boots"
       ]
     },
     {
@@ -26782,6 +26963,11 @@
       "level": "38-39",
       "zones": [
         "Splitpaw Lair"
+      ],
+      "drops": [
+        "Fine Steel Spear",
+        "Split Paw Tooth Necklace",
+        "Ringmail Boots"
       ],
       "loc": [
         {
@@ -27169,7 +27355,13 @@
         "Rusty Rapier",
         "Rusty Shortened Spear",
         "Bead Necklace",
+        "Ruined Gnoll Chain Bracelet",
+        "Ruined Gnoll Leather Tunic",
         "Ruined Gnoll Leather Sleeves",
+        "Ruined Gnoll Leather Wristbands",
+        "Ruined Gnoll Leather Gloves",
+        "Ruined Gnoll Leather Boots",
+        "Rusty Knuckles",
         "Patch of Gnoll Fur",
         "Blackburrow Gnoll Pelt",
         "Gnoll Fang"
@@ -27310,6 +27502,7 @@
         "RunnyEye Citadel"
       ],
       "drops": [
+        "Words of Possession",
         "Bag of Bread Loaves"
       ]
     },
@@ -27435,6 +27628,9 @@
       "level": "25?",
       "zones": [
         "RunnyEye Citadel"
+      ],
+      "drops": [
+        "Blackened Iron Bastard Sword"
       ]
     },
     {
@@ -27445,7 +27641,8 @@
         "RunnyEye Citadel"
       ],
       "drops": [
-        "Blackened Alloy Longsword"
+        "Blackened Alloy Longsword",
+        "Blackened Alloy Bastard Sword"
       ]
     },
     {
@@ -27882,6 +28079,15 @@
       "level": "22?",
       "zones": [
         "RunnyEye Citadel"
+      ],
+      "drops": [
+        "Blackened Iron Boots",
+        "Blackened Iron Spaulder",
+        "Blackened Iron Armplates",
+        "Blackened Iron Collar",
+        "Blackened Iron Gloves",
+        "Rusty Scimitar",
+        "Rusty Two Handed Sword"
       ]
     },
     {
@@ -27894,7 +28100,8 @@
       "drops": [
         "Fresh Fish",
         "Lancer Swordfish Fin",
-        "Swordfish Bill"
+        "Swordfish Bill",
+        "A Faded Salil's Writ Page"
       ]
     },
     {
@@ -28009,6 +28216,11 @@
       "level": "30 - 31",
       "zones": [
         "Firiona Vie"
+      ],
+      "drops": [
+        "Fine Steel Rapier",
+        "Gunthak Harpoon",
+        "Short Beer"
       ]
     },
     {
@@ -28465,6 +28677,9 @@
       "level": "53",
       "zones": [
         "Kael Drakkel"
+      ],
+      "drops": [
+        "Idol of Erosion"
       ],
       "loc": [
         {
@@ -28935,7 +29150,8 @@
         "Eastern Plains of Karana"
       ],
       "drops": [
-        "Diseased Wolf Pelt"
+        "Diseased Wolf Pelt",
+        "Fleshy Orb"
       ]
     },
     {
@@ -29108,6 +29324,9 @@
       "level": "9-12",
       "zones": [
         "Northern Plains of Karana"
+      ],
+      "drops": [
+        "Bandit Sash"
       ],
       "loc": [
         {
@@ -29284,6 +29503,10 @@
       "level": "30 - 35",
       "zones": [
         "Frontier Mountains"
+      ],
+      "drops": [
+        "Brute Hide",
+        "Backpack"
       ]
     },
     {
@@ -29340,7 +29563,9 @@
         "Chardok"
       ],
       "drops": [
-        "Burnished Wooden Stave"
+        "Burnished Wooden Stave",
+        "Star Ruby",
+        "Opal Bracelet"
       ]
     },
     {
@@ -29751,6 +29976,7 @@
         "Wristband of Conjuration",
         "Gloves of Conjuration",
         "Boots of Conjuration",
+        "Improved Invis vs Undead",
         "Diamond",
         "Ruby Crown",
         "Jacinth",
@@ -29926,6 +30152,9 @@
       "zones": [
         "Qeynos Aqueducts"
       ],
+      "drops": [
+        "Ivory Handled Falchion"
+      ],
       "loc": [
         {
           "ns": 327,
@@ -29959,6 +30188,9 @@
       "level": "10-12",
       "zones": [
         "South Qeynos"
+      ],
+      "drops": [
+        "Runed Branding Iron"
       ]
     },
     {
@@ -30397,6 +30629,11 @@
       "level": "22-24, (25?)",
       "zones": [
         "Lake of Ill Omen"
+      ],
+      "drops": [
+        "Sabertooth Fang",
+        "Sabertooth Tiger Hide",
+        "Excellent Sabertooth Tiger Hide"
       ]
     },
     {
@@ -30513,6 +30750,9 @@
       "level": "6-8",
       "zones": [
         "Chardok"
+      ],
+      "drops": [
+        "A Shovel"
       ]
     },
     {
@@ -30789,6 +31029,7 @@
         "Lake of Ill Omen"
       ],
       "drops": [
+        "A Scroll",
         "Iksar Skull Helm",
         "Hand Woven Leggings",
         "Sarnak Earring of Station",
@@ -30834,6 +31075,9 @@
       "level": "45-48",
       "zones": [
         "Chardok"
+      ],
+      "drops": [
+        "Water Sprinkler of the Forgiven"
       ]
     },
     {
@@ -31457,6 +31701,9 @@
       "level": "33",
       "zones": [
         "Frontier Mountains"
+      ],
+      "drops": [
+        "Necklace of Defiance"
       ]
     },
     {
@@ -32190,6 +32437,14 @@
       "level": "55?",
       "zones": [
         "Chardok"
+      ],
+      "drops": [
+        "Leather Whip",
+        "Iksar Skin Gloves",
+        "Blue Diamond",
+        "Diamond",
+        "Jacinth",
+        "Stave of Shielding"
       ]
     },
     {
@@ -32580,6 +32835,8 @@
         "Old Sebilis"
       ],
       "drops": [
+        "Froglok Scale Chestplate",
+        "Worn Cloth Mantle",
         "Fire Opal",
         "Fire Emerald"
       ]
@@ -32748,7 +33005,8 @@
         "Flawless Aquamarine",
         "Ancient Seahorse Hide Cloak",
         "Black Marble",
-        "Pristine Emerald"
+        "Pristine Emerald",
+        "Improved Invis vs Undead"
       ],
       "loc": [
         {
@@ -33899,6 +34157,7 @@
         "Chardok"
       ],
       "drops": [
+        "Ruby",
         "Water Sprinkler of the Forgiven",
         "Sarnak Skullsplitter",
         "Spell: Call of the Hero"
@@ -33937,6 +34196,10 @@
       "level": "45-48",
       "zones": [
         "Chardok"
+      ],
+      "drops": [
+        "Ruby",
+        "Diamond"
       ]
     },
     {
@@ -34106,7 +34369,8 @@
         "Shark Bones",
         "Doll",
         "Fresh Fish",
-        "Words of Possession"
+        "Words of Possession",
+        "Words of the Sentient (Azia)"
       ]
     },
     {
@@ -34616,6 +34880,12 @@
       "zones": [
         "The Wakening Land"
       ],
+      "drops": [
+        "Sifaye messenger's report",
+        "Sifaye Dart",
+        "Sifaye Dust",
+        "Sifaye Parts"
+      ],
       "loc": [
         {
           "ns": -2018,
@@ -34757,6 +35027,11 @@
       "level": "30",
       "zones": [
         "The Feerrott"
+      ],
+      "drops": [
+        "Lizardskin Tribal Mask",
+        "Ravenscale Gloves",
+        "Clump of Gorilla Hair"
       ],
       "loc": [
         {
@@ -34935,7 +35210,8 @@
         "Flawless Diamond",
         "Conch Shell Horn",
         "Lock of Siren Hair",
-        "Runed Sea Shell"
+        "Runed Sea Shell",
+        "Improved Invis vs Undead"
       ],
       "loc": [
         {
@@ -35022,6 +35298,9 @@
       "level": "53",
       "zones": [
         "Siren's Grotto"
+      ],
+      "drops": [
+        "Platinum Dragon Scale"
       ]
     },
     {
@@ -35216,6 +35495,9 @@
       "level": "21-22",
       "zones": [
         "Najena"
+      ],
+      "drops": [
+        "Hilt of the Nobleman"
       ],
       "loc": [
         {
@@ -35802,6 +36084,11 @@
       "zones": [
         "Eastern Wastes"
       ],
+      "drops": [
+        "Snow Griffin Egg",
+        "Snow Griffin Talon",
+        "Snow Griffin Feather"
+      ],
       "loc": [
         {
           "ns": -5810,
@@ -36218,7 +36505,10 @@
     {
       "page": "A Spectral Beguiler",
       "name": "A Spectral Beguiler",
-      "level": "49"
+      "level": "49",
+      "drops": [
+        "Peridot"
+      ]
     },
     {
       "page": "A Spectral Crusader",
@@ -36686,6 +36976,9 @@
       "zones": [
         "Timorous Deep"
       ],
+      "drops": [
+        "Spiroc Bone Dust"
+      ],
       "loc": [
         {
           "ns": 8295,
@@ -36855,6 +37148,9 @@
       "level": "5",
       "zones": [
         "Southern Karana"
+      ],
+      "drops": [
+        "Rain Water"
       ]
     },
     {
@@ -37138,6 +37434,9 @@
       "level": "13-15ish",
       "zones": [
         "Nektulos Forest"
+      ],
+      "drops": [
+        "Bloodstone"
       ]
     },
     {
@@ -37342,6 +37641,9 @@
       "level": "45",
       "zones": [
         "The Wakening Land"
+      ],
+      "drops": [
+        "Storm Giant Meat"
       ]
     },
     {
@@ -37604,6 +37906,9 @@
       "level": "8 - 15",
       "zones": [
         "Upper Guk"
+      ],
+      "drops": [
+        "Chunk of Meat"
       ]
     },
     {
@@ -38195,6 +38500,10 @@
       "zones": [
         "Splitpaw Lair"
       ],
+      "drops": [
+        "Rain Water",
+        "White Hellebore"
+      ],
       "loc": [
         {
           "ns": 664,
@@ -38208,6 +38517,9 @@
       "level": "65",
       "zones": [
         "Plane of Growth"
+      ],
+      "drops": [
+        "Noctivagant Breastplate"
       ],
       "loc": [
         {
@@ -38595,6 +38907,9 @@
       "zones": [
         "Qeynos Aqueducts"
       ],
+      "drops": [
+        "Human Blood"
+      ],
       "loc": [
         {
           "ns": 600,
@@ -38616,6 +38931,9 @@
       "level": "7",
       "zones": [
         "Qeynos Aqueducts"
+      ],
+      "drops": [
+        "Rusty Spear"
       ],
       "loc": [
         {
@@ -39747,6 +40065,7 @@
       "drops": [
         "Essence of Winter",
         "Crystallized Sulfur",
+        "Frosty Datura",
         "Black Pearl",
         "Emerald",
         "Flame Agate",
@@ -40239,6 +40558,9 @@
       "level": "13",
       "zones": [
         "Kerra Island"
+      ],
+      "drops": [
+        "Venomous Spikefish Poison Sac"
       ],
       "loc": [
         {
@@ -41251,7 +41573,8 @@
       "drops": [
         "Spiderling Eye",
         "Wooly Fungus",
-        "Spiderling Silk"
+        "Spiderling Silk",
+        "Spiderling Legs"
       ]
     },
     {
@@ -41544,6 +41867,11 @@
       "level": "5",
       "zones": [
         "Western Plains of Karana"
+      ],
+      "drops": [
+        "High Quality Cat Pelt",
+        "Lion Meat",
+        "Chunk of Meat"
       ]
     },
     {
@@ -41552,6 +41880,11 @@
       "level": "5",
       "zones": [
         "Western Plains of Karana"
+      ],
+      "drops": [
+        "High Quality Cat Pelt",
+        "Lion Meat",
+        "Chunk of Meat"
       ]
     },
     {
@@ -42199,6 +42532,9 @@
       "level": "10",
       "zones": [
         "The Warrens"
+      ],
+      "drops": [
+        "Cold Iron Shackle"
       ],
       "loc": [
         {
@@ -43724,7 +44060,8 @@
       ],
       "drops": [
         "Starmetal Ore",
-        "Part of Tasarin's Grimoire Pg. 390 (Left)"
+        "Part of Tasarin's Grimoire Pg. 390 (Left)",
+        "Tears of Prexus"
       ],
       "loc": [
         {
@@ -44409,7 +44746,8 @@
         "Butcherblock Mountains"
       ],
       "drops": [
-        "Bronze Two Handed Battle Axe"
+        "Bronze Two Handed Battle Axe",
+        "Dwarf Meat"
       ],
       "loc": [
         {
@@ -44716,6 +45054,9 @@
       "level": "66",
       "zones": [
         "Sleeper's Tomb"
+      ],
+      "drops": [
+        "Priceless Velium Reinforced Bow"
       ]
     },
     {
@@ -45139,7 +45480,8 @@
         "Shardwurm Eye",
         "Shardwurm Skin",
         "Shard Wurm Fang",
-        "Shardwurm Claw"
+        "Shardwurm Claw",
+        "Spell: Boon of the Garou"
       ]
     },
     {
@@ -45773,7 +46115,8 @@
         "Small Brick of Velium",
         "Large Brick of Velium",
         "Block of Velium",
-        "Small Piece of Velium"
+        "Small Piece of Velium",
+        "Improved Invis vs Undead"
       ],
       "loc": [
         {
@@ -47196,7 +47539,8 @@
         "Chardok"
       ],
       "drops": [
-        "Burnished Wooden Stave"
+        "Burnished Wooden Stave",
+        "Ruby"
       ]
     },
     {
@@ -47790,7 +48134,11 @@
       ],
       "drops": [
         "Evil Eye Eyestalk",
-        "Bunch of Optic Nerves"
+        "Bunch of Optic Nerves",
+        "Bottom of a Fractured Rune",
+        "Middle of a Fractured Rune",
+        "Top of a Fractured Rune",
+        "Flame of Vox"
       ],
       "loc": [
         {
@@ -47811,6 +48159,11 @@
       "zones": [
         "Gorge of King Xorbb",
         "Runnyeye"
+      ],
+      "drops": [
+        "Animated Shield",
+        "Animated Sword2",
+        "Animated Sword3"
       ]
     },
     {
@@ -47824,7 +48177,12 @@
         "Polished Bone Bracelet",
         "Onyx Ring",
         "Polished Bone Hoop",
-        "Evil Eye Lens"
+        "Evil Eye Lens",
+        "Evil Eye Eyestalk",
+        "Bottom of a Fractured Rune",
+        "Middle of a Fractured Rune",
+        "Top of a Fractured Rune",
+        "Bunch of Optic Nerves"
       ],
       "loc": [
         {
@@ -48022,6 +48380,25 @@
       "level": "35-50",
       "zones": [
         "Permafrost"
+      ],
+      "drops": [
+        "Throwing Boulder",
+        "Ice Giant Toes",
+        "Essence of Winter",
+        "Block of Permafrost",
+        "Flame of Vox",
+        "Nilitim's Grimoire Pg. 36",
+        "Nilitim's Grimoire Pg. 300",
+        "Nilitim's Grimoire Pg. 378",
+        "Nilitim's Grimoire Pg. 400",
+        "Nilitim's Grimoire Pg. 416",
+        "Nilitim's Grimoire Pg. 450",
+        "Rune of Ap`Sagor",
+        "Rune of Crippling",
+        "Rune of Infraction",
+        "Rune of Paralysis",
+        "Words of Obligation",
+        "Words of the Spectre"
       ]
     },
     {
@@ -48058,6 +48435,13 @@
       "level": "48-50",
       "zones": [
         "Permafrost"
+      ],
+      "drops": [
+        "Throwing Boulder",
+        "Essence of Winter",
+        "Nilitim's Grimoire Pg. 450",
+        "Rune of Paralysis",
+        "Words of Requisition"
       ],
       "loc": [
         {
@@ -48232,6 +48616,7 @@
         "Flawed Flame Emerald",
         "Flawed Sea Sapphire",
         "Imperfect Diamond",
+        "Improved Invis vs Undead",
         "Kobold Parts",
         "Wax Flower",
         "Icepaw War Claw",
@@ -48714,7 +49099,8 @@
       "drops": [
         "Large Brick of Velium",
         "Block of Velium",
-        "Small Piece of Velium"
+        "Small Piece of Velium",
+        "Improved Invis vs Undead"
       ],
       "loc": [
         {
@@ -48887,6 +49273,9 @@
       "level": "52-55",
       "zones": [
         "Chardok"
+      ],
+      "drops": [
+        "Burnished Wooden Stave"
       ]
     },
     {
@@ -49398,6 +49787,9 @@
       "drops": [
         "Raw-hide Boots",
         "Raw-hide Mask",
+        "Raw-hide Gorget",
+        "Raw-hide Shoulderpads",
+        "Raw-hide Gloves",
         "Rusty Short Sword",
         "Rusty Broad Sword",
         "Rusty Long Sword",
@@ -49654,6 +50046,9 @@
       "zones": [
         "Ocean of Tears"
       ],
+      "drops": [
+        "Mug of Sea Foam"
+      ],
       "loc": [
         {
           "ns": -1200,
@@ -49740,6 +50135,9 @@
       "zones": [
         "Ocean of Tears"
       ],
+      "drops": [
+        "Rusty Mace"
+      ],
       "loc": [
         {
           "ns": -855,
@@ -49762,6 +50160,9 @@
       "level": "11",
       "zones": [
         "Ocean of Tears"
+      ],
+      "drops": [
+        "Mug of Sea Foam"
       ]
     },
     {
@@ -49877,7 +50278,8 @@
         "Najena"
       ],
       "drops": [
-        "Guard's Keyring"
+        "Guard's Keyring",
+        "Whore's Bane"
       ]
     },
     {
@@ -50309,6 +50711,10 @@
       "level": "8-10",
       "zones": [
         "Southern Desert of Ro"
+      ],
+      "drops": [
+        "Cracked Staff",
+        "Bronze Two Handed Hammer"
       ],
       "loc": [
         {
@@ -51080,7 +51486,10 @@
       ],
       "drops": [
         "Thick Leather Apron",
-        "Opalline Earring"
+        "Opalline Earring",
+        "Preserved Hops",
+        "Scuffed Silver Key",
+        "Sphere of Unrest"
       ],
       "loc": [
         {
@@ -51159,6 +51568,9 @@
       "zones": [
         "Tower of Frozen Shadow"
       ],
+      "drops": [
+        "Mummy Wrappings"
+      ],
       "loc": [
         {
           "ns": 298,
@@ -51193,6 +51605,9 @@
       "level": "?",
       "zones": [
         "Tower of Frozen Shadow"
+      ],
+      "drops": [
+        "Fading Shadow Staff"
       ]
     },
     {
@@ -51284,6 +51699,10 @@
       "level": "11",
       "zones": [
         "Butcherblock Mountains"
+      ],
+      "drops": [
+        "Bone Chips",
+        "Warbone Chips"
       ],
       "loc": [
         {
@@ -51461,6 +51880,7 @@
         "Piece of Rat Fur",
         "Rat Whiskers",
         "Rat Ears",
+        "Rat Tooth",
         "Infected Rat Livers"
       ]
     },
@@ -51675,7 +52095,8 @@
         "Chardok"
       ],
       "drops": [
-        "Burnt Wood Staff"
+        "Burnt Wood Staff",
+        "Fine Steel Morning Star"
       ]
     },
     {
@@ -51702,6 +52123,9 @@
       "level": "51",
       "zones": [
         "Southern Desert of Ro"
+      ],
+      "drops": [
+        "Human Blood"
       ],
       "loc": [
         {
@@ -52354,6 +52778,11 @@
       "level": "22-24",
       "zones": [
         "Dagnor's Cauldron"
+      ],
+      "drops": [
+        "Arrow",
+        "Cauldron Shell",
+        "Water Ring"
       ]
     },
     {
@@ -53108,6 +53537,9 @@
       "zones": [
         "Butcherblock Mountains"
       ],
+      "drops": [
+        "Iron Visor"
+      ],
       "loc": [
         {
           "ns": 1429,
@@ -53318,6 +53750,10 @@
       "level": "24-26",
       "zones": [
         "Southern Karana"
+      ],
+      "drops": [
+        "Peridot",
+        "Bronze Battle Axe"
       ]
     },
     {
@@ -53468,6 +53904,10 @@
       "zones": [
         "Cobalt Scar"
       ],
+      "drops": [
+        "Cobalt Drake Hide",
+        "Drake Meat"
+      ],
       "loc": [
         {
           "ns": -1130,
@@ -53495,6 +53935,9 @@
       "zones": [
         "Paineel"
       ],
+      "drops": [
+        "Words of Transcendence"
+      ],
       "loc": [
         {
           "ns": 872,
@@ -53511,7 +53954,8 @@
         "South Karana"
       ],
       "drops": [
-        "Mandolin"
+        "Mandolin",
+        "Human Blood"
       ],
       "loc": [
         {
@@ -54147,7 +54591,8 @@
         "Dwarf Meat",
         "Dwarven Blood",
         "Rusty Rapier",
-        "Rusty Spear"
+        "Rusty Spear",
+        "Barma's Tongue"
       ],
       "loc": [
         {
@@ -55032,6 +55477,9 @@
       "zones": [
         "West Karana"
       ],
+      "drops": [
+        "Barbarian Head"
+      ],
       "loc": [
         {
           "ns": 0,
@@ -55677,7 +56125,8 @@
         "Steamfont Mountains"
       ],
       "drops": [
-        "Rusty Long Sword"
+        "Rusty Long Sword",
+        "Berinsans Shirt"
       ],
       "loc": [
         {
@@ -55989,6 +56438,9 @@
       "zones": [
         "Lesser Faydark"
       ],
+      "drops": [
+        "Gnome Meat"
+      ],
       "loc": [
         {
           "ns": 1074,
@@ -56035,6 +56487,9 @@
       "level": "6",
       "zones": [
         "Nektulos Forest"
+      ],
+      "drops": [
+        "Leatherfoot Raider Skullcap (drop)"
       ]
     },
     {
@@ -57264,7 +57719,10 @@
         "Ocean of Tears"
       ],
       "drops": [
-        "Rusty Mace"
+        "Rusty Mace",
+        "Words of Derivation",
+        "Chunk of Ogre Flesh",
+        "Ogre Head"
       ],
       "loc": [
         {
@@ -58875,6 +59333,9 @@
       "zones": [
         "Misty Thicket"
       ],
+      "drops": [
+        "Halfling Head"
+      ],
       "loc": [
         {
           "ns": -756,
@@ -59073,6 +59534,9 @@
       "zones": [
         "Splitpaw Lair"
       ],
+      "drops": [
+        "Burning Soul of the Pious"
+      ],
       "loc": [
         {
           "ns": 382,
@@ -59138,8 +59602,10 @@
         "Western Plains of Karana"
       ],
       "drops": [
+        "Wax Candle",
         "Torch",
         "Rat Shaped Ring",
+        "Human Blood",
         "Busted Prayer Beads"
       ],
       "loc": [
@@ -59279,7 +59745,8 @@
       ],
       "drops": [
         "Short Sword",
-        "Fine Steel Short Sword"
+        "Fine Steel Short Sword",
+        "Short Sword*"
       ],
       "loc": [
         {
@@ -59610,6 +60077,9 @@
       "level": "45",
       "zones": [
         "Cobalt Scar"
+      ],
+      "drops": [
+        "Opal"
       ],
       "loc": [
         {
@@ -60409,6 +60879,10 @@
       "zones": [
         "Western Plains of Karana"
       ],
+      "drops": [
+        "Human Blood",
+        "Crimson Sr Apprentice Robe*"
+      ],
       "loc": [
         {
           "ns": 1340,
@@ -60458,6 +60932,10 @@
       "zones": [
         "Nektulos Forest"
       ],
+      "drops": [
+        "Rusty Two Handed Hammer",
+        "Leatherfoot Raider Skullcap (drop)"
+      ],
       "loc": [
         {
           "ns": -1055,
@@ -60500,6 +60978,9 @@
       "level": "45",
       "zones": [
         "Northern Karana"
+      ],
+      "drops": [
+        "Short Sword"
       ],
       "loc": [
         {
@@ -60777,6 +61258,9 @@
       "zones": [
         "Dagnor's Cauldron"
       ],
+      "drops": [
+        "Warbone Chips"
+      ],
       "loc": [
         {
           "ns": -770,
@@ -60935,6 +61419,9 @@
       "level": "55",
       "zones": [
         "The Overthere"
+      ],
+      "drops": [
+        "Tears of Erollisi"
       ],
       "loc": [
         {
@@ -61182,6 +61669,8 @@
         "High Keep"
       ],
       "drops": [
+        "Short Sword",
+        "Long Sword",
         "Forged Bastard Sword"
       ],
       "loc": [
@@ -61279,6 +61768,9 @@
       "zones": [
         "North Freeport",
         "East Freeport"
+      ],
+      "drops": [
+        "Mandolin"
       ],
       "loc": [
         {
@@ -62039,6 +62531,10 @@
       "zones": [
         "Qeynos Hills"
       ],
+      "drops": [
+        "Bronze Short Sword",
+        "Bronze Dagger"
+      ],
       "loc": [
         {
           "ns": 4995,
@@ -62253,6 +62749,9 @@
       "zones": [
         "Dragon Necropolis"
       ],
+      "drops": [
+        "Wurmscale Scroll"
+      ],
       "loc": [
         {
           "ns": 608,
@@ -62388,6 +62887,9 @@
       "level": "21",
       "zones": [
         "Eastern Plains of Karana"
+      ],
+      "drops": [
+        "Pearl Shard"
       ],
       "loc": [
         {
@@ -63683,6 +64185,9 @@
       "zones": [
         "Ak'Anon"
       ],
+      "drops": [
+        "Ration"
+      ],
       "loc": [
         {
           "ns": 700,
@@ -63721,7 +64226,12 @@
         "Ak'Anon"
       ],
       "drops": [
-        "Scrap Metal"
+        "Size 4 Sprocket",
+        "Size 5 Sprocket",
+        "Size 6 Sprocket",
+        "Silver Cylinder",
+        "Scrap Metal",
+        "Blackbox B Series"
       ],
       "loc": [
         {
@@ -64677,6 +65187,9 @@
       "zones": [
         "Befallen"
       ],
+      "drops": [
+        "Mallet Stem"
+      ],
       "loc": [
         {
           "ns": -626,
@@ -64789,6 +65302,9 @@
       "level": "35",
       "zones": [
         "Great Divide"
+      ],
+      "drops": [
+        "War Wolf Choker"
       ]
     },
     {
@@ -66546,6 +67062,7 @@
         "Bottle of Kalish",
         "Short Ale",
         "Dwarf Meat",
+        "Crytil's Tongue",
         "Wrist Pouch"
       ],
       "loc": [
@@ -66615,7 +67132,12 @@
         "Solusek's Eye"
       ],
       "drops": [
-        "Gnome Meat"
+        "Gnome Meat",
+        "Functional Force Module",
+        "Large Power Source",
+        "Small Power Source",
+        "Melatite",
+        "Words of Sight"
       ]
     },
     {
@@ -66653,6 +67175,7 @@
       "drops": [
         "Gnome Meat",
         "Functional Force Module",
+        "Functional Frost Module",
         "Large Power Source",
         "Small Power Source",
         "Melatite"
@@ -66778,6 +67301,12 @@
       "level": "31",
       "zones": [
         "Solusek's Eye"
+      ],
+      "drops": [
+        "Functional Force Module",
+        "Large Power Source",
+        "Small Power Source",
+        "Melatite"
       ],
       "loc": [
         {
@@ -66986,6 +67515,20 @@
       "level": "30",
       "zones": [
         "Rathe Mountains"
+      ],
+      "drops": [
+        "Pearl",
+        "Topaz",
+        "Pearl Earring",
+        "Pearl Necklace",
+        "Mithril Earring",
+        "Crystallized Sulfur",
+        "Flame of Vox",
+        "The Scent of Marr",
+        "Velishoul's Tome Pg.44",
+        "Velishoul's Tome Pg.68",
+        "Words of Coercion",
+        "Words of Dissemination"
       ],
       "loc": [
         {
@@ -67452,7 +67995,8 @@
       ],
       "drops": [
         "Dragon Horn Ykesha",
-        "Undead Froglok Spine"
+        "Undead Froglok Spine",
+        "Words of Dissolution"
       ]
     },
     {
@@ -67983,6 +68527,9 @@
       "zones": [
         "Plane of Mischief"
       ],
+      "drops": [
+        "Lucky Skunk Foot"
+      ],
       "loc": [
         {
           "ns": 1750,
@@ -68385,7 +68932,8 @@
         "Butcherblock Mountains"
       ],
       "drops": [
-        "Bronze Two Handed Battle Axe"
+        "Bronze Two Handed Battle Axe",
+        "Dwarf Meat"
       ],
       "loc": [
         {
@@ -68647,6 +69195,12 @@
       "level": "39",
       "zones": [
         "Misty Thicket"
+      ],
+      "drops": [
+        "Spear",
+        "Round Shield",
+        "Silver Ring",
+        "Squad Ring"
       ],
       "loc": [
         {
@@ -69945,6 +70499,9 @@
       "name": "diseased forest giant",
       "zones": [
         "Firiona Vie"
+      ],
+      "drops": [
+        "Evergreen Ivy Ringband"
       ]
     },
     {
@@ -70905,6 +71462,9 @@
       "zones": [
         "Nektulos Forest"
       ],
+      "drops": [
+        "Dragoon Dirk"
+      ],
       "loc": [
         {
           "ns": 2324,
@@ -70951,6 +71511,10 @@
       "level": "36",
       "zones": [
         "Nektulos Forest"
+      ],
+      "drops": [
+        "Dragoon Dirk",
+        "Long Sword"
       ],
       "loc": [
         {
@@ -71413,6 +71977,9 @@
       "zones": [
         "West Freeport"
       ],
+      "drops": [
+        "Purple Sr Apprentice Robe*"
+      ],
       "loc": [
         {
           "ns": 1372,
@@ -71518,6 +72085,9 @@
       "level": "10?",
       "zones": [
         "Steamfont Mountains"
+      ],
+      "drops": [
+        "Rusty Dagger"
       ]
     },
     {
@@ -71611,6 +72181,10 @@
       "level": "8-10",
       "zones": [
         "Qeynos Aqueducts"
+      ],
+      "drops": [
+        "Order of Thunder (Drosco)",
+        "A Sealed Letter"
       ],
       "loc": [
         {
@@ -71786,6 +72360,9 @@
       "zones": [
         "High Keep"
       ],
+      "drops": [
+        "Fine Steel Short Sword"
+      ],
       "loc": [
         {
           "ns": 77.54,
@@ -71883,7 +72460,9 @@
         "Northern Desert of Ro"
       ],
       "drops": [
-        "Scute Shield"
+        "Scute Shield",
+        "Armadillo Husk",
+        "Armadillo Hide"
       ],
       "loc": [
         {
@@ -72370,6 +72949,10 @@
       "zones": [
         "Highpass Hold"
       ],
+      "drops": [
+        "Page 30 of a Book",
+        "Bayle List III"
+      ],
       "loc": [
         {
           "ns": 39,
@@ -72459,6 +73042,7 @@
         "High Keep"
       ],
       "drops": [
+        "Leather Whip",
         "Clawed Knuckle-Ring",
         "Bandages",
         "Ivory",
@@ -72870,6 +73454,7 @@
         "A Broom",
         "A Shovel",
         "a Torch",
+        "Stein (of Water)",
         "Torn Page of Mastery Fire",
         "Torn Page of Mastery Wind",
         "Torn Page of Mastery Earth",
@@ -73473,6 +74058,10 @@
       "zones": [
         "Ocean of Tears"
       ],
+      "drops": [
+        "Dwarven Blood",
+        "Dwarf Meat"
+      ],
       "loc": [
         {
           "ns": 1371,
@@ -73643,6 +74232,10 @@
       "level": "30-33",
       "zones": [
         "Emerald Jungle"
+      ],
+      "drops": [
+        "Ruined Cat Pelt",
+        "Chunk of Meat"
       ]
     },
     {
@@ -74049,6 +74642,9 @@
       "zones": [
         "Ak'Anon"
       ],
+      "drops": [
+        "Dark Gold Sr Apprentice Robe*"
+      ],
       "loc": [
         {
           "ns": 2100,
@@ -74437,6 +75033,11 @@
       "zones": [
         "Qeynos Hills"
       ],
+      "drops": [
+        "Courier's Head",
+        "Crate full of Ore",
+        "Note from Eichvul"
+      ],
       "loc": [
         {
           "ns": 3489,
@@ -74464,6 +75065,10 @@
       "level": "40",
       "zones": [
         "Neriak Third Gate"
+      ],
+      "drops": [
+        "Staff",
+        "Small Round Shield"
       ],
       "loc": [
         {
@@ -74761,6 +75366,9 @@
       "level": "30",
       "zones": [
         "South Qeynos"
+      ],
+      "drops": [
+        "Bronze Axe"
       ]
     },
     {
@@ -75273,6 +75881,7 @@
         "South Qeynos"
       ],
       "drops": [
+        "Fishing Pole",
         "Human Blood"
       ],
       "loc": [
@@ -75318,6 +75927,9 @@
       "level": "50",
       "zones": [
         "South Felwithe"
+      ],
+      "drops": [
+        "Crimson Sr Apprentice Robe*"
       ],
       "loc": [
         {
@@ -75478,7 +76090,8 @@
         "Skyfire Mountains"
       ],
       "drops": [
-        "Immortals"
+        "Immortals",
+        "Chromadrac Wing"
       ],
       "loc": [
         {
@@ -75877,6 +76490,14 @@
       "zones": [
         "Kurn's Tower"
       ],
+      "drops": [
+        "Bone Chips",
+        "Fine Steel Scimitar",
+        "Withered 2.5 Inch Finger",
+        "Withered 3 Inch Finger",
+        "Withered 3.1 Inch Finger",
+        "Withered 4 Inch Finger"
+      ],
       "loc": [
         {
           "ns": 0,
@@ -76047,6 +76668,9 @@
       "level": "25 - 26",
       "zones": [
         "Solusek's Eye"
+      ],
+      "drops": [
+        "Words of Transcendence"
       ]
     },
     {
@@ -76319,7 +76943,8 @@
       ],
       "drops": [
         "Obsidian Scimitar",
-        "Foreman's Tunic"
+        "Foreman's Tunic",
+        "Tattered Gnomish Cloak"
       ],
       "loc": [
         {
@@ -76424,6 +77049,9 @@
       "zones": [
         "High Keep"
       ],
+      "drops": [
+        "Leather Whip"
+      ],
       "loc": [
         {
           "ns": 89,
@@ -76437,6 +77065,9 @@
       "level": "45",
       "zones": [
         "Trakanon's Teeth"
+      ],
+      "drops": [
+        "Froglok Meat"
       ],
       "loc": [
         {
@@ -76608,6 +77239,9 @@
       "level": "7 - 11",
       "zones": [
         "Nektulos Forest"
+      ],
+      "drops": [
+        "Leatherfoot Raider Skullcap (drop)"
       ],
       "loc": [
         {
@@ -76831,6 +77465,10 @@
       "zones": [
         "Nektulos Forest"
       ],
+      "drops": [
+        "Rusty Two Handed Hammer",
+        "Leatherfoot Raider Skullcap (drop)"
+      ],
       "loc": [
         {
           "ns": -1045,
@@ -76858,6 +77496,9 @@
       "level": "45",
       "zones": [
         "North Kaladim"
+      ],
+      "drops": [
+        "Stained Parchment Top"
       ],
       "loc": [
         {
@@ -77287,6 +77928,12 @@
       "level": "25",
       "zones": [
         "Swamp of No Hope"
+      ],
+      "drops": [
+        "Green Goblin Skin",
+        "Blue Diamond",
+        "Ruby",
+        "Crystallized Sulfur"
       ]
     },
     {
@@ -77936,6 +78583,7 @@
         "Rune of the Astral",
         "Rune of Crippling",
         "Words of Bondage",
+        "Breath of Ro (Item)",
         "Words of Acquisition (Beza)",
         "Words of Odus",
         "Words of the Ethereal",
@@ -78728,6 +79376,7 @@
         "Icewell Keep"
       ],
       "drops": [
+        "Improved Invis vs Undead",
         "Crushed Jaundice Gem",
         "Crushed Nephrite",
         "Crushed Coral",
@@ -80384,6 +81033,9 @@
       "zones": [
         "Crystal Caverns"
       ],
+      "drops": [
+        "Onyxbrand"
+      ],
       "loc": [
         {
           "ns": -190,
@@ -80647,7 +81299,8 @@
         "Butcherblock Mountains"
       ],
       "drops": [
-        "Bronze Two Handed Battle Axe"
+        "Bronze Two Handed Battle Axe",
+        "Dwarf Meat"
       ],
       "loc": [
         {
@@ -80983,6 +81636,10 @@
       "zones": [
         "Ocean of Tears"
       ],
+      "drops": [
+        "Dwarven Blood",
+        "Dwarf Meat"
+      ],
       "loc": [
         {
           "ns": 1255,
@@ -80997,6 +81654,10 @@
       "level": "25",
       "zones": [
         "Lesser Faydark"
+      ],
+      "drops": [
+        "Wood Elf Parts",
+        "Elven Blood"
       ],
       "loc": [
         {
@@ -81224,7 +81885,8 @@
         "Rusty Shortened Spear",
         "Ration",
         "Loaf of Bread",
-        "Dwarf Meat"
+        "Dwarf Meat",
+        "Dwarven Blood"
       ],
       "loc": [
         {
@@ -81240,6 +81902,10 @@
       "level": "25",
       "zones": [
         "Lesser Faydark"
+      ],
+      "drops": [
+        "Bead Necklace",
+        "Wood Elf Parts"
       ],
       "loc": [
         {
@@ -81347,7 +82013,8 @@
       ],
       "drops": [
         "Gnawfang's Pelt",
-        "Gnawfang's Tooth"
+        "Gnawfang's Tooth",
+        "High Quality Cat Pelt"
       ],
       "loc": [
         {
@@ -82180,6 +82847,7 @@
         "Burning Woods"
       ],
       "drops": [
+        "Mithril Amulet",
         "Forest Loop",
         "Giant Lord's Tunic",
         "Giant Foreman's Tunic",
@@ -83241,6 +83909,7 @@
       ],
       "drops": [
         "Bone Chips",
+        "Rusty Fer`Esh",
         "Tarnished Fer`Esh"
       ]
     },
@@ -84386,6 +85055,10 @@
       "zones": [
         "West Freeport"
       ],
+      "drops": [
+        "Slashed Militia Tunic",
+        "Rusty Long Sword"
+      ],
       "loc": [
         {
           "ns": -107,
@@ -84729,6 +85402,9 @@
       "zones": [
         "Qeynos Hills"
       ],
+      "drops": [
+        "Studded Coin Purse"
+      ],
       "loc": [
         {
           "ns": 3583,
@@ -84813,7 +85489,8 @@
         "High Keep"
       ],
       "drops": [
-        "Fine Steel Short Sword"
+        "Fine Steel Short Sword",
+        "Highkeep Flask"
       ],
       "loc": [
         {
@@ -86978,6 +87655,9 @@
       "zones": [
         "Southern Felwithe"
       ],
+      "drops": [
+        "Two Handed Sword"
+      ],
       "loc": [
         {
           "ns": 503,
@@ -88272,6 +88952,9 @@
       "level": "40",
       "zones": [
         "Butcherblock Mountains"
+      ],
+      "drops": [
+        "Dwarven Axe"
       ],
       "loc": [
         {
@@ -90160,6 +90843,9 @@
       "zones": [
         "Southern Felwithe"
       ],
+      "drops": [
+        "Two Handed Sword"
+      ],
       "loc": [
         {
           "ns": 415,
@@ -91015,6 +91701,9 @@
       "zones": [
         "Qeynos Hills"
       ],
+      "drops": [
+        "Sironans Head"
+      ],
       "loc": [
         {
           "ns": 1424,
@@ -91145,6 +91834,9 @@
       "zones": [
         "Southern Felwithe"
       ],
+      "drops": [
+        "Two Handed Sword"
+      ],
       "loc": [
         {
           "ns": 692,
@@ -91160,6 +91852,9 @@
       "zones": [
         "Butcherblock Mountains"
       ],
+      "drops": [
+        "Dwarven Axe"
+      ],
       "loc": [
         {
           "ns": 1033,
@@ -91174,6 +91869,9 @@
       "level": "14",
       "zones": [
         "Highpass Hold"
+      ],
+      "drops": [
+        "Stald's Badge"
       ],
       "loc": [
         {
@@ -91686,6 +92384,9 @@
       "zones": [
         "Southern Felwithe"
       ],
+      "drops": [
+        "Two Handed Sword"
+      ],
       "loc": [
         {
           "ns": 510,
@@ -91929,6 +92630,9 @@
       "level": "40",
       "zones": [
         "Southern Felwithe"
+      ],
+      "drops": [
+        "Two Handed Sword"
       ],
       "loc": [
         {
@@ -92332,6 +93036,9 @@
       "zones": [
         "North Freeport"
       ],
+      "drops": [
+        "Token of Truth"
+      ],
       "loc": [
         {
           "ns": 132,
@@ -92484,6 +93191,9 @@
       "level": "12",
       "zones": [
         "Qeynos Hills"
+      ],
+      "drops": [
+        "Yalroens Head"
       ],
       "loc": [
         {
@@ -92819,6 +93529,9 @@
       "zones": [
         "Ocean of Tears"
       ],
+      "drops": [
+        "Fine Steel Short Sword"
+      ],
       "loc": [
         {
           "ns": -492,
@@ -92974,6 +93687,9 @@
       "zones": [
         "Skyshrine"
       ],
+      "drops": [
+        "Focused Ethereal Great Staff"
+      ],
       "loc": [
         {
           "ns": 175,
@@ -93081,6 +93797,7 @@
       ],
       "drops": [
         "Rune of Impetus",
+        "Tears of Prexus",
         "Wurm Meat"
       ]
     },
@@ -93338,7 +94055,8 @@
       "drops": [
         "Rusty Rapier",
         "Rusty Shortened Spear",
-        "Dwarf Meat"
+        "Dwarf Meat",
+        "Gundl's Tongue"
       ],
       "loc": [
         {
@@ -93511,7 +94229,8 @@
       ],
       "drops": [
         "A Noble's Crest",
-        "Hunting Bow"
+        "Hunting Bow",
+        "Human Parts"
       ],
       "loc": [
         {
@@ -93782,6 +94501,13 @@
       "level": "25",
       "zones": [
         "East Cabilis"
+      ],
+      "drops": [
+        "Words of Dissolution",
+        "Words of Cazic-Thule",
+        "Rune of Velious",
+        "Rune of Oppression",
+        "Pearl Shard"
       ],
       "loc": [
         {
@@ -94117,6 +94843,9 @@
       "level": "48",
       "zones": [
         "Trakanon's Teeth"
+      ],
+      "drops": [
+        "Words of Obligation"
       ]
     },
     {
@@ -94246,6 +94975,9 @@
       "level": "?",
       "zones": [
         "Erud's Crossing"
+      ],
+      "drops": [
+        "Mermaid Scale"
       ],
       "loc": [
         {
@@ -95467,6 +96199,10 @@
       "zones": [
         "Ocean of Tears"
       ],
+      "drops": [
+        "Dwarven Blood",
+        "Dwarf Meat"
+      ],
       "loc": [
         {
           "ns": 1394,
@@ -95568,7 +96304,8 @@
         "The Wakening Land"
       ],
       "drops": [
-        "Mercenary Assignments"
+        "Mercenary Assignments",
+        "Human Blood"
       ],
       "loc": [
         {
@@ -95637,7 +96374,9 @@
       "drops": [
         "Forlorn Arrow",
         "Forlorn Bow",
-        "Hunting Bow"
+        "Hunting Bow",
+        "Arrow",
+        "Bamboo Splint Cape"
       ],
       "loc": [
         {
@@ -95792,6 +96531,9 @@
       "level": "14",
       "zones": [
         "Rathe Mountains"
+      ],
+      "drops": [
+        "Iced Bone Chips"
       ]
     },
     {
@@ -96495,6 +97237,10 @@
       "level": "18",
       "zones": [
         "Field of Bone"
+      ],
+      "drops": [
+        "Iksar Dakoit Head",
+        "Dakoit Coin Purse"
       ]
     },
     {
@@ -96730,10 +97476,17 @@
         "Fine Steel Spear",
         "Fine Steel Rapier",
         "Jade Ring",
+        "Imp Blood",
         "Opal",
         "Nilitim's Grimoire Pg. 36",
         "Nilitim's Grimoire Pg. 300",
+        "Nilitim's Grimoire Pg. 301",
+        "Nilitim's Grimoire Pg. 351",
+        "Words of Incarceration",
+        "Essence of Rathe",
         "Crystallized Sulfur",
+        "Ashroot",
+        "Rune of Attraction",
         "Burnt Sash"
       ]
     },
@@ -97010,7 +97763,8 @@
         "Nektulos Forest"
       ],
       "drops": [
-        "Woven Grass Amulet"
+        "Woven Grass Amulet",
+        "Leatherfoot Raider Skullcap (drop)"
       ],
       "loc": [
         {
@@ -97063,6 +97817,9 @@
       "zones": [
         "Nektulos Forest"
       ],
+      "drops": [
+        "Rusty Two Handed Hammer"
+      ],
       "loc": [
         {
           "ns": 25,
@@ -97097,7 +97854,8 @@
         "Nektulos Forest"
       ],
       "drops": [
-        "Woven Grass Amulet"
+        "Woven Grass Amulet",
+        "Leatherfoot Raider Skullcap (drop)"
       ],
       "loc": [
         {
@@ -98016,6 +98774,9 @@
       "level": "55",
       "zones": [
         "Plane of Sky"
+      ],
+      "drops": [
+        "Burning Soul of the Virtuous"
       ]
     },
     {
@@ -98573,7 +99334,8 @@
         "Circlet of Fire",
         "Belt of Fire",
         "Gloves of Fire",
-        "Sceptre of Ixiblat Fer"
+        "Sceptre of Ixiblat Fer",
+        "Blue Diamond"
       ],
       "loc": [
         {
@@ -98679,6 +99441,10 @@
       "level": "40",
       "zones": [
         "Neriak Third Gate"
+      ],
+      "drops": [
+        "Staff",
+        "Small Round Shield"
       ]
     },
     {
@@ -98731,6 +99497,9 @@
       "level": "55",
       "zones": [
         "The Hole"
+      ],
+      "drops": [
+        "Rune of Coruscation"
       ],
       "loc": [
         {
@@ -99160,6 +99929,9 @@
       "level": "11",
       "zones": [
         "Innothule Swamp"
+      ],
+      "drops": [
+        "A Noble's Crest"
       ],
       "loc": [
         {
@@ -99861,6 +100633,9 @@
       "zones": [
         "Innothule Swamp"
       ],
+      "drops": [
+        "A Very Large Pelt"
+      ],
       "loc": [
         {
           "ns": 1832,
@@ -99977,6 +100752,10 @@
       "level": "60",
       "zones": [
         "Southern Felwithe"
+      ],
+      "drops": [
+        "Ghoulbane",
+        "Shiny Brass Shield"
       ],
       "loc": [
         {
@@ -100626,6 +101405,10 @@
         "Innothule Swamp",
         "Rathe Mountains"
       ],
+      "drops": [
+        "High Elf Parts",
+        "High Elf Flesh"
+      ],
       "loc": [
         {
           "ns": -991,
@@ -100978,7 +101761,8 @@
         "Lesser Faydark"
       ],
       "drops": [
-        "Raw-hide Cloak"
+        "Raw-hide Cloak",
+        "Vial of Tunare's Breath"
       ]
     },
     {
@@ -101144,6 +101928,9 @@
       "level": "23",
       "zones": [
         "Butcherblock Mountains"
+      ],
+      "drops": [
+        "Fishing Pole"
       ],
       "loc": [
         {
@@ -101507,6 +102294,9 @@
       "zones": [
         "Lake Rathetear"
       ],
+      "drops": [
+        "Teir`Dal Robe Red"
+      ],
       "loc": [
         {
           "ns": 342,
@@ -101535,6 +102325,9 @@
       "level": "50",
       "zones": [
         "Rathe Mountains"
+      ],
+      "drops": [
+        "Gray Sr Apprentice Robe*"
       ],
       "loc": [
         {
@@ -101894,7 +102687,8 @@
         "Water Flask",
         "Bottle of Kalish",
         "Dwarf Meat",
-        "Dwarven Blood"
+        "Dwarven Blood",
+        "Keldyn's Tongue"
       ],
       "loc": [
         {
@@ -101941,7 +102735,8 @@
         "Velketor's Labyrinth"
       ],
       "drops": [
-        "Drake Skull Helm"
+        "Drake Skull Helm",
+        "Improved Invis vs Undead"
       ]
     },
     {
@@ -102184,6 +102979,9 @@
       "level": "2",
       "zones": [
         "Erud's Crossing"
+      ],
+      "drops": [
+        "Kerra Isle Beetle eye"
       ],
       "loc": [
         {
@@ -104464,6 +105262,9 @@
       "zones": [
         "Western Plains of Karana"
       ],
+      "drops": [
+        "Human Blood"
+      ],
       "loc": [
         {
           "ns": -526,
@@ -104743,6 +105544,9 @@
       "zones": [
         "Ak'Anon"
       ],
+      "drops": [
+        "Gnome Decapitated Head"
+      ],
       "loc": [
         {
           "ns": -21,
@@ -104986,6 +105790,10 @@
       "level": "40",
       "zones": [
         "Neriak Third Gate"
+      ],
+      "drops": [
+        "Staff",
+        "Small Round Shield"
       ],
       "loc": [
         {
@@ -105602,6 +106410,9 @@
       "zones": [
         "Kithicor Forest"
       ],
+      "drops": [
+        "Blood Riven Axe"
+      ],
       "loc": [
         {
           "ns": 787,
@@ -106217,6 +107028,9 @@
       "zones": [
         "Skyshrine"
       ],
+      "drops": [
+        "Laoch Warhammer"
+      ],
       "loc": [
         {
           "ns": -23,
@@ -106367,6 +107181,9 @@
       "zones": [
         "South Qeynos"
       ],
+      "drops": [
+        "Fishing Pole"
+      ],
       "loc": [
         {
           "ns": 12,
@@ -106381,6 +107198,9 @@
       "level": "17",
       "zones": [
         "Lesser Faydark"
+      ],
+      "drops": [
+        "Larik Z`Vole's Head"
       ],
       "loc": [
         {
@@ -106808,6 +107628,10 @@
       "zones": [
         "Nektulos Forest"
       ],
+      "drops": [
+        "Woven Grass Amulet",
+        "Rusty Two Handed Hammer"
+      ],
       "loc": [
         {
           "ns": 1000,
@@ -106874,6 +107698,9 @@
       "zones": [
         "Nektulos Forest"
       ],
+      "drops": [
+        "Leatherfoot Raider Skullcap (drop)"
+      ],
       "loc": [
         {
           "ns": 1127,
@@ -106891,6 +107718,11 @@
       "level": "8-10",
       "zones": [
         "Nektulos Forest"
+      ],
+      "drops": [
+        "Rusty Morning Star",
+        "Rusty Two Handed Hammer",
+        "Leatherfoot Raider Skullcap (drop)"
       ],
       "loc": [
         {
@@ -109393,6 +110225,15 @@
       "level": "25",
       "zones": [
         "Najena"
+      ],
+      "drops": [
+        "High Elf Parts",
+        "Elven Blood",
+        "A Shovel",
+        "A Broom",
+        "Torn Page of Mastery Fire",
+        "Torn Page of Mastery Water",
+        "Torn Page of Mastery Earth"
       ]
     },
     {
@@ -109839,6 +110680,10 @@
       "zones": [
         "Neriak Third Gate"
       ],
+      "drops": [
+        "Dark Elf Decapitated Head",
+        "Dark Stained Training Robe*"
+      ],
       "loc": [
         {
           "ns": 894,
@@ -109898,7 +110743,8 @@
       ],
       "drops": [
         "Rusty Shortened Spear",
-        "Fine Steel Spear"
+        "Fine Steel Spear",
+        "Lon's Head"
       ],
       "loc": [
         {
@@ -109930,7 +110776,8 @@
         "Lake Rathetear"
       ],
       "drops": [
-        "Lord Bergurgle's Crown"
+        "Lord Bergurgle's Crown",
+        "Rune of Infraction"
       ],
       "loc": [
         {
@@ -110161,6 +111008,9 @@
       "level": "29",
       "zones": [
         "Southern Karana"
+      ],
+      "drops": [
+        "Decaying Heart"
       ],
       "loc": [
         {
@@ -110457,6 +111307,13 @@
       "zones": [
         "East Commonlands"
       ],
+      "drops": [
+        "Deathfist Slashed Belt",
+        "Legionnaire's Bracer",
+        "Raw-hide Boots",
+        "Raw-hide Cloak",
+        "Raw-hide Gorget"
+      ],
       "loc": [
         {
           "ns": 1019,
@@ -110497,7 +111354,11 @@
         "Pearl",
         "Flame Agate",
         "Jade Shard",
-        "Part of Tasarin's Grimoire Pg. 24 (Left)"
+        "Part of Tasarin's Grimoire Pg. 24 (Left)",
+        "Evil Eye Eyestalk",
+        "Beholder Optic Fluid",
+        "Bunch of Optic Nerves",
+        "Mithril Earring"
       ],
       "loc": [
         {
@@ -111273,6 +112134,9 @@
       "zones": [
         "South Qeynos"
       ],
+      "drops": [
+        "Elven Blood"
+      ],
       "loc": [
         {
           "ns": 365,
@@ -111963,6 +112827,9 @@
       "zones": [
         "Highpass Hold"
       ],
+      "drops": [
+        "Sealed Letter"
+      ],
       "loc": [
         {
           "ns": 336,
@@ -112374,6 +113241,7 @@
         "Ration",
         "Dwarf Meat",
         "Dwarven Blood",
+        "Margyl's Tongue",
         "Wrist Pouch",
         "Small Bag"
       ],
@@ -114876,6 +115744,9 @@
       "zones": [
         "Eastern Plains of Karana"
       ],
+      "drops": [
+        "Monogrammed Cloth"
+      ],
       "loc": [
         {
           "ns": -1800,
@@ -115594,6 +116465,7 @@
         "West Commonlands"
       ],
       "drops": [
+        "Note",
         "Human Blood"
       ],
       "loc": [
@@ -116031,6 +116903,11 @@
       "level": "26-28",
       "zones": [
         "The Estate of Unrest"
+      ],
+      "drops": [
+        "Sarcoscypha Fungus",
+        "Steel Knuckles",
+        "Amanita Phalloide"
       ],
       "loc": [
         {
@@ -117178,6 +118055,9 @@
       "zones": [
         "Qeynos Hills"
       ],
+      "drops": [
+        "Blue Training Robe*"
+      ],
       "loc": [
         {
           "ns": 1022,
@@ -117341,6 +118221,10 @@
       "level": "4",
       "zones": [
         "Nektulos Forest"
+      ],
+      "drops": [
+        "Woven Grass Amulet",
+        "Rusty Bastard Sword"
       ],
       "loc": [
         {
@@ -118119,6 +119003,9 @@
       "zones": [
         "Paineel"
       ],
+      "drops": [
+        "Cracked Staff"
+      ],
       "loc": [
         {
           "ns": 983,
@@ -118221,7 +119108,9 @@
       ],
       "drops": [
         "Amber",
-        "Fresh Fish"
+        "Fresh Fish",
+        "Catman Skin",
+        "Damaged Catman Skin"
       ],
       "loc": [
         {
@@ -118725,6 +119614,9 @@
       "zones": [
         "Ocean of Tears"
       ],
+      "drops": [
+        "Blackened Mithril Chain"
+      ],
       "loc": [
         {
           "ns": -3484,
@@ -118812,7 +119704,9 @@
       ],
       "drops": [
         "Bronze Dagger",
-        "Carnelian"
+        "Forged Dagger",
+        "Carnelian",
+        "Charred Bone Chips"
       ],
       "loc": [
         {
@@ -119277,7 +120171,8 @@
         "Qeynos Aqueducts"
       ],
       "drops": [
-        "Cracked Staff"
+        "Cracked Staff",
+        "Jade Shard"
       ],
       "loc": [
         {
@@ -119372,6 +120267,11 @@
       "level": "40",
       "zones": [
         "Western Plains of Karana"
+      ],
+      "drops": [
+        "Live Enchanted Rat: Jar 1",
+        "Live Enchanted Rat: Jar 2",
+        "Live Enchanted Rat: Jar 3"
       ],
       "loc": [
         {
@@ -119986,6 +120886,7 @@
         "Misty Thicket"
       ],
       "drops": [
+        "Deathfist Slashed Belt",
         "Rusty Short Sword",
         "Rusty Scythe",
         "Rusty Broad Sword",
@@ -120043,6 +120944,7 @@
         "Lesser Faydark"
       ],
       "drops": [
+        "Deathfist Shoulderpads",
         "Golden Earring",
         "Rune of Al'Kabor",
         "Rune of Neglect",
@@ -120226,6 +121128,7 @@
       ],
       "drops": [
         "Deathfist Pawn Scalp",
+        "Iron Ration",
         "Orc Pawn Pick"
       ]
     },
@@ -120463,6 +121366,11 @@
       "level": "9",
       "zones": [
         "East Commonlands"
+      ],
+      "drops": [
+        "Raw Short Sword 4",
+        "Orc Scalp",
+        "Deathfist Slashed Belt"
       ]
     },
     {
@@ -120676,6 +121584,9 @@
       "level": "34",
       "zones": [
         "Temple of Solusek Ro"
+      ],
+      "drops": [
+        "Bamboo Wakizashi Bo"
       ],
       "loc": [
         {
@@ -120940,6 +121851,9 @@
       "level": "24",
       "zones": [
         "West Karana"
+      ],
+      "drops": [
+        "Barbarian Head"
       ],
       "loc": [
         {
@@ -121520,7 +122434,8 @@
         "Rusty Shortened Spear",
         "Water Flask",
         "Dwarf Meat",
-        "Dwarven Blood"
+        "Dwarven Blood",
+        "Small Wooden Leg"
       ],
       "loc": [
         {
@@ -121575,6 +122490,9 @@
       "level": "27",
       "zones": [
         "Tower of Frozen Shadow"
+      ],
+      "drops": [
+        "Crystallized Shadow Spear"
       ],
       "loc": [
         {
@@ -121764,6 +122682,8 @@
         "Plane of Mischief"
       ],
       "drops": [
+        "Pearl",
+        "Super Sweet Fishing Grubs",
         "Black Squire",
         "Red Squire",
         "Blue Squire",
@@ -121902,6 +122822,7 @@
         "North Qeynos"
       ],
       "drops": [
+        "Torn Brown Shirt*",
         "Purple Headband"
       ],
       "loc": [
@@ -122365,6 +123286,9 @@
       "zones": [
         "West Freeport"
       ],
+      "drops": [
+        "Boots of Brawn"
+      ],
       "loc": [
         {
           "ns": -234,
@@ -122477,7 +123401,8 @@
         "Toxxulia Forest"
       ],
       "drops": [
-        "Human Blood"
+        "Human Blood",
+        "Poacher's Head"
       ],
       "loc": [
         {
@@ -123056,6 +123981,10 @@
       "zones": [
         "Various"
       ],
+      "drops": [
+        "Robe of Discord",
+        "Staff of Discord"
+      ],
       "loc": [
         {
           "ns": 116,
@@ -123136,8 +124065,12 @@
         "Lesser Faydark"
       ],
       "drops": [
+        "Velium Round Shield",
         "Opal Bracelet",
-        "Words of the Suffering"
+        "Words of Collection (Azia)",
+        "Words of the Suffering",
+        "Words of Convocation",
+        "Teir`Dal Blood Pact"
       ],
       "loc": [
         {
@@ -123217,7 +124150,9 @@
         "North Qeynos"
       ],
       "drops": [
-        "Fire Beetle Eye"
+        "Fire Beetle Eye",
+        "Fire Beetle Carapace",
+        "Fire Beetle Leg"
       ],
       "loc": [
         {
@@ -123305,6 +124240,10 @@
       "level": "24",
       "zones": [
         "Lesser Faydark"
+      ],
+      "drops": [
+        "Fine Steel Short Sword",
+        "Faerie Princess Wing"
       ],
       "loc": [
         {
@@ -123687,6 +124626,9 @@
       "zones": [
         "Northern Desert of Ro"
       ],
+      "drops": [
+        "Fishing Pole"
+      ],
       "loc": [
         {
           "ns": 2158,
@@ -123701,6 +124643,9 @@
       "level": "33-35",
       "zones": [
         "High Keep"
+      ],
+      "drops": [
+        "Human Decapitated Head"
       ],
       "loc": [
         {
@@ -124087,6 +125032,10 @@
       "zones": [
         "Kithicor Forest Misty Thicket"
       ],
+      "drops": [
+        "Giant Fire Beetle Eye",
+        "Giant Fire Beetle Leg"
+      ],
       "loc": [
         {
           "ns": 1404,
@@ -124105,6 +125054,10 @@
       "level": "8-10",
       "zones": [
         "North Qeynos"
+      ],
+      "drops": [
+        "Giant Fire Beetle Eye",
+        "Giant Fire Beetle Leg"
       ],
       "loc": [
         {
@@ -124234,6 +125187,10 @@
       "level": "9-12",
       "zones": [
         "Nektulos Forest"
+      ],
+      "drops": [
+        "Leatherfoot Raider Skullcap (drop)",
+        "Rusty Halberd"
       ],
       "loc": [
         {
@@ -124442,6 +125399,9 @@
       "level": "27-31",
       "zones": [
         "Iceclad Ocean"
+      ],
+      "drops": [
+        "Cougar Claw Earring"
       ]
     },
     {
@@ -125208,7 +126168,9 @@
         "Damask Robe",
         "Sleeves of the Spurned Necromancer",
         "Travelers Pouch",
-        "Travelers Pack"
+        "Travelers Pack",
+        "Bloodstained Key",
+        "Dull Bone Key"
       ],
       "loc": [
         {
@@ -125230,6 +126192,7 @@
         "A Broom",
         "A Shovel",
         "a Torch",
+        "Stein (of Water)",
         "Torn Page of Mastery Fire",
         "Torn Page of Mastery Wind",
         "Torn Page of Mastery Earth",
@@ -125333,6 +126296,9 @@
       "zones": [
         "Halas"
       ],
+      "drops": [
+        "Club"
+      ],
       "loc": [
         {
           "ns": 361,
@@ -125365,6 +126331,9 @@
       "level": "45",
       "zones": [
         "Kedge Keep"
+      ],
+      "drops": [
+        "Fresh Fish"
       ],
       "loc": [
         {
@@ -126375,6 +127344,9 @@
       "zones": [
         "Ak'Anon"
       ],
+      "drops": [
+        "Dark Gold Sr Apprentice Robe*"
+      ],
       "loc": [
         {
           "ns": 2024,
@@ -126402,6 +127374,9 @@
       "level": "39",
       "zones": [
         "North Qeynos"
+      ],
+      "drops": [
+        "Rineval Talyas' Robe"
       ],
       "loc": [
         {
@@ -126815,6 +127790,13 @@
       "level": "2",
       "zones": [
         "Steamfont Mountains"
+      ],
+      "drops": [
+        "Ration",
+        "Iron Ration",
+        "Water Flask",
+        "Ale",
+        "Bottle of Kalish"
       ]
     },
     {
@@ -127804,7 +128786,8 @@
         "Toxxulia Forest"
       ],
       "drops": [
-        "Troll Parts"
+        "Troll Parts",
+        "Troll Head"
       ],
       "loc": [
         {
@@ -127820,6 +128803,9 @@
       "level": "30",
       "zones": [
         "East Freeport"
+      ],
+      "drops": [
+        "Damaged Militia Helm"
       ],
       "loc": [
         {
@@ -127895,6 +128881,10 @@
       "level": "25",
       "zones": [
         "Eastern Wastes"
+      ],
+      "drops": [
+        "Orc Fang Earring",
+        "Velium Morning Star"
       ],
       "loc": [
         {
@@ -127980,6 +128970,9 @@
       "zones": [
         "Lake Rathetear"
       ],
+      "drops": [
+        "Old Patched Robe*"
+      ],
       "loc": [
         {
           "ns": 958,
@@ -128051,6 +129044,9 @@
       "level": "22",
       "zones": [
         "Lesser Faydark"
+      ],
+      "drops": [
+        "Gnome Meat"
       ],
       "loc": [
         {
@@ -128700,6 +129696,8 @@
         "Kurn's Tower"
       ],
       "drops": [
+        "Bone Chips",
+        "Brittle Iksar Skull",
         "Cracked Femur",
         "Iksar Targ Shield",
         "Rusty Fer`Esh",
@@ -129045,7 +130043,8 @@
         "Cobalt Helm",
         "Blood Ember Helm",
         "Sebilite Croaking Dirk",
-        "Undead Dragon Sinew"
+        "Undead Dragon Sinew",
+        "Tears of Prexus"
       ],
       "loc": [
         {
@@ -130270,7 +131269,8 @@
         "Toxxulia Forest"
       ],
       "drops": [
-        "Sentinel Creot's Head"
+        "Sentinel Creot's Head",
+        "Battle Staff"
       ],
       "loc": [
         {
@@ -130355,6 +131355,9 @@
       "level": "30",
       "zones": [
         "Erudin"
+      ],
+      "drops": [
+        "Battle Staff"
       ],
       "loc": [
         {
@@ -132224,6 +133227,10 @@
       "zones": [
         "Erudin"
       ],
+      "drops": [
+        "Battle Staff",
+        "Fine Steel Rapier"
+      ],
       "loc": [
         {
           "ns": -949,
@@ -133811,6 +134818,9 @@
       "zones": [
         "Kael Drakkel"
       ],
+      "drops": [
+        "Giant Militia Longsword"
+      ],
       "loc": [
         {
           "ns": 146,
@@ -134007,7 +135017,8 @@
         "North Qeynos"
       ],
       "drops": [
-        "Torn Brown Shirt*"
+        "Torn Brown Shirt*",
+        "Blue Headband"
       ],
       "loc": [
         {
@@ -134022,6 +135033,9 @@
       "level": "7",
       "zones": [
         "Rathe Mountains"
+      ],
+      "drops": [
+        "Muddy Trinket"
       ]
     },
     {
@@ -134782,6 +135796,10 @@
       "zones": [
         "West Freeport"
       ],
+      "drops": [
+        "E'cian Ice Scales",
+        "Halfling Head"
+      ],
       "loc": [
         {
           "ns": -107,
@@ -134871,7 +135889,9 @@
         "Butcherblock Mountains"
       ],
       "drops": [
-        "Bronze Two Handed Battle Axe"
+        "Bronze Two Handed Battle Axe",
+        "Dwarf Meat",
+        "Dwarven Blood"
       ],
       "loc": [
         {
@@ -135585,6 +136605,9 @@
       "level": "8",
       "zones": [
         "Lavastorm Mountains"
+      ],
+      "drops": [
+        "Testimony"
       ]
     },
     {
@@ -136554,6 +137577,12 @@
       "zones": [
         "Swamp of No Hope",
         "Warslik's Woods"
+      ],
+      "drops": [
+        "Bone Chips",
+        "Tarnished Sheer Blade",
+        "Iksar Targ Shield",
+        "Brittle Iksar Skull"
       ]
     },
     {
@@ -137140,6 +138169,10 @@
       "level": "14",
       "zones": [
         "The Warrens"
+      ],
+      "drops": [
+        "Large Empty Crate",
+        "Ye Auld Ball Peen Hammer"
       ],
       "loc": [
         {
@@ -138596,6 +139629,9 @@
       "zones": [
         "Kerra Island"
       ],
+      "drops": [
+        "Venomous Spikefish Poison Sac"
+      ],
       "loc": [
         {
           "ns": 632,
@@ -138763,6 +139799,13 @@
       "level": "20",
       "zones": [
         "Eastern Plains of Karana"
+      ],
+      "drops": [
+        "Bloodstone",
+        "Cracked Staff",
+        "Gold Ring",
+        "Rune of Al'Kabor",
+        "Topaz"
       ]
     },
     {
@@ -139158,7 +140201,8 @@
         "Mistmoore Castle"
       ],
       "drops": [
-        "Robe of the Keeper"
+        "Robe of the Keeper",
+        "Patch of Shadow"
       ],
       "loc": [
         {
@@ -139357,6 +140401,9 @@
       "zones": [
         "High Keep"
       ],
+      "drops": [
+        "Human Blood"
+      ],
       "loc": [
         {
           "ns": 70,
@@ -139543,6 +140590,9 @@
       "level": "63",
       "zones": [
         "Plane of Mischief"
+      ],
+      "drops": [
+        "A Rabbit Foot"
       ]
     },
     {
@@ -139568,7 +140618,8 @@
       ],
       "drops": [
         "Brown Chitin Protector",
-        "Crystalline Orb"
+        "Crystalline Orb",
+        "Stone Silk"
       ],
       "loc": [
         {
@@ -139625,6 +140676,9 @@
       "level": "40",
       "zones": [
         "High Keep"
+      ],
+      "drops": [
+        "Human Blood"
       ],
       "loc": [
         {
@@ -139877,6 +140931,14 @@
         "Kaesora",
         "Temple of Droga",
         "Mines of Nurga"
+      ],
+      "drops": [
+        "Truesilver Mail Sleeves",
+        "Strathbone Silk",
+        "Strathbone Anti-Venom",
+        "Spider Legs",
+        "Strathbone Shell Shield",
+        "Truesilver Mail Coif"
       ]
     },
     {
@@ -139911,7 +140973,8 @@
         "Water Flask",
         "Ration",
         "Short Ale",
-        "Dwarf Meat"
+        "Dwarf Meat",
+        "Gnoll Paw"
       ],
       "loc": [
         {
@@ -140495,6 +141558,10 @@
       "level": "25",
       "zones": [
         "Northern Felwithe"
+      ],
+      "drops": [
+        "Wood Elf Parts",
+        "Elven Blood"
       ]
     },
     {
@@ -140533,6 +141600,12 @@
       "level": "34",
       "zones": [
         "Cazic Thule"
+      ],
+      "drops": [
+        "Rubicite Vambraces",
+        "Ravenscale Armguards",
+        "Lizardscale Belt",
+        "Lizard Meat"
       ],
       "loc": [
         {
@@ -140647,7 +141720,8 @@
       ],
       "drops": [
         "Battle Axe",
-        "Hurrieta's Tunic"
+        "Hurrieta's Tunic",
+        "Fishing Pole"
       ],
       "loc": [
         {
@@ -140911,6 +141985,9 @@
       "zones": [
         "Innothule Swamp",
         "Rathe Mountains"
+      ],
+      "drops": [
+        "A Noble's Crest"
       ],
       "loc": [
         {
@@ -141269,6 +142346,9 @@
       "level": "34",
       "zones": [
         "Toxxulia Forest"
+      ],
+      "drops": [
+        "Senior Apprentice Robe*"
       ]
     },
     {
@@ -141371,6 +142451,11 @@
       "level": "45",
       "zones": [
         "Neriak Third Gate"
+      ],
+      "drops": [
+        "Words of the Psyche",
+        "Stained Parchment Bottom",
+        "Rune of The Inverse"
       ],
       "loc": [
         {
@@ -141498,7 +142583,8 @@
         "Eastern Plains of Karana"
       ],
       "drops": [
-        "Fine Steel Scimitar"
+        "Fine Steel Scimitar",
+        "Rain of Karana"
       ],
       "loc": [
         {
@@ -142011,7 +143097,8 @@
       ],
       "drops": [
         "Gargoyle Eye",
-        "Onyx"
+        "Onyx",
+        "Tektite (Item)"
       ],
       "loc": [
         {
@@ -142970,6 +144057,7 @@
       "drops": [
         "Silver-Plated Bracer",
         "Ghoulbane",
+        "Rusty Short Sword",
         "Froglok Meat",
         "Froglok Blood"
       ],
@@ -143210,7 +144298,8 @@
         "Dark Mail Coat",
         "Dark Mail Mittens",
         "Ogre War Maul",
-        "Whore's Bane"
+        "Whore's Bane",
+        "Shiny Metal Key"
       ],
       "loc": [
         {
@@ -143382,7 +144471,9 @@
         "The Warrens"
       ],
       "drops": [
-        "Ice of Velious"
+        "Ice of Velious",
+        "Words of Discernment",
+        "Bear Paw's Pelt"
       ],
       "loc": [
         {
@@ -144119,6 +145210,9 @@
       "zones": [
         "Western Plains of Karana"
       ],
+      "drops": [
+        "White Paper"
+      ],
       "loc": [
         {
           "ns": 800,
@@ -144755,7 +145849,9 @@
         "Western Plains of Karana"
       ],
       "drops": [
-        "Rusty Dagger"
+        "Rusty Dagger",
+        "Sack of Hay",
+        "Shovel"
       ],
       "loc": [
         {
@@ -145203,6 +146299,9 @@
       "level": "35",
       "zones": [
         "South Qeynos"
+      ],
+      "drops": [
+        "Club"
       ],
       "loc": [
         {
@@ -145666,7 +146765,8 @@
       ],
       "drops": [
         "Human Blood",
-        "Rusty Dagger"
+        "Rusty Dagger",
+        "Tovaxs Necklace"
       ],
       "loc": [
         {
@@ -149615,6 +150715,11 @@
       "zones": [
         "Everfrost Peaks"
       ],
+      "drops": [
+        "One Hand Pick",
+        "Parrying Pick",
+        "Breath of Ro (Item)"
+      ],
       "loc": [
         {
           "ns": 2859,
@@ -149971,6 +151076,7 @@
       "drops": [
         "Leather Whip",
         "Clawed Knuckle-Ring",
+        "Fish Food Vial",
         "Backpack"
       ],
       "loc": [
@@ -150291,6 +151397,11 @@
       "zones": [
         "Western Plains of Karana"
       ],
+      "drops": [
+        "Rusty Halberd",
+        "Glove of Rallos Zek",
+        "The Scent of Marr"
+      ],
       "loc": [
         {
           "ns": -3793,
@@ -150464,7 +151575,9 @@
         "Kurn's Tower"
       ],
       "drops": [
-        "Fine Steel Morning Star"
+        "Fine Steel Morning Star",
+        "Iksar Skull with an 'X' (Caste)",
+        "Iksar Skull with an 'X' (Leader)"
       ],
       "loc": [
         {
@@ -150943,6 +152056,10 @@
       "zones": [
         "The Overthere"
       ],
+      "drops": [
+        "Flowing Black Robe",
+        "Fine Steel Dagger"
+      ],
       "loc": [
         {
           "ns": 2766,
@@ -150957,6 +152074,9 @@
       "level": "61",
       "zones": [
         "Ak'Anon"
+      ],
+      "drops": [
+        "Dark Gold Sr Apprentice Robe*"
       ],
       "loc": [
         {
@@ -151252,6 +152372,9 @@
       "zones": [
         "Qeynos Hills"
       ],
+      "drops": [
+        "Human Blood"
+      ],
       "loc": [
         {
           "ns": 4677,
@@ -151527,6 +152650,9 @@
       "zones": [
         "Ak'Anon"
       ],
+      "drops": [
+        "Dark Gold Sr Apprentice Robe*"
+      ],
       "loc": [
         {
           "ns": 2031,
@@ -151757,7 +152883,8 @@
         "Everfrost Peaks"
       ],
       "drops": [
-        "Bone Chips"
+        "Bone Chips",
+        "Delius Thyme's Diary Pg. 74"
       ],
       "loc": [
         {
@@ -151775,7 +152902,9 @@
         "Everfrost Peaks"
       ],
       "drops": [
-        "Bone Chips"
+        "Bone Chips",
+        "Winter Lilly",
+        "Delius Thyme's Diary Pg. 75"
       ],
       "loc": [
         {
@@ -151791,6 +152920,9 @@
       "level": "12",
       "zones": [
         "Everfrost Peaks"
+      ],
+      "drops": [
+        "Delius Thyme's Diary Pg. 76"
       ],
       "loc": [
         {
@@ -152081,6 +153213,11 @@
       "zones": [
         "Splitpaw Lair"
       ],
+      "drops": [
+        "Split Paw Hide Gloves",
+        "Verishe Bracer of Dominance",
+        "Verishe Mal Greataxe"
+      ],
       "loc": [
         {
           "ns": 1171,
@@ -152096,6 +153233,9 @@
       "zones": [
         "Splitpaw Lair"
       ],
+      "drops": [
+        "Split Paw Hide Belt"
+      ],
       "loc": [
         {
           "ns": 1138,
@@ -152109,6 +153249,9 @@
       "level": "52",
       "zones": [
         "Karnor's Castle"
+      ],
+      "drops": [
+        "Piece of a medallion"
       ],
       "loc": [
         {
@@ -152864,6 +154007,13 @@
       "zones": [
         "Southern Karana"
       ],
+      "drops": [
+        "Human Blood",
+        "Velishoul's Tome Pg. 43",
+        "Words of Acquisition (Azia)",
+        "Wooden Flute",
+        "Breath of Solusek"
+      ],
       "loc": [
         {
           "ns": -50,
@@ -153517,6 +154667,9 @@
       "level": "?",
       "zones": [
         "Neriak Commons"
+      ],
+      "drops": [
+        "Dabner's Staff of Recall"
       ]
     },
     {
@@ -153777,6 +154930,9 @@
       "level": "32",
       "zones": [
         "Tower of Frozen Shadow"
+      ],
+      "drops": [
+        "Ceremonial Wedding Sword"
       ],
       "loc": [
         {
@@ -154237,6 +155393,9 @@
       "level": "51",
       "zones": [
         "Warsliks Woods"
+      ],
+      "drops": [
+        "Fine Steel Two Handed Sword"
       ],
       "loc": [
         {
@@ -156564,6 +157723,9 @@
       "zones": [
         "Steamfont Mountains"
       ],
+      "drops": [
+        "Winex's Staff"
+      ],
       "loc": [
         {
           "ns": -153,
@@ -157165,6 +158327,10 @@
       "level": "16",
       "zones": [
         "High Keep"
+      ],
+      "drops": [
+        "Bronze Dagger",
+        "Half Elf Head"
       ],
       "loc": [
         {
@@ -158833,6 +159999,9 @@
       "level": "10",
       "zones": [
         "Innothule Swamp"
+      ],
+      "drops": [
+        "Zimbittle's Pouch"
       ]
     },
     {
@@ -158866,6 +160035,14 @@
       "level": "24/25",
       "zones": [
         "Infected Paw"
+      ],
+      "drops": [
+        "Sapphire",
+        "Star Ruby",
+        "Emerald",
+        "Fire Emerald",
+        "Opal Bracelet",
+        "Gossamer Robe"
       ]
     },
     {
@@ -159098,6 +160275,9 @@
       "level": "25",
       "zones": [
         "Steamfont Mountains"
+      ],
+      "drops": [
+        "Gnome Meat"
       ],
       "loc": [
         {

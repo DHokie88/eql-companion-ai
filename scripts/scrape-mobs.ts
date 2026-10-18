@@ -3,6 +3,12 @@
  *
  *   npm run scrape:mobs                # incremental: reuses the on-disk wikitext cache
  *   npm run scrape:mobs -- --refresh   # ignore the cached index/pages, re-fetch everything
+ *   npm run scrape:mobs -- --reparse   # CACHE ONLY: re-run the parser over the cached wikitext;
+ *                                      # zero requests (throws rather than fetch), keeps scrapedAt
+ *
+ * READS THE ITEM CORPUS. `src/main/data/items.json` is the membership test that lets a loot
+ * `[[Item]]` LINK count as a drop (`parseMobLoot`), so when both are refreshed run scrape:items
+ * BEFORE this one.
  *
  * WHY A SCRAPED CATALOG AND NOT (ONLY) A LIVE LOOKUP: the wiki's drop list is the DEFINITIVE
  * answer to "what does this drop", and a `/con` needs that answer instantly, offline, and
@@ -36,6 +42,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 import { dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
 import { isMobPage, parseMobPage } from './sources/mobPage'
+import { corpusItemTest, type ItemDbFile } from '../src/main/itemsDb'
 import type { MobData, MobEntry } from '../src/shared/types'
 
 const API = 'https://eqlwiki.com/api.php'
@@ -44,6 +51,7 @@ const UA = 'everquest-companion/0.1 (personal quest tracker)'
 const HERE = dirname(fileURLToPath(import.meta.url))
 const CACHE_DIR = resolve(HERE, 'sources/cache/mobs')
 const OUT_PATH = resolve(HERE, '../src/renderer/src/data/eqlegends/mobs.json')
+const ITEMS_PATH = resolve(HERE, '../src/main/data/items.json')
 
 const DELAY_MS = 1000
 const MAX_RETRIES = 5
@@ -51,6 +59,11 @@ const MAX_RETRIES = 5
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
 const refresh = process.argv.slice(2).includes('--refresh')
+/** Cache-only: the one request path throws instead of touching the network. */
+const reparse = process.argv.slice(2).includes('--reparse')
+if (refresh && reparse) throw new Error('--refresh and --reparse are contradictory')
+
+const isItem = corpusItemTest((JSON.parse(readFileSync(ITEMS_PATH, 'utf8')) as ItemDbFile).items)
 
 // ---- polite API client (identical contract to scrape-quests.ts) ------------------
 
@@ -69,6 +82,7 @@ function describeRequest(params: Record<string, string>): string {
 async function api<T>(params: Record<string, string>): Promise<T> {
   // maxlag=5: MediaWiki's own bot-courtesy contract — the server refuses the request outright
   // when replication lag exceeds 5s, instead of straining to serve it (owner ruling 2026-08-22).
+  if (reparse) throw new Error(`--reparse is cache-only, but ${describeRequest(params)} is not cached`)
   const url = `${API}?${new URLSearchParams({ format: 'json', formatversion: '2', maxlag: '5', ...params }).toString()}`
   let wait = 1000
   for (let attempt = 0; ; attempt++) {
@@ -309,7 +323,7 @@ async function readMobPage(p: Member): Promise<MobEntry | 'not-mob' | PageSkip> 
   // Expected and NUMEROUS: `embeddedin` reports indirect transclusions, so quest/zone/index
   // pages that merely show a mob box land in the candidate list. Counted, not enumerated.
   if (!isMobPage(wt)) return 'not-mob'
-  return parseMobPage(p.title, wt) ?? { reason: 'mob template present but nothing parsed' }
+  return parseMobPage(p.title, wt, { isItem }) ?? { reason: 'mob template present but nothing parsed' }
 }
 
 interface RunSummary {
@@ -362,8 +376,10 @@ async function main(): Promise<void> {
   }
 
   mobs.sort((a, b) => a.page.localeCompare(b.page))
+  // A reparse fetched nothing, so the wikitext is as old as the last real scrape: keep its stamp.
+  const prior = reparse && existsSync(OUT_PATH) ? (JSON.parse(readFileSync(OUT_PATH, 'utf8')) as MobData) : null
   const out: MobData = {
-    scrapedAt: new Date().toISOString(),
+    scrapedAt: prior?.scrapedAt ?? new Date().toISOString(),
     source:
       'eqlwiki.com — Category:NPCs/Named Mobs/Merchants/Raid Encounters ∪ embeddedin Template:Namedmobpage/MerchantPage, filtered to pages opening a mob template',
     mobs
