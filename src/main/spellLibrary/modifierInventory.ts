@@ -4,6 +4,7 @@ import type { InventoryDump } from '../../shared/outputs/inventory'
 import type { SpellModifierContext } from '../../shared/spellModifiers'
 import type { ItemDbFile } from '../itemsDb'
 import { modifierFocusCandidates } from '../planner/modifierFocusCandidates'
+import { bardInstrumentInventory } from './bardInstrumentInventory'
 
 export interface ModifierInventoryReader {
   status(character: { name: string; server: string }): { path: string | null; updatedAt: string | null }
@@ -33,5 +34,5 @@ export function readModifierInventory(character: { name: string; server: string 
   }
   const audit = modifierFocusCandidates(loaded.dump, reader.items)
   if (loaded.dump.malformed.length > 0) audit.warnings.push('Some inventory rows could not be read; equipped focus coverage may be incomplete.')
-  return { state: 'ready', exportedAt: loaded.loadedAt, ...audit }
+  return { state: 'ready', exportedAt: loaded.loadedAt, ...audit, instruments: bardInstrumentInventory(loaded.dump, reader.items) }
 }
