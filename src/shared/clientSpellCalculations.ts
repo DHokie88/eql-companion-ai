@@ -74,12 +74,17 @@ function calculationProblems(record: ClientSpellRecord, effects: ClientSpellEffe
   return reasons
 }
 
-function finishCalculation(result: SpellCalculation, effects: ClientSpellEffect[], level: number, ticks: number): SpellCalculation {
+/** Runs only after all formulas and durations pass validation, once per HP slot. */
+export type ClientSpellAmountTransform = (amount: number, effect: ClientSpellEffect) => number
+
+function finishCalculation(result: SpellCalculation, effects: ClientSpellEffect[], level: number, options: { ticks: number; transform?: ClientSpellAmountTransform }): SpellCalculation {
+  const { ticks, transform } = options
   let instant = 0
   let perTick = 0
   for (const effect of effects) {
-    const amount = magnitude(effect, level)
-    if (amount === null) continue
+    const base = magnitude(effect, level)
+    if (base === null) continue
+    const amount = transform ? transform(base, effect) : base
     if (effect.spa === 0 && ticks > 0) perTick += amount
     else instant += amount
   }
@@ -99,7 +104,7 @@ function selectedHpEffects(record: ClientSpellRecord, sign: number): ClientSpell
   return record.effects.filter((effect) => (effect.spa === 0 || effect.spa === 79) && effect.base * sign > 0)
 }
 
-export function calculateClientSpell(record: ClientSpellRecord, level: number, metric: SpellMetric): SpellCalculation {
+export function calculateClientSpell(record: ClientSpellRecord, level: number, metric: SpellMetric, transform?: ClientSpellAmountTransform): SpellCalculation {
   const result = emptyCalculation(record, metric)
   const invalid = requestProblem(level, metric)
   if (invalid) { result.reasons.push(invalid); return result }
@@ -117,7 +122,7 @@ export function calculateClientSpell(record: ClientSpellRecord, level: number, m
   result.reasons = calculationProblems(record, effects, level)
   const ticks = durationTicks(record, level)
   if (result.reasons.length || ticks === null) return result
-  return finishCalculation(result, effects, level, ticks)
+  return finishCalculation(result, effects, level, { ticks, transform })
 }
 
 function requestProblem(level: number, metric: SpellMetric): string | null {
