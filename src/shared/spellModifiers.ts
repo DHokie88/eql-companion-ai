@@ -19,7 +19,7 @@ export interface SpellModifierContext {
   character: { key: string; name: string; server: string } | null
   preferences: SpellModifierPreferences
   ranks: Record<string, { name: string; rank: number }> | null
-  inventory: { state: 'missing' | 'ready' | 'error'; exportedAt: string | null; candidates: SpellFocusCandidate[]; warnings: string[] }
+  inventory: { state: 'missing' | 'ready' | 'error'; exportedAt: string | null; candidates: SpellFocusCandidate[]; warnings: string[]; instruments?: import('./bardInstruments').BardInstrumentInventory }
   warnings: string[]
 }
 export interface SpellEvaluationOptions { mode: SpellValueMode; contextRevision: string; classes?: SpellClass[] }
