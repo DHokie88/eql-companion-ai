@@ -29,7 +29,7 @@ function effectDelta(calc: number, level: number): number | null {
   return null
 }
 
-function magnitude(effect: ClientSpellEffect, level: number): number | null {
+export function clientSpellEffectAmount(effect: ClientSpellEffect, level: number): number | null {
   const delta = effectDelta(effect.calc, level)
   if (delta === null) return null
   const base = Math.abs(effect.base)
@@ -40,7 +40,7 @@ function magnitude(effect: ClientSpellEffect, level: number): number | null {
   return cap < base && delta > 0 ? Math.max(base - delta, cap) : Math.min(amount, cap)
 }
 
-function durationTicks(record: ClientSpellRecord, level: number): number | null {
+export function clientSpellDurationTicks(record: ClientSpellRecord, level: number): number | null {
   const formula = record.durationFormula
   const ticks = formula >= 200 ? formula : DURATIONS[formula]?.(level)
   if (ticks === undefined || !Number.isFinite(ticks)) return null
@@ -64,10 +64,10 @@ function emptyCalculation(record: ClientSpellRecord, metric: SpellMetric): Spell
 }
 
 function calculationProblems(record: ClientSpellRecord, effects: ClientSpellEffect[], level: number): string[] {
-  const unknown = effects.filter((effect) => magnitude(effect, level) === null).map((effect) => effect.calc)
+  const unknown = effects.filter((effect) => clientSpellEffectAmount(effect, level) === null).map((effect) => effect.calc)
   const reasons: string[] = []
   if (unknown.length) reasons.push(`Unsupported effect formula: ${[...new Set(unknown)].join(', ')}.`)
-  const ticks = durationTicks(record, level)
+  const ticks = clientSpellDurationTicks(record, level)
   if (ticks === null) reasons.push(`Unsupported or untimed duration formula: ${record.durationFormula}.`)
   else if (!Number.isInteger(ticks) || ticks < 0) reasons.push(`Fractional or negative client duration (${ticks} ticks) is not modeled.`)
   if (record.aoeDurationMs > 0) reasons.push(`Repeated-wave timing is not modeled (${record.aoeDurationMs} ms).`)
@@ -82,7 +82,7 @@ function finishCalculation(result: SpellCalculation, effects: ClientSpellEffect[
   let instant = 0
   let perTick = 0
   for (const effect of effects) {
-    const base = magnitude(effect, level)
+    const base = clientSpellEffectAmount(effect, level)
     if (base === null) continue
     const amount = transform ? transform(base, effect) : base
     if (effect.spa === 0 && ticks > 0) perTick += amount
@@ -120,7 +120,7 @@ export function calculateClientSpell(record: ClientSpellRecord, level: number, m
     return result
   }
   result.reasons = calculationProblems(record, effects, level)
-  const ticks = durationTicks(record, level)
+  const ticks = clientSpellDurationTicks(record, level)
   if (result.reasons.length || ticks === null) return result
   return finishCalculation(result, effects, level, { ticks, transform })
 }
