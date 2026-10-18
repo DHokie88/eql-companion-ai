@@ -3,7 +3,7 @@ import type { SpellCheckReason, SpellDataset, SpellLibraryStatus, SpellObservati
 import { SpellWorkerRpc } from './rpc'
 import type { SpellResistTable } from '../../shared/resistTypes'
 import { setSpellActivation } from './activation'
-import type { SpellModifierContext } from '../../shared/spellModifiers'
+import type { SpellEvaluationOptions, SpellModifierContext } from '../../shared/spellModifiers'
 import { evaluationArg } from './queryValidation'
 
 interface Published { dataset: SpellDataset; observation?: SpellObservation; materializedDir: string }
@@ -174,7 +174,7 @@ export class SpellLibraryService {
       this.installId = saved.installId
     }
     const scoped = this.scopeQuery(method, query)
-    const modifiers = await this.modifiersFor(query)
+    const modifiers = await this.modifiersFor(query, method)
     if (!this.owns(root, generation)) throw new Error('EQ installation changed. Please retry the query.')
     const result = await this.reader.call<T>(method, { installId: this.installId, query: scoped, ...(modifiers ? { modifiers } : {}) })
     if (!this.owns(root, generation)) throw new Error('EQ installation changed. Please retry the query.')
@@ -183,11 +183,15 @@ export class SpellLibraryService {
     }
     return result
   }
-  private async modifiersFor(query: unknown): Promise<SpellModifierContext | undefined> {
+  private async modifiersFor(query: unknown, method: string): Promise<SpellModifierContext | undefined> {
     if (!query || typeof query !== 'object' || Array.isArray(query)) return undefined
     const options = evaluationArg((query as Record<string, unknown>).evaluation)
-    if (!options) return undefined
+    if (!options && !['rankings', 'byLevel'].includes(method)) return undefined
     const context = await this.deps.modifierContext?.()
+    if (!options) return context
+    return this.validateModifiers(context, options)
+  }
+  private validateModifiers(context: SpellModifierContext | undefined, options: SpellEvaluationOptions): SpellModifierContext {
     if (context?.revision !== options.contextRevision || context.preferences.mode !== options.mode) {
       throw new Error('Spell modifier inputs changed. Refresh the results.')
     }
@@ -196,7 +200,7 @@ export class SpellLibraryService {
   }
   private scopeQuery(method: string, query: unknown): unknown {
     if (!query || typeof query !== 'object' || Array.isArray(query)) return query
-    if (!this.current.dataset || !['search', 'detail', 'compare', 'rank'].includes(method)) return query
+    if (!this.current.dataset || !['search', 'detail', 'compare', 'rank', 'rankings', 'byLevel'].includes(method)) return query
     const q = query as Record<string, unknown>
     return { ...q, snapshotId: q.snapshotId ?? this.current.dataset.snapshotId }
   }

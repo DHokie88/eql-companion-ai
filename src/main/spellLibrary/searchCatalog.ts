@@ -5,7 +5,7 @@ import { levelArg, pageArgs } from './queryValidation'
 import type { SpellLibraryStorage } from './storage'
 import type { SpellCalculator } from './workerEvaluation'
 
-function summary(record: ClientSpellRecord, classes: ReturnType<typeof spellSearchOptions>['classes']): SpellSummary {
+export function catalogSummary(record: ClientSpellRecord, classes: ReturnType<typeof spellSearchOptions>['classes']): SpellSummary {
   const { id, name, rank, mana, category, subcategory, beneficial, target } = record
   return { id, name, rank, classes: record.classes, mana, category, subcategory, beneficial, target,
     learnedLevel: minimumSpellLevel(record.classes, classes), spellType: clientSpellType(record) }
@@ -21,7 +21,7 @@ function collect(storage: SpellLibraryStorage, dataset: SpellDataset | null, opt
     if (record.category) categories.add(record.category)
     if (record.subcategory && (!options.category || record.category === options.category)) subcategories.add(record.subcategory)
     if (!matchesSpellSearch(record, options)) continue
-    const row = summary(record, options.classes)
+    const row = catalogSummary(record, options.classes)
     evaluateRow(record, row)
     matches.push(row)
   }
@@ -33,7 +33,7 @@ export function searchCatalog(storage: SpellLibraryStorage, dataset: SpellDatase
   const options = spellSearchOptions(query)
   const { page, pageSize } = pageArgs(query)
   const calculateAll = options.sortBy === 'amount' || options.sortBy === 'efficiency'
-  const level = calculateAll || query.evaluation !== undefined ? levelArg(query.level) : undefined
+  const level = calculateAll || query.evaluation !== undefined || query.analysis !== undefined ? levelArg(query.level) : undefined
   const { matches, categories, subcategories } = collect(storage, dataset, options, (record, row) => {
     if (calculateAll && level !== undefined) evaluate(record, row, level, calculate)
   })

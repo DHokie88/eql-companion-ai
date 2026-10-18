@@ -125,7 +125,8 @@ export class SpellModifierCoordinator {
       const character = selection.character === null ? null : { ...selection.character, key }
       const value = { modelVersion: SPELL_MODIFIER_MODEL_VERSION, character, preferences, ...facts }
       // Export timestamps are provenance. Rewriting identical gear must not re-rank the catalog.
-      const revision = digest({ key, ...value, inventory: { ...value.inventory, exportedAt: undefined } })
+      const revision = digest({ key, ...value, preferences: { ...preferences, targets: preferences.targets ?? 4 },
+        inventory: { ...value.inventory, exportedAt: undefined } })
       const next = { revision, ...value }
       const changed = JSON.stringify(this.context) !== JSON.stringify(next)
       this.context = next

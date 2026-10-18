@@ -1,4 +1,5 @@
 import type { SpellModifierPreferences, SpellModifierUpdate } from '../../shared/spellModifiers'
+import { targetCountArg } from './analysisValidation'
 
 function object(value: unknown): Record<string, unknown> {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) throw new Error('Expected modifier settings object')
@@ -53,13 +54,14 @@ function focusIds(value: unknown): number[] {
 /** Every renderer and disk preference enters through this complete, bounded shape. */
 export function validateModifierPreferences(value: unknown): SpellModifierPreferences {
   const prefs = object(value)
-  keys(prefs, ['mode', 'emulation'])
+  keys(prefs, prefs.targets === undefined ? ['mode', 'emulation'] : ['mode', 'emulation', 'targets'])
   if (prefs.mode !== 'client' && prefs.mode !== 'mine' && prefs.mode !== 'emulate') throw new Error('Invalid spell value mode')
   const emulation = object(prefs.emulation)
   keys(emulation, ['rank', 'ranks', 'focus', 'focusIds'])
   if (!['detected', 'none', 'selected'].includes(String(emulation.focus))) throw new Error('Invalid focus mode')
   return {
     mode: prefs.mode,
+    ...(prefs.targets === undefined ? {} : { targets: targetCountArg(prefs.targets) }),
     emulation: {
       rank: emulation.rank === null ? null : rank(emulation.rank),
       ranks: overrides(emulation.ranks),
