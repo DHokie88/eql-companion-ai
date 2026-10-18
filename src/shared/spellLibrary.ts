@@ -53,7 +53,21 @@ export interface SpellLibraryStatus {
   storageBytes: number
 }
 export interface SpellQueryContext { snapshotId?: string }
+export const SPELL_BROWSE_SORTS = ['id', 'name', 'level', 'classes', 'category', 'type', 'amount', 'mana', 'efficiency', 'selected'] as const
+export type SpellBrowseSort = typeof SPELL_BROWSE_SORTS[number]
+export type SpellSortDirection = 'asc' | 'desc'
+export type SpellBrowseType = 'dd' | 'dot' | 'aoe' | 'heal' | 'hot' | 'other'
 export interface SpellSearchQuery extends SpellQueryContext {
+  minLevel?: number
+  maxLevel?: number
+  allLevels?: boolean
+  subcategory?: string
+  type?: SpellBrowseType
+  polarity?: 'beneficial' | 'detrimental'
+  mana?: 'free' | 'cost'
+  sortBy?: SpellBrowseSort
+  direction?: SpellSortDirection
+  selectedIds?: number[]
   evaluation?: SpellEvaluationOptions
   text?: string
   classes?: SpellClass[]
@@ -64,7 +78,7 @@ export interface SpellSearchQuery extends SpellQueryContext {
   page?: number
   pageSize?: number
 }
-export type SpellSummary = Pick<ClientSpellRecord, 'id' | 'name' | 'rank' | 'classes' | 'mana' | 'category' | 'subcategory' | 'beneficial' | 'target'> & { calculations?: SpellCalculation[] }
+export type SpellSummary = Pick<ClientSpellRecord, 'id' | 'name' | 'rank' | 'classes' | 'mana' | 'category' | 'subcategory' | 'beneficial' | 'target'> & { calculations?: SpellCalculation[]; learnedLevel?: number | null; spellType?: SpellBrowseType }
 export interface SpellSearchResult {
   dataset: SpellDataset | null
   total: number
@@ -72,6 +86,7 @@ export interface SpellSearchResult {
   pageSize: number
   records: SpellSummary[]
   categories: string[]
+  subcategories: string[]
 }
 export interface SpellDetailQuery extends SpellQueryContext { id: number; level?: number; evaluation?: SpellEvaluationOptions }
 export interface SpellDetailResult { dataset: SpellDataset | null; record: ClientSpellRecord | null; calculations?: SpellCalculation[] }

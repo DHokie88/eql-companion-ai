@@ -162,9 +162,13 @@ test('the cadence is 200 ms — generous for a human, and never tighter than 150
   assert.ok(POINTER_WATCH_MS >= 150, 'the owner floor: do not go tighter than 150 ms')
 })
 
-// ------------------------------------------------------------------ the registry, on real timers
+// ----------------------------------------------------------- the registry, on a controlled clock
 
-test('ONE interval per kind, and it stops itself the moment it fires', async () => {
+test('ONE interval per kind, and it stops itself the moment it fires', (t) => {
+  // Wall-clock sleeps cannot promise two interval callbacks on a busy suite runner.
+  // Drive the real registry's timer directly, preserving the cadence and cancellation checks.
+  t.mock.timers.enable({ apis: ['setInterval'] })
+  t.after(() => stopPointerWatch('fight'))
   assert.deepEqual(pointerWatchKeys(), [], 'nothing is watched before anything captures')
   const port = fakePort({ x: 150, y: 150 })
   startPointerWatch('fight', port)
@@ -172,8 +176,8 @@ test('ONE interval per kind, and it stops itself the moment it fires', async () 
   startPointerWatch('fight', port)
   assert.deepEqual(pointerWatchKeys(), ['fight'])
 
-  await new Promise((r) => setTimeout(r, POINTER_WATCH_MS * 2 + 60))
-  assert.ok(port.reads >= 2, `the watch is running (${port.reads} reads)`)
+  t.mock.timers.tick(POINTER_WATCH_MS * 2)
+  assert.equal(port.reads, 2, 'exactly one cursor read per interval after re-capture')
   assert.equal(port.exits, 0, 'the pointer is inside — nothing is sent')
   assert.equal(port.confirms, 0, 'and the window is never asked while it is inside')
 
@@ -183,7 +187,7 @@ test('ONE interval per kind, and it stops itself the moment it fires', async () 
     port.reads++
     return { x: 900, y: 900 }
   }
-  await new Promise((r) => setTimeout(r, POINTER_WATCH_MS * 2 + 60))
+  t.mock.timers.tick(POINTER_WATCH_MS * 2)
   assert.equal(port.exits, 1, 'exactly one exit, however many ticks have passed since')
   assert.deepEqual(pointerWatchKeys(), [], 'and the timer is gone with it')
   assert.ok(port.reads > reads)

@@ -48,6 +48,9 @@ test('browse, details, comparison and exhaustive ranking use identical modifier 
     assert.equal(ranked.scanned, 4)
     assert.equal(ranked.direct[0].id, 2) // Beyond the one-row search page.
     assert.deepEqual(ranked.direct[0], second)
+    const sorted = call<SpellSearchResult>('search', { pageSize: 1, level: 50, classes: ['WIZ'], evaluation, sortBy: 'amount', direction: 'desc' })
+    assert.equal(sorted.records[0].id, 2, 'Browse sorts by the modeled total across every matching page')
+    assert.deepEqual(sorted.records[0].calculations?.[0], second)
     assert.equal(fixture.storage.observations(source.dataset.installId).total, 1)
     assert.equal(fixture.storage.snapshots(source.dataset.installId).length, 1)
   } finally { fixture.close() }

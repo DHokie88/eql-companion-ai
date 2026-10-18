@@ -1,15 +1,9 @@
 import { type JSX, useCallback, useState } from 'react'
-import { Alert, Box, Button, CircularProgress, FormControl, InputLabel, MenuItem, Select, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
-import type { SpellCalculation, SpellClass, SpellMetric } from '@shared/spellLibrary'
+import { Alert, CircularProgress, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from '@mui/material'
+import type { SpellClass, SpellMetric } from '@shared/spellLibrary'
 import type { SpellEvaluationOptions } from '@shared/spellModifiers'
 import { useLibraryQuery } from './useLibraryQuery'
-import { amount, EstimateAmount, EstimateExplanation } from './SpellEstimate'
-
-function CalculationRows({ rows, onOpen, onRemove }: { rows: SpellCalculation[]; onOpen: (id: number) => void; onRemove?: (id: number) => void }): JSX.Element {
-  return <Box sx={{ overflowX: 'auto' }}><Table size="small"><TableHead><TableRow><TableCell>Spell</TableCell><TableCell align="right">Instant</TableCell><TableCell align="right">Per tick × ticks</TableCell><TableCell align="right">Full amount / target</TableCell><TableCell align="right">Client mana</TableCell><TableCell align="right">Amount / client mana</TableCell><TableCell>Scope / exclusions</TableCell>{onRemove && <TableCell />}</TableRow></TableHead><TableBody>{rows.map((r) => <TableRow key={r.id} data-testid="spells-calculation">
-    <TableCell><Button size="small" onClick={() => onOpen(r.id)}>{r.name}</Button><Typography variant="caption" display="block">ID {r.id} · target {r.target}</Typography></TableCell><TableCell align="right">{amount(r.instant)}</TableCell><TableCell align="right">{r.perTick === null ? '-' : `${amount(r.perTick)} × ${r.ticks ?? '?'}`}</TableCell><TableCell align="right"><EstimateAmount calculation={r} /></TableCell><TableCell align="right">{r.mana}</TableCell><TableCell align="right">{r.mana === 0 ? 'Zero mana' : amount(r.perMana)}</TableCell><TableCell sx={{ minWidth: 180 }}><EstimateExplanation calculation={r} /></TableCell>{onRemove && <TableCell><Button size="small" onClick={() => onRemove(r.id)}>Remove</Button></TableCell>}
-  </TableRow>)}</TableBody></Table></Box>
-}
+import { SpellCalculationTable as CalculationRows } from './SpellCalculationTable'
 
 export function SpellCompare({ ids, classes, level, evaluation, onRemove, onOpen }: { ids: number[]; classes: SpellClass[]; level: number; evaluation: SpellEvaluationOptions; onRemove: (id: number) => void; onOpen: (id: number) => void }): JSX.Element {
   const [metric, setMetric] = useState<SpellMetric>('damage')
@@ -28,7 +22,7 @@ export function SpellCompare({ ids, classes, level, evaluation, onRemove, onOpen
     {compared.error && <Alert severity="error">{compared.error}</Alert>}{compared.loading && <CircularProgress size={22} />}
     {compared.data && <><CalculationRows rows={compared.data.results} onOpen={onOpen} onRemove={onRemove} /><Typography variant="caption" color="text.secondary">{compared.data.scope}</Typography></>}
     <Typography variant="h6">Full catalog rankings</Typography>
-    <Typography variant="body2" color="text.secondary">{classes.length ? classes.join(' / ') : 'All classes'} · eligible through level {level}. Rankings scan the entire captured catalog.</Typography>
+    <Typography variant="body2" color="text.secondary">{classes.length ? classes.join(' / ') : 'All classes'} · eligible through level {level}. Rank by selects the top 20 from the entire captured catalog per group; column headings sort those results.</Typography>
     {ranked.error && <Alert severity="error">{ranked.error}</Alert>}{ranked.loading && <CircularProgress size={22} />}
     {ranked.data && <>
       <Typography variant="caption" data-testid="spells-ranked-count">Scanned {ranked.data.scanned.toLocaleString()} client records; {ranked.data.eligible.toLocaleString()} eligible · revision {ranked.data.dataset?.contentId.slice(0, 14)}</Typography>

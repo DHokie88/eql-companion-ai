@@ -4,6 +4,7 @@ import type {
   SpellTimelineResult, SpellCalculation, SpellMetric
 } from '../../shared/spellLibrary'
 import { WorkerSpellEvaluation, spellEvaluationScope, type SpellCalculator } from './workerEvaluation'
+import { searchCatalog } from './searchCatalog'
 import { changeKind, spellDifferences } from './differences'
 import { SpellLibraryStorage } from './storage'
 import { integerArg, objectArgs, stringArg } from './workerProtocol'
@@ -21,36 +22,11 @@ function hpCalculations(record: ClientSpellRecord, level: number, calculate: Spe
   if (!record.effects.some((e) => [0, 79, 100, 101, 334].includes(e.spa))) return []
   return [calculate(record, level, record.beneficial ? 'healing' : 'damage')]
 }
-function evaluatedSummary(record: ClientSpellRecord, query: Record<string, unknown>, calculate: SpellCalculator): SpellSummary {
-  const summary = spellSummary(record)
-  if (query.evaluation !== undefined) summary.calculations = hpCalculations(record, levelArg(query.level), calculate)
-  return summary
-}
 function amount(calculation: SpellCalculation, ranking: 'amount' | 'efficiency'): number {
   return (ranking === 'efficiency' ? calculation.perMana : calculation.total) ?? -Infinity
 }
 function ranked(values: SpellCalculation[], ranking: 'amount' | 'efficiency', limit: number): SpellCalculation[] {
   return values.sort((a, b) => amount(b, ranking) - amount(a, ranking) || a.id - b.id).slice(0, limit)
-}
-function searchOptions(query: Record<string, unknown>) {
-  if (query.allSpells !== undefined && typeof query.allSpells !== 'boolean') throw new Error('Invalid allSpells')
-  return {
-    classes: classesArg(query.classes),
-    level: query.level === undefined ? undefined : levelArg(query.level),
-    text: optionalText(query.text, 'text')?.toLowerCase(),
-    category: optionalText(query.category, 'category', 256),
-    effect: query.effect === undefined ? undefined : integerArg(query.effect, 'effect', 0, 100000),
-    allSpells: query.allSpells === true
-  }
-}
-function matchesSearch(record: ClientSpellRecord, options: ReturnType<typeof searchOptions>): boolean {
-  if (options.text && !matchesText(record, options.text)) return false
-  if (options.category && record.category !== options.category) return false
-  if (options.effect !== undefined && !record.effects.some((slot) => slot.spa === options.effect)) return false
-  return available(record, options.classes, options.allSpells ? undefined : options.level)
-}
-function matchesText(record: ClientSpellRecord, text: string): boolean {
-  return /^\d+$/.test(text) ? record.id === Number(text) : `${record.name} ${record.description}`.toLowerCase().includes(text)
 }
 interface RankedGroups {
   direct: SpellCalculation[]; periodic: SpellCalculation[]; zeroMana: SpellCalculation[]; excluded: SpellCalculation[]
@@ -101,23 +77,11 @@ export class SpellLibraryQueries {
     return snapshot ? this.storage.dataset(installId, snapshot) : this.storage.active(installId)
   }
   private search(installId: string, input: unknown, context: unknown): SpellSearchResult {
-    const query = queryObject(input, ['snapshotId', 'text', 'classes', 'level', 'category', 'effect', 'allSpells', 'page', 'pageSize', 'evaluation'])
-    const { page, pageSize } = pageArgs(query)
-    const options = searchOptions(query)
+    const query = queryObject(input, ['snapshotId', 'text', 'classes', 'level', 'category', 'subcategory', 'effect', 'allSpells', 'allLevels',
+      'minLevel', 'maxLevel', 'type', 'polarity', 'mana', 'sortBy', 'direction', 'selectedIds', 'page', 'pageSize', 'evaluation'])
     const dataset = this.dataset(installId, query)
     const calculate = this.evaluation.calculator(dataset, query, context)
-    const records: SpellSummary[] = []
-    const categories = new Set<string>()
-    let total = 0
-    if (dataset) for (const record of this.storage.records(dataset.snapshotId)) {
-      if (record.category) categories.add(record.category)
-      if (!matchesSearch(record, options)) continue
-      if (total >= (page - 1) * pageSize && records.length < pageSize) {
-        records.push(evaluatedSummary(record, query, calculate))
-      }
-      total++
-    }
-    return { dataset, total, page, pageSize, records, categories: [...categories].sort() }
+    return searchCatalog(this.storage, dataset, query, calculate)
   }
   private detail(installId: string, input: unknown, context: unknown) {
     const query = queryObject(input, ['snapshotId', 'id', 'level', 'evaluation'])

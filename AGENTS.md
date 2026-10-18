@@ -125,6 +125,9 @@ docs/agents-archive.md.
   - `symbolicate.test` emitted-map round trip · `out/preload/index.js.map is missing` during
     a concurrent `npm run build` · 1 sighting (2026-10-18, Oracle Spells verification) · resolved
     by sequencing build before unit verification; the ordering is now documented in the fork gate.
+  - `pointerWatch.test` registry cadence · expected two cursor reads after a 460 ms sleep,
+    observed one under concurrent build/E2E load · 1 sighting (2026-10-18, Spells controls) · resolved
+    with a controlled interval clock and exact read-count/cancellation assertions; runtime unchanged.
   - `sky-filters.e2e` · remount race · **RESOLVED 9816cd34 (JOS-279)**
     (`tests/e2e/viewRemount.mts` holds the precondition); a SECOND distinct
     cause with the guard holding · 1 sighting 2026-08-13 · watch. Both rows
