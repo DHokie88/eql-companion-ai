@@ -538,24 +538,26 @@ fn category_id(f: &[&str], i: usize) -> Option<u32> {
 /// by [`parse_spells_us`] before it decides whether this row wins its key, and reading them twice
 /// would be two chances to disagree about what a valid level is.
 fn row_info(f: &[&str], name: &str, class_levels: ClassLevels) -> SpellInfo {
-    let slots = parse_slots(field(f, F_SLOTS));
+    // The 174-column format inserts one field at 74. Earlier columns are unchanged.
+    let shifted = |index: usize| index + usize::from(f.len() == 174 && index >= 74);
+    let slots = parse_slots(field(f, shifted(F_SLOTS)));
     let bard_only = bard_only(&class_levels);
     let recast_ms = js_number_or_zero(field(f, F_RECAST_MS));
-    let ae = js_number_or_zero(field(f, F_AE_MAX_TARGETS));
+    let ae = js_number_or_zero(field(f, shifted(F_AE_MAX_TARGETS)));
     let mana = js_number_or_zero(field(f, F_MANA));
     // `Number(f[11]) || 0`, and the whole `hpDuration` branch turns on it being non-zero.
     let formula = js_number_or_zero(field(f, F_DURATION_FORMULA));
     let hp = hp_slots_of(&slots, formula != 0.0);
     SpellInfo {
         name: name.to_owned(),
-        category: category_id(f, F_CATEGORY),
-        subcategory: category_id(f, F_SUBCATEGORY),
+        category: category_id(f, shifted(F_CATEGORY)),
+        subcategory: category_id(f, shifted(F_SUBCATEGORY)),
         class_levels,
         // Not `|| 0`: the resist type goes into `axisFromResistType` as `Number(...)` alone, and an
         // unparseable one is NaN, which matches no arm and is therefore `None` — the same answer a
         // chromatic spell gets.
         axis: axis_from_resist_type(js_number(field(f, F_RESIST_TYPE).unwrap_or(""))),
-        resist_adj: js_number_or_zero(field(f, F_RESIST_ADJ)),
+        resist_adj: js_number_or_zero(field(f, shifted(F_RESIST_ADJ))),
         cast_ms: js_number_or_zero(field(f, F_CAST_MS)),
         recast_ms: (recast_ms > 0.0).then_some(recast_ms),
         ae_max_targets: (ae > 0.0).then_some(ae),
@@ -657,6 +659,70 @@ mod tests {
         let table = parse_spells_us(&row(fields));
         assert_eq!(table.len(), 1, "the row parsed to exactly one entry");
         table.into_values().next().expect("the one entry")
+    }
+
+    #[test]
+    fn shared_client_layout_fixtures_preserve_shifted_fields() {
+        let fixtures: serde_json::Value =
+            serde_json::from_str(include_str!("../../../../tests/fixtures/spell-parity.json"))
+                .unwrap();
+        for fixture in fixtures.as_array().unwrap() {
+            let text = fixture["row"].as_str().unwrap();
+            assert_eq!(
+                text.split('^').count(),
+                fixture["layout"].as_u64().unwrap() as usize
+            );
+            let table = parse_spells_us(text);
+            let info = &table[fixture["key"].as_str().unwrap()];
+            let expected = &fixture["projection"];
+            assert_eq!(
+                info.axis.unwrap().word(),
+                expected["axis"].as_str().unwrap()
+            );
+            assert_eq!(info.resist_adj, expected["resistAdj"].as_f64().unwrap());
+            assert_eq!(info.cast_ms, expected["castMs"].as_f64().unwrap());
+            assert_eq!(
+                info.recast_ms.unwrap(),
+                expected["recastMs"].as_f64().unwrap()
+            );
+            assert_eq!(
+                info.ae_max_targets.unwrap(),
+                expected["aeMaxTargets"].as_f64().unwrap()
+            );
+            assert_eq!(info.mana.unwrap(), expected["mana"].as_f64().unwrap());
+            assert_eq!(info.target_type, expected["targetType"].as_f64().unwrap());
+            assert_eq!(
+                info.category.unwrap(),
+                fixture["category"].as_u64().unwrap() as u32
+            );
+            assert_eq!(
+                info.subcategory.unwrap(),
+                fixture["subcategory"].as_u64().unwrap() as u32
+            );
+            let damage = info.damage_slot.unwrap();
+            assert_eq!(damage.base, expected["hpSlot"]["base"].as_f64().unwrap());
+            assert_eq!(damage.calc, expected["hpSlot"]["calc"].as_f64().unwrap());
+            assert_eq!(damage.max, expected["hpSlot"]["max"].as_f64().unwrap());
+            assert_eq!(info.hp.len(), 1);
+            assert!(info.hp[0].per_tick);
+            assert_eq!(
+                info.hp_duration.unwrap(),
+                HpDuration {
+                    formula: 7.0,
+                    value: 5.0
+                }
+            );
+            assert_eq!(
+                info.debuff_slots[0],
+                DebuffSlot {
+                    axis: Axis::Magic,
+                    base: -10.0,
+                    calc: 101.0,
+                    max: 23.0
+                }
+            );
+            assert_eq!(info.class_levels[11], 20);
+        }
     }
 
     #[test]

@@ -19,9 +19,9 @@
 //! character switch to serve a question nobody may ask. [`std::sync::OnceLock`] is the whole
 //! mechanism, and a failure is memoised too, so a missing file is answered instantly forever.
 //!
-//! Nothing is cached across a process, so there is nothing to invalidate: a client patch that
-//! rewrites `spells_us.txt` is followed by a game launch and a fresh engine. What it will not do is
-//! notice a patch mid-session, which costs a restart the player has already performed.
+//! Captured revisions are loaded eagerly on the requesting connection thread, outside the world
+//! mutex, then published by swapping one immutable Arc. An old reader keeps its own handle; a
+//! new reader receives the new reference. No fold, epoch, channel or combat state is restarted.
 
 use fold::dbstr::{parse_spell_categories, CategoryNames};
 use fold::spells_us::{parse_spells_us, SpellInfo, SpellTable};
@@ -36,6 +36,7 @@ use std::sync::OnceLock;
 pub struct ClientSpells {
     /// `<eqRoot>/spells_us.txt`, derived from the attach's log path.
     path: PathBuf,
+    snapshot_id: Option<String>,
     /// `<eqRoot>/dbstr_us.txt`, beside it. See [`ClientSpells::category_names`].
     dbstr_path: PathBuf,
     /// The parsed table, or `None` when the file could not be read. Filled once.
@@ -68,10 +69,51 @@ impl ClientSpells {
         let root = log.parent()?.parent()?;
         Some(Self {
             path: root.join("spells_us.txt"),
+            snapshot_id: None,
             dbstr_path: root.join("dbstr_us.txt"),
             table: OnceLock::new(),
             categories: OnceLock::new(),
         })
+    }
+
+    /// Load an immutable captured reference completely before it can become active.
+    pub fn captured(
+        path: PathBuf,
+        dbstr_path: PathBuf,
+        snapshot_id: String,
+    ) -> Result<Self, String> {
+        let text = std::fs::read_to_string(&path)
+            .map_err(|e| format!("captured spells_us.txt is unreadable: {e}"))?;
+        let mut records = 0;
+        for line in text.lines().filter(|line| !line.trim().is_empty()) {
+            let fields: Vec<_> = line.split('^').collect();
+            if !matches!(fields.len(), 173 | 174)
+                || fields[0].parse::<u32>().is_err()
+                || fields[1].trim().is_empty()
+            {
+                return Err(
+                    "captured spells_us.txt contains an unsupported or malformed record".into(),
+                );
+            }
+            records += 1;
+        }
+        if records == 0 {
+            return Err("captured spells_us.txt contains no records".into());
+        }
+        let categories = std::fs::read_to_string(&dbstr_path)
+            .map_err(|e| format!("captured dbstr_us.txt is unreadable: {e}"))?;
+        Ok(Self {
+            path,
+            snapshot_id: Some(snapshot_id),
+            dbstr_path,
+            table: OnceLock::from(Some(parse_spells_us(&text))),
+            categories: OnceLock::from(parse_spell_categories(&categories)),
+        })
+    }
+
+    #[must_use]
+    pub fn snapshot_id(&self) -> Option<&str> {
+        self.snapshot_id.as_deref()
     }
 
     /// The path this would read. Reported on the health/diagnostic surfaces so a card that says
@@ -177,6 +219,34 @@ mod tests {
         f[49] = "39".to_string();
         f[172] = slots.to_string();
         f.join("^")
+    }
+
+    #[test]
+    fn captured_references_are_eager_immutable_and_utf8() {
+        let dir = scratch("captured");
+        let spells_path = dir.join("spells_us.txt");
+        let dbstr_path = dir.join("dbstr_us.txt");
+        let name = "Oracle Synthetic \u{00c9}clair";
+        std::fs::write(&spells_path, row("900002", name, "2", "1|0|-20|0|100|20")).unwrap();
+        std::fs::write(
+            &dbstr_path,
+            "114^5^Synthetic category
+",
+        )
+        .unwrap();
+        let spells =
+            ClientSpells::captured(spells_path.clone(), dbstr_path.clone(), "revision-a".into())
+                .unwrap();
+        std::fs::write(&spells_path, "malformed replacement").unwrap();
+        std::fs::remove_file(&dbstr_path).unwrap();
+        assert_eq!(spells.snapshot_id(), Some("revision-a"));
+        assert_eq!(spells.spell(name).unwrap().name, name);
+        assert_eq!(
+            spells.category_names().get(&114).map(String::as_str),
+            Some("Synthetic category")
+        );
+        assert!(ClientSpells::captured(spells_path, dbstr_path, "revision-b".into()).is_err());
+        std::fs::remove_dir_all(dir).unwrap();
     }
 
     #[test]

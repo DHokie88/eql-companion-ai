@@ -6,20 +6,20 @@
 //! testable with no socket in the room.
 
 use protocol::generated::{
-    AlertsDefineRequestOp, BuffTrustDefineRequestOp, ClientMessage, CombatSearchFightsRequestOp,
-    CombatSearchFightsResult, CombatSnapshotOpts, CombatSnapshotRequestOp, CombatSnapshotResult,
-    CombatState, ComboDefineRequestOp, DefineAck, EchoRequestOp, EchoResult, EngineMessage,
-    ErrorCode, ErrorReply, ErrorReplyKind, FightSearchHit, FightSummary, HealthResultStatus,
-    HelloOp, KnowledgeDefineRequestOp, KnowledgeDomain, KnowledgeItemRequestOp,
-    KnowledgeMobRequestOp, KnowledgeRecord, KnowledgeResult, KnowledgeSearchRequestOp,
-    KnowledgeSearchResult, KnowledgeSpellRequestOp, ModuleSnapshotRequestOp, ModuleSnapshotResult,
-    PerfBudgetsRequestOp, PerfSnapshotRequestOp, PerfTimelineRequestOp, ProtocolError, Reply,
-    ReplyKind, ReplyResult, RequestId, ResetMessage, ResetMessageKind, ResistLevelSource,
-    ResistLevelsRequestOp, ResistLevelsResult, ResistMobLevel, RespawnConfirmAck,
-    RespawnConfirmSightingRequestOp, RespawnDefineRequestOp, RosterDefineRequestOp,
-    SessionAttachRequestOp, SessionHealthRequestOp, SessionMarkAck, SessionMarkAckStatus,
-    SessionMarkAddRequestOp, SessionProgressRequestOp, SubscribeAck, ViewSubscribeRequestOp,
-    ViewUnsubscribeRequestOp,
+    AlertsDefineRequestOp, BuffTrustDefineRequestOp, ClientMessage, ClientSpellsActivateRequestOp,
+    ClientSpellsActivateResult, CombatSearchFightsRequestOp, CombatSearchFightsResult,
+    CombatSnapshotOpts, CombatSnapshotRequestOp, CombatSnapshotResult, CombatState,
+    ComboDefineRequestOp, DefineAck, EchoRequestOp, EchoResult, EngineMessage, ErrorCode,
+    ErrorReply, ErrorReplyKind, FightSearchHit, FightSummary, HealthResultStatus, HelloOp,
+    KnowledgeDefineRequestOp, KnowledgeDomain, KnowledgeItemRequestOp, KnowledgeMobRequestOp,
+    KnowledgeRecord, KnowledgeResult, KnowledgeSearchRequestOp, KnowledgeSearchResult,
+    KnowledgeSpellRequestOp, ModuleSnapshotRequestOp, ModuleSnapshotResult, PerfBudgetsRequestOp,
+    PerfSnapshotRequestOp, PerfTimelineRequestOp, ProtocolError, Reply, ReplyKind, ReplyResult,
+    RequestId, ResetMessage, ResetMessageKind, ResistLevelSource, ResistLevelsRequestOp,
+    ResistLevelsResult, ResistMobLevel, RespawnConfirmAck, RespawnConfirmSightingRequestOp,
+    RespawnDefineRequestOp, RosterDefineRequestOp, SessionAttachRequestOp, SessionHealthRequestOp,
+    SessionMarkAck, SessionMarkAckStatus, SessionMarkAddRequestOp, SessionProgressRequestOp,
+    SubscribeAck, ViewSubscribeRequestOp, ViewUnsubscribeRequestOp,
 };
 use protocol::generated::{
     ClassAbbr, ClientSpell, ClientSpellDebuff, ClientSpellDebuffAxis, ClientSpellSlot, ResistAxis,
@@ -156,6 +156,7 @@ fn spells_search_result(
             .unwrap_or_default(),
         spell_table: table_state(spells),
         path: spells.path().to_string_lossy().into_owned(),
+        snapshot_id: spells.snapshot_id().map(str::to_owned),
     }
 }
 
@@ -498,6 +499,26 @@ impl Session {
                 }
             }
 
+            ClientMessage::ClientSpellsActivateRequest(request) => {
+                let params = request.params;
+                match world.activate_client_spells(
+                    &params.root,
+                    &params.snapshot_id,
+                    &params.spells_path,
+                    &params.dbstr_path,
+                ) {
+                    Ok(applied) => reply(
+                        request.id,
+                        ReplyResult::ClientSpellsActivateResult(ClientSpellsActivateResult {
+                            client_spells_activated: applied,
+                            root: params.root,
+                            snapshot_id: params.snapshot_id,
+                        }),
+                    ),
+                    Err(message) => error(request.id, ErrorCode::Unavailable, message),
+                }
+            }
+
             // One spell out of the client's own table, beside the install the attach named. It is
             // the only source that states how a spell is RESISTED — the committed wiki scrape knows
             // a spell's messages and neither its resist type nor its resist adjust.
@@ -524,6 +545,7 @@ impl Session {
                             spell_name: name,
                             table: table_state(&spells),
                             path: spells.path().to_string_lossy().into_owned(),
+                            snapshot_id: spells.snapshot_id().map(str::to_owned),
                         }),
                     ),
                 }
@@ -1083,6 +1105,7 @@ fn is_known_op(op: &str) -> bool {
         ResistLevelsRequestOp::ResistLevels.to_string(),
         ResistSpellRequestOp::ResistSpell.to_string(),
         SpellsSearchRequestOp::SpellsSearch.to_string(),
+        ClientSpellsActivateRequestOp::ClientSpellsActivate.to_string(),
         LogsSetDirRequestOp::LogsSetDir.to_string(),
         LogsListRequestOp::LogsList.to_string(),
     ]
