@@ -1,11 +1,14 @@
 import { type JSX, useCallback, useEffect, useState } from 'react'
 import { Alert, Box, Button, CircularProgress, FormControl, InputLabel, MenuItem, Pagination, Select, Stack, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography } from '@mui/material'
 import type { SpellClass } from '@shared/spellLibrary'
+import type { SpellEvaluationOptions } from '@shared/spellModifiers'
 import { useLibraryQuery } from './useLibraryQuery'
 import { useSearchText } from './useSearchText'
+import { EstimateAmount } from './SpellEstimate'
 
-export function SpellBrowse({ classes, level, allSpells, enabled, selected, onToggle, onOpen }: {
+export function SpellBrowse({ classes, level, evaluation, allSpells, enabled, selected, onToggle, onOpen }: {
   classes: SpellClass[]; level: number; allSpells: boolean; enabled: boolean; selected: number[]
+  evaluation: SpellEvaluationOptions
   onToggle: (id: number) => void; onOpen: (id: number) => void
 }): JSX.Element {
   const [text, setText] = useState('')
@@ -17,8 +20,8 @@ export function SpellBrowse({ classes, level, allSpells, enabled, selected, onTo
   useEffect(() => { setPage(1) }, [classKey, level, allSpells])
   const load = useCallback(() => window.eq.spellLibrary.search({
     text: queryText, classes: classKey ? classKey.split(',') as SpellClass[] : [], level, allSpells,
-    category: category || undefined, effect: effect === '' ? undefined : Number(effect), page, pageSize: 40
-  }), [queryText, classKey, level, allSpells, category, effect, page])
+    category: category || undefined, effect: effect === '' ? undefined : Number(effect), page, pageSize: 40, evaluation
+  }), [queryText, classKey, level, allSpells, category, effect, page, evaluation])
   const { data, loading, error } = useLibraryQuery(load)
   const reset = (change: () => void): void => { change(); setPage(1) }
   if (!enabled) return <Box />
@@ -32,8 +35,8 @@ export function SpellBrowse({ classes, level, allSpells, enabled, selected, onTo
     {loading && <CircularProgress size={22} aria-label="Searching spells" />}
     {data && <>
       <Typography variant="caption" color="text.secondary">{data.total.toLocaleString()} matching records · IDs and ranks are preserved · revision {data.dataset?.contentId.slice(0, 14) ?? 'no baseline'}</Typography>
-      <Box sx={{ overflowX: 'auto' }}><Table size="small" aria-label="Client spell records"><TableHead><TableRow><TableCell>ID</TableCell><TableCell>Spell</TableCell><TableCell>Client classes / levels</TableCell><TableCell>Category</TableCell><TableCell align="right">Mana</TableCell><TableCell>Compare</TableCell></TableRow></TableHead>
-        <TableBody>{data.records.map((record) => <TableRow key={record.id} hover data-testid="spells-record"><TableCell>{record.id}</TableCell><TableCell><Button size="small" onClick={() => onOpen(record.id)} data-testid={`spells-open-${record.id}`}>{record.name}</Button></TableCell><TableCell>{record.classes.length ? record.classes.map((c) => `${c.code} ${c.level}`).join(' · ') : 'Internal / NPC'}</TableCell><TableCell>{record.category || 'Uncategorized'}</TableCell><TableCell align="right">{record.mana}</TableCell><TableCell><Button size="small" variant={selected.includes(record.id) ? 'contained' : 'outlined'} disabled={!selected.includes(record.id) && selected.length >= 4} onClick={() => onToggle(record.id)} data-testid={`spells-compare-${record.id}`}>{selected.includes(record.id) ? 'Selected' : 'Add'}</Button></TableCell></TableRow>)}</TableBody>
+      <Box sx={{ overflowX: 'auto' }}><Table size="small" aria-label="Client spell records"><TableHead><TableRow><TableCell>ID</TableCell><TableCell>Spell</TableCell><TableCell>Client classes / levels</TableCell><TableCell>Category</TableCell><TableCell>HP amount / target</TableCell><TableCell align="right">Client mana</TableCell><TableCell>Compare</TableCell></TableRow></TableHead>
+        <TableBody>{data.records.map((record) => <TableRow key={record.id} hover data-testid="spells-record"><TableCell>{record.id}</TableCell><TableCell><Button size="small" onClick={() => onOpen(record.id)} data-testid={`spells-open-${record.id}`}>{record.name}</Button></TableCell><TableCell>{record.classes.length ? record.classes.map((c) => `${c.code} ${c.level}`).join(' · ') : 'Internal / NPC'}</TableCell><TableCell>{record.category || 'Uncategorized'}</TableCell><TableCell>{record.calculations?.map((calculation) => <Box key={calculation.metric}><Typography variant="caption">{calculation.metric}</Typography><EstimateAmount calculation={calculation} /></Box>)}</TableCell><TableCell align="right">{record.mana}</TableCell><TableCell><Button size="small" variant={selected.includes(record.id) ? 'contained' : 'outlined'} disabled={!selected.includes(record.id) && selected.length >= 4} onClick={() => onToggle(record.id)} data-testid={`spells-compare-${record.id}`}>{selected.includes(record.id) ? 'Selected' : 'Add'}</Button></TableCell></TableRow>)}</TableBody>
       </Table></Box>
       {data.total === 0 && <Typography>No matching spells in this captured dataset.</Typography>}
       {data.total > 40 && <Pagination count={Math.ceil(data.total / 40)} page={page} onChange={(_e, value) => setPage(value)} data-testid="spells-pagination" />}

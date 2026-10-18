@@ -2,11 +2,15 @@ import { type JSX, useCallback } from 'react'
 import { Accordion, AccordionDetails, AccordionSummary, Alert, Box, Button, Chip, CircularProgress, Divider, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
 import { useBackTarget } from '../../appBack'
 import { useLibraryQuery } from './useLibraryQuery'
+import type { SpellEvaluationOptions } from '@shared/spellModifiers'
+import { SpellHpValues } from './SpellEstimate'
+import type { SpellCalculation } from '@shared/spellLibrary'
 
-export function LibrarySpellDetail({ id, snapshotId, onBack, onWiki, onHistory }: {
+export function LibrarySpellDetail({ id, snapshotId, level, evaluation, onBack, onWiki, onHistory }: {
   id: number; snapshotId?: string; onBack: () => void; onWiki?: (name: string) => void; onHistory: (id: number) => void
+  level?: number; evaluation?: SpellEvaluationOptions
 }): JSX.Element {
-  const load = useCallback(() => window.eq.spellLibrary.detail({ id, snapshotId }), [id, snapshotId])
+  const load = useCallback(() => window.eq.spellLibrary.detail({ id, snapshotId, level, evaluation }), [id, snapshotId, level, evaluation])
   const { data, loading, error } = useLibraryQuery(load)
   useBackTarget(() => { onBack(); return true })
   const record = data?.record
@@ -21,6 +25,7 @@ export function LibrarySpellDetail({ id, snapshotId, onBack, onWiki, onHistory }
       <Typography>Mana {record.mana} · Cast {record.castMs / 1000}s · Recovery {record.recoveryMs / 1000}s · Recast {record.recastMs / 1000}s · Range {record.range} · AE range {record.aeRange} · Target {record.target}</Typography>
       <Typography variant="caption" color="text.secondary">Unmodified client record · first observed {data.dataset && new Date(data.dataset.firstObserved).toLocaleString()} · revision {data.dataset?.contentId.slice(0, 14)}. Eligibility does not confirm ownership or acquisition.</Typography>
       <Stack direction="row" spacing={1}><Button size="small" onClick={() => onHistory(id)}>Spell timeline</Button><SupplementaryLink name={record.name} open={onWiki} /></Stack>
+      <DetailCalculations calculations={data.calculations} />
       <Divider /><Typography variant="subtitle1">Decoded effects</Typography>
       <Box sx={{ overflowX: 'auto' }}><Table size="small"><TableHead><TableRow>{['Slot', 'SPA', 'Base', 'Limit', 'Formula', 'Maximum'].map((label) => <TableCell key={label}>{label}</TableCell>)}</TableRow></TableHead><TableBody>{record.effects.map((e) => <TableRow key={e.slot}>{[e.slot, e.spa, e.base, e.limit, e.calc, e.max].map((v, i) => <TableCell key={i}>{v}</TableCell>)}</TableRow>)}</TableBody></Table></Box>
       {Object.entries(record.messages).map(([kind, message]) => <Typography key={kind} variant="body2"><strong>{kind}:</strong> {message}</Typography>)}
@@ -28,6 +33,10 @@ export function LibrarySpellDetail({ id, snapshotId, onBack, onWiki, onHistory }
       <Accordion><AccordionSummary>All {record.rawFields.length} raw client columns</AccordionSummary><AccordionDetails><Typography variant="caption">Column indexes are zero based. Unknown fields are preserved for history.</Typography><Table size="small"><TableBody>{record.rawFields.map((value, index) => <TableRow key={index}><TableCell>{index}</TableCell><TableCell sx={{ overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }}>{value}</TableCell></TableRow>)}</TableBody></Table></AccordionDetails></Accordion>
     </>}
   </Stack>
+}
+
+function DetailCalculations({ calculations }: { calculations?: SpellCalculation[] }): JSX.Element | null {
+  return calculations?.length ? <SpellHpValues calculations={calculations} /> : null
 }
 
 function SupplementaryLink({ name, open }: { name: string; open?: (name: string) => void }): JSX.Element | null {
