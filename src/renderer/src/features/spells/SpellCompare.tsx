@@ -1,25 +1,27 @@
 import { type JSX, useCallback, useState } from 'react'
 import { Alert, Box, Button, CircularProgress, FormControl, InputLabel, MenuItem, Select, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
 import type { SpellCalculation, SpellClass, SpellMetric } from '@shared/spellLibrary'
+import type { SpellEvaluationOptions } from '@shared/spellModifiers'
 import { useLibraryQuery } from './useLibraryQuery'
+import { amount, EstimateAmount, EstimateExplanation } from './SpellEstimate'
 
 function CalculationRows({ rows, onOpen, onRemove }: { rows: SpellCalculation[]; onOpen: (id: number) => void; onRemove?: (id: number) => void }): JSX.Element {
-  return <Box sx={{ overflowX: 'auto' }}><Table size="small"><TableHead><TableRow><TableCell>Spell</TableCell><TableCell align="right">Instant</TableCell><TableCell align="right">Per tick × ticks</TableCell><TableCell align="right">Full amount / target</TableCell><TableCell align="right">Mana</TableCell><TableCell align="right">Amount / mana</TableCell><TableCell>Scope / exclusions</TableCell>{onRemove && <TableCell />}</TableRow></TableHead><TableBody>{rows.map((r) => <TableRow key={r.id} data-testid="spells-calculation">
-    <TableCell><Button size="small" onClick={() => onOpen(r.id)}>{r.name}</Button><Typography variant="caption" display="block">ID {r.id} · target {r.target}</Typography></TableCell><TableCell align="right">{r.instant ?? 'Excluded'}</TableCell><TableCell align="right">{r.perTick === null ? '-' : `${r.perTick} × ${r.ticks ?? '?'}`}</TableCell><TableCell align="right">{r.total?.toLocaleString() ?? 'Excluded'}</TableCell><TableCell align="right">{r.mana}</TableCell><TableCell align="right">{r.perMana?.toLocaleString(undefined, { maximumFractionDigits: 3 }) ?? (r.mana === 0 ? 'Zero mana' : '-')}</TableCell><TableCell sx={{ minWidth: 180 }}>{[...r.restrictions, ...r.reasons].join('; ') || 'Supported client HP calculation'}</TableCell>{onRemove && <TableCell><Button size="small" onClick={() => onRemove(r.id)}>Remove</Button></TableCell>}
+  return <Box sx={{ overflowX: 'auto' }}><Table size="small"><TableHead><TableRow><TableCell>Spell</TableCell><TableCell align="right">Instant</TableCell><TableCell align="right">Per tick × ticks</TableCell><TableCell align="right">Full amount / target</TableCell><TableCell align="right">Client mana</TableCell><TableCell align="right">Amount / client mana</TableCell><TableCell>Scope / exclusions</TableCell>{onRemove && <TableCell />}</TableRow></TableHead><TableBody>{rows.map((r) => <TableRow key={r.id} data-testid="spells-calculation">
+    <TableCell><Button size="small" onClick={() => onOpen(r.id)}>{r.name}</Button><Typography variant="caption" display="block">ID {r.id} · target {r.target}</Typography></TableCell><TableCell align="right">{amount(r.instant)}</TableCell><TableCell align="right">{r.perTick === null ? '-' : `${amount(r.perTick)} × ${r.ticks ?? '?'}`}</TableCell><TableCell align="right"><EstimateAmount calculation={r} /></TableCell><TableCell align="right">{r.mana}</TableCell><TableCell align="right">{r.mana === 0 ? 'Zero mana' : amount(r.perMana)}</TableCell><TableCell sx={{ minWidth: 180 }}><EstimateExplanation calculation={r} /></TableCell>{onRemove && <TableCell><Button size="small" onClick={() => onRemove(r.id)}>Remove</Button></TableCell>}
   </TableRow>)}</TableBody></Table></Box>
 }
 
-export function SpellCompare({ ids, classes, level, onRemove, onOpen }: { ids: number[]; classes: SpellClass[]; level: number; onRemove: (id: number) => void; onOpen: (id: number) => void }): JSX.Element {
+export function SpellCompare({ ids, classes, level, evaluation, onRemove, onOpen }: { ids: number[]; classes: SpellClass[]; level: number; evaluation: SpellEvaluationOptions; onRemove: (id: number) => void; onOpen: (id: number) => void }): JSX.Element {
   const [metric, setMetric] = useState<SpellMetric>('damage')
   const [ranking, setRanking] = useState<'amount' | 'efficiency'>('amount')
   const idsKey = ids.join(',')
   const classKey = classes.join(',')
-  const compare = useCallback(() => window.eq.spellLibrary.compare({ ids: idsKey ? idsKey.split(',').map(Number) : [], level, metric }), [idsKey, level, metric])
-  const rank = useCallback(() => window.eq.spellLibrary.rank({ classes: classKey ? classKey.split(',') as SpellClass[] : [], level, metric, ranking, limit: 20 }), [classKey, level, metric, ranking])
+  const compare = useCallback(() => window.eq.spellLibrary.compare({ ids: idsKey ? idsKey.split(',').map(Number) : [], level, metric, evaluation }), [idsKey, level, metric, evaluation])
+  const rank = useCallback(() => window.eq.spellLibrary.rank({ classes: classKey ? classKey.split(',') as SpellClass[] : [], level, metric, ranking, limit: 20, evaluation }), [classKey, level, metric, ranking, evaluation])
   const compared = useLibraryQuery(compare)
   const ranked = useLibraryQuery(rank)
   return <Stack spacing={2} data-testid="spells-compare">
-    <Alert severity="info">Unmodified client values, one target, full duration. Focus, AA, motes, instruments, critical hits, resists, chained recourse, and unsupported repeated waves are excluded. These values are not combat ceilings.</Alert>
+    <CalculationScope evaluation={evaluation} />
     <Stack direction="row" gap={1} flexWrap="wrap"><FormControl size="small" sx={{ minWidth: 150 }}><InputLabel id="spell-metric-label">Metric</InputLabel><Select labelId="spell-metric-label" label="Metric" value={metric} data-testid="spells-metric" onChange={(e) => setMetric(e.target.value as SpellMetric)}><MenuItem value="damage">Damage</MenuItem><MenuItem value="healing">Healing</MenuItem></Select></FormControl><FormControl size="small" sx={{ minWidth: 190 }}><InputLabel id="spell-ranking-label">Rank by</InputLabel><Select labelId="spell-ranking-label" label="Rank by" value={ranking} data-testid="spells-ranking" onChange={(e) => setRanking(e.target.value as typeof ranking)}><MenuItem value="amount">Full amount per target</MenuItem><MenuItem value="efficiency">Amount per mana</MenuItem></Select></FormControl></Stack>
     <Typography variant="h6">Selected spells · level {level}</Typography>
     {ids.length === 0 && <Typography color="text.secondary">Add up to four spells from Browse to compare their numeric records side by side.</Typography>}
@@ -36,4 +38,8 @@ export function SpellCompare({ ids, classes, level, onRemove, onOpen }: { ids: n
       {ranked.data.excludedCount > 0 && <><Typography variant="subtitle1">Excluded calculations ({ranked.data.excludedCount})</Typography><CalculationRows rows={ranked.data.excluded} onOpen={onOpen} /><Typography variant="caption">Showing up to 20 excluded examples. Unsupported formulas are never treated as zero.</Typography></>}
     </>}
   </Stack>
+}
+
+function CalculationScope({ evaluation }: { evaluation: SpellEvaluationOptions }): JSX.Element {
+  return <Alert severity="info">{evaluation.mode === 'client' ? 'Unmodified client values. Motes and focus are excluded.' : 'Character estimates use modeled mote ranks and qualifying focus; partial results are labeled. Rankings reflect those modeled inputs.'} One target, full duration, client mana cost. AA, instruments, critical hits, resists, chained recourse, and unsupported repeated waves are excluded. These values are not combat ceilings.</Alert>
 }

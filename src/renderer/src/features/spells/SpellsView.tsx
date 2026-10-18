@@ -1,6 +1,7 @@
-import { type JSX, useState } from 'react'
-import { Alert, Box, Button, Chip, FormControl, InputLabel, MenuItem, Select, Stack, Tab, Tabs, TextField, Typography } from '@mui/material'
+import { type JSX, useMemo, useState } from 'react'
+import { Alert, Box, Button, CircularProgress, FormControl, InputLabel, MenuItem, Select, Stack, Tab, Tabs, TextField, Typography } from '@mui/material'
 import { SPELL_CLASSES, type SpellClass, type SpellLibraryStatus } from '@shared/spellLibrary'
+import type { SpellEvaluationOptions } from '@shared/spellModifiers'
 import type { ProgressionSnap } from '@shared/types'
 import type { AppRouting } from '../../appRouting'
 import { useModule } from '../../lib/useModule'
@@ -12,6 +13,8 @@ import { SpellBrowse } from './SpellBrowse'
 import { SpellCompare } from './SpellCompare'
 import { SpellHistory } from './SpellHistory'
 import { LibrarySpellDetail } from './LibrarySpellDetail'
+import { useSpellModifiers } from './useSpellModifiers'
+import { SpellModifierControls } from './SpellModifierControls'
 
 export default function SpellsView({ routing }: { routing: AppRouting }): JSX.Element {
   const status = useSpellLibraryStatus()
@@ -24,9 +27,16 @@ export default function SpellsView({ routing }: { routing: AppRouting }): JSX.El
   const [tab, setTab] = useState('browse')
   const [selected, setSelected] = useState<number[]>([])
   const [timelineId, setTimelineId] = useState<number | null>(null)
+  const modifiers = useSpellModifiers()
   const level = pickedLevel ?? stated.level ?? 50
   const following = mode === 'character' && combo.resolved.length > 0
   const classes = scopeClasses(mode, combo.resolved, pickedClasses)
+  const classKey = classes.join(',')
+  const contextRevision = modifiers.context?.revision
+  const valueMode = modifiers.context?.preferences.mode
+  const evaluation = useMemo<SpellEvaluationOptions | undefined>(() => contextRevision && valueMode ? {
+    mode: valueMode, contextRevision, classes: classKey ? classKey.split(',') as SpellClass[] : []
+  } : undefined, [contextRevision, valueMode, classKey])
   const toggle = (id: number): void => {
     setSelected((ids) => ids.includes(id) ? ids.filter((n) => n !== id) : ids.length < 4 ? [...ids, id] : ids)
   }
@@ -35,16 +45,27 @@ export default function SpellsView({ routing }: { routing: AppRouting }): JSX.El
     <Stack spacing={2} data-testid="spells-view">
       <LibraryHeader status={status} busy={busy} />
       <ScopeControls mode={mode} setMode={setMode} following={following} classes={classes} pickedClasses={pickedClasses} setClasses={setClasses} comboClasses={combo.resolved} level={level} pickedLevel={pickedLevel} setLevel={setLevel} statedLevel={stated.level} />
+      <SpellModifierControls state={modifiers} ids={[...new Set([...selected, ...(routing.librarySpellId === null ? [] : [routing.librarySpellId])])]} />
       <Tabs value={tab} onChange={(_e, value: string) => { setTab(value); routing.clearLibrarySpellFocus() }} aria-label="Spell library views">
         <Tab label="Browse" value="browse" data-testid="spells-tab-browse" /><Tab label={`Compare${selected.length ? ` (${selected.length}/4)` : ''}`} value="compare" data-testid="spells-tab-compare" /><Tab label="History" value="history" data-testid="spells-tab-history" />
       </Tabs>
-      {routing.librarySpellId !== null ? <LibrarySpellDetail id={routing.librarySpellId} onBack={() => { routing.clearLibrarySpellFocus(); if (routing.nav.origin) routing.nav.back() }} onWiki={routing.openSpell} onHistory={(id) => { setTimelineId(id); routing.clearLibrarySpellFocus(); setTab('history') }} /> : <>
-        {tab === 'browse' && <SpellBrowse classes={classes} level={level} allSpells={mode === 'all'} enabled={mode === 'all' || classes.length > 0} selected={selected} onToggle={toggle} onOpen={routing.openLibrarySpell} />}
-        {tab === 'compare' && <SpellCompare ids={selected} classes={classes} level={level} onRemove={toggle} onOpen={routing.openLibrarySpell} />}
-        {tab === 'history' && <SpellHistory focusId={timelineId} onOpen={routing.openLibrarySpell} />}
-      </>}
+      <LibraryContent routing={routing} tab={tab} timelineId={timelineId} loading={modifiers.loading} evaluation={evaluation} classes={classes} level={level} mode={mode} selected={selected} toggle={toggle} onHistory={(id) => { setTimelineId(id); routing.clearLibrarySpellFocus(); setTab('history') }} />
     </Stack>
   )
+}
+
+function LibraryContent({ routing, tab, timelineId, loading, evaluation, classes, level, mode, selected, toggle, onHistory }: {
+  routing: AppRouting; tab: string; timelineId: number | null; loading: boolean; evaluation?: SpellEvaluationOptions
+  classes: SpellClass[]; level: number; mode: 'character' | 'custom' | 'all'; selected: number[]
+  toggle: (id: number) => void; onHistory: (id: number) => void
+}): JSX.Element {
+  if (tab === 'history' && routing.librarySpellId === null) return <SpellHistory focusId={timelineId} onOpen={routing.openLibrarySpell} />
+  if (loading || !evaluation) return <CircularProgress size={22} aria-label="Loading calculation context" />
+  if (routing.librarySpellId !== null) return <LibrarySpellDetail id={routing.librarySpellId} level={level} evaluation={evaluation} onBack={() => { routing.clearLibrarySpellFocus(); if (routing.nav.origin) routing.nav.back() }} onWiki={routing.openSpell} onHistory={onHistory} />
+  return <>
+    {tab === 'browse' && <SpellBrowse classes={classes} level={level} evaluation={evaluation} allSpells={mode === 'all'} enabled={mode === 'all' || classes.length > 0} selected={selected} onToggle={toggle} onOpen={routing.openLibrarySpell} />}
+    {tab === 'compare' && <SpellCompare ids={selected} classes={classes} level={level} evaluation={evaluation} onRemove={toggle} onOpen={routing.openLibrarySpell} />}
+  </>
 }
 
 function scopeClasses(mode: 'character' | 'custom' | 'all', resolved: SpellClass[], manual: SpellClass[]): SpellClass[] {
@@ -78,7 +99,6 @@ function ScopeControls({ mode, setMode, following, classes, pickedClasses, setCl
         {!following && mode !== 'all' && <ClassSelection value={pickedClasses} onChange={setClasses} />}
         <TextField label="Caster level" type="number" size="small" value={level} slotProps={{ htmlInput: { min: 1, max: 125, 'data-testid': 'spells-level' } }} sx={{ width: 110 }} onChange={(e) => { const n = Number(e.target.value); if (Number.isInteger(n) && n >= 1 && n <= 125) setLevel(n) }} />
         {statedLevel !== null && pickedLevel !== null && <Button size="small" onClick={() => setLevel(null)}>Follow level {statedLevel}</Button>}
-        <Chip size="small" variant="outlined" label="Unmodified client values" />
       </Stack>
       {!following && mode !== 'all' && classes.length === 0 && <Typography color="text.secondary">Choose one or more classes, or select All spells. Character classes and level will be used when resolved.</Typography>}
       <Typography variant="caption" color="text.secondary">Class and level eligibility comes from the client. It does not confirm spell ownership, scroll availability, or server acquisition.</Typography>
