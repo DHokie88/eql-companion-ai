@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-10-08T04:04:00.022Z",
+  "generatedAt": "2026-10-18T16:21:55.375Z",
   "note": "Images shipped with the app so it never fetches art at runtime. Every file states the exact upstream URL it came from. Regenerate with `npm run fetch:images`.",
   "sources": [
     "https://eqlwiki.com/",
     "https://wiki.project1999.com/"
   ],
   "totals": {
-    "files": 805,
-    "bytes": 4486890
+    "files": 808,
+    "bytes": 4491476
   },
   "images": [
     {
@@ -1894,6 +1894,13 @@
       "sha256": "b2ded515f0f01b516631cd96d17b64899489c3113fa602fbee053739f5926e93"
     },
     {
+      "file": "item-2880.png",
+      "url": "https://eqlwiki.com/index.php?title=Special:Redirect/file/Item_2880.png",
+      "kind": "item",
+      "bytes": 971,
+      "sha256": "060b31089a2d458e59cf54ea2983920e1503b93c605d3da37bc0182a2ca9344b"
+    },
+    {
       "file": "item-3204.png",
       "url": "https://eqlwiki.com/index.php?title=Special:Redirect/file/Item_3204.png",
       "kind": "item",
@@ -3040,6 +3047,13 @@
       "kind": "item",
       "bytes": 2410,
       "sha256": "1c514835ec5041f341a0495c3f3f6a8e69fcbfc8958b89b0a047ed4f8cfe68fa"
+    },
+    {
+      "file": "item-6478.png",
+      "url": "https://eqlwiki.com/index.php?title=Special:Redirect/file/Item_6478.png",
+      "kind": "item",
+      "bytes": 1449,
+      "sha256": "06622008f6ded3d54ba3c94d5e4508dc8e590365a356a6aaed1eefd7416a83a7"
     },
     {
       "file": "item-648.png",
@@ -5224,6 +5238,13 @@
       "kind": "item",
       "bytes": 1825,
       "sha256": "9c84492730ea1bf2724e62b609798fdfb3d8ed0bc9f63a136f3a24d83f781611"
+    },
+    {
+      "file": "item-9644.png",
+      "url": "https://eqlwiki.com/index.php?title=Special:Redirect/file/Item_9644.png",
+      "kind": "item",
+      "bytes": 2166,
+      "sha256": "331acb7d9570eccfd2500b859e1d9100513ffd5e95f4bee411bc516002f29d36"
     },
     {
       "file": "item-965.png",

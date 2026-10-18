@@ -40,6 +40,16 @@ const SLOT_RENAMES: Record<string, EquipSlot> = {
 /** Punctuation the wiki leaves between slot names. Dropped SILENTLY — it is not an unknown slot. */
 const SLOT_NOISE: ReadonlySet<string> = new Set(['/', '-', '&', 'OR', 'AND'])
 
+/**
+ * Hand-verified stray WORDS on a `Slot:` line, dropped like the punctuation above. Never widened by
+ * guesswork.
+ *
+ * `SPECIAL` (2026-10-18 rescrape, one page: Soldier's Brooch of the Corrupt, `Slot: SPECIAL RANGE`).
+ * Its seven sibling Soldier's Brooch pages all read `Slot: RANGE`, and the same page read
+ * `Slot: RANGE` in the 2026-10-07 scrape. No equip slot is called Special.
+ */
+const SLOT_STRAY_WORDS: ReadonlySet<string> = new Set(['SPECIAL'])
+
 /** Strip the trailing punctuation the wiki leaves on a token ("BACK," → "BACK") and fold case. */
 function cleanToken(raw: string): string {
   return raw.trim().replace(/[,.;:]+$/, '').toUpperCase()
@@ -57,7 +67,7 @@ export function normalizeSlotTokens(slot?: string): { slots: EquipSlot[]; unknow
   const unknown: string[] = []
   for (const raw of (slot ?? '').split(/\s+/)) {
     const token = cleanToken(raw)
-    if (token === '' || SLOT_NOISE.has(token)) continue
+    if (token === '' || SLOT_NOISE.has(token) || SLOT_STRAY_WORDS.has(token)) continue
     const mapped = SLOT_RENAMES[token] ?? (SLOT_SET.has(token) ? (token as EquipSlot) : undefined)
     if (mapped === undefined) {
       if (!unknown.includes(raw)) unknown.push(raw)

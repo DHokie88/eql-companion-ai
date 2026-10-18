@@ -86,11 +86,14 @@ const SLOT_TOKENS: [token: string, canonical: string | null][] = [
   ['Ear', 'EAR'],
   // punctuation the wiki leaves behind
   ['BACK,', 'BACK'],
-  ['/', null]
+  ['/', null],
+  // a stray word added by the 2026-10-18 rescrape (Soldier's Brooch of the Corrupt, `Slot: SPECIAL
+  // RANGE`; its seven siblings say `RANGE`), dropped by SLOT_STRAY_WORDS
+  ['SPECIAL', null]
 ]
 
 test('every measured slot token maps to a canonical slot or to silence', () => {
-  assert.equal(SLOT_TOKENS.length, 40, 'the measured inventory is 40 distinct tokens (2026-08-22 rescrape)')
+  assert.equal(SLOT_TOKENS.length, 41, 'the measured inventory is 41 distinct tokens (2026-10-18 rescrape)')
   for (const [token, canonical] of SLOT_TOKENS) {
     const { slots, unknown } = normalizeSlotTokens(token)
     assert.deepEqual(unknown, [], `${token} should be known to the table`)

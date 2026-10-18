@@ -1,5 +1,5 @@
 {
-  "scrapedAt": "2026-10-08T03:23:28.372Z",
+  "scrapedAt": "2026-10-18T15:56:03.861Z",
   "source": "eqlwiki.com — Category:NPCs/Named Mobs/Merchants/Raid Encounters ∪ embeddedin Template:Namedmobpage/MerchantPage, filtered to pages opening a mob template",
   "mobs": [
     {
@@ -6236,7 +6236,7 @@
       "drops": [
         "Amanita Phalloide",
         "Cracked Giant Scarab Carapace",
-        "Giant Scarab Egg Sack",
+        "Giant Scarab Egg Sac",
         "Giant Scarab Eye",
         "Giant Scarab Legs",
         "Pristine Giant Scarab Carapace"
@@ -8430,11 +8430,17 @@
       ]
     },
     {
-      "page": "A dwarven mercenary",
-      "name": "a dwarven mercenary",
+      "page": "A dwarven merc",
+      "name": "a dwarven merc",
       "level": "1",
       "zones": [
         "Cazic-Thule"
+      ],
+      "loc": [
+        {
+          "ns": 598,
+          "ew": 164
+        }
       ]
     },
     {
@@ -14772,7 +14778,7 @@
       ],
       "drops": [
         "Giant Scarab Legs",
-        "Giant Scarab Egg Sack",
+        "Giant Scarab Egg Sac",
         "Pristine Giant Scarab Carapace",
         "Cracked Giant Scarab Carapace"
       ]
@@ -16273,6 +16279,12 @@
       "level": "1",
       "zones": [
         "Cazic-Thule"
+      ],
+      "loc": [
+        {
+          "ns": 598,
+          "ew": 164
+        }
       ]
     },
     {
@@ -29509,7 +29521,8 @@
       "drops": [
         "Imbued Granite Spauldors",
         "Withered Leather Sleeves",
-        "Withered Leather Shoulderpads"
+        "Withered Leather Shoulderpads",
+        "Withered Leather Tunic"
       ]
     },
     {
@@ -30667,7 +30680,7 @@
         "Oasis of Marr"
       ],
       "drops": [
-        "Giant Scarab Egg Sack",
+        "Giant Scarab Egg Sac",
         "Giant Scarab Eye",
         "Pristine Giant Scarab Carapace",
         "Scarab Carapace"
@@ -38648,6 +38661,12 @@
       ],
       "drops": [
         "Tier'Dal Priest Insignia"
+      ],
+      "loc": [
+        {
+          "ns": 1208,
+          "ew": 2483
+        }
       ]
     },
     {
@@ -38659,6 +38678,12 @@
       ],
       "drops": [
         "Tier'Dal Arcane Insignia"
+      ],
+      "loc": [
+        {
+          "ns": 1188,
+          "ew": 2478
+        }
       ]
     },
     {
@@ -39543,23 +39568,35 @@
     {
       "page": "A Troll Greenblood",
       "name": "a Troll Greenblood",
-      "level": "9",
+      "level": "11",
       "zones": [
         "Rathe Mountains"
       ],
       "drops": [
         "Troll Greenblood Insignia"
+      ],
+      "loc": [
+        {
+          "ns": 1178,
+          "ew": 2448
+        }
       ]
     },
     {
       "page": "A Troll Marauder",
       "name": "a Troll Marauder",
-      "level": "10",
+      "level": "9-11",
       "zones": [
         "Rathe Mountains"
       ],
       "drops": [
         "Troll Basher Insignia"
+      ],
+      "loc": [
+        {
+          "ns": 1170,
+          "ew": 2483
+        }
       ]
     },
     {
@@ -63264,7 +63301,7 @@
     },
     {
       "page": "Clockwork Merchant (LG-16)",
-      "name": "Clockwork Merchant (1105, -1030)",
+      "name": "Clockwork Merchant",
       "level": "40",
       "zones": [
         "Ak'Anon"
@@ -81274,7 +81311,7 @@
       ],
       "drops": [
         "Gnoll Head",
-        "a tattered note"
+        "Tattered Note"
       ],
       "loc": [
         {
@@ -93345,7 +93382,7 @@
     {
       "page": "Gunlok Jure",
       "name": "Gunlok Jure",
-      "level": "61",
+      "level": "70",
       "zones": [
         "North Kaladim"
       ],
@@ -97829,10 +97866,10 @@
         "Leatherfoot Sandals",
         "Pauldrons of Power",
         "Ring of Pureblood",
+        "Rod of Unbound Thought",
         "Shattered Emerald of Corruption",
         "Skinner's Belt",
-        "Triumphant Mask",
-        "Rod of Unbound Thought"
+        "Triumphant Mask"
       ],
       "loc": [
         {
@@ -103567,7 +103604,7 @@
     },
     {
       "page": "Klok Lagnoz",
-      "name": "Klok Koglin",
+      "name": "Klok Lagnoz",
       "level": "50",
       "zones": [
         "New Sebilis Expedition"
@@ -117366,6 +117403,10 @@
           "ns": 730,
           "ew": 8800,
           "pct": 100
+        },
+        {
+          "ns": 730,
+          "ew": 8800
         }
       ]
     },
@@ -117683,8 +117724,8 @@
       ],
       "loc": [
         {
-          "ns": -1035,
-          "ew": -1535
+          "ns": 1160,
+          "ew": 500
         }
       ]
     },
@@ -123062,7 +123103,7 @@
     {
       "page": "Priestess Ghalea",
       "name": "Priestess Ghalea",
-      "level": "61",
+      "level": "70",
       "zones": [
         "North Kaladim"
       ],
@@ -123189,7 +123230,7 @@
     {
       "page": "Prince Kyrmt Keroppi",
       "name": "Prince Kyrmt Keroppi",
-      "level": "35",
+      "level": "30",
       "zones": [
         "Lake Rathetear"
       ]
@@ -126144,7 +126185,8 @@
         "Mudman Enforcer",
         "Essence of Earth",
         "Stonemelder's Band",
-        "Idol of the Underking"
+        "Idol of the Underking",
+        "Imbued Granite Spaulders"
       ],
       "loc": [
         {
@@ -128936,13 +128978,6 @@
       "drops": [
         "Scrounge's Claw",
         "Scrounge's Pelt"
-      ],
-      "loc": [
-        {
-          "ns": -2475,
-          "ew": 641,
-          "pct": 50
-        }
       ]
     },
     {
@@ -139940,6 +139975,25 @@
       "name": "Sugal the Fist"
     },
     {
+      "page": "Sulgar",
+      "name": "Sulgar",
+      "level": "50",
+      "zones": [
+        "Everfrost Peaks"
+      ],
+      "drops": [
+        "Robe of the Evoker",
+        "Human Blood"
+      ],
+      "loc": [
+        {
+          "ns": 3032,
+          "ew": -2395,
+          "pct": 100
+        }
+      ]
+    },
+    {
       "page": "Sulon McMoor",
       "name": "Sulon McMoor",
       "level": "61",
@@ -140073,13 +140127,14 @@
     {
       "page": "Sven Felligan",
       "name": "Sven Felligan",
+      "level": "45",
       "zones": [
         "Everfrost Peaks"
       ],
       "loc": [
         {
-          "ns": 2885,
-          "ew": -3483,
+          "ns": 2848,
+          "ew": -3454,
           "z": -37
         }
       ]

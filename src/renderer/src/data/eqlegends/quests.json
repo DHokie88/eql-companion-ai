@@ -1,5 +1,5 @@
 {
-  "scrapedAt": "2026-10-08T03:42:02.791Z",
+  "scrapedAt": "2026-10-18T16:14:23.310Z",
   "source": "eqlwiki.com — Category:Quests + quest subcategories",
   "quests": [
     {
@@ -631,7 +631,6 @@
         "Melatite",
         "Mistmoore Granite",
         "Sand of Ro",
-        "Soil of Underfoot",
         "Platinum Bar",
         "Fairy Dust",
         "SoulFire",
@@ -3665,7 +3664,7 @@
         "Spiderling Eye",
         "Spiderling Silk",
         "Fire Beetle Eye",
-        "Giant Scarab Egg Sack",
+        "Giant Scarab Egg Sac",
         "Giant Fire Beetle Leg",
         "Giant Wasp Wing"
       ],
@@ -3678,7 +3677,7 @@
         "1. Spiderling Eye",
         "2. Spiderling Silk",
         "3. Fire Beetle Eye",
-        "4. Giant Scarab Egg Sack",
+        "4. Giant Scarab Egg Sac",
         "5. Giant Fire Beetle Leg",
         "6. Giant Wasp Wing",
         "After collecting the items, hit combine and give the box back to him, along with the list he gave you, for your reward. Make sure to hand them both in at the same time or he won't give you a reward or experience."
@@ -4460,7 +4459,6 @@
         }
       ],
       "requiredItems": [
-        "Soil of Underfoot",
         "Foot of Candlestick",
         "Stem of Candlestick",
         "Candle of Bravery",
@@ -10605,7 +10603,13 @@
       ],
       "rewards": [
         {
+          "name": "Bronze Warhammer"
+        },
+        {
           "name": "Small Leather Wristbands"
+        },
+        {
+          "name": "Small Leather Boots"
         }
       ],
       "requiredItems": [
@@ -11027,36 +11031,30 @@
         }
       ],
       "requiredItems": [
-        "Gnoll Head",
-        "a tattered note"
+        "Gnoll Head"
       ],
       "expReward": true,
       "steps": [
         "Larsk Juton is located at 244, -18 in Surefall Glade.",
         "You say, 'Hail, Larsk Juton'",
-        "You say, 'What are Sabertooths?'",
-        "You say, 'What pact?'",
-        "You say, 'I will halt this meeting.'",
+        "You say, 'Sabertooths'",
+        "You say, 'pact'",
+        "You say, 'halt this meeting'",
         "Gnasher Furgutt may be found in Qeynos Hills pacing around outside of Blackburrow.",
         "You say, 'Hail, Gnasher Furgutt'",
-        "Kill him to loot his Gnoll Head, which can be identified as \"Gnasher's Head,\" and head back to Larsk. If a tattered note drops, loot it as well.",
-        "Upon turning in the Gnoll Head:",
-        "(Roughly 2% at level 12)",
-        "You receive gold, silver, and copper, and a random piece of low-level armor (Raw Hide Tunic).",
-        "Upon turning in a tattered note (#1):",
-        "You receive gold, silver, and copper from Larsk",
-        "You receive another note with the same name, flagged as a new note.",
-        "NOTE: On 7/12/2019, Larsk handed the note back but did not mention Captain Tillin. After a second turn-in with the handed-back note (tried because there was no dialogue), he eats the note. Tried with amiable faction, got new note March 29, 2020",
-        "Go to the South Qeynos Arena and turn in this other note to Captain Tillin.",
-        "Upon turning in a tattered note (#2):",
-        "You receive 6 platinum, 9 gold, and 1 silver from Captain Tillin.",
-        "You receive Medal of Merit (CHA +5), and an NPC called Executioner spawns.",
+        "Kill him to loot his Gnoll Head, which can be identified as \"Gnasher's Head,\" and head back to Larsk. A Tattered Note should also drop, so loot it as well.",
+        "Give the Gnoll Head to Larsk:",
+        "You receive gold, silver, and copper, and a random piece of low-level armor such as Raw Hide Tunic.",
+        "Then, turn in the Tattered Note:",
+        "You receive gold, silver, and copper from Larsk.",
+        "You receive another note with the same name, flagged as a new note. Go to the South Qeynos Arena and turn in this other note to Captain Tillin:",
+        "You receive coin and Medal of Merit.",
+        "An NPC called Executioner spawns.",
         "Conclusion:",
         "You say, 'executioner'",
         "You say, 'Field Marshall Ralem'",
         "You say, 'Hail, Executioner'",
-        "The Executioner kills McNeal Jocub",
-        "__NOTOC__"
+        "The Executioner kills McNeal Jocub."
       ]
     },
     {
@@ -14301,7 +14299,8 @@
         "Tattered Recipe",
         "High Elf Flesh",
         "Preserved Leg",
-        "Ogre Butcher Gloves"
+        "Ogre Butcher Gloves",
+        "Grub Locker"
       ],
       "expReward": true,
       "steps": [
@@ -15974,7 +15973,6 @@
         "Enchanted Platinum Bar",
         "Platinum Bar",
         "Sands of Ro",
-        "Soil of Underfoot",
         "Fairy Dust"
       ],
       "steps": [
@@ -25947,9 +25945,9 @@
       "expReward": true,
       "steps": [
         "Lizardscale Cloak from Tae Ew Templar in Cazic Thule",
-        "Rune of Scale from a saltwater croc in Upper Guk",
-        "Rune of Scale from a deepwater crocodile and a deepwater caiman in Oasis of Marr",
-        "Rune of Scale from a firescale crocodile in Lavastorm"
+        "Rune of Scale (top) from a saltwater croc in Upper Guk",
+        "Rune of Scale (middle) from a deepwater crocodile and a deepwater caiman in Oasis of Marr",
+        "Rune of Scale (bottom) from a firescale crocodile in Lavastorm"
       ]
     },
     {
@@ -28567,7 +28565,9 @@
         "Priestess Ghalea may be found at 790, 135.",
         "You say, 'Hail, Priestess Ghalea'",
         "You say, 'What Soil of Underfoot?'",
-        "You will need to be high amiable (failed at 403, worked tat 453) with Clerics of Underfoot before turning in. Upon giving her four Fairy Dust:",
+        "If amiable or lower with Clerics of Underfoot as a Dwarf PAL/MNK/SHM . . .",
+        "If kindly or better . . .",
+        "Upon giving her four Fairy Dust:",
         "You receive 4 gold from Priestess Ghalea.",
         "You receive 1 platinum from Priestess Ghalea."
       ]
@@ -29995,6 +29995,7 @@
         "Tergon's Spellbook",
         "Sealed Letter"
       ],
+      "expReward": true,
       "steps": [
         "Tergon Brenclog, located in the library, wants his spellbook back.",
         "He gives you a sealed note to deliver to his brother Retlon in Freeport who was working with Master Dooly Jonkers.",
@@ -34646,7 +34647,7 @@
         "Travel to Befallen. Inside, near the well, you will find Skeleton Lrodd who is a guaranteed spawn and indifferent to all players. Give him the note.",
         "Handing in the note will spawn Cmdr Windstream on level 3. He spawns on the chair/throne just through the invisible wall. Kill him, and he will drop the \"Mallet Stem.\"",
         "You have slain Cmdr Windstream!",
-        "Cmdr Windstream and the other Befallen necromancers are on Burning Dead faction.",
+        "(No Faction Hit)",
         "The An Elf Skeleton is located on the same floor as Cmdr Windstream. Coming from the bottom of the well, the elf skeleton is just on the other side of the fake wall and to the left, next to the spikes near the hanging dwarf torso. If you're coming down from the zone in, it's beyond the second locked door at the bottom of the broken staircase. It will drop the Mallet Head, Mallet Hilt or neither. When you have both, put the Mallet Head and Mallet Hilt inside the Mallet Stem and hit Combine. This will complete the Thex Mallet. An Elf Skeleton has a 6:40 respawn time.",
         "Journey back to Neriak 3rd Gate and give the mallet to Loveal S`Nez.",
         "You receive the Reaper of the Dead."
@@ -37422,6 +37423,8 @@
         "You say, 'What werewolves?'",
         "You say, 'What enchanted blade?'",
         "Give him a Silver Bar. (Stacks of bars works. Protip: Options > Gameplay > Confirmations to access Fast Item Destroy; every turn in will put a book in your inventory.)",
+        "(20261010 After doing 50 at a time of the 400 I needed to turn in, then emptying my bags of the books, and doing another 50, I decided to turn",
+        "the final 250 all at once. My bags filled again, and about 20 were stacked on my cursor, but I got ALL the faction gains.)",
         "You receive a LORE book called Fixxin Followigs Silvery Blades, which contains information about how to craft silver weapons. The chief reward is all the positive faction hits, though."
       ]
     },

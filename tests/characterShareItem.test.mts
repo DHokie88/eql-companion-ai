@@ -54,7 +54,8 @@ test('every worn cell states its rank, its base name, and what the item reads at
   assert.equal(hands.ac, 15)
   const str = hands.stats?.find((s) => s.key === 'STR')
   assert.deepEqual(str, { key: 'STR', label: 'Strength', value: '+12' })
-  assert.deepEqual(hands.flags, ['Magic Item'])
+  // The 2026-10-18 rescrape: the wiki page now flags the gauntlets `Attunable` (was `Magic Item`).
+  assert.deepEqual(hands.flags, ['Attunable'])
 
   // A weapon states its three numbers and its effect line; nothing else does.
   const primary = profile.cells.find((c) => c.slot === 'primary')
