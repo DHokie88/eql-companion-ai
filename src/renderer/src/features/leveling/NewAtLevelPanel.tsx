@@ -143,14 +143,9 @@ export function NewAtLevelPanel({
     onFocusConsumed()
   })
 
-  // THE LEVEL JOIN, MEMOIZED (JOS-511 item 2). It folds the unlock dataset for the loadout at this
-  // level and it ran on every render of this panel — a keystroke in the search box below, a
-  // progression push two components up, a pointer move on the charts. Its three inputs are the
-  // dataset (a module-level cached pull), the combo (memoized by `useCurrentComboClasses`) and a
-  // number, so the fold now runs exactly when one of those moves. Its IDENTITY matters as much as
-  // its cost: `unlocks.spells` and `unlocks.skills` are the arrays the two lists take, and fresh
-  // arrays are what would defeat the row memo below them.
-  const unlocks = useMemo(() => unlocksAtLevel(data, combo, level), [data, combo, level])
+  // Keep the established skill/discipline join and its candidate-class provenance. Passing an
+  // empty spell projection avoids doing the legacy name-based spell fold alongside the worker.
+  const unlocks = useMemo(() => unlocksAtLevel({ ...data, spells: [] }, combo, level), [data, combo, level])
   // Memoized for its IDENTITY as much as its cost: it is a dependency of the search below, and
   // `comboClassesOf` already hands back one object per combo snapshot.
   const classes = useMemo(() => comboClassSet(combo), [combo])
@@ -159,8 +154,6 @@ export function NewAtLevelPanel({
   // it is the prop every one of them takes.
   const resolved = useMemo(() => new Set<string>(combo.resolved), [combo])
   const known = classes.length > 0
-
-
   return (
     // `position: relative` is the pulse's anchor and nothing else; `data-highlighted` states the
     // landing in the DOM so a spec can assert the CUE rather than a colour (tests/e2e/toast.e2e).
