@@ -1,5 +1,5 @@
-import { type JSX, useMemo, useState } from 'react'
-import { Alert, Box, Button, CircularProgress, FormControl, InputLabel, MenuItem, Select, Stack, Tab, Tabs, TextField, Typography } from '@mui/material'
+import { type JSX, useMemo } from 'react'
+import { Alert, Box, Button, CircularProgress, Dialog, FormControl, InputLabel, MenuItem, Select, Stack, Tab, Tabs, TextField, Typography } from '@mui/material'
 import { SPELL_CLASSES, type SpellClass, type SpellLibraryStatus } from '@shared/spellLibrary'
 import type { SpellEvaluationOptions } from '@shared/spellModifiers'
 import type { ProgressionSnap } from '@shared/types'
@@ -15,20 +15,27 @@ import { SpellHistory } from './SpellHistory'
 import { LibrarySpellDetail } from './LibrarySpellDetail'
 import { useSpellModifiers } from './useSpellModifiers'
 import { SpellModifierControls } from './SpellModifierControls'
+import { SpellWorkspace } from './spellWorkspace'
+import { useSpellViewState } from './useSpellViewState'
+import { SpellRankings } from './SpellRankings'
+import { SpellByLevel } from './SpellByLevel'
+import { SpellTargetControls } from './SpellTargetControls'
+import type { SpellModifiersState } from './useSpellModifiers'
 
 export default function SpellsView({ routing }: { routing: AppRouting }): JSX.Element {
   const status = useSpellLibraryStatus()
+  const modifiers = useSpellModifiers()
+  const identity = `${status.dataset?.installId ?? status.installation ?? 'unknown'}:${modifiers.context?.character?.key ?? 'session'}`
+  return <SpellWorkspace identity={identity}><SpellsWorkspace routing={routing} status={status} modifiers={modifiers} /></SpellWorkspace>
+}
+
+function SpellsWorkspace({ routing, status, modifiers }: { routing: AppRouting; status: SpellLibraryStatus; modifiers: SpellModifiersState }): JSX.Element {
   const combo = useCurrentComboClasses()
   const prog = useModule<ProgressionSnap>('progression') ?? EMPTY_PROGRESSION
   const stated = useStatedLevel(prog)
-  const [mode, setMode] = useState<'character' | 'custom' | 'all'>('character')
-  const [pickedClasses, setClasses] = useState<SpellClass[]>([])
-  const [pickedLevel, setLevel] = useState<number | null>(null)
-  const [tab, setTab] = useState('browse')
-  const [selected, setSelected] = useState<number[]>([])
-  const [timelineId, setTimelineId] = useState<number | null>(null)
-  const modifiers = useSpellModifiers()
-  const level = pickedLevel ?? stated.level ?? 50
+  const state = useSpellViewState(routing, !!modifiers.context)
+  const { mode, setMode, pickedClasses, setClasses, pickedLevel, setLevel, tab, setTab, selected } = state
+  const level = casterLevel(pickedLevel, stated.level)
   const following = mode === 'character' && combo.resolved.length > 0
   const classes = scopeClasses(mode, combo.resolved, pickedClasses)
   const classKey = classes.join(',')
@@ -37,34 +44,43 @@ export default function SpellsView({ routing }: { routing: AppRouting }): JSX.El
   const evaluation = useMemo<SpellEvaluationOptions | undefined>(() => contextRevision && valueMode ? {
     mode: valueMode, contextRevision, classes: classKey ? classKey.split(',') as SpellClass[] : []
   } : undefined, [contextRevision, valueMode, classKey])
-  const toggle = (id: number): void => {
-    setSelected((ids) => ids.includes(id) ? ids.filter((n) => n !== id) : ids.length < 4 ? [...ids, id] : ids)
-  }
+  const targets = modifiers.context?.preferences.targets ?? 4
+  const analysis = useMemo(() => ({ scope: 'single' as const, targets }), [targets])
   const busy = ['checking', 'importing', 'activating'].includes(status.phase)
   return (
     <Stack spacing={2} data-testid="spells-view">
       <LibraryHeader status={status} busy={busy} />
+      {routing.nav.origin && <Box><Button size="small" onClick={() => routing.nav.back()}>Back to {routing.nav.origin.label}</Button></Box>}
       <ScopeControls mode={mode} setMode={setMode} following={following} classes={classes} pickedClasses={pickedClasses} setClasses={setClasses} comboClasses={combo.resolved} level={level} pickedLevel={pickedLevel} setLevel={setLevel} statedLevel={stated.level} />
-      <SpellModifierControls state={modifiers} ids={[...new Set([...selected, ...(routing.librarySpellId === null ? [] : [routing.librarySpellId])])]} />
-      <Tabs value={tab} onChange={(_e, value: string) => { setTab(value); routing.clearLibrarySpellFocus() }} aria-label="Spell library views">
-        <Tab label="Browse" value="browse" data-testid="spells-tab-browse" /><Tab label={`Compare${selected.length ? ` (${selected.length}/4)` : ''}`} value="compare" data-testid="spells-tab-compare" /><Tab label="History" value="history" data-testid="spells-tab-history" />
+      {routing.librarySpellId === null && <SpellModifierControls state={modifiers} ids={selected} />}
+      <SpellTargetControls targets={targets} disabled={!modifiers.context || modifiers.saving} onChange={(value) => { if (modifiers.context) modifiers.update({ ...modifiers.context.preferences, targets: value }) }} />
+      <Tabs value={tab} onChange={(_e, value: typeof tab) => { setTab(value); routing.clearLibrarySpellFocus() }} aria-label="Spell library views" variant="scrollable">
+        <Tab label="Browse" value="browse" data-testid="spells-tab-browse" /><Tab label="Rankings" value="rankings" data-testid="spells-tab-rankings" /><Tab label={`Compare${selected.length ? ` (${selected.length}/4)` : ''}`} value="compare" data-testid="spells-tab-compare" /><Tab label="By level" value="by-level" data-testid="spells-tab-by-level" /><Tab label="History" value="history" data-testid="spells-tab-history" />
       </Tabs>
-      <LibraryContent routing={routing} tab={tab} timelineId={timelineId} evaluation={evaluation} classes={classes} level={level} mode={mode} selected={selected} toggle={toggle} onHistory={(id) => { setTimelineId(id); routing.clearLibrarySpellFocus(); setTab('history') }} />
+      <LibraryContent routing={routing} state={state} modifiers={modifiers} evaluation={evaluation} analysis={analysis} classes={classes} level={level} />
     </Stack>
   )
 }
 
-function LibraryContent({ routing, tab, timelineId, evaluation, classes, level, mode, selected, toggle, onHistory }: {
-  routing: AppRouting; tab: string; timelineId: number | null; evaluation?: SpellEvaluationOptions
-  classes: SpellClass[]; level: number; mode: 'character' | 'custom' | 'all'; selected: number[]
-  toggle: (id: number) => void; onHistory: (id: number) => void
+function casterLevel(picked: number | null, stated: number | null): number { return picked ?? stated ?? 50 }
+
+function LibraryContent({ routing, state, modifiers, evaluation, analysis, classes, level }: {
+  routing: AppRouting; state: ReturnType<typeof useSpellViewState>; evaluation?: SpellEvaluationOptions
+  modifiers: SpellModifiersState
+  analysis: import('@shared/spellAnalysis').SpellAnalysisOptions; classes: SpellClass[]; level: number
 }): JSX.Element {
-  if (tab === 'history' && routing.librarySpellId === null) return <SpellHistory focusId={timelineId} onOpen={routing.openLibrarySpell} />
+  const { tab, mode, selected, toggle } = state
+  const onHistory = (id: number): void => { state.setTimelineId(id); routing.clearLibrarySpellFocus(); state.setTab('history') }
+  if (tab === 'history' && routing.librarySpellId === null) return <SpellHistory focusId={state.timelineId} onOpen={routing.openLibrarySpell} />
   if (!evaluation) return <CircularProgress size={22} aria-label="Loading calculation context" />
-  if (routing.librarySpellId !== null) return <LibrarySpellDetail id={routing.librarySpellId} level={level} evaluation={evaluation} onBack={() => { routing.clearLibrarySpellFocus(); if (routing.nav.origin) routing.nav.back() }} onWiki={routing.openSpell} onHistory={onHistory} />
   return <>
-    {tab === 'browse' && <SpellBrowse classes={classes} level={level} evaluation={evaluation} allSpells={mode === 'all'} enabled={mode === 'all' || classes.length > 0} selected={selected} onToggle={toggle} onOpen={routing.openLibrarySpell} />}
-    {tab === 'compare' && <SpellCompare ids={selected} classes={classes} level={level} evaluation={evaluation} onRemove={toggle} onOpen={routing.openLibrarySpell} />}
+    {tab === 'browse' && <SpellBrowse classes={classes} level={level} evaluation={evaluation} analysis={analysis} allSpells={mode === 'all'} enabled={mode === 'all' || classes.length > 0} selected={selected} onToggle={toggle} onOpen={state.open} />}
+    {tab === 'rankings' && <SpellRankings classes={classes} level={level} evaluation={evaluation} targets={analysis.targets} selected={selected} initialCategory={state.focusCategory} onFocusConsumed={() => state.setFocusCategory(undefined)} onToggle={toggle} onOpen={state.open} />}
+    {tab === 'compare' && <SpellCompare ids={selected} classes={classes} level={level} evaluation={evaluation} targets={analysis.targets} initialScope={state.focusScope} onFocusConsumed={() => state.setFocusScope(undefined)} onRemove={toggle} onOpen={state.open} />}
+    {tab === 'by-level' && <SpellByLevel classes={classes} level={level} evaluation={evaluation} selected={selected} onOpen={state.open} onPreview={state.preview} onToggle={toggle} />}
+    <Dialog fullScreen open={routing.librarySpellId !== null} onClose={routing.clearLibrarySpellFocus} data-testid="library-spell-dialog"><Box sx={{ p: 3 }}>
+      {routing.librarySpellId !== null && <LibrarySpellDetail id={routing.librarySpellId} level={state.previewLevel ?? level} evaluation={evaluation} analysis={{ ...analysis, scope: state.previewScope }} controls={<SpellModifierControls state={modifiers} ids={[routing.librarySpellId]} />} onBack={() => { routing.clearLibrarySpellFocus(); if (routing.nav.origin) routing.nav.back() }} onWiki={routing.openSpell} onHistory={onHistory} />}
+    </Box></Dialog>
   </>
 }
 

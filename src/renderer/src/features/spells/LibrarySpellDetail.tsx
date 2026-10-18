@@ -1,33 +1,40 @@
-import { type JSX, useCallback } from 'react'
-import { Accordion, AccordionDetails, AccordionSummary, Alert, Box, Button, Chip, CircularProgress, Divider, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
+import { type JSX, type ReactNode, useCallback } from 'react'
+import { Accordion, AccordionDetails, AccordionSummary, Alert, Box, Button, Chip, CircularProgress, Divider, Stack, Table, TableBody, TableCell, TableRow, Typography } from '@mui/material'
 import { useBackTarget } from '../../appBack'
 import { useLibraryQuery } from './useLibraryQuery'
 import type { SpellEvaluationOptions } from '@shared/spellModifiers'
 import { SpellHpValues } from './SpellEstimate'
 import type { SpellCalculation } from '@shared/spellLibrary'
+import type { SpellAnalysisOptions } from '@shared/spellAnalysis'
+import { SpellAnalysisBreakdown } from './SpellAnalysisBreakdown'
+import { SpellEffectSummary, SpellTechnicalEffects } from './SpellEffectSummary'
 
-export function LibrarySpellDetail({ id, snapshotId, level, evaluation, onBack, onWiki, onHistory }: {
+export function LibrarySpellDetail({ id, snapshotId, level, evaluation, analysis, controls, onBack, onWiki, onHistory }: {
   id: number; snapshotId?: string; onBack: () => void; onWiki?: (name: string) => void; onHistory: (id: number) => void
   level?: number; evaluation?: SpellEvaluationOptions
+  analysis?: SpellAnalysisOptions
+  controls?: ReactNode
 }): JSX.Element {
-  const load = useCallback(() => window.eq.spellLibrary.detail({ id, snapshotId, level, evaluation }), [id, snapshotId, level, evaluation])
+  const load = useCallback(() => window.eq.spellLibrary.detail({ id, snapshotId, level, evaluation, analysis }), [id, snapshotId, level, evaluation, analysis])
   const { data, loading, error } = useLibraryQuery(load)
   useBackTarget(() => { onBack(); return true })
   const record = data?.record
   return <Stack spacing={1.5} data-testid="spells-detail" data-spell-id={id}>
     <Box><Button size="small" onClick={onBack} data-testid="spells-detail-back">← Back</Button></Box>
+    {controls}
     {loading && <CircularProgress size={22} />}{error && <Alert severity="error">{error}</Alert>}
     {data && !record && <Alert severity="info">Spell ID {id} is not present in this snapshot. Its earlier revisions remain in History.</Alert>}
     {record && <>
       <Stack direction="row" gap={1} flexWrap="wrap" alignItems="center"><Typography variant="h5">{record.name}</Typography><Chip size="small" label={`ID ${record.id}`} /><Chip size="small" variant="outlined" label={`Client layout ${record.layout}`} /></Stack>
       <Typography color="text.secondary">{record.classes.length ? record.classes.map((c) => `${c.code} ${c.level}`).join(' · ') : 'Internal / NPC record'} · {record.category} {record.subcategory && `/ ${record.subcategory}`}</Typography>
       <Typography sx={{ whiteSpace: 'pre-wrap' }}>{record.description || 'No description supplied by the client.'}</Typography>
-      <Typography>Mana {record.mana} · Cast {record.castMs / 1000}s · Recovery {record.recoveryMs / 1000}s · Recast {record.recastMs / 1000}s · Range {record.range} · AE range {record.aeRange} · Target {record.target}</Typography>
+      <SpellEffectSummary presentation={data.presentation} />
+      <Typography>Client mana {record.mana} · Cast {record.castMs / 1000}s · Recovery {record.recoveryMs / 1000}s · Recast {record.recastMs / 1000}s</Typography>
       <Typography variant="caption" color="text.secondary">Unmodified client record · first observed {data.dataset && new Date(data.dataset.firstObserved).toLocaleString()} · revision {data.dataset?.contentId.slice(0, 14)}. Eligibility does not confirm ownership or acquisition.</Typography>
       <Stack direction="row" spacing={1}><Button size="small" onClick={() => onHistory(id)}>Spell timeline</Button><SupplementaryLink name={record.name} open={onWiki} /></Stack>
       <DetailCalculations calculations={data.calculations} />
       <Divider /><Typography variant="subtitle1">Decoded effects</Typography>
-      <Box sx={{ overflowX: 'auto' }}><Table size="small"><TableHead><TableRow>{['Slot', 'SPA', 'Base', 'Limit', 'Formula', 'Maximum'].map((label) => <TableCell key={label}>{label}</TableCell>)}</TableRow></TableHead><TableBody>{record.effects.map((e) => <TableRow key={e.slot}>{[e.slot, e.spa, e.base, e.limit, e.calc, e.max].map((v, i) => <TableCell key={i}>{v}</TableCell>)}</TableRow>)}</TableBody></Table></Box>
+      <SpellTechnicalEffects record={record} presentation={data.presentation} />
       {Object.entries(record.messages).map(([kind, message]) => <Typography key={kind} variant="body2"><strong>{kind}:</strong> {message}</Typography>)}
       <Accordion><AccordionSummary>Complete interpreted client fields</AccordionSummary><AccordionDetails><Table size="small"><TableBody>{Object.entries(record.fields).map(([key, value]) => <TableRow key={key}><TableCell>{key}</TableCell><TableCell sx={{ overflowWrap: 'anywhere' }}>{String(value ?? '')}</TableCell></TableRow>)}</TableBody></Table></AccordionDetails></Accordion>
       <Accordion><AccordionSummary>All {record.rawFields.length} raw client columns</AccordionSummary><AccordionDetails><Typography variant="caption">Column indexes are zero based. Unknown fields are preserved for history.</Typography><Table size="small"><TableBody>{record.rawFields.map((value, index) => <TableRow key={index}><TableCell>{index}</TableCell><TableCell sx={{ overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }}>{value}</TableCell></TableRow>)}</TableBody></Table></AccordionDetails></Accordion>
@@ -36,7 +43,7 @@ export function LibrarySpellDetail({ id, snapshotId, level, evaluation, onBack, 
 }
 
 function DetailCalculations({ calculations }: { calculations?: SpellCalculation[] }): JSX.Element | null {
-  return calculations?.length ? <SpellHpValues calculations={calculations} /> : null
+  return calculations?.length ? <><SpellHpValues calculations={calculations} />{calculations.map((c) => <SpellAnalysisBreakdown key={c.metric} calculation={c} />)}</> : null
 }
 
 function SupplementaryLink({ name, open }: { name: string; open?: (name: string) => void }): JSX.Element | null {

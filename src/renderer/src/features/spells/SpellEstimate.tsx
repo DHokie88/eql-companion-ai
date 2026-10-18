@@ -15,6 +15,7 @@ export function EstimateAmount({ calculation }: { calculation: SpellCalculation 
     </Typography>
     {modifier?.range && changedMode && <Typography variant="caption">Range {amount(modifier.range.min)} - {amount(modifier.range.max)}</Typography>}
     <EstimateBadges calculation={calculation} />
+    {calculation.analysis?.partial && <Chip size="small" color="warning" variant="outlined" label="Partial scenario" />}
   </Stack>
 }
 
@@ -52,7 +53,7 @@ export function rankLabel(rank: number): string {
 export function SpellHpValues({ calculations }: { calculations: SpellCalculation[] }): JSX.Element {
   return <Stack spacing={1} data-testid="spells-hp-values">
     {calculations.map((calculation) => <Stack key={calculation.metric} spacing={0.5}>
-      <Typography variant="subtitle2">{calculation.metric === 'damage' ? 'Damage' : 'Healing'} per target</Typography>
+      <Typography variant="subtitle2">{calculation.metric === 'damage' ? 'Damage' : 'Healing'} · {calculation.analysis?.scope ?? 'per target'}</Typography>
       <EstimateAmount calculation={calculation} />
       <Typography variant="caption">Instant {amount(calculation.instant)} · Per tick {amount(calculation.perTick)} × {calculation.ticks ?? '?'} · Client mana {calculation.mana} · Amount / client mana {calculation.mana === 0 ? 'Zero mana' : amount(calculation.perMana)}</Typography>
       <EstimateExplanation calculation={calculation} />

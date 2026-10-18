@@ -1,87 +1,11 @@
 /**
- * Headless Electron integration test for the LEVELING tab
- * (docs/plans/leveling-analytics.md §8, "Final verification").
- *
- * WHY ITS OWN FILE: one spec per surface, all of them sharing `appHarness.mts` and running back
- * to back from `npm run test:e2e`. `EQ_E2E=1` (src/main/e2e.ts) shows no window, skips the
- * single-instance lock and points `userData` at a throwaway temp dir, so this runs invisibly
- * beside the user's game and dev app.
- *
- * WHY `userData` IS WIPED FIRST: several assertions here are about the state the tab comes up
- * in. Nothing about a selection or a timescale is persisted today (both are session-lifetime
- * component state, deliberately), but a fresh dir is what makes "before any interaction" mean
- * the same thing on every machine and after every earlier spec — which is what a per-launch
- * userData dir now guarantees for free.
- *
- * WHAT IT ASSERTS, against whatever the real log holds right now:
- *   1. the nav row mounts the view (or the no-logs empty state honestly explains why not);
- *   2. a chart is drawn, and the ZONE-BAND STRIP is mounted inside it with real bands;
- *   2b. (JOS-292) the level chart draws the FRACTIONAL CURVE - denser than the ding series it is
- *      anchored on, inside its own plot, with an uncertainty band over every stretch the log did
- *      not state, no vertex inside one, and a readout that says so rather than naming a bar
- *      position there. Step 2b lives in `curveSteps.mts`;
- *   3. the range-stats panel is mounted with the view and scoped to the TIMESCALE'S WINDOW
- *      (JOS-75 — it used to exist only while a drag did);
- *   4. a real pointer DRAG across the chart narrows that scope to the selection, and the panel
- *      re-derives WITH rows (hero cards + at least one per-zone row — `Σ zones[].spanMs ==
- *      durationMs` means a committed range always covers at least one zone row, even if it is
- *      the `unknown` one);
- *   5. a CLICK (under `DRAG_THRESHOLD_PX`) drops the selection and the panel FALLS BACK to the
- *      window, restoring exactly the numbers it had before the drag — the precedence contract;
- *   5b. the TIMESCALE control (JOS-71) offers only the windows this log can fill, and picking one
- *      replaces the whole time base: the strip re-cuts itself and stays inside its plot, the
- *      hover still resolves a cursor, a drag still commits a range and a click still dismisses it,
- *      and `All` restores the exact window it started on;
- *   5c. and (JOS-75) the DASHBOARD NUMBERS move with it — the range panel's stated stretch, its
- *      readouts and the AA pace panel all re-derive on a window change, dominate correctly
- *      (a window inside another can never count more), and come back BYTE-IDENTICAL at `All`;
- *   6. the "New at this level" panel is mounted with its stepper — and, once the combo module
- *      has resolved a loadout, draws real unlock rows for it (floors, never today's counts);
- *   6a. (JOS-391) and each spell row says what the spell is WORTH: compact damage/heal figures per
- *      mana, the `already yours (CLS N)` claim naming a level below the one on screen, the spell it
- *      replaces from the shipped line research, and the word `directional` said exactly ONCE on
- *      the panel rather than footnoted per row. Step 6a lives in `unlockRowSteps.mts`;
- *   6c. (JOS-392) the spell a row says it REPLACES is a hover target of its own, and the card that
- *      opens is that spell's - carrying the figures main read for it;
- *   6d. (JOS-392) and typing `27-28 cleric shaman` turns the panel into the matching spells, each
- *      row's chips stating the level each class gets it at, in any word order - then clearing the
- *      box gives the level view back. Steps 6c/6d live in `unlockRowSteps.mts` too;
- *   6e. (JOS-393) and a spell the wiki badges out of era is FOUND by that search and MARKED - the
- *      chip on the row, the same words on its card - while its in-era sibling one rung down the
- *      same ladder wears nothing;
- *   7. (JOS-289) THE WHOLE PAGE SCROLLS AND NO PANEL DOES: the window itself never scrolls, no
- *      panel on the tab shows an internal vertical scrollbar except the drops list whose row count
- *      earns one, and the deepest panel is reached by scrolling the PAGE. No renderer console
- *      errors either;
- *   7b. and at the narrowest window the app allows, the two columns STACK instead of sharing one
- *      height (JOS-151's collision, which JOS-289 removed the cause of): no panel draws over
- *      another, the stack is not a scroller, and both the timeslice control and the unlock stepper
- *      are still the thing at their own centre;
- *   7c. and a spell name in the per-level readout opens the full spell card. Steps 7/7b/7c live in
- *      `levelingLayoutSteps.mts`;
- *   8. (JOS-78) the IN-WINDOW DROPS panel is mounted with the tab, states its empty window rather
- *      than drawing a blank box, and fills from loot the harness plays into the tailed file —
- *      ordered by observed drops, each row stating a count and a rate over a STATED span that
- *      names its hour (JOS-288: elapsed by default, active behind the tab's basis toggle);
- *   9. and clicking a row opens that item's Loot drill-down (with its own per-zone drop-rate
- *      table) through the app's ONE navigation seam, so Back NAMES the Leveling tab and returns
- *      here (the JOS-43 law, on the app's newest cross-view link). Steps 8/9 live in
- *      `dropSteps.mts` — this spec is at the repo's max-lines budget;
- *   10. (JOS-450) and the best-spells readout SEARCHES the whole catalog: typing swaps its ranked
- *      table for results, a spell no class in this loadout can learn is drawn as a row of that
- *      readout wearing its own class-level chip, and clearing the box hands the table back. It runs
- *      inside step 6f's sequence and lives in `bestSpellsSearchSteps.mts`.
- *
- * FRESH-MACHINE HONESTY. A machine with no EQ logs mounts no feature view at all, and a
- * character whose log carries fewer than two dings and fewer than two AA gains draws no chart —
- * `LevelingView` renders its stated empty state instead. Both are the CORRECT behaviour: the
- * spec detects them, asserts the honest EMPTY-state versions of the above (the view mounts, the
- * empty state says why, and no stats panel exists), `note()`s what it saw, and skips the
- * assertions that presuppose a drawn chart.
- *
- * Floors and identities only, never today's numbers (AGENTS.md: frozen numbers rot).
- *
- * Run: `npm run test:e2e`.
+ * Hidden Electron regression for Leveling: chart geometry, fractional levels, AA accounting,
+ * drag selection and cost, timescale/scope identity, zone bands, drops, skills and page layout.
+ * Spell checks now use a hand-authored captured catalog and the shared worker analysis.
+ * Numeric-ID eligibility/details replace the old wiki ownership/era/line assumptions; standalone
+ * supplementary cards retain their dedicated spell-card suite. The compact ranking defaults to
+ * efficiency, shares the level stepper, and links to the expanded Spells view.
+ * EQ_E2E_HIDDEN_ONLY=1 skips optional photo sessions that briefly show a test window.
  */
 import type { Page } from 'playwright-core'
 import {
@@ -100,7 +24,8 @@ import {
   waitHydrated
 } from './appHarness.mjs'
 import { mainWindow } from './appWindow.mjs'
-import { launchOnFixture } from './logFixture.mjs'
+import { launchOnFixture, stageFixture } from './logFixture.mjs'
+import { stageAnalysisSources } from './spellAnalysisFixture.mjs'
 // The in-window drops panel and its round trip into the item drill-down (JOS-78) — next door
 // because this spec sits AT the repo max-lines budget; see that file's header.
 import { stepDrops } from './dropSteps.mjs'
@@ -108,7 +33,7 @@ import { stepScopeDefaults, stepZoneSlice } from './sliceSteps.mjs'
 // The layout contract, the spell card in the per-level readout and the narrow window (JOS-289,
 // which inverted JOS-151's claim here) — next door for the same reason, and see that file's header
 // for what the reporter's 1073x937 did to this tab and what the owner overturned afterwards.
-import { dismissFirstRunNotice, stepNarrowLayout, stepPageScroll, stepSpellCard } from './levelingLayoutSteps.mjs'
+import { dismissFirstRunNotice, stepNarrowLayout, stepPageScroll } from './levelingLayoutSteps.mjs'
 // WHAT A POINTERMOVE COSTS (JOS-290) — the drag-responsiveness pin, next door because this file
 // is at the repo's line budget. It measures inside the same gesture it asserts about.
 import { stepDragCost } from './dragPerfSteps.mjs'
@@ -121,11 +46,12 @@ import { stepChartShots, stepLevelCurve } from './curveSteps.mjs'
 // it (step 6a, JOS-391: the figures, `already yours`, `replaces`, and the one `directional` in
 // the header). Next door for the same line-budget reason; the pair is one question about one
 // panel, and this spec still owns the order and the launch.
-import { shootUnlockPanel, stepNewAtLevel, stepUnlockEra, stepUnlockSearch } from './unlockRowSteps.mjs'
+import { shootUnlockPanel } from './unlockRowSteps.mjs'
+import { stepNewAtLevel, stepUnlockSearch, stepClientEligibility, stepSpellCard, stepBestSpells } from './levelingClientSpellSteps.mjs'
 // THE RIGHT COLUMN'S READOUT (JOS-445) — best damage by dps, best healing by hps, at the level the
 // tab is showing. Next door for the same line-budget reason; it asserts the SEAM the unit suite
 // cannot reach (the lines crossing IPC, one stepper driving two columns, a header click re-ranking).
-import { shootBestSpells, stepBestSpells } from './bestSpellsSteps.mjs'
+import { shootBestSpells } from './bestSpellsSteps.mjs'
 
 const NAV = '[data-testid="nav-leveling"]'
 const VIEW = '[data-testid="leveling-view"]'
@@ -641,24 +567,19 @@ async function stepAaLedger(page: Page): Promise<void> {
   check('…and clicking it opens its rungs', rungs > 0, `${String(rungs)} rungs`)
 }
 
+async function optionalPhotos(capture: () => Promise<void>): Promise<void> {
+  if (!process.env.EQ_E2E_HIDDEN_ONLY) await capture()
+}
+
 async function main(): Promise<void> {
   buildIfStale()
 
   // See the header: a fresh dir is what makes "before any selection" mean the same thing on
   // every machine, and every launch gets one.
   console.log('launch: hidden Electron (EQ_E2E=1) against tests/fixtures/e2e-leveling.log…')
-  // THE INVENTORY DUMP IS STAGED FOR STEP 8's WORN-FOCUS MARKER (JOS-452). The tab itself reads
-  // nothing else from it: the gear compare card lives on another surface, and with no dump the
-  // best-spells readout is byte-identical to what it was, which is what that step's `note` arm
-  // covers. It is the owner's own committed dump, so the focus effects in force are real ones.
-  const { app, close, log } = await launchOnFixture('e2e-leveling.log', {
-    inventory: 'Primitive_freeport-Inventory.txt',
-    // JOS-507 — hand-authored `spells_us.txt` + `dbstr_us.txt` so the readout's search-by-TYPE step
-    // holds on any machine rather than only on one with EverQuest installed. It changes nothing the
-    // other steps read: the ranked tables and the wiki search are the committed catalog's, and this
-    // is a file only the engine's `spells.search` opens.
-    clientTables: true
-  })
+  const staged = stageFixture('e2e-leveling.log', { inventory: 'Primitive_freeport-Inventory.txt' })
+  stageAnalysisSources(staged)
+  const { app, close, log } = await launchOnFixture(staged)
 
   let page: Page | null = null
   try {
@@ -693,7 +614,7 @@ async function main(): Promise<void> {
         await stepTimescale(page, chart)
         // STRAIGHT AFTER IT (JOS-339): that step leaves the tab on `All` with no selection, which
         // is the state the shots open from. It puts the window size and the slice back itself.
-        await stepChartShots(app, page)
+        await optionalPhotos(() => stepChartShots(app, page))
         // The other half of the same control (JOS-130, sliceSteps.mts): the preset that moves the
         // arithmetic and not the window. It runs AFTER stepTimescale, which leaves the tab on
         // `All`, and takes the spec's own dashboard readout so "byte for byte" means one thing.
@@ -713,29 +634,12 @@ async function main(): Promise<void> {
         // is nothing for the panel to be a read of.
         check('…and with no chart there is no range-stats panel either', (await countOf(page, PANEL)) === 0)
       }
-      // Deliberately OUTSIDE the chart branch: the unlock panel is computed from the committed
-      // DBs, so it must be there whether or not this log has enough dings to draw a chart.
+      // Spells remain available without a chart. Exercise the captured catalog while retaining
+      // the surrounding skill/discipline, chart, AA and page-layout regressions.
       await stepNewAtLevel(page, log)
-      // …and the OTHER question the same panel answers (JOS-392): typing turns it into a spell
-      // finder. It runs here because the step above has resolved the loadout and walked to a level
-      // with rows on it, which is the state "clearing restores the level view" is a claim about;
-      // it puts the box back empty itself, so everything below still sees the level view.
       await stepUnlockSearch(page)
-      // …and (JOS-393) the era verdict on the rows that search returns: `Sloths Healing` is found
-      // and MARKED out of era, its card says the same, and `Snails Healing` one rung down the same
-      // ladder wears nothing. It runs on the search rather than the level list because the loadout
-      // here is whatever this machine's log resolved and a shaman is not guaranteed; the fold
-      // itself is pinned over the committed data by tests/spellEra.test.mts. It leaves the box
-      // empty, like the step above it.
-      await stepUnlockEra(page)
-      // Straight after it, on the level that step walked to: the readout's spell names now carry
-      // the full card (JOS-293's `SpellTooltip`), which is only usable because the list stopped
-      // being a 120px porthole — the two halves of JOS-289 proving each other.
+      await stepClientEligibility(page)
       await stepSpellCard(page)
-      // AFTER the whole unlock-panel sequence (JOS-445): those steps resolve the loadout and walk
-      // the stepper to a level with rows on it, which is the state this readout is a claim about —
-      // and they leave the search box empty, so the stepper is live. It presses the stepper once
-      // and presses it back, so nothing below sees a level the steps above did not leave.
       await stepBestSpells(page)
       await stepPageScroll(page)
       // LAST, because it moves the window: it puts the size and the minimum back before it
@@ -744,10 +648,10 @@ async function main(): Promise<void> {
       // AFTER EVEN THAT (JOS-391): the camera SHOWS the window, and showing it moves the scroll
       // position and stalls compositing — measured, it broke three of the layout checks above
       // when it sat in place after step 6a. It asserts nothing, so it costs nothing here.
-      await shootUnlockPanel(app, page)
+      await optionalPhotos(() => shootUnlockPanel(app, page))
       // …and the new readout beside it (JOS-445), for the same reason and in the same place: a
       // surface the owner asked for gets a picture. Both cameras run after every measurement.
-      await shootBestSpells(app, page)
+      await optionalPhotos(() => shootBestSpells(app, page))
     }
 
     check('no renderer console errors', consoleErrors.length === 0, consoleErrors.slice(0, 3).join(' | '))
@@ -756,6 +660,7 @@ async function main(): Promise<void> {
     else await dumpArtifacts(page, 'leveling-pass')
   } finally {
     await close()
+    await staged.dispose()
   }
 
   reportRun()

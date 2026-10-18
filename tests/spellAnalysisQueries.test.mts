@@ -116,12 +116,15 @@ test('By level groups earliest eligible class levels and detected rank ignores s
   try {
     const at = f.call<SpellByLevelResult>('byLevel', { level: 20, classes: ['WIZ'], view: 'at', evaluation, analysis: single }, modifiers)
     assert.deepEqual(ids(at), [1]); assert.equal(at.records[0].detectedRank, 9)
+    assert.deepEqual(ids(f.call<SpellByLevelResult>('byLevel', { level: 20, throughLevel: 30, classes: ['WIZ'], view: 'at' })), [1])
     assert.equal(at.records[0].calculations?.[0].modifiers?.rank, 5)
     assert.equal(at.records[0].calculations?.[0].analysis?.level, 20)
     assert.equal(at.records[0].description, 'Synthetic description')
     const upcoming = f.call<SpellByLevelResult>('byLevel', { level: 20, classes: ['CLR', 'WIZ'], view: 'upcoming' }, modifiers)
     assert.deepEqual(ids(upcoming), [2, 6, 3]); assert.equal(upcoming.throughLevel, 30)
     assert.deepEqual(upcoming.records.map((r) => r.learnedLevel), [21, 21, 30])
+    const nameSorted = f.call<SpellByLevelResult>('byLevel', { level: 20, classes: ['WIZ'], view: 'upcoming', sortBy: 'name', direction: 'asc' })
+    assert.deepEqual(ids(nameSorted), [5, 3, 2, 6], 'By level honors the selected full-catalog sort before pagination')
     assert.equal(upcoming.records[0].detectedRank, null, 'duplicate names never inherit a detected mote upgrade')
     const edited = f.call<SpellByLevelResult>('byLevel', { level: 20, throughLevel: 31, classes: ['WIZ'], view: 'upcoming', pageSize: 2, page: 2 })
     assert.deepEqual(ids(edited), [5, 3]); assert.equal(edited.total, 5)
@@ -151,6 +154,13 @@ test('rankings and By level validate bounded analysis settings and cache context
     f.storage.publish({ root: f.root, reason: 'manual', parserVersion: '1', ...syntheticCatalog([updated]) })
     assert.equal(f.rankings().records[0].calculation.total, 200)
     assert.equal(f.rankings({ snapshotId: f.dataset.snapshotId }).records[0].calculation.total, 100)
+  } finally { f.close() }
+})
+
+test('By level amount sorting evaluates client values even without modifier or analysis options', () => {
+  const f = fixture([spellRow(1, 'Mid', 10, 80), spellRow(2, 'Low', 10, 50), spellRow(3, 'High', 10, 135)])
+  try {
+    assert.deepEqual(ids(f.call<SpellByLevelResult>('byLevel', { level: 1, classes: ['WIZ'], view: 'at', sortBy: 'amount', direction: 'desc' })), [3, 1, 2])
   } finally { f.close() }
 })
 

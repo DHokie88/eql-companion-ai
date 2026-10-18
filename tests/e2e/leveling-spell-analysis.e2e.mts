@@ -9,6 +9,7 @@ import { spellBundle, spellFields } from '../fixtures/spell-library/synthetic'
 import { buildIfStale, dumpArtifacts, settle, waitHydrated } from './appHarness.mjs'
 import { mainWindow } from './appWindow.mjs'
 import { launchOnFixture, stageFixture, type FixtureLog } from './logFixture.mjs'
+import { playWho } from './gameplay.mjs'
 
 function row(id: number, name: string, level: number, options: { damage: number; target?: number }): string {
   const { damage, target = 5 } = options
@@ -114,6 +115,7 @@ const page = await mainWindow(launch.app)
 page.setDefaultTimeout(20_000)
 try {
   await waitHydrated(page)
+  playWho(staged)
   await settle(() => page.evaluate(() => window.eq.spellLibrary.status()), (value) => value.dataset?.recordCount === 16, { timeoutMs: 30_000 })
   await compactParity(page)
   await sharedModesAndTargets(page)

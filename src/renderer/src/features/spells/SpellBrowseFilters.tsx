@@ -15,9 +15,10 @@ function ChoiceFilter({ name, label, value, options, onChange }: {
 function textOptions(values: string[], selected: string) {
   return [...new Set([...values, ...(selected ? [selected] : [])])].map((value) => ({ value, label: value }))
 }
-export function SpellBrowseFilters({ filters, maximum, categories, subcategories, change, reset, invalid }: {
+export function SpellBrowseFilters({ filters, maximum, categories, subcategories, change, reset, invalid, hideTypes = false }: {
   filters: BrowseFilters; maximum: string; categories: string[]; subcategories: string[]; invalid: string | null
   change: <K extends keyof BrowseFilters>(key: K, value: BrowseFilters[K]) => void; reset: () => void
+  hideTypes?: boolean
 }): JSX.Element {
   return <Stack spacing={1.5}>
     <Stack direction="row" gap={1} flexWrap="wrap">
@@ -26,10 +27,10 @@ export function SpellBrowseFilters({ filters, maximum, categories, subcategories
       <TextField size="small" label="Max spell level" type="number" value={maximum} error={!!invalid} slotProps={{ htmlInput: { min: 1, max: 255, 'data-testid': 'spells-max-level' } }} onChange={(e) => change('max', e.target.value)} sx={{ width: 150 }} />
       <Button onClick={reset} data-testid="spells-reset-filters">Reset filters</Button>
     </Stack>
-    <ToggleButtonGroup size="small" exclusive value={filters.type} onChange={(_e, value: SpellBrowseType | '' | null) => { if (value !== null) change('type', value) }} aria-label="Spell type" sx={{ flexWrap: 'wrap' }}>
+    {!hideTypes && <ToggleButtonGroup size="small" exclusive value={filters.type} onChange={(_e, value: SpellBrowseType | '' | null) => { if (value !== null) change('type', value) }} aria-label="Spell type" sx={{ flexWrap: 'wrap' }}>
       <ToggleButton value="" data-testid="spells-type-all">All types</ToggleButton>
       {Object.entries(SPELL_TYPE_LABELS).map(([value, label]) => <ToggleButton key={value} value={value} data-testid={`spells-type-${value}`}>{label}</ToggleButton>)}
-    </ToggleButtonGroup>
+    </ToggleButtonGroup>}
     <Stack direction="row" gap={1} flexWrap="wrap">
       <ChoiceFilter name="category" label="Category" value={filters.category} options={textOptions(categories, filters.category)} onChange={(value) => change('category', value)} />
       <ChoiceFilter name="subcategory" label="Subcategory" value={filters.subcategory} options={textOptions(subcategories, filters.subcategory)} onChange={(value) => change('subcategory', value)} />

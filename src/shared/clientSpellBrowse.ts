@@ -53,8 +53,9 @@ function recordSortValue(record: SpellSummary, field: Exclude<SpellBrowseSort, '
   }
 }
 
-export type SpellCalculationSort = 'name' | 'instant' | 'perTick' | 'total' | 'mana' | 'perMana' | 'scope'
+export type SpellCalculationSort = 'name' | 'instant' | 'perTick' | 'total' | 'mana' | 'perMana' | 'scope' | 'rate'
 function calculationSortValue(row: SpellCalculation, column: SpellCalculationSort): string | number | null {
+  if (column === 'rate') return row.analysis?.timing.rate ?? null
   return column === 'scope' ? [...row.reasons, ...row.restrictions].join(' ') : row[column]
 }
 /** Presentation ordering for an already-selected comparison or globally-ranked result group. */

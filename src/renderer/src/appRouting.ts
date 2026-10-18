@@ -11,6 +11,7 @@ import { VIEW_LABELS, type View } from './appViews'
 import { afterBack, afterLink, originTop, type NavOrigin } from './navOrigin'
 import type { CombatFocus } from './features/combat/combatFocus'
 import type { MobTarget } from './features/mobs/mobTarget'
+import type { SpellLibraryFocus } from '@shared/spellAnalysis'
 
 /**
  * THE ONE BACK CONTRACT (JOS-43). Every cross-view drill receiver takes this same object — never
@@ -179,6 +180,9 @@ export interface AppRouting {
   openSpell: (name: string) => void
   clearSpellFocus: () => void
   librarySpellId: number | null
+  libraryFocus: SpellLibraryFocus | null
+  libraryFocusNonce: number
+  clearLibraryFocus: () => void
   openLibrarySpell: (id: number) => void
   clearLibrarySpellFocus: () => void
   /** The item the Character tab should PREVIEW on the model, or null for the sheet as it stands. */
@@ -255,6 +259,20 @@ function useFocusSlot<T>(to: View, linkTo: NavSeam['linkTo']): FocusSlot<T> {
   return useMemo(() => ({ value, nonce, open, clear }), [value, nonce, open, clear])
 }
 
+function useLibraryFocus(linkTo: NavSeam['linkTo']): FocusSlot<SpellLibraryFocus> {
+  const focus = useFocusSlot<SpellLibraryFocus>('spells', linkTo)
+  const open = focus.open
+  useEffect(() => {
+    const receive = (event: Event): void => {
+      const detail = (event as CustomEvent<SpellLibraryFocus>).detail
+      if (detail && ['browse', 'rankings', 'compare', 'by-level'].includes(detail.tab)) open(detail)
+    }
+    window.addEventListener('eqo:spell-library-focus', receive)
+    return () => { window.removeEventListener('eqo:spell-library-focus', receive) }
+  }, [open])
+  return focus
+}
+
 export function useAppRouting(view: View, setView: (v: View) => void): AppRouting {
   const { linkTo, selectView, nav } = useNavSeam(view, setView)
   const mob = useFocusSlot<MobTarget>('mobs', linkTo)
@@ -270,6 +288,7 @@ export function useAppRouting(view: View, setView: (v: View) => void): AppRoutin
   // that draws one.
   const spell = useFocusSlot<string>('spell', linkTo)
   const librarySpell = useFocusSlot<number>('spells', linkTo)
+  const libraryFocus = useLibraryFocus(linkTo)
   // THE ITEM PREVIEW (EQ Zera): an item page asking the character model to wear its item. Same
   // shape as every other slot — the NONCE is what makes asking twice arrive twice, which matters
   // more here than anywhere else because the Character tab UNMOUNTS on every tab switch and a
@@ -287,6 +306,9 @@ export function useAppRouting(view: View, setView: (v: View) => void): AppRoutin
       openSpell: spell.open,
       clearSpellFocus: spell.clear,
       librarySpellId: librarySpell.value,
+      libraryFocus: libraryFocus.value,
+      libraryFocusNonce: libraryFocus.nonce,
+      clearLibraryFocus: libraryFocus.clear,
       openLibrarySpell: librarySpell.open,
       clearLibrarySpellFocus: librarySpell.clear,
       mobTarget: mob.value,
@@ -318,7 +340,7 @@ export function useAppRouting(view: View, setView: (v: View) => void): AppRoutin
       openCharacter: character.open,
       clearPreviewFocus: character.clear
     }),
-    [selectView, nav, spell, librarySpell, mob, quest, questPage, level, combat, loot, character]
+    [selectView, nav, spell, librarySpell, libraryFocus, mob, quest, questPage, level, combat, loot, character]
   )
 }
 

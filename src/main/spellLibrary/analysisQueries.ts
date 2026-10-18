@@ -1,6 +1,6 @@
 import type { ClientSpellRecord, SpellDataset, SpellSummary } from '../../shared/spellLibrary'
 import { SPELL_ANALYSIS_MODEL_VERSION, type SpellAnalysisSort, type SpellByLevelResult, type SpellRankingRow, type SpellRankingsResult } from '../../shared/spellAnalysis'
-import { compareSpellValues, matchesSpellType, minimumSpellLevel } from '../../shared/clientSpellBrowse'
+import { compareSpellValues, matchesSpellType, minimumSpellLevel, spellBrowseSortValue } from '../../shared/clientSpellBrowse'
 import { analysisArg, ANALYSIS_SORTS, choiceArg, RANKING_CATEGORIES } from './analysisValidation'
 import { matchesSpellSearch, SEARCH_QUERY_FIELDS, spellSearchOptions } from './browseQuery'
 import { catalogSummary } from './searchCatalog'
@@ -59,10 +59,11 @@ function rankingOptions(input: unknown) {
 }
 function byLevelOptions(input: unknown) {
   const query = queryObject(input, [...SEARCH_QUERY_FIELDS, 'view', 'throughLevel'])
-  const base = spellSearchOptions(query)
+  const base = spellSearchOptions({ ...query, sortBy: query.sortBy ?? 'level' })
   const level = levelArg(query.level)
   const view = choiceArg(query.view, 'level view', ['at', 'upcoming'] as const)
-  const throughLevel = levelArg(query.throughLevel ?? (view === 'at' ? level : Math.min(255, level + 10)))
+  const requestedEnd = levelArg(query.throughLevel ?? Math.min(255, level + 10))
+  const throughLevel = view === 'at' ? level : requestedEnd
   if (throughLevel < level) throw new Error('Through level must not precede the selected level')
   const start = view === 'at' ? level : level + 1
   const min = Math.max(start, base.minLevel ?? start)
@@ -120,7 +121,8 @@ export class SpellAnalysisQueries {
         detectedRank: this.evaluation.detectedRank(dataset, record, context),
         calculations: this.byLevelCalculations(record, learned, options.query, calculate) })
     }
-    rows.sort((a, b) => (a.learnedLevel ?? 0) - (b.learnedLevel ?? 0) || a.id - b.id)
+    rows.sort((a, b) => compareSpellValues(spellBrowseSortValue(a, options.filters.sortBy, options.filters.selected),
+      spellBrowseSortValue(b, options.filters.sortBy, options.filters.selected), options.filters.direction) || a.id - b.id)
     return { dataset, total: rows.length, page: options.page, pageSize: options.pageSize,
       records: rows.slice((options.page - 1) * options.pageSize, options.page * options.pageSize),
       categories: [...result.categories].sort(), subcategories: [...result.subcategories].sort(),
@@ -128,7 +130,7 @@ export class SpellAnalysisQueries {
   }
 
   private byLevelCalculations(record: ClientSpellRecord, level: number, query: Record<string, unknown>, calculate: SpellCalculator) {
-    if (query.analysis === undefined && query.evaluation === undefined) return undefined
+    if (query.analysis === undefined && query.evaluation === undefined && query.sortBy !== 'amount' && query.sortBy !== 'efficiency') return undefined
     return record.effects.some((effect) => [0, 79, 100, 101, 334].includes(effect.spa))
       ? [calculate(record, level, record.beneficial ? 'healing' : 'damage')] : []
   }

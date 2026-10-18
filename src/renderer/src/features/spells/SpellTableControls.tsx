@@ -1,4 +1,5 @@
-import { type JSX, type ReactNode, useState } from 'react'
+import { type JSX, type ReactNode } from 'react'
+import { useSpellWorkspaceState } from './spellWorkspace'
 import { Button, TableCell, TableSortLabel } from '@mui/material'
 import type { SpellSortDirection } from '@shared/spellLibrary'
 
@@ -7,11 +8,12 @@ export function SpellNameButton({ id, children, onOpen }: { id: number; children
     sx={{ justifyContent: 'flex-start', textAlign: 'left', width: '100%', minWidth: 0, px: 0 }}>{children}</Button>
 }
 
-export function useSpellSort<T extends string>(initial: T, direction: SpellSortDirection = 'asc') {
-  const [sort, setSort] = useState<{ field: T; direction: SpellSortDirection }>({ field: initial, direction })
+export function useSpellSort<T extends string>(initial: T, direction: SpellSortDirection = 'asc', key: string = initial) {
+  const [sort, setSort] = useSpellWorkspaceState<{ field: T; direction: SpellSortDirection }>(`sort-${key}`, { field: initial, direction })
   const changeSort = (field: T): void => setSort((previous) => ({ field,
     direction: previous.field === field && previous.direction === 'asc' ? 'desc' : 'asc' }))
-  return { ...sort, changeSort }
+  const selectSort = (field: T, direction: SpellSortDirection): void => setSort({ field, direction })
+  return { ...sort, changeSort, selectSort }
 }
 
 export function SpellSortHeader<T extends string>({ field, label, sort, numeric = false }: {

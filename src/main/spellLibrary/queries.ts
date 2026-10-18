@@ -5,6 +5,7 @@ import type {
 } from '../../shared/spellLibrary'
 import { WorkerSpellEvaluation, spellEvaluationScope, type SpellCalculator } from './workerEvaluation'
 import { searchCatalog } from './searchCatalog'
+import { describeClientSpell } from '../../shared/clientSpellDescriptions'
 import { SEARCH_QUERY_FIELDS } from './browseQuery'
 import { SpellAnalysisQueries } from './analysisQueries'
 import { SpellQueryCache } from './queryCache'
@@ -107,7 +108,8 @@ export class SpellLibraryQueries {
     const dataset = this.dataset(installId, query)
     const record = dataset ? this.storage.record(dataset.snapshotId, id) : null
     const calculate = this.evaluation.calculator(dataset, query, context)
-    return { dataset, record, ...((query.evaluation !== undefined || query.analysis !== undefined) && record ? { calculations: hpCalculations(record, levelArg(query.level), calculate) } : {}) }
+    const presentation = record && query.level !== undefined ? describeClientSpell(record, levelArg(query.level)) : undefined
+    return { dataset, record, presentation, ...((query.evaluation !== undefined || query.analysis !== undefined) && record ? { calculations: hpCalculations(record, levelArg(query.level), calculate) } : {}) }
   }
   private compare(installId: string, input: unknown, context: unknown): SpellComparisonResult {
     const query = queryObject(input, ['snapshotId', 'ids', 'level', 'metric', 'evaluation', 'analysis'])

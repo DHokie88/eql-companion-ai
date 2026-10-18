@@ -91,7 +91,7 @@ export interface SpellSearchResult {
   subcategories: string[]
 }
 export interface SpellDetailQuery extends SpellQueryContext { id: number; level?: number; evaluation?: SpellEvaluationOptions; analysis?: SpellAnalysisOptions }
-export interface SpellDetailResult { dataset: SpellDataset | null; record: ClientSpellRecord | null; calculations?: SpellCalculation[] }
+export interface SpellDetailResult { dataset: SpellDataset | null; record: ClientSpellRecord | null; calculations?: SpellCalculation[]; presentation?: import('./clientSpellDescriptions').SpellPresentation }
 export type SpellMetric = 'damage' | 'healing'
 export interface SpellCalculation {
   analysis?: SpellAnalysis

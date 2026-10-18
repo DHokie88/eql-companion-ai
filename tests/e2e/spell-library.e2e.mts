@@ -1,11 +1,11 @@
 /** Synthetic, three-file import through the real workers, preload, renderer and Rust engine. */
 import assert from 'node:assert/strict'
-import { writeFileSync, statSync, utimesSync, mkdirSync, unlinkSync } from 'node:fs'
+import { writeFileSync, statSync, utimesSync, unlinkSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Page } from 'playwright-core'
 import { SPELL_SOURCE_FILES, type SpellLibraryStatus, type SpellSourceFile } from '../../src/shared/spellLibrary'
 import { spellBundle, spellFields } from '../fixtures/spell-library/synthetic'
-import { buildIfStale, settle, dumpArtifacts, ARTIFACTS } from './appHarness.mjs'
+import { buildIfStale, settle, dumpArtifacts } from './appHarness.mjs'
 import { mainWindow, makeUserData, removeUserData } from './appWindow.mjs'
 import { launchOnFixture, stageFixture, type FixtureLog } from './logFixture.mjs'
 
@@ -18,7 +18,8 @@ async function ready(page: Page, priorCheck?: string | null): Promise<SpellLibra
 
 async function checkForUpdates(page: Page): Promise<SpellLibraryStatus> {
   const prior = await page.evaluate(() => window.eq.spellLibrary.status())
-  await page.locator('[data-testid="spells-check"]').click()
+  if (await page.locator('[data-testid="library-spell-dialog"]').isVisible()) await page.evaluate(() => window.eq.spellLibrary.check())
+  else await page.locator('[data-testid="spells-check"]').click()
   return ready(page, prior.checkedAt)
 }
 
@@ -110,9 +111,11 @@ try {
   await page.locator('[data-testid="spells-compare-101"]').click()
   await page.locator('[data-testid="spells-compare-102"]').click()
   await page.locator('[data-testid="spells-tab-compare"]').click()
-  await page.locator('[data-testid="spells-ranked-count"]').waitFor()
-  assert.match(await page.locator('[data-testid="spells-ranked-count"]').innerText(), /Scanned 3/)
+  await settle(() => page.locator('[data-testid="spells-calculation"]').count(), (count) => count === 2)
   assert.ok(await page.locator('[data-testid="spells-calculation"]').count() >= 2)
+  await page.locator('[data-testid="spells-tab-rankings"]').click()
+  await page.locator('[data-testid="spells-ranked-count"]').waitFor()
+  assert.match(await page.locator('[data-testid="spells-ranked-count"]').innerText(), /2 matching ranked/)
   await page.locator('[data-testid="spells-tab-browse"]').click()
   await page.locator('[data-testid="spells-open-101"]').click()
   await page.locator('[data-testid="spells-detail"]').waitFor()
@@ -167,8 +170,7 @@ try {
   assert.equal(await page.locator('[data-testid="spells-record"]').count(), 0)
   await page.locator('[data-testid="spells-effect"]').fill('79')
   await page.locator('[data-testid="spells-open-101"]').waitFor()
-  mkdirSync(ARTIFACTS, { recursive: true })
-  await page.screenshot({ path: join(ARTIFACTS, 'browse.png'), fullPage: true, timeout: 30_000 })
+  await dumpArtifacts(page, 'browse')
 
   writeFileSync(join(staged.installDir, 'spells_us.txt'), 'broken^partial\n')
   await page.locator('[data-testid="spells-check"]').click()
