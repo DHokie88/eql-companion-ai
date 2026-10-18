@@ -144,7 +144,7 @@ export interface SpellBeforeAfterResult {
   differences: SpellFieldDifference[]
 }
 export interface SpellTimelineQuery { id: number }
-export interface SpellTimelineResult { dataset: SpellDataset | null; entries: Array<{ observation: SpellObservation; record: SpellSummary | null }> }
+export interface SpellTimelineResult { dataset: SpellDataset | null; entries: { observation: SpellObservation; record: SpellSummary | null }[] }
 export interface SpellLibraryBridge {
   status(): Promise<SpellLibraryStatus>
   check(): Promise<SpellLibraryStatus>

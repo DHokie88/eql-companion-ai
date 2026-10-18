@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
+import { spawn } from 'node:child_process'
 import { SPELL_SOURCE_FILES, type SpellRankingResult, type SpellSearchResult } from '../src/shared/spellLibrary'
 import { SpellLibraryStorage, spellInstallId } from '../src/main/spellLibrary/storage'
 import { SpellLibraryQueries } from '../src/main/spellLibrary/queries'
@@ -28,7 +29,7 @@ test('immutable content-addressed history records A > B > A and parser upgrades 
     const same = f.storage.publish({ root: f.root, reason: 'manual', parserVersion: '2', ...a })
     assert.equal(same.observation.outcome, 'unchanged')
     assert.equal(f.storage.observations(first.dataset.installId).total, 5)
-    assert.equal(f.storage.db.prepare('SELECT count(*) AS n FROM revisions').get()?.n, 3)
+    assert.equal(f.storage.db.prepare('SELECT count(*) AS n FROM revisions').get()?.n, 2, 'a parser upgrade shares unchanged immutable records')
     assert.equal(f.storage.db.prepare('SELECT count(*) AS n FROM snapshots').get()?.n, 3)
     assert.ok(existsSync(first.materializedDir), 'writer leaves old generations until coordinator releases readers')
   } finally { f.close() }
@@ -144,5 +145,30 @@ test('corrupt archived sources fail materialization without publishing or leakin
     assert.throws(() => f.storage.materialize(result.dataset.installId, result.dataset.snapshotId))
     assert.equal(readdirSync(join(f.options.storageDir, 'materialized')).length, 1)
     assert.equal(f.storage.active(result.dataset.installId)?.snapshotId, result.dataset.snapshotId)
+  } finally { f.close() }
+})
+
+test('a writer process killed during publication leaves the previous active snapshot intact', async () => {
+  const f = storageFixture()
+  try {
+    const baseline = f.storage.publish({ root: f.root, reason: 'startup', parserVersion: '1', ...syntheticCatalog() })
+    const child = spawn(process.execPath, ['--input-type=module', '-e', `
+      import { DatabaseSync } from 'node:sqlite';
+      const db = new DatabaseSync(process.argv[1]);
+      db.exec('PRAGMA foreign_keys=ON; BEGIN IMMEDIATE;');
+      db.prepare('UPDATE installs SET current_snapshot=NULL WHERE id=?').run(process.argv[2]);
+      process.stdout.write('ready');
+      process.stdin.resume();
+    `, f.options.databasePath, baseline.dataset.installId], { stdio: ['pipe', 'pipe', 'pipe'] })
+    const exited = new Promise<void>((resolve) => { child.once('exit', () => resolve()) })
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error('Crash fixture writer did not begin its transaction')), 10_000)
+        child.once('error', (error) => { clearTimeout(timer); reject(error) })
+        child.stdout.once('data', () => { clearTimeout(timer); resolve() })
+      })
+    } finally { child.kill('SIGKILL'); await exited }
+    assert.equal(f.storage.active(baseline.dataset.installId)?.snapshotId, baseline.dataset.snapshotId)
+    assert.equal(f.storage.observations(baseline.dataset.installId).total, 1)
   } finally { f.close() }
 })

@@ -314,21 +314,16 @@ function unlockSpells(client: SpellResistTable | null): UnlockSpell[] {
 let cached: LevelUnlockData | null = null
 /** Was `cached` built with the client table in hand? See `buildLevelUnlocks`. */
 let cachedWithClient = false
+let cachedClient: SpellResistTable | null = null
 
 /**
- * The whole dataset, built once — and REBUILT ONCE MORE if the client's spell table shows up after
- * the first build (JOS-396).
- *
- * The inputs used to be compile-time constants, so "cached forever" was the whole story. The client
- * table is not: it is parsed on a worker (`src/main/resist/spellTable.ts`), takes a moment on a cold
- * launch, and a player who opens the Leveling tab in that moment would otherwise be handed a dataset
- * with Odium's damage permanently missing — for the rest of the run, because the cache would never
- * be asked again. One boolean fixes it: a dataset folded WITHOUT the table is provisional and is
- * rebuilt the first time a read arrives with one. The rebuild costs the same ~2,000-row fold the
- * first one did and happens at most once per run, because the table never becomes null again.
+ * Reuse the derived dataset only for the same immutable client handle. A better projection replaces
+ * a provisional wiki-only fold; a new captured handle rebuilds it. An omitted client argument keeps
+ * the existing better fold within that generation. The reference owner explicitly clears this cache
+ * on installation changes and activation, so a different installation cannot inherit the old fold.
  */
 export function buildLevelUnlocks(client: SpellResistTable | null = null): LevelUnlockData {
-  if (cached && (cachedWithClient || !client)) return cached
+  if (cached && (client === null || cachedClient === client) && (cachedWithClient || !client)) return cached
   const skillTable = classesJson.skillUnlocks as Record<string, RawUnlock[]>
   const discTable = classesJson.discUnlocks as Record<string, RawUnlock[]>
   const disputed: string[] = classesJson.disputed
@@ -339,6 +334,7 @@ export function buildLevelUnlocks(client: SpellResistTable | null = null): Level
   }
   cached = { spells: unlockSpells(client), skills, scrapedAt: classesJson.scrapedAt }
   cachedWithClient = client !== null
+  cachedClient = client
   return cached
 }
 
@@ -346,6 +342,7 @@ export function buildLevelUnlocks(client: SpellResistTable | null = null): Level
 export function resetLevelUnlocksCache(): void {
   cached = null
   cachedWithClient = false
+  cachedClient = null
 }
 
 /**

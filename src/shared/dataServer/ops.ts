@@ -14,6 +14,7 @@
 import type { ClientMessage, ErrorCode, Hello, ReplyResult, RequestId } from './protocol.generated'
 import type {
   AttachResult,
+  ClientSpellsActivateResult,
   CombatSearchFightsResult,
   CombatSnapshotResult,
   DefineAck,
@@ -37,6 +38,7 @@ import type {
 interface ResultRegistry {
   echo: EchoResult
   'session.attach': AttachResult
+  'clientSpells.activate': ClientSpellsActivateResult
   'session.health': HealthResult
   'session.progress': SubscribeAck
   'module.snapshot': ModuleSnapshotResult
@@ -242,6 +244,7 @@ export const RESULT_GUARDS: Record<RequestOp, (result: ReplyResult) => boolean> 
   // `uptimeMs`. The field is required even when it is EMPTY — a filter that excludes everything is a
   // real answer here and must not read as a wrong shape.
   'spells.search': (r) => 'spells' in r,
+  'clientSpells.activate': (r) => 'clientSpellsActivated' in r,
   // `applied` — the push joins the ack family, and the guard says so rather than pretending
   // otherwise. `logs.setDir` carries ONE DIRECTORY and therefore no `count`, which is the same
   // answer `buffTrust.define` and `respawn.define` give, so no field could separate it from the six

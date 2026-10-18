@@ -5,6 +5,8 @@ Fork startup gate: every fork code change must pass `npm run build` and
 test runs the real `Open-Fork.cmd`, built renderer/preload and release engine in
 an isolated test profile. Build the matching engine with `npm run build:engine`
 when engine code changes; a successful compile alone does not prove the app loads.
+Finish `npm run build` before starting `npm test`: the symbolication round-trip tests read emitted
+bundles and maps from `out/`, so a concurrent rebuild can remove a map between their reads.
 
 Distilled operating manual. Per-task history lives in `git log` and Linear;
 this file holds only repeatable rules and load-bearing design. Long-form war
@@ -120,6 +122,9 @@ docs/agents-archive.md.
   row (spec · signature · occurrences · disposition), integrators append on
   sighting, and a flake at 3+ occurrences must have a fix ticket or chip —
   "green on re-run" is a report line, never a resolution. Known rows:
+  - `symbolicate.test` emitted-map round trip · `out/preload/index.js.map is missing` during
+    a concurrent `npm run build` · 1 sighting (2026-10-18, Oracle Spells verification) · resolved
+    by sequencing build before unit verification; the ordering is now documented in the fork gate.
   - `sky-filters.e2e` · remount race · **RESOLVED 9816cd34 (JOS-279)**
     (`tests/e2e/viewRemount.mts` holds the precondition); a SECOND distinct
     cause with the guard holding · 1 sighting 2026-08-13 · watch. Both rows

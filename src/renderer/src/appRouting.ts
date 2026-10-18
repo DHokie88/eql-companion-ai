@@ -178,6 +178,9 @@ export interface AppRouting {
    */
   openSpell: (name: string) => void
   clearSpellFocus: () => void
+  librarySpellId: number | null
+  openLibrarySpell: (id: number) => void
+  clearLibrarySpellFocus: () => void
   /** The item the Character tab should PREVIEW on the model, or null for the sheet as it stands. */
   previewItem: string | null
   previewNonce: number
@@ -266,6 +269,7 @@ export function useAppRouting(view: View, setView: (v: View) => void): AppRoutin
   // to every spell name in the window, so a fresh identity per render would re-render every list
   // that draws one.
   const spell = useFocusSlot<string>('spell', linkTo)
+  const librarySpell = useFocusSlot<number>('spells', linkTo)
   // THE ITEM PREVIEW (EQ Zera): an item page asking the character model to wear its item. Same
   // shape as every other slot — the NONCE is what makes asking twice arrive twice, which matters
   // more here than anywhere else because the Character tab UNMOUNTS on every tab switch and a
@@ -282,6 +286,9 @@ export function useAppRouting(view: View, setView: (v: View) => void): AppRoutin
       spellNonce: spell.nonce,
       openSpell: spell.open,
       clearSpellFocus: spell.clear,
+      librarySpellId: librarySpell.value,
+      openLibrarySpell: librarySpell.open,
+      clearLibrarySpellFocus: librarySpell.clear,
       mobTarget: mob.value,
       mobNonce: mob.nonce,
       openMob: mob.open,
@@ -311,7 +318,7 @@ export function useAppRouting(view: View, setView: (v: View) => void): AppRoutin
       openCharacter: character.open,
       clearPreviewFocus: character.clear
     }),
-    [selectView, nav, spell, mob, quest, questPage, level, combat, loot, character]
+    [selectView, nav, spell, librarySpell, mob, quest, questPage, level, combat, loot, character]
   )
 }
 

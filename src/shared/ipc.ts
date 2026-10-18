@@ -1,6 +1,10 @@
 // Central registry of IPC channel names so main/preload/renderer stay in sync.
 
 export const IPC = {
+  spellLibraryStatus: 'spellLibrary:status',
+  spellLibraryCheck: 'spellLibrary:check',
+  spellLibraryQuery: 'spellLibrary:query',
+  spellLibraryStatusChanged: 'spellLibrary:statusChanged',
   // ---- module transport (the one pattern for loot/turnins/kills/leveling/character) ----
   // renderer -> main
   getModuleSnapshot: 'module:getSnapshot',

@@ -46,6 +46,7 @@ import { registerDevIpc } from './dev'
 import { registerFeedbackIpc } from './feedback'
 import { registerGraphicsIpc } from './graphics'
 import { registerKnowledgeIpc } from './knowledge'
+import { registerSpellLibraryIpc } from './spellLibrary'
 import { registerMapsIpc } from './maps'
 import { registerOutputsIpc } from './outputs'
 import { registerPerfIpc } from './perf'
@@ -134,6 +135,7 @@ export function registerIpc(): void {
   registerSoundsIpc()
   registerSpeechIpc()
   registerKnowledgeIpc()
+  registerSpellLibraryIpc()
   registerPlannerIpc()
   registerMapsIpc()
   registerPresenceIpc()

@@ -6,6 +6,7 @@ import { rosterApi } from './roster'
 import { soundsBridge } from './sounds'
 // "What IS this" — the spell/item/mob lookups, split out at the 400-line ceiling (preload/knowledge.ts).
 import { knowledgeBridge } from './knowledge'
+import { spellLibrary } from './spellLibrary'
 // The log-stream pushes — line / character rebuild / quiet-switch offer (preload/logStream.ts).
 import { logStreamBridge } from './logStream'
 // WRAPPED SEVERAL NAMES TO A LINE, NOT ONE PER LINE, and that is a factoring decision rather than
@@ -405,6 +406,7 @@ const api = {
   ...soundsBridge,
   /** "What IS this" — spell / item / mob lookups, and the spell catalog: preload/knowledge.ts. */
   ...knowledgeBridge,
+  spellLibrary,
 
   // ---- voice alerts / TTS (docs/plans/voice-alerts.md §3) ----
   // The 'system' tier needs NOTHING here: Chromium's `speechSynthesis` is already in the

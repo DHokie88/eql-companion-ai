@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto'
 import type { ClientSpellRecord, SpellChangeCounts, SpellChangeKind, SpellFieldDifference } from '../../shared/spellLibrary'
+import { INTERPRETED_SPELL_COLUMNS } from '../../shared/clientSpellParser'
 
 export function stableJson(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(stableJson).join(',')}]`
@@ -25,17 +26,22 @@ function changedKeys(a: Record<string, unknown>, b: Record<string, unknown>): st
 }
 function rawDifferences(before: ClientSpellRecord, after: ClientSpellRecord): SpellFieldDifference[] {
   const result: SpellFieldDifference[] = []
-  const length = Math.max(before.rawFields.length, after.rawFields.length)
-  for (let i = 0; i < length; i++) {
-    if (before.rawFields[i] !== after.rawFields[i]) result.push({
-      field: `rawFields[${i}]`, before: before.rawFields[i] ?? null, after: after.rawFields[i] ?? null, kind: 'raw-only'
+  for (let i = 0; i < 173; i++) {
+    if (INTERPRETED_SPELL_COLUMNS.has(i)) continue
+    const oldIndex = i + (before.layout === 174 && i >= 74 ? 1 : 0)
+    const newIndex = i + (after.layout === 174 && i >= 74 ? 1 : 0)
+    if (before.rawFields[oldIndex] !== after.rawFields[newIndex]) result.push({
+      field: `rawFields[${i}] (173-layout index)`, before: before.rawFields[oldIndex], after: after.rawFields[newIndex], kind: 'raw-only'
     })
+  }
+  if (before.layout === 174 && after.layout === 174 && before.rawFields[74] !== after.rawFields[74]) {
+    result.push({ field: 'rawFields[74] (inserted column)', before: before.rawFields[74], after: after.rawFields[74], kind: 'raw-only' })
   }
   return result
 }
 function namedDifferences(before: ClientSpellRecord, after: ClientSpellRecord, parserChanged: boolean): SpellFieldDifference[] {
   return changedKeys(before.fields, after.fields).map((field) => {
-    const kind = ['extra', 'layoutInserted74'].includes(field) ? 'raw-only' : parserChanged ? 'parser-upgrade' : 'interpreted'
+    const kind = parserChanged ? 'parser-upgrade' : 'interpreted'
     return { field: `fields.${field}`, before: before.fields[field] ?? null, after: after.fields[field] ?? null, kind }
   })
 }

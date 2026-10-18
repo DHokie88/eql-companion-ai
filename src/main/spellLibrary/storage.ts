@@ -8,7 +8,7 @@ import {
   type SpellObservation
 } from '../../shared/spellLibrary'
 import { sourceHash, type CapturedSpellBundle } from './capture'
-import { countChanges, emptyCounts, identityHash, stableJson } from './differences'
+import { countChanges, emptyCounts, identityHash, stableJson, spellDifferences } from './differences'
 import { SPELL_SCHEMA } from './schema'
 import type { SpellCheckResult, SpellStorageStatus, SpellWorkerData } from './workerProtocol'
 
@@ -37,6 +37,13 @@ function diskBytes(path: string): number {
   if (statSync(path).isFile()) return statSync(path).size
   return readdirSync(path, { withFileTypes: true }).reduce((sum, item) =>
     sum + (item.isSymbolicLink() ? 0 : diskBytes(join(path, item.name))), 0)
+}
+
+function observationMessage(outcome: SpellObservation['outcome'], counts: SpellObservation['counts'], records: number): string {
+  if (outcome === 'changed' && counts.interpreted === 0 && counts.added === 0 && counts.removed === 0) {
+    return 'Source files changed; no interpreted spell changes. Raw or format differences remain available.'
+  }
+  return `${records} client spells; ${outcome}. ${counts.added} added, ${counts.changed} changed, ${counts.removed} removed.`
 }
 
 /** One writer owns this connection. Query workers open independent read-only WAL connections. */
@@ -138,7 +145,7 @@ export class SpellLibraryStorage {
     this.statement('INSERT INTO snapshots(id,content_id,parser_version,first_observed,record_count) VALUES(?,?,?,?,?)')
       .run(snapshotId, contentId, input.parserVersion, observedAt, input.records.length)
     for (const record of input.records) {
-      const hash = identityHash({ parserVersion: input.parserVersion, record })
+      const hash = identityHash(record)
       this.statement('INSERT OR IGNORE INTO revisions(hash,spell_id,record) VALUES(?,?,?)').run(hash, record.id, stableJson(record))
       const revision = this.statement('SELECT id FROM revisions WHERE hash=?').get(hash)
       if (!revision) throw new Error('Missing spell revision')
@@ -165,6 +172,20 @@ export class SpellLibraryStorage {
       this.archiveSource(capture.hashes[name], capture.sources[name])
     }
   }
+  private persistDifferences(observationId: number, before: SpellDataset | null, input: SpellImportInput): void {
+    // A baseline defines the starting catalog, rather than a patch with thousands of additions.
+    if (!before) return
+    const prior = new Map(Array.from(this.records(before.snapshotId), (record) => [record.id, record]))
+    const save = (old: ClientSpellRecord | null, next: ClientSpellRecord | null): void => {
+      const id = next?.id ?? old?.id
+      for (const difference of spellDifferences(old, next, before.parserVersion !== input.parserVersion)) {
+        this.statement('INSERT INTO field_differences(observation_id,spell_id,field,kind,before_value,after_value) VALUES(?,?,?,?,?,?)')
+          .run(observationId, id ?? 0, difference.field, difference.kind, stableJson(difference.before), stableJson(difference.after))
+      }
+    }
+    for (const record of input.records) { save(prior.get(record.id) ?? null, record); prior.delete(record.id) }
+    for (const record of prior.values()) save(record, null)
+  }
   publish(input: SpellImportInput): SpellCheckResult {
     this.validateRecords(input)
     const installId = this.ensureInstall(input.root)
@@ -186,10 +207,12 @@ export class SpellLibraryStorage {
       const next = this.datasetUnchecked(installId, snapshotId)
       const outcome = this.outcome(previous, next, seen)
       const counts = outcome === 'unchanged' ? emptyCounts() : countChanges(previous ? this.records(previous.snapshotId) : [], input.records, previous?.parserVersion !== next.parserVersion)
+      const message = observationMessage(outcome, counts, input.records.length)
       const observation = { observedAt, reason: input.reason, outcome, snapshotId,
-        previousSnapshotId: previous?.snapshotId ?? null, message: `${input.records.length} client spells; ${outcome}`, counts }
+        previousSnapshotId: previous?.snapshotId ?? null, message, counts }
       const result = this.statement('INSERT INTO observations(install_id,observed_at,reason,outcome,snapshot_id,previous_snapshot_id,message,counts) VALUES(?,?,?,?,?,?,?,?)')
         .run(installId, observedAt, input.reason, outcome, snapshotId, observation.previousSnapshotId, observation.message, stableJson(counts))
+      if (outcome !== 'unchanged') this.persistDifferences(Number(result.lastInsertRowid), previous, input)
       this.statement('UPDATE installs SET current_snapshot=?,checked_at=? WHERE id=?').run(snapshotId, observedAt, installId)
       this.db.exec('COMMIT')
       return { dataset: next, observation: { id: Number(result.lastInsertRowid), ...observation }, materializedDir }

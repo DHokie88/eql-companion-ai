@@ -100,10 +100,11 @@
 import * as koffi from 'koffi'
 // The client's image name, imported rather than respelled: the running scan and the
 // "is this window EverQuest" predicate must never disagree about what the game is called.
-import { EQ_CLIENT_EXES } from './presenceProtocol'
+import { createProcessScanner } from './presenceProcessScan'
+import type { EqClientProcess } from '../shared/eqClientProcess'
 
 /**
- * What the watcher can ask Windows. Deliberately four methods and no state: this module is a
+ * What the watcher can ask Windows. Native observations only: this module is a
  * translation layer, and every decision made from these answers lives in `presenceProtocol.ts`.
  */
 export interface PresenceNative {
@@ -128,6 +129,8 @@ export interface PresenceNative {
   imagePath(pid: number): string
   /** 1 = an EverQuest client is running, 0 = none is, -1 = the enumeration itself failed. */
   eqRunning(rootWithSep: string): number
+  /** Shared scan: legacy running policy plus actual client identities from verified kernel handles. */
+  scanProcesses(rootWithSep: string): { running: number; clients: EqClientProcess[] | null }
 }
 
 /**
@@ -247,6 +250,7 @@ export function loadPresenceNative(): PresenceNative {
     'void *__stdcall OpenProcess(uint32 access, bool inherit, uint32 pid)'
   )
   const CloseHandle = bind(kernel32, 'bool __stdcall CloseHandle(void *h)')
+
   const QueryFullProcessImageNameW = bind(
     kernel32,
     'bool __stdcall QueryFullProcessImageNameW(void *h, uint32 flags, _Out_ void *buf, _Inout_ uint32 *size)'
@@ -324,22 +328,31 @@ export function loadPresenceNative(): PresenceNative {
     }
   }
 
-  function eqRunning(rootWithSep: string): number {
+  const creationTime = creationTimeReader(kernel32)
+  const scanProcesses = createProcessScanner({ imagePath, creationTime, pids: () => {
     const needed = [0]
-    if (!asBool(EnumProcesses(pidBuf, MAX_PIDS * 4, needed))) return -1
-    const count = Math.min(Math.floor(needed[0] / 4), MAX_PIDS)
-    const root = rootWithSep.toLowerCase()
-    for (let i = 0; i < count; i++) {
-      const pid = pidBuf[i]
-      if (pid === 0) continue
-      const path = imagePath(pid).toLowerCase()
-      if (path.length === 0) continue
-      const cut = path.lastIndexOf('\\')
-      if (EQ_CLIENT_EXES.has(cut < 0 ? path : path.slice(cut + 1))) return 1
-      if (root.length > 0 && path.startsWith(root)) return 1
-    }
-    return 0
-  }
+    if (!asBool(EnumProcesses(pidBuf, MAX_PIDS * 4, needed)) || needed[0] >= MAX_PIDS * 4) return null
+    return Array.from(pidBuf.slice(0, Math.floor(needed[0] / 4))).filter((pid) => pid !== 0)
+  } })
+  return { cursorShowing, foreground, imagePath, eqRunning: (root) => scanProcesses(root).running, scanProcesses }
+}
 
-  return { cursorShowing, foreground, imagePath, eqRunning }
+/** Read the image and kernel birth time from one handle, rejecting a PID-reuse race. */
+function creationTimeReader(kernel32: ReturnType<typeof koffi.load>): (pid: number, expectedPath: string) => string | null {
+  const open = bind(kernel32, 'void *__stdcall OpenProcess(uint32 access, bool inherit, uint32 pid)')
+  const close = bind(kernel32, 'bool __stdcall CloseHandle(void *h)')
+  const getTimes = bind(kernel32, 'bool __stdcall GetProcessTimes(void *h, _Out_ void *created, _Out_ void *exited, _Out_ void *kernel, _Out_ void *user)')
+  const getImage = bind(kernel32, 'bool __stdcall QueryFullProcessImageNameW(void *h, uint32 flags, _Out_ void *buf, _Inout_ uint32 *size)')
+  const times = Array.from({ length: 4 }, () => Buffer.alloc(8))
+  const path = Buffer.alloc(PATH_CHARS * 2), size = [PATH_CHARS]
+  return (pid, expectedPath) => {
+    const handle = open(PROCESS_QUERY_LIMITED_INFORMATION, false, pid)
+    if (!isHandle(handle)) return null
+    try {
+      size[0] = PATH_CHARS
+      if (!asBool(getImage(handle, 0, path, size))) return null
+      if (path.toString('utf16le', 0, size[0] * 2).toLowerCase() !== expectedPath.toLowerCase()) return null
+      return asBool(getTimes(handle, ...times)) ? times[0].readBigUInt64LE().toString() : null
+    } finally { close(handle) }
+  }
 }

@@ -164,6 +164,7 @@ export async function applyEqDirChange(): Promise<EqConfig> {
   // an override must be able to re-probe the machine, not serve the root we found an hour ago.
   invalidateEqDiscovery()
   const config = buildEqConfig()
+  void import('./spellLibrary').then(({ spellLibrary }) => spellLibrary().check('installation-change'))
   // THE ENGINE IS TOLD, AND IT IS TOLD HERE (JOS-498). This is the one moment a person can say where
   // EverQuest lives, and it is AFTER `invalidateEqDiscovery` + `buildEqConfig` on purpose: the push
   // reads `eqLogsDir()` for itself, so it must not run until this process has resolved the new

@@ -122,8 +122,14 @@ test('SPA 100 HoT, complete-heal SPA and unsupported HP models explain absent me
   for (const spa of [100, 101, 334]) {
     const result = calculateClientSpell(spell({ beneficial: true, effects: [hp(100, 50, 0, spa)] }), 20, 'healing')
     assert.equal(result.total, null)
-    assert.match(result.reasons.join(' '), /No matching healing HP effect/)
+    assert.match(result.reasons.join(' '), /outside this version's supported formulas/)
   }
+})
+
+test('fractional client duration stays available in details but is excluded from periodic estimates', () => {
+  const result = calculateClientSpell(spell({ durationFormula: 7, durationCap: 20.5, effects: [hp(100, -10, 0, 0)] }), 50, 'damage')
+  assert.equal(result.total, null)
+  assert.match(result.reasons.join(' '), /Fractional or negative client duration \(20.5 ticks\)/)
 })
 
 test('formula results do not depend on rank label, gear or class names', () => {

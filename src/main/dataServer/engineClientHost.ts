@@ -600,6 +600,11 @@ async function sendAttach(mine: number, l: LiveEngine, logPath: string): Promise
     )
     if (gen !== mine) return null
     l.attachedTo = logPath
+    if (result.accepted) {
+      const { replaySpellActivation } = await import('../spellLibrary/activation')
+      await replaySpellActivation().catch((error: unknown) => debug(`spell reference activation: ${describeErr(error)}`))
+      if (gen !== mine) return null
+    }
     debug(
       `data-server engine attached: ${logPath} (epoch ${String(result.epoch)}, ` +
         `accepted ${String(result.accepted)})`

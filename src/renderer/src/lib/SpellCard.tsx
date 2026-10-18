@@ -45,6 +45,7 @@ import { CARD_LABEL, CARD_MONO, CARD_TEXT, CardSection, LABEL_STYLE, MoreLine, T
 import { Tooltip } from './Tooltip'
 import { useObservedSpellRanks } from './useObservedSpellRanks'
 import { useSpellLink, type OpenSpell } from './spellLink'
+import { spellRevisionKey, useSpellRevision } from '../features/spells/libraryState'
 
 /** How many effect lines / rank members the card lists before collapsing to "+N more". */
 const MAX_LISTED = 8
@@ -126,10 +127,11 @@ const SPELL_PENDING = new Map<string, Promise<SpellDetail | null>>()
 
 /** A record still inside its TTL, or null. Exported-adjacent only in spirit: tests drive the hook. */
 function freshRecord(name: string): SpellDetail | null {
-  const hit = SPELL_RECORDS.get(name)
+  const key = `${spellRevisionKey()}:${name}`
+  const hit = SPELL_RECORDS.get(key)
   if (!hit) return null
   if (Date.now() - hit.at > RECORD_TTL_MS) {
-    SPELL_RECORDS.delete(name)
+    SPELL_RECORDS.delete(key)
     return null
   }
   return hit.data
@@ -137,20 +139,23 @@ function freshRecord(name: string): SpellDetail | null {
 
 /** Resolve one spell's record, at most once per name in flight. Never rejects — a failure is null. */
 function lookupSpellCached(name: string): Promise<SpellDetail | null> {
-  const inflight = SPELL_PENDING.get(name)
+  const revision = spellRevisionKey()
+  const key = `${revision}:${name}`
+  const inflight = SPELL_PENDING.get(key)
   if (inflight) return inflight
   const p = window.eq
     .lookupSpell(name)
     .then((d: SpellDetail) => {
-      SPELL_RECORDS.set(name, { at: Date.now(), data: d })
-      SPELL_PENDING.delete(name)
+      SPELL_PENDING.delete(key)
+      if (spellRevisionKey() !== revision) return null
+      SPELL_RECORDS.set(key, { at: Date.now(), data: d })
       return d
     })
     .catch(() => {
-      SPELL_PENDING.delete(name)
+      SPELL_PENDING.delete(key)
       return null
     })
-  SPELL_PENDING.set(name, p)
+  SPELL_PENDING.set(key, p)
   return p
 }
 
@@ -180,6 +185,7 @@ export function clearSpellRecordCache(): void {
  * arriving for a card that is no longer open is a resolution arriving after this cleanup ran.
  */
 export function useSpellDetail(name: string): { data: SpellDetail | null; loading: boolean } {
+  const revision = useSpellRevision()
   const [data, setData] = useState<SpellDetail | null>(() => freshRecord(name))
   const [loading, setLoading] = useState(() => freshRecord(name) === null)
 
@@ -202,7 +208,7 @@ export function useSpellDetail(name: string): { data: SpellDetail | null; loadin
     return () => {
       alive = false
     }
-  }, [name])
+  }, [name, revision])
 
   return { data, loading }
 }

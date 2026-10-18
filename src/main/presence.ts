@@ -2,11 +2,13 @@
 // presence.ts — the WATCHER: one long-running thread, and the state it maintains.
 // ============================================================================
 //
-// Two features need the same four facts — is EQ running, is EQ the foreground window, where is
+// Presence effects need four facts — is EQ running, is EQ the foreground window, where is
 // that window, and is the system cursor being drawn — so they are answered ONCE, here:
 //
 //   * overlay AUTO-HIDE (hide the floating meters when the game isn't running / isn't focused)
 //   * the CURSOR RING (a halo drawn only over the EQ window, only while it is focused)
+// The spell library also holds a subscription while Oracle is open and consumes only the shared
+// five-second client-identity scan. Its subscription never enables the cursor stream.
 //
 // THE COST MODEL IS THE DESIGN. Windows has no cross-process "foreground window changed" event
 // an Electron main process can subscribe to without native code, so somebody has to poll. The
@@ -42,6 +44,7 @@ import { join } from 'path'
 import { Worker } from 'node:worker_threads'
 import { screen } from 'electron'
 import { E2E } from './e2e'
+import { noteEqClients } from './presenceClients'
 import { logError, logInfo } from './errorLog'
 import { notePresenceRestart } from './telemetry'
 import { effectiveEqRoot } from './log/config'
@@ -289,6 +292,7 @@ function toDip(rect: ScreenRect): ScreenRect {
 }
 
 function applyRecord(rec: PresenceRecord): void {
+  if (rec.t === 'clients') { noteEqClients(rec.clients); return }
   // The heartbeat is LIVENESS, not an observation. It says the loop is turning, which is exactly
   // what `noteSignal` already recorded; it deliberately does not set `observed`, because a beat
   // is not a look at the world and must never be the reason auto-hide starts acting.

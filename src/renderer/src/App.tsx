@@ -63,7 +63,7 @@ import DevTriageView from './devTriage'
 // keep the tree out of packaged bytes. The owner released the tab, so that file is gone and this is
 // an ordinary static import like the eleven views above it.
 import CharacterView from './features/character/CharacterView'
-import { SpellDrill } from './features/spells/SpellPage'
+import { SpellRoutes } from './features/spells/SpellRoutes'
 import { QuestsBranch } from './features/quests/QuestsView'
 import { ZoneLootBranch } from './features/zoneloot/ZoneLootView'
 import { CraftingBranch } from './features/crafting/CraftingView'
@@ -183,10 +183,6 @@ function PlainView({
           onOpenSharingPrefs={onOpenSharingPrefs}
         />
       )}
-      {/* THE SPELL DRILLDOWN (JOS-508). Its view check and its payload check live in the feature
-          file, not here: this switch is one branch per view and a branch needing both would have
-          cost `PlainView` two points of the measured complexity ceiling. */}
-      <SpellDrill view={view} viewKey={viewKey} routing={routing} />
       {/* QUESTS (EQ Zera): mounted as a sibling, for the same reason SpellDrill is. */}
       <QuestsBranch
         view={view}
@@ -250,6 +246,7 @@ function ViewContent({
   // no-characters gate on purpose: the triage tab reads the cloud backlog, not the game log, so
   // a machine with no EverQuest install must still reach it.
   if (OWNER_TOOLS && view === 'triage') return <DevTriageView />
+  if (['spells', 'spell'].includes(view)) return <SpellRoutes view={view} viewKey={viewKey} routing={routing} />
   if (!hasCharacters) return <NoLogsEmptyState onOpenPreferences={onOpenPreferences} />
   // EVERY SPELL NAME BELOW THIS LINE IS A LINK (JOS-508) — one provider rather than a prop threaded
   // through AlertsView, BuffsView and LevelingView to the five places a name is drawn.

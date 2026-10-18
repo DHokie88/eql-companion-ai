@@ -51,6 +51,7 @@ import { initProcessPriority } from './processPriority'
 import { startEngineSupervisor, stopEngineSupervisor } from './dataServer/engineHost'
 import { getProcessPriorityPrefs } from './storeProcessPriority'
 import { initPresenceEffects, stopPresenceEffects } from './presenceEffects'
+import { startSpellLibrary, stopSpellLibrary } from './spellLibrary'
 import { initAwayAlerts, stopAwayAlerts } from './awayAlerts'
 // The phone link (docs/plans/phone-link.md). Arms NOTHING unless the switch is already on, and
 // never under EQ_E2E - the origin is dark there, so a headless run cannot open a socket at all.
@@ -413,6 +414,7 @@ if (!gotSingleInstanceLock) {
     // windows that must already exist. Costs one store read when both are off — which is the
     // default install: `presenceNeeded()` decides whether the watcher thread is started at all.
     initPresenceEffects()
+    startSpellLibrary()
 
     // Away alerts (src/shared/awayAlerts.ts): the drain timer for alerts that also go to a Discord
     // channel while nobody is at the keyboard. Costs one store read when the feature is off — which
@@ -453,6 +455,7 @@ if (!gotSingleInstanceLock) {
  * cover. A thread cannot outlive its process, so both the hazard and its workaround are gone.
  */
 app.on('before-quit', () => {
+  teardownStep('main:stopSpellLibrary', stopSpellLibrary)
   teardownStep('main:stopPresence', stopPresenceEffects)
   // …and the away-alerts drain tick. Unref'd, so it could never hold the process open by itself;
   // stopped here anyway for the reason every other timer in this teardown is - a tick that fires

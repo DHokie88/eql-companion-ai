@@ -8,6 +8,24 @@ import { spellInstallId } from '../src/main/spellLibrary/storage'
 import type { SpellCheckResult } from '../src/main/spellLibrary/workerProtocol'
 import { spellRow, storageFixture, syntheticCatalog, writeCatalog } from './spellLibrarySynthetic.mts'
 
+test('independent message and description edits are detected even with identical sizes and timestamps', async () => {
+  const f = storageFixture()
+  try {
+    writeCatalog(f.root)
+    const baseline = await captureClientSpellBundle(f.root, { wait: async () => undefined })
+    for (const name of ['spells_us_str.txt', 'dbstr_us.txt'] as const) {
+      const path = join(f.root, name), stamp = statSync(path), original = readFileSync(path, 'utf8')
+      writeFileSync(path, name === 'spells_us_str.txt' ? original.replace('You cast.', 'You test.') : original.replace('Synthetic description', 'Synthetic Description'))
+      utimesSync(path, stamp.atime, stamp.mtime)
+      assert.equal(statSync(path).size, stamp.size)
+      const changed = await captureClientSpellBundle(f.root, { wait: async () => undefined })
+      assert.notEqual(changed.hashes[name], baseline.hashes[name])
+      assert.equal(changed.hashes['spells_us.txt'], baseline.hashes['spells_us.txt'])
+      writeFileSync(path, original)
+    }
+  } finally { f.close() }
+})
+
 test('capture requires one second stability and hashes full files despite same mtime/size', async () => {
   const f = storageFixture()
   try {

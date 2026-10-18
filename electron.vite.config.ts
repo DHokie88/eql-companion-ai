@@ -74,7 +74,9 @@ export default defineConfig({
           speechWorker: resolve(__dirname, 'src/main/speech/worker.ts'),
           presenceWorker: resolve(__dirname, 'src/main/presenceWorker.ts'),
           perfProbeWorker: resolve(__dirname, 'src/main/perfProbeWorker.ts'),
-          resistTableWorker: resolve(__dirname, 'src/main/resistTableWorker.ts')
+          resistTableWorker: resolve(__dirname, 'src/main/resistTableWorker.ts'),
+          spellLibraryWriter: resolve(__dirname, 'src/main/spellLibrary/writerWorker.ts'),
+          spellLibraryQuery: resolve(__dirname, 'src/main/spellLibrary/queryWorker.ts')
         }
       }
     }

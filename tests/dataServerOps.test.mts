@@ -38,6 +38,7 @@ import type {
 const EVERY_OP: RequestOp[] = [
   'echo',
   'session.attach',
+  'clientSpells.activate',
   'session.health',
   'session.progress',
   'module.snapshot',
@@ -82,6 +83,7 @@ test('EVERY GUARD IS DISCRIMINATING — no two ops accept each other’s result'
   const shapes: Record<RequestOp, ReplyResult> = {
     echo: { text: 'hello engine' },
     'session.attach': { epoch: 2, accepted: true },
+    'clientSpells.activate': { clientSpellsActivated: false, root: 'C:\\EQ', snapshotId: 'synthetic' },
     'session.health': { status: 'live', epoch: 2, uptimeMs: 925 },
     'session.progress': { subscription: 4, subscribed: true },
     'module.snapshot': { module: 'kills', seq: 139859, state: { v: 3, mobs: {} } },

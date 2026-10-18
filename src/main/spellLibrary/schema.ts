@@ -24,5 +24,10 @@ CREATE TABLE IF NOT EXISTS observations (
   previous_snapshot_id TEXT REFERENCES snapshots(id), message TEXT NOT NULL, counts TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS observations_install ON observations(install_id,id DESC);
+CREATE TABLE IF NOT EXISTS field_differences (
+  observation_id INTEGER NOT NULL REFERENCES observations(id), spell_id INTEGER NOT NULL,
+  field TEXT NOT NULL, kind TEXT NOT NULL, before_value TEXT NOT NULL, after_value TEXT NOT NULL,
+  PRIMARY KEY(observation_id,spell_id,field,kind)
+);
 PRAGMA user_version=1;
 `

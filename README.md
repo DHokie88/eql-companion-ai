@@ -4,8 +4,8 @@ A Windows desktop companion for **EverQuest Legends**. It reads the log file the
 writes and turns it into live views: a DPS meter, floating overlays, Plane of Sky quest tracking,
 loot and item knowledge, XP/AA progress, raid-target history, buff timers, and sound alerts.
 
-**It only reads your log.** Nothing is injected into EverQuest, no game files are touched, no
-memory is read, nothing is automated.
+It reads your log and the three client spell data files. Nothing is injected into EverQuest,
+no game files are modified, no game memory is read, and gameplay is never automated.
 
 ## Origin
 
@@ -19,6 +19,12 @@ guide is [`AGENTS.md`](AGENTS.md) and is still the best map of the code.
 ## What changed in the fork
 
 - **Renamed** to EQ Oracle (EQO).
+- **Spells below Leveling.** Browse exact client IDs and ranks, compare unmodified damage and
+  healing, and inspect captured versions and field changes in History. Oracle checks all three
+  spell files on startup, detected client launches, installation changes, and manual request.
+  SQLite and compressed source history stay under the existing profile's `spells/` directory.
+  History begins at the first captured baseline and is retained indefinitely. See
+  [`docs/plans/eq-oracle-spells.md`](docs/plans/eq-oracle-spells.md).
 - **The Z Engine.** The Rust log engine (`engine/`) is the fork's own line of development now: the
   process is `zengine.exe`, its cost on a real log is measured by `npm run engine:baseline` and
   recorded under `docs/zengine/`, and the program of work is in `docs/zengine/README.md`.

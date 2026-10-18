@@ -852,92 +852,6 @@ impl World {
         self.ask_fold(|answer| ingest::Ask::MobLevels(ingest::MobLevelAsk { names, answer }))
     }
 
-    /// The client's spell table for the install this world is attached to. `None` when nothing has
-    /// been attached, which is the only state in which there is no install to speak of.
-    ///
-    /// It does not go through the ingest door, unlike every other reader on this type. The table is
-    /// not fold state — the resist fold never reads it, which is what lets a ledger be replayed and
-    /// re-estimated without one — so there is nothing to ask the ingest thread about, and reading a
-    /// file on the thread that tails the log would be a stall for nothing.
-    ///
-    /// The handle leaves the lock and the parse happens outside it, which is why this returns an
-    /// `Arc` rather than an answer: `ClientSpells::table` blocks its caller for a few hundred
-    /// milliseconds on the first ask, and doing that under this mutex would stall every other
-    /// connection and deadlock against the ingest's own `report_*` calls.
-    #[must_use]
-    pub fn client_spells(&self) -> Option<Arc<crate::spells::ClientSpells>> {
-        self.lock().client_spells.clone()
-    }
-
-    /// Preload a captured spell reference without holding the world lock, then swap only its Arc.
-    /// The profile boundary and current install are checked before reading; attach and concurrent
-    /// activation guards are checked again at publication. No live ingest state is touched.
-    pub fn activate_client_spells(
-        &self,
-        root: &str,
-        snapshot_id: &str,
-        spells_path: &str,
-        dbstr_path: &str,
-    ) -> Result<bool, String> {
-        let canonical = |path: &Path| std::fs::canonicalize(path).map_err(|e| e.to_string());
-        let root = canonical(Path::new(root))?;
-        let (epoch, activation, profile) = {
-            let mut state = self.lock();
-            let attached = state
-                .fold
-                .log
-                .as_ref()
-                .and_then(|p| p.parent())
-                .and_then(|p| p.parent())
-                .ok_or("no log is attached")?;
-            if canonical(attached)? != root {
-                return Err("captured spell install does not match the attached log".into());
-            }
-            let profile = state
-                .client_spells_state_dir
-                .clone()
-                .ok_or("the attached session has no profile state directory")?;
-            state.client_spells_activation += 1;
-            (state.epoch, state.client_spells_activation, profile)
-        };
-        if snapshot_id.is_empty() || snapshot_id.len() > 256 {
-            return Err("invalid captured spell snapshot identity".into());
-        }
-        let boundary = canonical(&profile.join("spells").join("materialized"))?;
-        let spells = canonical(Path::new(spells_path))?;
-        let dbstr = canonical(Path::new(dbstr_path))?;
-        let generation = spells
-            .parent()
-            .ok_or("captured spell directory is missing")?;
-        if generation.parent() != Some(boundary.as_path())
-            || dbstr.parent() != Some(generation)
-            || spells.file_name().and_then(|s| s.to_str()) != Some("spells_us.txt")
-            || dbstr.file_name().and_then(|s| s.to_str()) != Some("dbstr_us.txt")
-        {
-            return Err("captured spell files must share a generation beneath the profile spells/materialized directory".into());
-        }
-        let replacement = Arc::new(crate::spells::ClientSpells::captured(
-            spells,
-            dbstr,
-            snapshot_id.to_owned(),
-        )?);
-        Ok(self.publish_client_spells(epoch, activation, replacement))
-    }
-
-    fn publish_client_spells(
-        &self,
-        epoch: i64,
-        activation: u64,
-        replacement: Arc<crate::spells::ClientSpells>,
-    ) -> bool {
-        let mut state = self.lock();
-        if state.epoch != epoch || state.client_spells_activation != activation {
-            return false;
-        }
-        state.client_spells = Some(replacement);
-        true
-    }
-
     /// Post one ask through the one door and wait for it — the shape `module_snapshot` and
     /// `perf_snapshot` each spell out by hand.
     ///
@@ -1034,43 +948,6 @@ impl World {
             .iter()
             .map(|(family, payload)| (family.clone(), payload.clone()))
             .collect()
-    }
-
-    /// Where the character logs live, as the app just said.
-    ///
-    /// An idempotent full-set replace of one value: the latest push is the whole of what the app
-    /// has said, the same command law the five defines are under.
-    ///
-    /// Nothing is handed to a fold, which is the whole difference from [`World::define`]. A define
-    /// changes what folding a log produces and therefore has to reach the running ingest and be
-    /// re-applied at the next attach's construction; a directory changes nothing about any fold, so
-    /// the write ends here — and this call therefore cannot block on the ingest thread.
-    pub fn set_log_dir(&self, dir: &str) {
-        self.lock().log_dir.set(dir);
-    }
-
-    /// The character logs in the directory the app named, or `Err` when it has named none.
-    ///
-    /// The scan happens with the lock released, as [`World::module_snapshot`]'s wait does: it is a
-    /// readdir plus one stat per file, fast on a warm directory and unbounded on a disconnected
-    /// network share, and this mutex is taken by the ingest thread in every `report_*` it makes.
-    ///
-    /// The path is copied out and echoed back by the caller, so the answer names the directory it
-    /// is about — see `LogsListResult`, where that echo is the client's own staleness test.
-    ///
-    /// It needs no fold and no attach: a fresh install has characters to choose between before
-    /// there is anything to attach to.
-    pub fn list_logs(&self) -> Result<(String, crate::logs::LogScan), String> {
-        let dir = self.lock().log_dir.get().map(std::path::Path::to_path_buf);
-        let Some(dir) = dir else {
-            return Err(
-                "no log directory has been pushed, so there is nothing to enumerate; the app names \
-                 it with logs.setDir"
-                    .to_owned(),
-            );
-        };
-        let scan = crate::logs::scan(&dir);
-        Ok((dir.to_string_lossy().into_owned(), scan))
     }
 
     /// The ingest offers to take writes: install this turn's push channel.
@@ -1693,9 +1570,7 @@ mod tests {
     use super::{FoldMark, World};
     use crate::views::{self, Meter};
     use protocol::generated::{EngineMessage, EpochReason, HealthResultStatus, ViewDescriptor};
-    use std::path::{Path, PathBuf};
     use std::sync::Arc;
-    use std::sync::{atomic::Ordering, mpsc::channel};
 
     /// A validated view over a registered source. These tests are about the epoch, the generation
     /// and the subscription bookkeeping; the view is the smallest real one there is, and
@@ -1712,7 +1587,7 @@ mod tests {
 
     /// Serve every subscription off a world with no fold behind it — which is what a landing fold
     /// does here, and what makes the reset arrive.
-    fn land(world: &World, generation: u64, mark: FoldMark) -> bool {
+    pub(super) fn land(world: &World, generation: u64, mark: FoldMark) -> bool {
         world.report_fold_landed(generation, mark, &views::NoRows, None, &mut Meter::new())
     }
 
@@ -1723,20 +1598,20 @@ mod tests {
     const A_LOG: &str = "C:/nowhere/eqlog_Nobody_freeport.txt";
 
     /// A world whose attaches start nothing.
-    fn world() -> World {
+    pub(super) fn world() -> World {
         World::with_ingest(Arc::new(|_world, _generation, _attach| {}))
     }
 
     /// The generation the current turn holds. A real ingest is handed its own number by `attach`
     /// and never has to ask; a test that replaced the ingest has to.
-    fn generation(world: &World) -> u64 {
+    pub(super) fn generation(world: &World) -> u64 {
         world
             .inner
             .generation
             .load(std::sync::atomic::Ordering::SeqCst)
     }
 
-    fn mark(events: i64, pct: f64) -> FoldMark {
+    pub(super) fn mark(events: i64, pct: f64) -> FoldMark {
         FoldMark {
             checkpoint: 4096,
             events,
@@ -1787,151 +1662,6 @@ mod tests {
             "absent for the scan, `true` for the tail - never `false`, which would put a field \
              with no reader on every frame of every historical fold"
         );
-    }
-
-    /// A synthetic install/profile; never reads a player's client or log.
-    fn captured_reference() -> (PathBuf, PathBuf, PathBuf, PathBuf) {
-        static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
-        let dir = std::env::temp_dir().join(format!(
-            "oracle-activation-{}-{}",
-            std::process::id(),
-            NEXT.fetch_add(1, Ordering::SeqCst)
-        ));
-        let install = dir.join("game");
-        let profile = dir.join("profile");
-        let captured = profile.join("spells/materialized/captured-generation");
-        std::fs::create_dir_all(install.join("Logs")).unwrap();
-        std::fs::create_dir_all(&captured).unwrap();
-        let fixture: serde_json::Value =
-            serde_json::from_str(include_str!("../../../../tests/fixtures/spell-parity.json"))
-                .unwrap();
-        std::fs::write(
-            captured.join("spells_us.txt"),
-            fixture[1]["row"].as_str().unwrap(),
-        )
-        .unwrap();
-        std::fs::write(
-            captured.join("dbstr_us.txt"),
-            "114^5^Synthetic Taps
-43^5^Synthetic Health
-",
-        )
-        .unwrap();
-        (dir, install, profile, captured)
-    }
-
-    #[test]
-    fn captured_reference_swaps_without_changing_live_world_state() {
-        let (dir, install, profile, captured) = captured_reference();
-        let world = world();
-        world.attach(
-            install.join("Logs/eqlog_Test_server.txt").to_str().unwrap(),
-            profile.to_str(),
-            eqlog::ZoneHint::default(),
-        );
-        let token = generation(&world);
-        land(&world, token, mark(47, 100.0));
-        let (writes, _) = channel();
-        let (asks, _) = channel();
-        {
-            let mut state = world.lock();
-            state.write_to = Some(writes);
-            state.asks = Some(asks);
-        }
-        let before = world.mark();
-        let epoch = *world.health().epoch;
-        let previous = world.client_spells().unwrap();
-        assert!(world
-            .activate_client_spells(
-                install.to_str().unwrap(),
-                "snapshot-a",
-                captured.join("spells_us.txt").to_str().unwrap(),
-                captured.join("dbstr_us.txt").to_str().unwrap()
-            )
-            .unwrap());
-        let active = world.client_spells().unwrap();
-        assert_eq!(active.snapshot_id(), Some("snapshot-a"));
-        assert!(active.spell("Oracle Synthetic Ember II").is_some());
-        assert_eq!(
-            active.category_names().get(&114).map(String::as_str),
-            Some("Synthetic Taps")
-        );
-        assert!(previous.snapshot_id().is_none());
-        assert_eq!(*world.health().epoch, epoch);
-        assert_eq!(generation(&world), token);
-        assert_eq!(world.mark(), before);
-        let state = world.lock();
-        assert!(state.write_to.is_some());
-        assert!(state.asks.is_some());
-        drop(state);
-        std::fs::remove_dir_all(dir).unwrap();
-    }
-
-    #[test]
-    fn rejected_capture_preserves_the_previous_reference() {
-        let (dir, install, profile, captured) = captured_reference();
-        let world = world();
-        let activate = |root: &Path, path: &Path| {
-            world.activate_client_spells(
-                root.to_str().unwrap(),
-                "snapshot",
-                path.join("spells_us.txt").to_str().unwrap(),
-                path.join("dbstr_us.txt").to_str().unwrap(),
-            )
-        };
-        assert!(
-            activate(&install, &captured).is_err(),
-            "activation requires attach"
-        );
-        world.attach(
-            install.join("Logs/eqlog_Test_server.txt").to_str().unwrap(),
-            profile.to_str(),
-            eqlog::ZoneHint::default(),
-        );
-        let previous = world.client_spells().unwrap();
-        assert!(activate(&profile, &captured).is_err(), "wrong install");
-        std::fs::write(install.join("spells_us.txt"), "outside profile").unwrap();
-        std::fs::write(install.join("dbstr_us.txt"), "outside profile").unwrap();
-        assert!(activate(&install, &install).is_err(), "outside profile");
-        std::fs::write(captured.join("spells_us.txt"), "malformed").unwrap();
-        assert!(activate(&install, &captured).is_err(), "malformed file");
-        assert!(Arc::ptr_eq(&previous, &world.client_spells().unwrap()));
-        std::fs::remove_dir_all(dir).unwrap();
-    }
-
-    #[test]
-    fn superseded_capture_and_reattach_cannot_publish_an_old_handle() {
-        let (dir, install, profile, captured) = captured_reference();
-        let world = world();
-        let log = install.join("Logs/eqlog_Test_server.txt");
-        world.attach(
-            log.to_str().unwrap(),
-            profile.to_str(),
-            eqlog::ZoneHint::default(),
-        );
-        let replacement = Arc::new(
-            crate::spells::ClientSpells::captured(
-                captured.join("spells_us.txt"),
-                captured.join("dbstr_us.txt"),
-                "old".into(),
-            )
-            .unwrap(),
-        );
-        let (epoch, ticket) = {
-            let state = world.lock();
-            (state.epoch, state.client_spells_activation)
-        };
-        world.lock().client_spells_activation += 1;
-        assert!(!world.publish_client_spells(epoch, ticket, replacement.clone()));
-        let ticket = world.lock().client_spells_activation;
-        world.attach(
-            log.to_str().unwrap(),
-            profile.to_str(),
-            eqlog::ZoneHint::default(),
-        );
-        assert!(!world.publish_client_spells(epoch, ticket, replacement));
-        assert!(world.client_spells().unwrap().snapshot_id().is_none());
-        std::fs::remove_dir_all(dir).unwrap();
     }
 
     #[test]
@@ -2098,3 +1828,9 @@ mod tests {
         assert_eq!(*world.health().epoch, 2, "a dead fold bumps nothing");
     }
 }
+
+#[path = "world_spell_library.rs"]
+mod spell_library;
+#[cfg(test)]
+#[path = "world_spell_reference_tests.rs"]
+mod spell_reference_tests;

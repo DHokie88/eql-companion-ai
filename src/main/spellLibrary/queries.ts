@@ -35,10 +35,13 @@ function searchOptions(query: Record<string, unknown>) {
   }
 }
 function matchesSearch(record: ClientSpellRecord, options: ReturnType<typeof searchOptions>): boolean {
-  if (options.text && !`${record.id} ${record.name} ${record.description}`.toLowerCase().includes(options.text)) return false
+  if (options.text && !matchesText(record, options.text)) return false
   if (options.category && record.category !== options.category) return false
   if (options.effect !== undefined && !record.effects.some((slot) => slot.spa === options.effect)) return false
   return available(record, options.classes, options.allSpells ? undefined : options.level)
+}
+function matchesText(record: ClientSpellRecord, text: string): boolean {
+  return /^\d+$/.test(text) ? record.id === Number(text) : `${record.name} ${record.description}`.toLowerCase().includes(text)
 }
 interface RankedGroups {
   direct: SpellCalculation[]; periodic: SpellCalculation[]; zeroMana: SpellCalculation[]; excluded: SpellCalculation[]
@@ -109,7 +112,7 @@ export class SpellLibraryQueries {
   }
   private compare(installId: string, input: unknown): SpellComparisonResult {
     const query = queryObject(input, ['snapshotId', 'ids', 'level', 'metric'])
-    if (!Array.isArray(query.ids) || query.ids.length > 20) throw new Error('Compare at most 20 spells')
+    if (!Array.isArray(query.ids) || query.ids.length > 4) throw new Error('Compare at most four spells')
     const ids = [...new Set(query.ids.map(spellId))]
     const level = levelArg(query.level)
     const metric = metricArg(query.metric)
@@ -134,6 +137,8 @@ export class SpellLibraryQueries {
     if (dataset) for (const record of this.storage.records(dataset.snapshotId)) {
       scanned++
       if (!available(record, classes, level)) continue
+      const sign = metric === 'damage' ? -1 : 1
+      if (record.beneficial !== (metric === 'healing') || !record.effects.some((e) => [0, 79, 100, 101, 334].includes(e.spa) && e.base * sign > 0)) continue
       collectRank(record, { level, metric, limit }, groups)
     }
     const rankedDirect = ranked(groups.direct, query.ranking, limit), rankedPeriodic = ranked(groups.periodic, query.ranking, limit)

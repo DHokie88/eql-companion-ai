@@ -120,6 +120,14 @@ for (const [label, mutate] of malformedRows) {
   })
 }
 
+test('a fractional client duration cap is preserved without truncating or rejecting the bundle', () => {
+  const fields = spellFields()
+  fields[12] = '20.5'
+  const record = parseClientSpellBundle(spellBundle([fields.join('^')]))[0]
+  assert.equal(record.durationCap, 20.5)
+  assert.equal(record.rawFields[12], '20.5')
+})
+
 test('empty sources, duplicate IDs and malformed or duplicate joined strings fail', () => {
   for (const file of ['spells_us.txt', 'spells_us_str.txt', 'dbstr_us.txt'] as const) {
     const sources = spellBundle()

@@ -67,7 +67,9 @@ function calculationProblems(record: ClientSpellRecord, effects: ClientSpellEffe
   const unknown = effects.filter((effect) => magnitude(effect, level) === null).map((effect) => effect.calc)
   const reasons: string[] = []
   if (unknown.length) reasons.push(`Unsupported effect formula: ${[...new Set(unknown)].join(', ')}.`)
-  if (durationTicks(record, level) === null) reasons.push(`Unsupported or untimed duration formula: ${record.durationFormula}.`)
+  const ticks = durationTicks(record, level)
+  if (ticks === null) reasons.push(`Unsupported or untimed duration formula: ${record.durationFormula}.`)
+  else if (!Number.isInteger(ticks) || ticks < 0) reasons.push(`Fractional or negative client duration (${ticks} ticks) is not modeled.`)
   if (record.aoeDurationMs > 0) reasons.push(`Repeated-wave timing is not modeled (${record.aoeDurationMs} ms).`)
   return reasons
 }
@@ -89,18 +91,25 @@ function finishCalculation(result: SpellCalculation, effects: ClientSpellEffect[
 }
 
 /** A single spell at a stated caster level. Null metrics are excluded, never zero. */
+function unmodeledHpEffects(record: ClientSpellRecord, sign: number): ClientSpellEffect[] {
+  return record.effects.filter((effect) => [100, 101, 334].includes(effect.spa) && effect.base * sign > 0)
+}
+
+function selectedHpEffects(record: ClientSpellRecord, sign: number): ClientSpellEffect[] {
+  return record.effects.filter((effect) => (effect.spa === 0 || effect.spa === 79) && effect.base * sign > 0)
+}
+
 export function calculateClientSpell(record: ClientSpellRecord, level: number, metric: SpellMetric): SpellCalculation {
   const result = emptyCalculation(record, metric)
-  if (!Number.isInteger(level) || level < 1 || level > 255) {
-    result.reasons.push('Caster level must be a whole number from 1 to 255.')
-    return result
-  }
-  if (metric !== 'damage' && metric !== 'healing') {
-    result.reasons.push('Unsupported calculation metric.')
-    return result
-  }
+  const invalid = requestProblem(level, metric)
+  if (invalid) { result.reasons.push(invalid); return result }
   const sign = metric === 'damage' ? -1 : 1
-  const effects = record.effects.filter((effect) => (effect.spa === 0 || effect.spa === 79) && effect.base * sign > 0)
+  const unmodeled = unmodeledHpEffects(record, sign)
+  if (unmodeled.length) {
+    result.reasons.push(`HP effect SPA ${unmodeled.map((effect) => effect.spa).join(', ')} is outside this version's supported formulas.`)
+    return result
+  }
+  const effects = selectedHpEffects(record, sign)
   if (!effects.length || record.beneficial !== (metric === 'healing')) {
     result.reasons.push(`No matching ${metric} HP effect in this ${record.beneficial ? 'beneficial' : 'detrimental'} client definition.`)
     return result
@@ -109,4 +118,10 @@ export function calculateClientSpell(record: ClientSpellRecord, level: number, m
   const ticks = durationTicks(record, level)
   if (result.reasons.length || ticks === null) return result
   return finishCalculation(result, effects, level, ticks)
+}
+
+function requestProblem(level: number, metric: SpellMetric): string | null {
+  if (!Number.isInteger(level) || level < 1 || level > 255) return 'Caster level must be a whole number from 1 to 255.'
+  if (metric !== 'damage' && metric !== 'healing') return 'Unsupported calculation metric.'
+  return null
 }

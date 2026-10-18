@@ -88,6 +88,13 @@ const MESSAGE_KEYS = ['you_cast', 'other_casts', 'on_you', 'on_other', 'fades']
 const LATE_FIELDS: Record<string, number> = { resistMod: 78, recourse: 81, descriptionId: 85, categoryId: 86, subcategoryId: 87, aeMaxTargets: 143, displayNameId: 165 }
 const EARLY_FIELDS: Record<string, number> = { range: 4, aeRange: 5, castMs: 8, recoveryMs: 9, recastMs: 10, durationFormula: 11, durationCap: 12, aoeDurationMs: 13, mana: 14, beneficialCode: 28, resist: 29, target: 30, skill: 32 }
 
+/** Original 173-layout indexes whose meaning Oracle interprets. Unknown columns remain raw. */
+export const INTERPRETED_SPELL_COLUMNS: ReadonlySet<number> = new Set([
+  0, 1, 3, ...Object.values(EARLY_FIELDS), ...Object.values(LATE_FIELDS), 172,
+  ...Array.from({ length: 12 }, (_value, index) => index + 15),
+  ...Array.from({ length: 16 }, (_value, index) => index + 36)
+])
+
 function sourceLines(text: string, file: SpellSourceFile): string[] {
   if (!text.trim()) throw new Error(`${file}: empty source file`)
   return text.replace(/^\uFEFF/, '').split(/\r?\n/).filter((line) => line.length > 0)
@@ -247,7 +254,7 @@ function describeEffect(effect: ClientSpellEffect, record: ClientSpellRecord, na
 function namedFields(raw: string[], shift: number, id: number): Record<string, string | number | boolean | null> {
   const fields: Record<string, string | number | boolean | null> = { extra: raw[3] }
   for (const [name, index] of Object.entries(EARLY_FIELDS)) {
-    const parse = name === 'range' || name === 'aeRange' ? numeric : integer
+    const parse = ['range', 'aeRange', 'durationCap'].includes(name) ? numeric : integer
     fields[name] = parse(raw[index], `Spell ${id} ${name}`)
   }
   for (const [name, index] of Object.entries(LATE_FIELDS)) fields[name] = integer(raw[index + shift], `Spell ${id} ${name}`)

@@ -153,13 +153,34 @@ function makeHover(): {
   return { point, active: () => zones.size > 0, test, apply }
 }
 
+function processReporter(): (clients: import('../shared/eqClientProcess').EqClientProcess[] | null) => void {
+  let last = ''
+  return (clients) => {
+    if (clients === null) return
+    const line = `P|${JSON.stringify(clients)}`
+    if (line !== last) { last = line; say(line) }
+  }
+}
+
+/** Shares one scan between existing overlay presence and per-client launch detection. */
+function createRunningBlock(native: PresenceNative, root: string, resetPaths: () => void): () => void {
+  const reportClients = processReporter()
+  let lastRun = -1
+  return () => {
+    resetPaths() // Windows recycles PIDs, so foreground image memoization lasts one scan only.
+    const { running, clients } = native.scanProcesses(root)
+    reportClients(clients)
+    if (running >= 0 && running !== lastRun) { lastRun = running; say(`R|${String(running)}`) }
+    say('H')
+  }
+}
+
 /** The whole loop, once the surface is known to work. */
 function run(native: PresenceNative): void {
   const { eqRootWithSep, runningPollMs, tickMs, foregroundEveryTicks, watchCursor } = init
   /** pid -> image path, for the ~31 foreground scans between beats. */
   let paths = new Map<number, string>()
   let lastFg = ''
-  let lastRun = -1
   let lastCur = -1
   let nextRun = 0
   let fgCountdown = 0
@@ -202,24 +223,7 @@ function run(native: PresenceNative): void {
     }
   }
 
-  function runningBlock(): void {
-    // The pid -> image-path memo is dropped on every beat rather than only when it grows past 256
-    // entries. Windows RECYCLES pids, and an entry that outlives its process is not stale data, it
-    // is WRONG data: the browser that inherits a departed eqgame.exe's pid would be handed
-    // eqgame's path and classified as the game. Five seconds bounds that window.
-    paths = new Map()
-    // -1 means the enumeration failed, which is not the same fact as "the game is not running":
-    // hold the last answer rather than announcing a disappearance nobody observed.
-    const running = native.eqRunning(eqRootWithSep)
-    if (running >= 0 && running !== lastRun) {
-      lastRun = running
-      say(`R|${String(running)}`)
-    }
-    // THE HEARTBEAT, and the only line sent unconditionally. Everything else is change-driven, so
-    // a healthy idle watcher is indistinguishable from a wedged one on the channel alone — see
-    // presenceProtocol.ts's note. One line per beat is what buys main that distinction.
-    say('H')
-  }
+  const runningBlock = createRunningBlock(native, eqRootWithSep, () => { paths = new Map() })
 
   /**
    * The cursor block. EVERY TICK, and deliberately alone up at the top of `tick` (JOS-120).

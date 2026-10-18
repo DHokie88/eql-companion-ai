@@ -331,7 +331,12 @@ test('the view list is the SAME set the app can render', () => {
   const known = knownViews(src)
   assert.ok(known !== null && known.length > 5, 'failed to read KNOWN_VIEWS out of appViews.ts')
   const drills = declared.filter((v) => !known.includes(v) && !unreleased.includes(v))
-  const reportable = declared.filter((v) => !unreleased.includes(v) && !drills.includes(v))
+  // Oracle's local fork adds a tab without changing the upstream telemetry ingest contract.
+  // The existing dwellView allowlist drops this view; no deployment or new telemetry is needed.
+  const localOnly = ['spells']
+  assert.ok(known.includes('spells'), 'the local spell library remains a restorable destination')
+  assert.ok(!(TELEMETRY_VIEWS as readonly string[]).includes('spells'))
+  const reportable = declared.filter((v) => !unreleased.includes(v) && !drills.includes(v) && !localOnly.includes(v))
   assert.deepEqual(reportable.sort(), [...TELEMETRY_VIEWS].sort())
 
   // The mirror of the UNRELEASED rule below: a drill must not ALSO be in the schema. If one is

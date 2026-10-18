@@ -20,6 +20,7 @@ import type {
   PresenceState,
   ScreenRect
 } from '../shared/presencePrefs'
+import { isEqClientProcess, type EqClientProcess } from '../shared/eqClientProcess'
 
 // ---------------------------------------------------------------- the line protocol
 //
@@ -27,6 +28,7 @@ import type {
 //
 //   F|<pid>|<x>|<y>|<w>|<h>|<exePath>|<title>   foreground window changed
 //   R|<0|1>                                      EQ process existence changed (5 s cadence)
+//   P|<JSON client identities>                   actual client PID/birth/path set changed (5 s)
 //   C|<0|1>                                      system cursor visibility changed
 //   V|<key>|<0|1>                                the cursor ENTERED (1) / LEFT (0) a hot zone
 //   H                                            heartbeat — "still looping" (5 s cadence)
@@ -78,6 +80,7 @@ import type {
 export type PresenceRecord =
   | { t: 'fg'; pid: number; rect: ScreenRect; exePath: string; title: string }
   | { t: 'run'; running: boolean }
+  | { t: 'clients'; clients: EqClientProcess[] }
   | { t: 'cursor'; visible: boolean }
   | { t: 'hover'; key: string; inside: boolean }
   | { t: 'beat' }
@@ -159,6 +162,7 @@ export function parsePresenceLine(line: string): PresenceRecord | null {
   if (trimmed === '') return null
   // The heartbeat carries no payload, so it is the whole line or it is not a heartbeat.
   if (trimmed === 'H') return { t: 'beat' }
+  if (trimmed.startsWith('P|')) return parseClients(trimmed.slice(2))
   const parts = trimmed.split('|')
   if (parts[0] === 'F') return parseForeground(parts)
   if (parts[0] === 'X') return parseExit(parts)
@@ -168,6 +172,14 @@ export function parsePresenceLine(line: string): PresenceRecord | null {
   if (parts[0] === 'R') return { t: 'run', running: flag }
   if (parts[0] === 'C') return { t: 'cursor', visible: flag }
   return null
+}
+
+function parseClients(payload: string): PresenceRecord | null {
+  try {
+    const clients: unknown = JSON.parse(payload)
+    return Array.isArray(clients) && clients.length <= 4096 && clients.every(isEqClientProcess)
+      ? { t: 'clients', clients } : null
+  } catch { return null }
 }
 
 // ------------------------------------------------- the HOT-ZONE HIT TEST, downstream (JOS-370)

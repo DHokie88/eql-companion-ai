@@ -57,7 +57,9 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { discoverEqRoot, fixedDrives, rootHasLogs } from '../../src/main/log/discovery'
 import { settleEngineServing } from './engineSteps.mjs'
-import { launchApp, removeUserData, type LaunchedApp } from './appWindow.mjs'
+import { launchApp, mainWindow, removeUserData, type LaunchedApp } from './appWindow.mjs'
+import { settle } from './settle.mjs'
+import { SPELL_SOURCE_FILES } from '../../src/shared/spellLibrary'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const FIXTURES = join(HERE, '..', 'fixtures')
@@ -97,16 +99,21 @@ function stageMaps(installDir: string): void {
  */
 function stageSpells(installDir: string): void {
   const root = realEqRoot()
-  const file = root ? join(root, 'spells_us.txt') : null
-  if (!file || !existsSync(file)) return
+  if (!root) return
+  for (const name of SPELL_SOURCE_FILES) stageSpellSource(root, installDir, name)
+}
+
+function stageSpellSource(root: string, installDir: string, name: string): void {
+  const file = join(root, name)
+  if (!existsSync(file)) return
   try {
-    symlinkSync(file, join(installDir, 'spells_us.txt'), 'file')
+    symlinkSync(file, join(installDir, name), 'file')
     return
   } catch {
     // Developer Mode is off; fall through to the copy.
   }
   try {
-    copyFileSync(file, join(installDir, 'spells_us.txt'))
+    copyFileSync(file, join(installDir, name))
   } catch {
     // neither ⇒ the resist spec takes its stated no-spell-data branch
   }
@@ -257,7 +264,8 @@ export function writeAchievementsDump(installDir: string, fixture: string): stri
 /** The real EQ install, if this machine has one — the only source of map packs. */
 function realEqRoot(): string | null {
   // The FS half of discovery only: no `reg query` subprocesses in a test harness.
-  return discoverEqRoot({ hasLogs: rootHasLogs, extraCandidates: () => [], fixedDrives })
+  const explicit = process.env.EQ_INSTALL_DIR
+  return discoverEqRoot({ hasLogs: rootHasLogs, extraCandidates: () => explicit ? [explicit] : [], fixedDrives })
 }
 
 /**
@@ -435,6 +443,7 @@ export async function launchOnFixture(
   // See `waitForEngine`: bounded, quiet on expiry, and the reason sixty specs did not each grow a
   // wait of their own.
   if (opts.waitForEngine !== false) await settleEngineServing(launched.app)
+  await settleClientCatalog(launched, log)
   return {
     ...launched,
     log,
@@ -443,4 +452,12 @@ export async function launchOnFixture(
       if (owned) await log.dispose()
     }
   }
+}
+
+/** Captured references replace the former one-file cache; preserve the real-source test carve-out. */
+async function settleClientCatalog(launched: LaunchedApp, log: FixtureLog): Promise<void> {
+  if (!SPELL_SOURCE_FILES.every((name) => existsSync(join(log.installDir, name)))) return
+  const page = await mainWindow(launched.app)
+  await settle(() => page.evaluate(() => window.eq.spellLibrary.status()),
+    (status) => status.phase === 'ready' || status.phase === 'error', { timeoutMs: 180_000 })
 }

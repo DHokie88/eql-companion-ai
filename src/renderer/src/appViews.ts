@@ -13,6 +13,7 @@ export type View =
   | 'posky'
   | 'alerts'
   | 'leveling'
+  | 'spells'
   | 'loot'
   | 'quests'
   // ZONE LOOT (EQ Zera, ROADMAP §2): pick a zone, see every mob in it and what each drops, with
@@ -88,6 +89,7 @@ export const VIEW_LABELS: Record<View, string> = {
   posky: 'Plane of Sky',
   alerts: 'Alerts',
   leveling: 'Leveling',
+  spells: 'Spells',
   loot: 'Loot',
   quests: 'Quests',
   // Two words, as a player says it. The nav rail sets it uppercase itself.
@@ -130,6 +132,7 @@ const KNOWN_VIEWS: View[] = [
   'posky',
   'alerts',
   'leveling',
+  'spells',
   'loot',
   'quests',
   'zoneloot',
