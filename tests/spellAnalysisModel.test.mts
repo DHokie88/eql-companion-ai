@@ -86,6 +86,8 @@ test('ordinary AOE applies chosen target count, captured cap and spell maximum w
   assert.equal(chosen.perMana, 30)
   assert.deepEqual([chosen.analysis.requestedTargets, chosen.analysis.effectiveTargets, chosen.analysis.hits, chosen.analysis.hitCap], [4, 3, 3, 3])
   assert.equal(chosen.analysis.scope, 'aggregate pack total')
+  assert.match(chosen.restrictions.join(' '), /aggregate pack totals/)
+  assert.doesNotMatch(chosen.restrictions.join(' '), /values are per target/)
   assert.equal(chosen.analysis.singleTargetTotal, 100)
   assert.equal(chosen.analysis.packTotal, 300)
   assert.equal(analyze(area(8), pack('maximum')).total, 800)

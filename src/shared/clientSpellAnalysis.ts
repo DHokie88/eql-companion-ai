@@ -97,9 +97,11 @@ export function analyzeClientSpell(record: ClientSpellRecord, options: ClientSpe
   const calculation = calculationFor(source, options, catalog.modifiers)
   const analysis = buildAnalysis(record, options, { calculation, mechanics, scenario })
   const result = scaleAnalysisCalculation(calculation, scenario.reason ? null : scenario.hits)
+  const restrictions = result.restrictions.map((restriction) => analysis.scope === 'aggregate pack total'
+    ? restriction.replace('values are per target.', 'analyzed values are aggregate pack totals.') : restriction)
   return {
     ...result, analysis,
     reasons: [...new Set([...result.reasons, ...scenario.reason ? [scenario.reason] : []])],
-    restrictions: [...result.restrictions, 'Analysis rates are modeled cycle estimates, not measured combat output. Mana is spent once per cast.']
+    restrictions: [...restrictions, 'Analysis rates are modeled cycle estimates, not measured combat output. Mana is spent once per cast.']
   }
 }
