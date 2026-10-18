@@ -76,6 +76,8 @@ test('the fork desktop launcher loads the built UI, preload and matching release
     assert.equal(await page.getByText('EQ Oracle (EQO)', { exact: true }).count(), 1, 'the title bar must use the Oracle brand')
     assert.equal(await page.locator('[data-testid="nav-spells"]').count(), 1, 'the built desktop must include the spell library')
     assert.equal(await page.evaluate(() => typeof window.eq.spellLibrary?.search), 'function', 'the typed spell library preload must load')
+    assert.equal(await page.evaluate(() => typeof window.eq.spellLibrary?.rankings), 'function', 'paginated rankings must cross the real preload')
+    assert.equal(await page.evaluate(() => typeof window.eq.spellLibrary?.byLevel), 'function', 'level planning must cross the real preload')
     await page.waitForFunction(async () => (await window.eq.engineLaunchState()).phase === 'live', undefined, {
       timeout: Math.max(1, deadline - Date.now())
     })

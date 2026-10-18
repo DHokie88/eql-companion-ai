@@ -3,7 +3,7 @@ import { IPC } from '../../shared/ipc'
 import { spellLibrary } from '../spellLibrary'
 import { getModifierContext, updateModifierPreferences } from '../spellLibrary/modifierRuntime'
 
-const QUERIES = new Set(['search', 'detail', 'compare', 'rank', 'history', 'changes', 'beforeAfter', 'timeline', 'focusOptions'])
+const QUERIES = new Set(['search', 'detail', 'compare', 'rank', 'rankings', 'byLevel', 'history', 'changes', 'beforeAfter', 'timeline', 'focusOptions'])
 export function registerSpellLibraryIpc(): void {
   ipcMain.handle(IPC.spellLibraryModifierContext, () => getModifierContext())
   ipcMain.handle(IPC.spellLibraryUpdateModifiers, (_event, update: unknown) => updateModifierPreferences(update))

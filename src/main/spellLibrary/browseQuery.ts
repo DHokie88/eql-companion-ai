@@ -3,6 +3,9 @@ import { matchesSpellType, minimumSpellLevel } from '../../shared/clientSpellBro
 import { classesArg, levelArg, optionalText } from './queryValidation'
 import { integerArg } from './workerProtocol'
 
+export const SEARCH_QUERY_FIELDS = ['snapshotId', 'text', 'classes', 'level', 'category', 'subcategory', 'effect', 'allSpells', 'allLevels',
+  'minLevel', 'maxLevel', 'type', 'polarity', 'mana', 'sortBy', 'direction', 'selectedIds', 'page', 'pageSize', 'evaluation', 'analysis']
+
 function optionalChoice<T extends string>(value: unknown, name: string, choices: readonly T[]): T | undefined {
   if (value === undefined) return undefined
   if (typeof value !== 'string' || !choices.includes(value as T)) throw new Error(`Invalid ${name}`)

@@ -5,10 +5,14 @@ import type {
 } from '../../shared/spellLibrary'
 import { WorkerSpellEvaluation, spellEvaluationScope, type SpellCalculator } from './workerEvaluation'
 import { searchCatalog } from './searchCatalog'
+import { SEARCH_QUERY_FIELDS } from './browseQuery'
+import { SpellAnalysisQueries } from './analysisQueries'
+import { SpellQueryCache } from './queryCache'
 import { changeKind, spellDifferences } from './differences'
 import { SpellLibraryStorage } from './storage'
 import { integerArg, objectArgs, stringArg } from './workerProtocol'
 import { classesArg, levelArg, metricArg, optionalText, pageArgs, queryObject, requiredSnapshotArg, snapshotArg, spellId } from './queryValidation'
+import type { SpellModifierContext } from '../../shared/spellModifiers'
 
 export function spellSummary(record: ClientSpellRecord): SpellSummary {
   const { id, name, rank, classes, mana, category, subcategory, beneficial, target } = record
@@ -48,7 +52,12 @@ function collectRank(record: ClientSpellRecord, options: { level: number; metric
 /** A request pins one read transaction. Even a concurrent publication cannot mix snapshots. */
 export class SpellLibraryQueries {
   private evaluation: WorkerSpellEvaluation
-  constructor(readonly storage: SpellLibraryStorage) { this.evaluation = new WorkerSpellEvaluation(storage) }
+  private analysis: SpellAnalysisQueries
+  private cache = new SpellQueryCache()
+  constructor(readonly storage: SpellLibraryStorage) {
+    this.evaluation = new WorkerSpellEvaluation(storage)
+    this.analysis = new SpellAnalysisQueries(storage, this.evaluation)
+  }
   handle(method: string, input: unknown): unknown {
     const args = objectArgs(input)
     const installId = stringArg(args.installId, 'installId')
@@ -57,42 +66,51 @@ export class SpellLibraryQueries {
   }
   private dispatch(method: string, installId: string, args: Record<string, unknown>): unknown {
     const query = args.query
-    switch (method) {
-      case 'active': return this.storage.active(installId)
-      case 'status': return this.storage.status(installId)
-      case 'search': return this.search(installId, query, args.modifiers)
-      case 'detail': return this.detail(installId, query, args.modifiers)
-      case 'compare': return this.compare(installId, query, args.modifiers)
-      case 'rank': return this.rank(installId, query, args.modifiers)
-      case 'focusOptions': return this.focusOptions(installId, query)
-      case 'history': return this.history(installId, query)
-      case 'changes': return this.changes(installId, query)
-      case 'beforeAfter': return this.beforeAfter(installId, query)
-      case 'timeline': return this.timeline(installId, query)
-      default: throw new Error('Unknown spell query method')
+    const handlers: Record<string, () => unknown> = {
+      active: () => this.storage.active(installId), status: () => this.storage.status(installId),
+      search: () => this.search(installId, query, args.modifiers), detail: () => this.detail(installId, query, args.modifiers),
+      compare: () => this.compare(installId, query, args.modifiers), rank: () => this.rank(installId, query, args.modifiers),
+      rankings: () => this.analysisQuery('rankings', installId, args), byLevel: () => this.analysisQuery('byLevel', installId, args),
+      focusOptions: () => this.focusOptions(installId, query), history: () => this.history(installId, query),
+      changes: () => this.changes(installId, query), beforeAfter: () => this.beforeAfter(installId, query), timeline: () => this.timeline(installId, query)
     }
+    if (!Object.hasOwn(handlers, method)) throw new Error('Unknown spell query method')
+    return handlers[method]()
+  }
+  private analysisQuery(method: 'rankings' | 'byLevel', installId: string, args: Record<string, unknown>): unknown {
+    const query = queryObject(args.query, [...SEARCH_QUERY_FIELDS, 'categoryTab', 'group', 'view', 'throughLevel'])
+    const dataset = this.dataset(installId, query)
+    this.evaluation.calculator(dataset, query, args.modifiers)
+    const context = args.modifiers as SpellModifierContext | undefined
+    // Inventory export time is UI provenance, not an effective calculation input.
+    const effectiveContext = context ? { ...context, inventory: { ...context.inventory, exportedAt: undefined } } : undefined
+    const key = this.cache.key(method, { installId, dataset, query, context: effectiveContext })
+    const cached = this.cache.get(key)
+    if (cached !== undefined) return cached
+    const result = this.analysis[method](dataset, query, args.modifiers)
+    this.cache.set(key, result)
+    return result
   }
   private dataset(installId: string, query: Record<string, unknown>): SpellDataset | null {
     const snapshot = snapshotArg(query.snapshotId)
     return snapshot ? this.storage.dataset(installId, snapshot) : this.storage.active(installId)
   }
   private search(installId: string, input: unknown, context: unknown): SpellSearchResult {
-    const query = queryObject(input, ['snapshotId', 'text', 'classes', 'level', 'category', 'subcategory', 'effect', 'allSpells', 'allLevels',
-      'minLevel', 'maxLevel', 'type', 'polarity', 'mana', 'sortBy', 'direction', 'selectedIds', 'page', 'pageSize', 'evaluation'])
+    const query = queryObject(input, SEARCH_QUERY_FIELDS)
     const dataset = this.dataset(installId, query)
     const calculate = this.evaluation.calculator(dataset, query, context)
     return searchCatalog(this.storage, dataset, query, calculate)
   }
   private detail(installId: string, input: unknown, context: unknown) {
-    const query = queryObject(input, ['snapshotId', 'id', 'level', 'evaluation'])
+    const query = queryObject(input, ['snapshotId', 'id', 'level', 'evaluation', 'analysis'])
     const id = spellId(query.id)
     const dataset = this.dataset(installId, query)
     const record = dataset ? this.storage.record(dataset.snapshotId, id) : null
     const calculate = this.evaluation.calculator(dataset, query, context)
-    return { dataset, record, ...(query.evaluation !== undefined && record ? { calculations: hpCalculations(record, levelArg(query.level), calculate) } : {}) }
+    return { dataset, record, ...((query.evaluation !== undefined || query.analysis !== undefined) && record ? { calculations: hpCalculations(record, levelArg(query.level), calculate) } : {}) }
   }
   private compare(installId: string, input: unknown, context: unknown): SpellComparisonResult {
-    const query = queryObject(input, ['snapshotId', 'ids', 'level', 'metric', 'evaluation'])
+    const query = queryObject(input, ['snapshotId', 'ids', 'level', 'metric', 'evaluation', 'analysis'])
     if (!Array.isArray(query.ids) || query.ids.length > 4) throw new Error('Compare at most four spells')
     const ids = [...new Set(query.ids.map(spellId))]
     const level = levelArg(query.level)

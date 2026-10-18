@@ -176,3 +176,18 @@ test('invalid preferences reject numeric, count, key and mode violations', () =>
     assert.throws(() => validateModifierPreferences(preferences))
   }
 })
+
+test('target preferences retain legacy shapes and only change revisions when their effective value changes', async () => {
+  const r = rig(), before = await r.coordinator.get()
+  const old = defaultSpellModifierPreferences()
+  assert.deepEqual(validateModifierPreferences(old), old)
+  const explicit = await r.coordinator.update({ expectedRevision: before.revision, preferences: { ...old, targets: 4 } })
+  assert.equal(explicit.revision, before.revision)
+  const pack = await r.coordinator.update({ expectedRevision: explicit.revision, preferences: { ...old, targets: 8 } })
+  assert.notEqual(pack.revision, before.revision)
+  assert.equal(pack.preferences.targets, 8)
+  const max = await r.coordinator.update({ expectedRevision: pack.revision, preferences: { ...old, targets: 'maximum' } })
+  assert.notEqual(max.revision, pack.revision)
+  for (const targets of [0, 101, 1.5, 'all', null]) assert.throws(() => validateModifierPreferences({ ...old, targets }))
+  r.coordinator.stop()
+})

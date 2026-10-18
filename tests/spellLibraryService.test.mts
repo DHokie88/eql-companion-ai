@@ -126,3 +126,13 @@ test('evaluated requests pin main-owned character inputs and reject a reply afte
     assert.equal(r.service.status().phase, 'ready')
   } finally { r.service.stop() }
 })
+
+test('new analysis queries pin the active dataset and reject installation switches', async () => {
+  const r = rig(async (root) => published(root))
+  try {
+    await r.service.check('startup')
+    await r.service.query('rankings', { level: 50, categoryTab: 'dd', analysis: { scope: 'single', targets: 4 } })
+    await r.service.query('byLevel', { level: 50, view: 'upcoming' })
+    for (const call of r.queries) assert.equal((call.args as { query: { snapshotId: string } }).query.snapshotId, 'snapshot-A')
+  } finally { r.service.stop() }
+})

@@ -4,6 +4,7 @@ import type { SpellLibraryBridge, SpellLibraryStatus } from '../shared/spellLibr
 
 const query = <T>(method: string, args: unknown): Promise<T> => ipcRenderer.invoke(IPC.spellLibraryQuery, method, args)
 export const spellLibrary: SpellLibraryBridge = {
+  rankings: (q) => query('rankings', q), byLevel: (q) => query('byLevel', q),
   modifierContext: () => ipcRenderer.invoke(IPC.spellLibraryModifierContext),
   updateModifiers: (update) => ipcRenderer.invoke(IPC.spellLibraryUpdateModifiers, update),
   focusOptions: (q) => query('focusOptions', q),
