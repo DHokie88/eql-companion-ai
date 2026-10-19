@@ -61,13 +61,19 @@ export class SpellModifierCatalog {
       if (explicit !== null) return { rank: explicit, source: 'simulated', warnings }
       if (emulation.rank !== null && validRank(emulation.rank)) return { rank: emulation.rank, source: 'simulated', warnings }
     }
+    const detected = this.observedRank(record, context)
+    return { ...detected, warnings: [...warnings, ...detected.warnings] }
+  }
+
+  observedRank(record: ClientSpellRecord, context: SpellModifierContext): ResolvedModifierRank {
+    const warnings: string[] = []
     const key = spellLineKey(record.name)
     const observation = context.ranks?.[key]
     if (!observation || !validRank(observation.rank)) {
       warnings.push('Mote rank is unknown; the partial estimate assumes the client base amount.')
       return { rank: null, source: 'unknown', warnings }
     }
-    if (this.lines.get(key)?.length !== 1 || spellLineKey(observation.name) !== key) {
+    if (this.lines.get(key)?.length !== 1 || nameKey(observation.name) !== nameKey(record.name)) {
       warnings.push('The observed mote-rank name matches multiple client IDs or classic spell lines; no upgrade was assumed.')
       return { rank: null, source: 'unknown', warnings }
     }

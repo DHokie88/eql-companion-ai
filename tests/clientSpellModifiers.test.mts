@@ -63,6 +63,7 @@ test('duplicate names including internal records and collapsed classic lines nev
   const classic = modifierSpell({ name: 'Synthetic Bolt II' })
   assert.equal(evaluate(classic, modifierContext({ ranks: null })).total, 100)
   assert.equal(evaluate(classic, modifierContext({ ranks: null })).modifiers?.rank, null)
+  assert.equal(evaluate(classic, context).modifiers?.rank, null, 'a lone classic II record cannot borrow the base-name observation')
 })
 
 test('manual numeric rank overrides remain valid on duplicate names and stale names are explained', () => {

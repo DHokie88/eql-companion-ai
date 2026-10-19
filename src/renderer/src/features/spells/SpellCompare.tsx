@@ -32,6 +32,6 @@ export function SpellCompare({ ids, level, evaluation, targets, initialScope, on
     <Alert severity="info">Differences use one dataset, caster level, value mode, and target scenario. Full-duration totals are potential effects before resists, critical hits, overheal, or interruptions. Healing remains per recipient. Percentage differences are unavailable for zero or unknown references.</Alert>
     {!ids.length && <Typography>Add up to four spells from Browse, Rankings, or By level.</Typography>}
     {error && <Alert severity="error">{error}</Alert>}{loading && <CircularProgress size={22} />}
-    {data && <><SpellCalculationTable rows={data.results} referenceId={referenceId} onOpen={onOpen} onRemove={onRemove} /><Typography variant="caption" color="text.secondary">{data.scope}</Typography></>}
+    {data && <><SpellCalculationTable rows={data.results} rankEvidence={data.rankEvidence} referenceId={referenceId} onOpen={onOpen} onRemove={onRemove} /><Typography variant="caption" color="text.secondary">{data.scope}</Typography></>}
   </Stack>
 }

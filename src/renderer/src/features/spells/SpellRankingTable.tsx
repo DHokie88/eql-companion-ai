@@ -5,6 +5,7 @@ import { amount, EstimateAmount } from './SpellEstimate'
 import { SpellNameButton, SpellSortHeader, type useSpellSort } from './SpellTableControls'
 import { SpellAnalysisBreakdown } from './SpellAnalysisBreakdown'
 import { useSpellWorkspaceState } from './spellWorkspace'
+import { SpellRowRank } from './SpellRowRank'
 
 const BASIC: { field: SpellAnalysisSort; label: string }[] = [{ field: 'id', label: 'ID' }, { field: 'name', label: 'Spell' }, { field: 'level', label: 'Level' }, { field: 'amount', label: 'Full amount' }, { field: 'mana', label: 'Client mana' }, { field: 'efficiency', label: 'Amount / mana' }, { field: 'rate', label: 'Modeled cycle DPS/HPS' }]
 const OPTIONAL: { field: SpellAnalysisSort; label: string }[] = [{ field: 'cast', label: 'Cast (s)' }, { field: 'recovery', label: 'Recovery (s)' }, { field: 'recast', label: 'Recast (s)' }, { field: 'duration', label: 'Delivery (s)' }, { field: 'ticks', label: 'Ticks' }, { field: 'waves', label: 'Waves' }, { field: 'targets', label: 'Targets' }, { field: 'hits', label: 'Hits' }]
@@ -40,7 +41,7 @@ function RankingRows({ row, selected, expanded, expand, extras, onOpen, onToggle
   row: SpellRankingRow; selected: number[]; expanded: boolean; expand: () => void; extras: typeof OPTIONAL; onOpen: (id: number, scope?: 'single' | 'pack') => void; onToggle: (id: number) => void
 }): JSX.Element {
   return <><TableRow data-testid="rankings-record" data-spell-id={row.id}>
-    <TableCell>{row.id}</TableCell><TableCell sx={{ minWidth: 160 }}><SpellNameButton id={row.id} onOpen={() => onOpen(row.id, row.calculation.analysis?.scenario.scope)}>{row.name}</SpellNameButton><Typography variant="caption">{row.classes.map((c) => `${c.code} ${c.level}`).join(' · ')}</Typography></TableCell>
+    <TableCell>{row.id}</TableCell><TableCell sx={{ minWidth: 190 }}><SpellNameButton id={row.id} onOpen={() => onOpen(row.id, row.calculation.analysis?.scenario.scope)}>{row.name}</SpellNameButton><SpellRowRank id={row.id} name={row.name} evidence={row.rankEvidence} /><Typography variant="caption" display="block">{row.classes.map((c) => `${c.code} ${c.level}`).join(' · ')}</Typography></TableCell>
     <TableCell align="right">{row.learnedLevel ?? '-'}</TableCell><TableCell align="right"><EstimateAmount calculation={row.calculation} /><Typography variant="caption">{row.calculation.analysis?.scope}</Typography></TableCell>
     <TableCell align="right">{row.mana}</TableCell><TableCell align="right">{row.mana === 0 ? 'Zero mana' : amount(row.calculation.perMana)}</TableCell><TableCell align="right">{amount(row.calculation.analysis?.timing.rate ?? null)}</TableCell>
     {extras.map((c) => <TableCell key={c.field} align="right">{amount(extraValue(row, c.field))}</TableCell>)}

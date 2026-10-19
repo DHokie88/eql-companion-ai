@@ -1,6 +1,7 @@
 import type { SpellCalculation, SpellClass } from './spellLibrary'
 
-export const SPELL_MODIFIER_MODEL_VERSION = '2'
+export const SPELL_MODIFIER_MODEL_VERSION = '3'
+export interface SpellRankEvidence { rank: number; characterKey: string; contextRevision: string; snapshotId: string }
 export type SpellValueMode = 'client' | 'mine' | 'emulate'
 export interface SpellEmulation {
   rank: number | null

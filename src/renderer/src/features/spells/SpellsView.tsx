@@ -21,12 +21,13 @@ import { SpellRankings } from './SpellRankings'
 import { SpellByLevel } from './SpellByLevel'
 import { SpellTargetControls } from './SpellTargetControls'
 import type { SpellModifiersState } from './useSpellModifiers'
+import { SpellRankProvider } from './spellRankState'
 
 export default function SpellsView({ routing }: { routing: AppRouting }): JSX.Element {
   const status = useSpellLibraryStatus()
   const modifiers = useSpellModifiers()
   const identity = `${status.dataset?.installId ?? status.installation ?? 'unknown'}:${modifiers.context?.character?.key ?? 'session'}`
-  return <SpellWorkspace identity={identity}><SpellsWorkspace routing={routing} status={status} modifiers={modifiers} /></SpellWorkspace>
+  return <SpellWorkspace identity={identity}><SpellRankProvider state={modifiers} snapshotId={status.dataset?.snapshotId ?? null}><SpellsWorkspace routing={routing} status={status} modifiers={modifiers} /></SpellRankProvider></SpellWorkspace>
 }
 
 function SpellsWorkspace({ routing, status, modifiers }: { routing: AppRouting; status: SpellLibraryStatus; modifiers: SpellModifiersState }): JSX.Element {

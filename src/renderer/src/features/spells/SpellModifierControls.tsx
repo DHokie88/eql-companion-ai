@@ -4,7 +4,8 @@ import { defaultSpellModifierPreferences, type SpellEmulation, type SpellModifie
 import type { SpellModifiersState } from './useSpellModifiers'
 import { rankLabel } from './SpellEstimate'
 import { SpellFocusPicker } from './SpellFocusPicker'
-import { MOTE_RANKS, SpellRankOverrides } from './SpellRankOverrides'
+import { SpellRankOverrides } from './SpellRankOverrides'
+import { SpellRankPreview } from './SpellRankPreview'
 
 export function SpellModifierControls({ state, ids }: { state: SpellModifiersState; ids: number[] }): JSX.Element {
   const { context, saving, loading, error, update } = state
@@ -15,6 +16,7 @@ export function SpellModifierControls({ state, ids }: { state: SpellModifiersSta
     {!context && !error && <CircularProgress size={20} aria-label="Loading spell modifiers" />}
     {context && preferences && <>
       <ValueModeButtons context={context} disabled={disabled} onChange={update} />
+      <SpellRankPreview state={state} />
       {!context.character && <Typography variant="caption" color="text.secondary">Select a character to use Show mine. Characterless emulation lasts for this session.</Typography>}
       {saving && <Typography variant="caption">Saving modifier settings…</Typography>}
       <Accordion data-testid="spells-modifiers-panel">
@@ -68,11 +70,6 @@ function EmulationControls({ preferences, ids, disabled, onChange }: {
   const update = (emulation: SpellEmulation): void => onChange({ ...preferences, emulation })
   return <Stack spacing={1.5} data-testid="spells-emulation">
     <Typography variant="subtitle2">Simulated inputs</Typography>
-    <FormControl size="small" sx={{ maxWidth: 420 }}><InputLabel id="spells-global-rank-label">Mote rank for all spells</InputLabel>
-      <Select labelId="spells-global-rank-label" label="Mote rank for all spells" value={value.rank ?? ''} disabled={disabled} data-testid="spells-global-rank" onChange={(event) => update({ ...value, rank: event.target.value === '' ? null : Number(event.target.value) })}>
-        <MenuItem value="">Use detected ranks</MenuItem>{MOTE_RANKS.map((rank) => <MenuItem key={rank} value={rank}>Set all to {rankLabel(rank)}</MenuItem>)}
-      </Select>
-    </FormControl>
     <SpellRankOverrides ids={ids} value={value} disabled={disabled} onChange={update} />
     <FormControl size="small" sx={{ maxWidth: 420 }}><InputLabel id="spells-focus-mode-label">Focus assumptions</InputLabel>
       <Select labelId="spells-focus-mode-label" label="Focus assumptions" value={value.focus} disabled={disabled} data-testid="spells-focus-mode" onChange={(event) => update({ ...value, focus: event.target.value as SpellEmulation['focus'] })}>

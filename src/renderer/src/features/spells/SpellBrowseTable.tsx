@@ -4,6 +4,7 @@ import { SPELL_TYPE_LABELS } from '@shared/clientSpellBrowse'
 import type { SpellBrowseSort, SpellSummary } from '@shared/spellLibrary'
 import { amount, EstimateAmount } from './SpellEstimate'
 import { SpellNameButton, SpellSortHeader, type useSpellSort } from './SpellTableControls'
+import { SpellRowRank } from './SpellRowRank'
 
 const COLUMNS: { field: SpellBrowseSort; label: string; numeric?: boolean }[] = [
   { field: 'id', label: 'ID' }, { field: 'name', label: 'Spell' }, { field: 'level', label: 'Level', numeric: true },
@@ -25,7 +26,7 @@ export function SpellBrowseTable({ records, selected, sort, onOpen, onToggle }: 
   return <Box sx={{ overflowX: 'auto' }}><Table size="small" aria-label="Client spell records" sx={{ '& .MuiTableCell-root': { px: 1 } }}><TableHead><TableRow>
     {COLUMNS.map((column) => <SpellSortHeader key={column.field} {...column} sort={sort} />)}
   </TableRow></TableHead><TableBody>{records.map((record) => <TableRow key={record.id} hover data-testid="spells-record">
-    <TableCell>{record.id}</TableCell><TableCell sx={{ minWidth: 160, maxWidth: 250 }}><SpellNameButton id={record.id} onOpen={onOpen}>{record.name}</SpellNameButton></TableCell>
+    <TableCell>{record.id}</TableCell><TableCell sx={{ minWidth: 190, maxWidth: 280 }}><SpellNameButton id={record.id} onOpen={onOpen}>{record.name}</SpellNameButton><SpellRowRank id={record.id} name={record.name} evidence={record.rankEvidence} /></TableCell>
     <TableCell align="right">{record.learnedLevel ?? '-'}</TableCell><TableCell sx={{ minWidth: 120 }}>{record.classes.length ? record.classes.map((c) => `${c.code} ${c.level}`).join(' · ') : 'Internal / NPC'}</TableCell>
     <TableCell>{record.category || 'Uncategorized'}{record.subcategory && <Typography variant="caption" display="block" color="text.secondary">{record.subcategory}</Typography>}</TableCell>
     <TableCell sx={{ whiteSpace: 'nowrap' }}>{record.spellType ? SPELL_TYPE_LABELS[record.spellType] : '-'}</TableCell>

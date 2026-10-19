@@ -4,7 +4,7 @@ import type { SpellEmulation } from '@shared/spellModifiers'
 import { useLibraryQuery } from './useLibraryQuery'
 import { rankLabel } from './SpellEstimate'
 
-export const MOTE_RANKS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+export const MOTE_RANKS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
 export function SpellRankOverrides({ ids, value, disabled, onChange }: {
   ids: number[]; value: SpellEmulation; disabled: boolean; onChange: (value: SpellEmulation) => void

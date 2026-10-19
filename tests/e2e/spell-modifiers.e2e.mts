@@ -15,6 +15,8 @@ async function context(page: Page, accepts: (value: SpellModifierContext) => boo
 }
 
 async function openSpells(page: Page): Promise<void> {
+  const notice = page.getByTestId('telemetry-notice-off')
+  if (await notice.isVisible()) await notice.click()
   await page.locator('[data-testid="nav-spells"]').click()
   await page.locator('[data-testid="spells-mode-client"]').waitFor()
   await page.locator('[data-testid="spells-scope"]').click()
@@ -79,6 +81,7 @@ function stageSources(staged: FixtureLog): void {
 
 async function detectedAndSimulated(page: Page): Promise<void> {
   await openSpells(page)
+  await rankPreviewControls(page)
   assert.match(await amountText(page), /^40/)
   await mode(page, 'mine')
   await settle(() => amountText(page), (text) => text.includes('40 → 61'))
@@ -89,13 +92,14 @@ async function detectedAndSimulated(page: Page): Promise<void> {
   await mode(page, 'emulate')
   assert.equal(await page.locator('[data-testid="spells-search"]').inputValue(), 'Test Ember', 'mode changes preserve the current search')
   await page.locator('[data-testid="spells-search"]').fill('')
-  await choose(page, 'spells-global-rank', 'Set all to Base / I')
+  await choose(page, 'spells-global-rank', 'Group default: Base / I')
   await choose(page, 'spells-rank-101', 'V')
   await choose(page, 'spells-focus-mode', 'No damage/healing focus')
   await settle(() => amountText(page), (text) => text.includes('40 → 52'))
   assert.match(await amountText(page), /Simulated/)
   await page.locator('[data-testid="spells-open-101"]').click()
   await settle(() => page.locator('[data-testid="spells-hp-values"]').innerText(), (text) => text.includes('40 → 52'))
+  await settle(() => page.getByTestId('spells-detail').getByTestId('spell-owned-rank').innerText(), (text) => text === 'Yours IX')
   assert.match(await page.locator('[data-testid="spells-hp-values"]').innerText(), /Mote rank V \(simulated\)/)
   await page.locator('[data-testid="spells-detail-back"]').click()
   await page.locator('[data-testid="spells-tab-compare"]').click()
@@ -106,11 +110,44 @@ async function detectedAndSimulated(page: Page): Promise<void> {
   // The smaller client amount wins after the exact-ID override across the entire eligible catalog.
   const rows = page.locator('[data-testid="rankings-record"]')
   assert.match(await rows.nth(0).innerText(), /Test Ember/i)
+  assert.match(await rows.nth(0).getByTestId('spell-owned-rank').innerText(), /Yours IX/)
   await page.locator('[data-testid="spells-tab-compare"]').click()
   await mode(page, 'mine')
   await settle(() => amountText(page), (text) => text.includes('40 → 61'))
   await mode(page, 'emulate')
   await settle(() => amountText(page), (text) => text.includes('40 → 52'))
+}
+
+async function rankPreviewControls(page: Page): Promise<void> {
+  const known = page.getByTestId('spells-record').filter({ has: page.getByTestId('spells-open-101') })
+  const unknown = page.getByTestId('spells-record').filter({ has: page.getByTestId('spells-open-102') })
+  assert.equal(await settle(() => known.getByTestId('spell-owned-rank').innerText(), (text) => text === 'Yours IX'), 'Yours IX')
+  assert.equal(await unknown.getByTestId('spell-owned-rank').count(), 0)
+  await choose(page, 'spells-global-rank', 'Group default: V')
+  await context(page, (value) => value.preferences.mode === 'emulate' && value.preferences.emulation.rank === 5)
+  assert.ok((await settle(() => amountText(page), (text) => text.includes('40 → 52'))).includes('40 → 52'))
+  await choose(page, 'spell-preview-rank-101', 'III')
+  await context(page, (value) => value.preferences.emulation.ranks['101']?.rank === 3)
+  await choose(page, 'spells-global-rank', 'Group default: X')
+  const exact = await context(page, (value) => value.preferences.emulation.rank === 10)
+  assert.equal(exact.preferences.emulation.ranks['101'].rank, 3)
+  assert.equal(await settle(() => known.getByTestId('spell-owned-rank').innerText(), (text) => text === 'Yours IX'), 'Yours IX')
+  await choose(page, 'spell-preview-rank-101', 'Base')
+  await context(page, (value) => value.preferences.emulation.ranks['101']?.rank === 0)
+  assert.ok((await settle(() => amountText(page), (text) => text.includes('40 → 40'))).includes('40 → 40'))
+  await page.getByTestId('spells-clear-rank-overrides').click()
+  await context(page, (value) => Object.keys(value.preferences.emulation.ranks).length === 0)
+  await choose(page, 'spells-global-rank', 'Group default: Base')
+  await context(page, (value) => value.preferences.emulation.rank === 0)
+  await dumpArtifacts(page, 'rank-controls-emulate')
+  await choose(page, 'spells-global-rank', 'Yours (detected)')
+  assert.ok((await settle(() => amountText(page), (text) => text.includes('40 → 61'))).includes('40 → 61'))
+  const panelSummary = page.locator('[data-testid="spells-modifiers-panel"] .MuiAccordionSummary-root').first()
+  await panelSummary.click()
+  await dumpArtifacts(page, 'rank-badges-preview')
+  await panelSummary.click()
+  await choose(page, 'spells-global-rank', 'Client values')
+  await context(page, (value) => value.preferences.mode === 'client')
 }
 
 async function focusAndReset(page: Page): Promise<void> {
@@ -142,7 +179,7 @@ async function characterless(staged: FixtureLog): Promise<void> {
     assert.equal(await page.locator('[data-testid="spells-mode-mine"]').isDisabled(), true)
     await mode(page, 'emulate')
     await modifiers(page)
-    await choose(page, 'spells-global-rank', 'Set all to V')
+    await choose(page, 'spells-global-rank', 'Group default: V')
     await choose(page, 'spells-focus-mode', 'No damage/healing focus')
     await settle(() => amountText(page), (text) => text.includes('40 → 52'))
     assert.match(await page.locator('[data-testid="spells-modifier-controls"]').innerText(), /lasts for this session/)

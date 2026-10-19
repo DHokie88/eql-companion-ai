@@ -6,26 +6,28 @@ import { amount, EstimateAmount } from './SpellEstimate'
 import { SpellAnalysisBreakdown } from './SpellAnalysisBreakdown'
 import { spellComparisonDifferences, type SpellDifference } from '@shared/spellAnalysisPresentation'
 import { SpellNameButton, SpellSortHeader, useSpellSort } from './SpellTableControls'
+import type { SpellRankEvidence } from '@shared/spellModifiers'
+import { SpellRowRank } from './SpellRowRank'
 
 const COLUMNS: { field: SpellCalculationSort; label: string; numeric?: boolean }[] = [
   { field: 'name', label: 'Spell' }, { field: 'instant', label: 'Instant', numeric: true }, { field: 'perTick', label: 'Per tick × ticks', numeric: true },
   { field: 'total', label: 'Full amount', numeric: true }, { field: 'mana', label: 'Client mana', numeric: true },
   { field: 'perMana', label: 'Amount / client mana', numeric: true }, { field: 'rate', label: 'Modeled cycle DPS/HPS', numeric: true }, { field: 'scope', label: 'Scope / exclusions' }
 ]
-export function SpellCalculationTable({ rows, onOpen, onRemove, referenceId }: {
-  rows: SpellCalculation[]; onOpen: (id: number) => void; onRemove?: (id: number) => void; referenceId?: number
+export function SpellCalculationTable({ rows, onOpen, onRemove, referenceId, rankEvidence }: {
+  rows: SpellCalculation[]; onOpen: (id: number) => void; onRemove?: (id: number) => void; referenceId?: number; rankEvidence?: Record<string, SpellRankEvidence | null>
 }): JSX.Element {
   const sort = useSpellSort<SpellCalculationSort>('total', 'desc')
   const sorted = sortSpellCalculations(rows, sort.field, sort.direction)
   return <Box sx={{ overflowX: 'auto' }}><Table size="small" sx={{ '& .MuiTableCell-root': { px: 1 } }}><TableHead><TableRow>
     {COLUMNS.map((column) => <SpellSortHeader key={column.field} {...column} sort={sort} />)}{onRemove && <TableCell />}
-  </TableRow></TableHead><TableBody>{sorted.map((row) => <CalculationRow key={row.id} row={row} onOpen={onOpen} onRemove={onRemove} reference={rows.find((r) => r.id === referenceId)} />)}</TableBody></Table></Box>
+  </TableRow></TableHead><TableBody>{sorted.map((row) => <CalculationRow key={row.id} row={row} evidence={rankEvidence?.[String(row.id)]} onOpen={onOpen} onRemove={onRemove} reference={rows.find((r) => r.id === referenceId)} />)}</TableBody></Table></Box>
 }
-function CalculationRow({ row, onOpen, onRemove, reference }: { row: SpellCalculation; onOpen: (id: number) => void; onRemove?: (id: number) => void; reference?: SpellCalculation }): JSX.Element {
+function CalculationRow({ row, onOpen, onRemove, reference, evidence }: { row: SpellCalculation; onOpen: (id: number) => void; onRemove?: (id: number) => void; reference?: SpellCalculation; evidence?: SpellRankEvidence | null }): JSX.Element {
   const differences = spellComparisonDifferences(row, reference)
   const showDifference = reference !== undefined && row.id !== reference.id
   return <TableRow data-testid="spells-calculation">
-    <TableCell sx={{ minWidth: 190 }}><SpellNameButton id={row.id} onOpen={onOpen}>{row.name}</SpellNameButton><Typography variant="caption" display="block">ID {row.id} · target {row.target}</Typography></TableCell>
+    <TableCell sx={{ minWidth: 190 }}><SpellNameButton id={row.id} onOpen={onOpen}>{row.name}</SpellNameButton><SpellRowRank id={row.id} name={row.name} evidence={evidence} /><Typography variant="caption" display="block">ID {row.id} · target {row.target}</Typography></TableCell>
     <TableCell align="right">{amount(row.instant)}</TableCell><PeriodicCell row={row} />
     <TableCell align="right"><EstimateAmount calculation={row} />{showDifference && <Delta value={differences.amount} />}</TableCell><TableCell align="right">{row.mana}{showDifference && <Delta value={differences.mana} />}</TableCell>
     <TableCell align="right">{row.mana === 0 ? 'Zero mana' : amount(row.perMana)}{showDifference && <Delta value={differences.efficiency} />}</TableCell>

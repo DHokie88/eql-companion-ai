@@ -114,7 +114,12 @@ export class SpellLibraryQueries {
     const query = queryObject(input, SEARCH_QUERY_FIELDS)
     const dataset = this.dataset(installId, query)
     const calculate = this.evaluation.calculator(dataset, query, context)
-    return searchCatalog(this.storage, dataset, query, calculate)
+    const result = searchCatalog(this.storage, dataset, query, calculate)
+    if (dataset) for (const row of result.records) {
+      const record = this.storage.record(dataset.snapshotId, row.id)
+      if (record) row.rankEvidence = this.evaluation.rankEvidence(dataset, record, context)
+    }
+    return result
   }
   private detail(installId: string, input: unknown, context: unknown) {
     const query = queryObject(input, ['snapshotId', 'id', 'level', 'evaluation', 'analysis'])
@@ -123,7 +128,7 @@ export class SpellLibraryQueries {
     const record = dataset ? this.storage.record(dataset.snapshotId, id) : null
     const calculate = this.evaluation.calculator(dataset, query, context)
     const presentation = record && query.level !== undefined ? this.evaluation.presentation(dataset, { record, level: levelArg(query.level), query, context }) : undefined
-    return { dataset, record, presentation, ...((query.evaluation !== undefined || query.analysis !== undefined) && record ? { calculations: hpCalculations(record, levelArg(query.level), calculate) } : {}) }
+    return { dataset, record, presentation, rankEvidence: record ? this.evaluation.rankEvidence(dataset, record, context) : null, ...((query.evaluation !== undefined || query.analysis !== undefined) && record ? { calculations: hpCalculations(record, levelArg(query.level), calculate) } : {}) }
   }
   private compare(installId: string, input: unknown, context: unknown): SpellComparisonResult {
     const query = queryObject(input, ['snapshotId', 'ids', 'level', 'metric', 'evaluation', 'analysis'])
@@ -134,11 +139,12 @@ export class SpellLibraryQueries {
     const dataset = this.dataset(installId, query)
     const calculate = this.evaluation.calculator(dataset, query, context)
     const results: SpellCalculation[] = []
+    const rankEvidence: NonNullable<SpellComparisonResult['rankEvidence']> = {}
     if (dataset) for (const id of ids) {
       const record = this.storage.record(dataset.snapshotId, id)
-      if (record) results.push(calculate(record, level, metric))
+      if (record) { results.push(calculate(record, level, metric)); rankEvidence[String(id)] = this.evaluation.rankEvidence(dataset, record, context) }
     }
-    return { dataset, level, scope: spellEvaluationScope(query), results }
+    return { dataset, level, scope: spellEvaluationScope(query), results, rankEvidence }
   }
   private rank(installId: string, input: unknown, context: unknown): SpellRankingResult {
     const query = queryObject(input, ['snapshotId', 'classes', 'level', 'metric', 'ranking', 'limit', 'evaluation'])

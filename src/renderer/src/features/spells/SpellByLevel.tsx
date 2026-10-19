@@ -1,12 +1,12 @@
 import { Fragment, type JSX, useCallback } from 'react'
-import { Alert, Box, Button, Chip, CircularProgress, Pagination, Stack, Tab, Tabs, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, CircularProgress, Pagination, Stack, Tab, Tabs, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography } from '@mui/material'
 import type { SpellBrowseSort, SpellClass, SpellSummary } from '@shared/spellLibrary'
 import type { SpellEvaluationOptions } from '@shared/spellModifiers'
 import { useLibraryQuery } from './useLibraryQuery'
 import { useSearchText } from './useSearchText'
 import { SpellNameButton, SpellSortHeader, useSpellSort } from './SpellTableControls'
 import { useSpellPageReset, useSpellScroll, useSpellWorkspaceState } from './spellWorkspace'
-import { rankLabel } from './SpellEstimate'
+import { SpellRowRank } from './SpellRowRank'
 
 export function SpellByLevel({ classes, level, evaluation, selected, onOpen, onPreview, onToggle }: {
   classes: SpellClass[]; level: number; evaluation: SpellEvaluationOptions; selected: number[]
@@ -53,7 +53,7 @@ function ByLevelTable({ records, selected, sort, onOpen, onPreview, onToggle }: 
     {sort.field === 'level' && (index === 0 || records[index - 1].learnedLevel !== r.learnedLevel) && <TableRow><TableCell colSpan={7} sx={{ bgcolor: 'action.hover' }}><Typography variant="subtitle2">Eligible at level {r.learnedLevel ?? 'unknown'}</Typography></TableCell></TableRow>}
     <TableRow data-testid="by-level-record" data-spell-id={r.id}>
     <TableCell>{r.learnedLevel ?? '-'}</TableCell><TableCell>{r.id}</TableCell><TableCell sx={{ minWidth: 210 }}><SpellNameButton id={r.id} onOpen={onOpen}>{r.name}</SpellNameButton>
-      <Chip size="small" variant="outlined" label={r.detectedRank == null ? 'Mote rank unknown' : `Detected ${rankLabel(r.detectedRank)}`} /><Typography variant="caption" display="block">{r.description?.slice(0, 220)}</Typography></TableCell>
+      <SpellRowRank id={r.id} name={r.name} evidence={r.rankEvidence} /><Typography variant="caption" display="block">{r.description?.slice(0, 220)}</Typography></TableCell>
     <TableCell>{r.classes.map((c) => `${c.code} ${c.level}`).join(' · ')}</TableCell><TableCell>{r.category}<Typography variant="caption" display="block">{r.subcategory}</Typography></TableCell><TableCell>{r.mana}</TableCell>
     <TableCell><Button size="small" disabled={r.learnedLevel == null} onClick={() => onPreview(r.id, r.learnedLevel ?? 1)} data-testid={`by-level-preview-${r.id}`}>Preview at {r.learnedLevel}</Button><Button size="small" disabled={!selected.includes(r.id) && selected.length >= 4} onClick={() => onToggle(r.id)} data-testid={`by-level-compare-${r.id}`}>{selected.includes(r.id) ? 'Selected' : 'Add to Compare'}</Button></TableCell>
   </TableRow></Fragment>)}</TableBody></Table></Box>

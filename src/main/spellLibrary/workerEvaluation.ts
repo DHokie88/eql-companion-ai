@@ -1,5 +1,5 @@
 import type { ClientSpellRecord, SpellCalculation, SpellDataset, SpellMetric } from '../../shared/spellLibrary'
-import type { SpellModifierContext } from '../../shared/spellModifiers'
+import type { SpellModifierContext, SpellRankEvidence } from '../../shared/spellModifiers'
 import { calculateClientSpell, CLIENT_SPELL_CALCULATION_SCOPE } from '../../shared/clientSpellCalculations'
 import { evaluateModifiedSpell, SpellModifierCatalog } from '../../shared/clientSpellModifiers'
 import { analyzeClientSpell, SpellMechanicsCatalog } from '../../shared/clientSpellAnalysis'
@@ -38,9 +38,13 @@ export class WorkerSpellEvaluation {
     return this.cached.mechanics
   }
   detectedRank(dataset: SpellDataset, record: ClientSpellRecord, input: unknown): number | null {
+    return this.rankEvidence(dataset, record, input)?.rank ?? null
+  }
+  rankEvidence(dataset: SpellDataset | null, record: ClientSpellRecord, input: unknown): SpellRankEvidence | null {
     const context = input as SpellModifierContext | undefined
-    if (!context?.character) return null
-    return this.catalog(dataset).rank(record, { ...context, preferences: { ...context.preferences, mode: 'mine' } }).rank
+    if (!dataset || !context?.character) return null
+    const rank = this.catalog(dataset).observedRank(record, context).rank
+    return rank === null ? null : { rank, characterKey: context.character.key, contextRevision: context.revision, snapshotId: dataset.snapshotId }
   }
   presentation(dataset: SpellDataset | null, input: { record: ClientSpellRecord; level: number; query: Record<string, unknown>; context: unknown }) {
     const presentation = describeClientSpell(input.record, input.level)

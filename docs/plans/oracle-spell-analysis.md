@@ -77,3 +77,21 @@ Decoding references (consulted 2026-10-18; EQL behavior still needs separate ver
 - [EQEmu instrument arithmetic](https://github.com/EQEmu/Server/blob/master/zone/client_mods.cpp)
 - [EQEmu focus limits and effect application](https://github.com/EQEmu/Server/blob/master/zone/spell_effects.cpp)
 - [Current client IS_SKILL mapping](https://github.com/rumstil/eqspellparser/blob/master/core/SpellParserCurrent.cs)
+
+## Visible mote rank previews and observation badges
+
+The always-visible mote preview dropdown switches between client values, detected values, or an
+Emulate group default. Exact numeric-ID row overrides are available in Emulate across Browse,
+Rankings, Compare, By level and details. Group changes preserve matching per-spell overrides;
+their count and a clear action stay visible. Base=0 and Base/I=1 remain exact choices, and previews
+below an observed rank are allowed. Existing profile/session persistence owns these preferences.
+
+Green Yours VII badges mean highest observed upgraded rank from the selected character's own
+cast/resist or merge logs. They are not a complete spellbook scan. Missing, ambiguous and Base/I
+evidence produces no upgraded badge. The worker resolves observations independently of simulation,
+requires exact full base-name identity and catalog-wide uniqueness, and stamps evidence with the
+character key, context revision and snapshot ID. Retained replies from another context cannot
+display a badge. A lone classic-suffix record cannot borrow an observation of its stripped name.
+
+Modifier model 3 tightens that observation association. Source parser versions, captured spell
+history and live combat state are unchanged by previews, badges or preference updates.

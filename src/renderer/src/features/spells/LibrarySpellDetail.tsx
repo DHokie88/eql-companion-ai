@@ -10,6 +10,7 @@ import { SpellAnalysisBreakdown } from './SpellAnalysisBreakdown'
 import { SpellEffectSummary, SpellTechnicalEffects } from './SpellEffectSummary'
 import { BardSongInstruments } from './BardSongInstruments'
 import { SpellDetailSection } from './SpellDetailSection'
+import { SpellRowRank } from './SpellRowRank'
 
 export function LibrarySpellDetail({ id, snapshotId, level, evaluation, analysis, controls, onBack, onWiki, onHistory }: {
   id: number; snapshotId?: string; onBack: () => void; onWiki?: (name: string) => void; onHistory: (id: number) => void
@@ -27,6 +28,7 @@ export function LibrarySpellDetail({ id, snapshotId, level, evaluation, analysis
     {data && !record && <Alert severity="info">Spell ID {id} is not present in this snapshot. Its earlier revisions remain in History.</Alert>}
     {record && <>
       <Stack spacing={1.5}><Stack direction="row" gap={1.5} flexWrap="wrap" alignItems="center"><Typography variant="h4" sx={{ fontWeight: 600 }}>{record.name}</Typography><Chip size="small" variant="outlined" label={`ID ${record.id}`} /></Stack>
+        <SpellRowRank id={record.id} name={record.name} evidence={data.rankEvidence} />
         <Typography color="text.secondary">{record.classes.length ? record.classes.map((c) => `${c.code} ${c.level}`).join(' · ') : 'Internal / NPC record'} · {record.category} {record.subcategory && `/ ${record.subcategory}`}</Typography>
         <DetailDescription record={record} presentation={data.presentation} />
       </Stack>

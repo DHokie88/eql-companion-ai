@@ -32,13 +32,18 @@ export function EstimateExplanation({ calculation }: { calculation: SpellCalcula
   const modifier = calculation.modifiers
   return <Stack spacing={0.5}>
     {modifier && modifier.mode !== 'client' && <>
-      <Typography variant="caption">{modifier.rank === null ? 'Mote rank unknown; using base amount.' : `Mote rank ${rankLabel(modifier.rank)} (${modifier.rankSource}).`} Measured rank model {modifier.modelVersion}.</Typography>
+      <RankExplanation calculation={calculation} />
       <FocusExplanation calculation={calculation} />
       <InstrumentExplanation calculation={calculation} />
       {modifier.warnings.map((warning) => <Typography key={warning} variant="caption" color="warning.main">{warning}</Typography>)}
     </>}
     <Typography variant="caption" color="text.secondary">{[...calculation.restrictions, ...calculation.reasons].join('; ') || 'Supported HP calculation, one target, full duration.'}</Typography>
   </Stack>
+}
+function RankExplanation({ calculation }: { calculation: SpellCalculation }): JSX.Element | null {
+  const modifier = calculation.modifiers
+  if (!modifier || modifier.mode === 'client') return null
+  return <Typography variant="caption">{modifier.rank === null ? 'Mote rank unknown; using base amount.' : `Mote rank ${rankLabel(modifier.rank)} (${modifier.rankSource}).`} Measured rank model {modifier.modelVersion}.</Typography>
 }
 function InstrumentExplanation({ calculation }: { calculation: SpellCalculation }): JSX.Element | null {
   const instrument = calculation.modifiers?.instrument
@@ -64,7 +69,7 @@ export function SpellHpValues({ calculations, showExplanation = true }: { calcul
       <EstimateAmount calculation={calculation} />
       <Typography variant="caption" color="text.secondary">{calculation.total === null ? 'This HP formula is not supported yet. Open the calculation details for exclusions.' : `Instant ${amount(calculation.instant)} · Per tick ${amount(calculation.perTick)} × ${calculation.ticks ?? '?'} · Client mana ${calculation.mana} · Amount / client mana ${calculation.mana === 0 ? 'Zero mana' : amount(calculation.perMana)}`}</Typography>
       {showExplanation && <EstimateExplanation calculation={calculation} />}
-      {!showExplanation && <InstrumentExplanation calculation={calculation} />}
+      {!showExplanation && <><RankExplanation calculation={calculation} /><InstrumentExplanation calculation={calculation} /></>}
     </Stack>)}
   </Stack>
 }

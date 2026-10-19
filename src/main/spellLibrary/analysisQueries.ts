@@ -81,7 +81,7 @@ export class SpellAnalysisQueries {
   rankings(dataset: SpellDataset | null, input: unknown, context: unknown): SpellRankingsResult {
     const options = rankingOptions(input)
     const calculate = this.evaluation.calculator(dataset, options.query, context)
-    const result = this.rankingRows(dataset, options, calculate)
+    const result = this.rankingRows(dataset, { options, context }, calculate)
     const groups = result.groups
     const rows = options.group === 'zero-mana' ? groups.zeroMana : groups[options.group]
     rows.sort((a, b) => compareSpellValues(sortValue(a, options.sortBy), sortValue(b, options.sortBy), options.direction) || a.id - b.id)
@@ -95,7 +95,8 @@ export class SpellAnalysisQueries {
       contextRevision: (context as SpellModifierContext | undefined)?.revision ?? null, modelVersion: SPELL_ANALYSIS_MODEL_VERSION, level: options.level }
   }
 
-  private rankingRows(dataset: SpellDataset | null, options: ReturnType<typeof rankingOptions>, calculate: SpellCalculator) {
+  private rankingRows(dataset: SpellDataset | null, input: { options: ReturnType<typeof rankingOptions>; context: unknown }, calculate: SpellCalculator) {
+    const { options, context } = input
     const groups: RankingGroups = { ranked: [], zeroMana: [], excluded: [] }
     const result = { groups, categories: new Set<string>(), subcategories: new Set<string>(), counts: { dd: 0, dot: 0, aoe: 0, heal: 0, hot: 0 } }
     if (dataset) for (const record of this.storage.records(dataset.snapshotId)) {
@@ -104,7 +105,7 @@ export class SpellAnalysisQueries {
       countCategories(record, result.counts)
       if (!matchesSpellType(record, options.category)) continue
       const calculation = calculate(record, options.level, record.beneficial ? 'healing' : 'damage')
-      addRow(groups, { ...catalogSummary(record, options.filters.classes), calculation, calculations: [calculation] })
+      addRow(groups, { ...catalogSummary(record, options.filters.classes), rankEvidence: this.evaluation.rankEvidence(dataset, record, context), calculation, calculations: [calculation] })
     }
     return result
   }
@@ -119,7 +120,7 @@ export class SpellAnalysisQueries {
       const learned = minimumSpellLevel(record.classes, options.filters.classes)
       if (learned === null) continue
       rows.push({ ...catalogSummary(record, options.filters.classes), description: clientSpellDescription(record),
-        detectedRank: this.evaluation.detectedRank(dataset, record, context),
+        detectedRank: this.evaluation.detectedRank(dataset, record, context), rankEvidence: this.evaluation.rankEvidence(dataset, record, context),
         calculations: this.byLevelCalculations(record, learned, options.query, calculate) })
     }
     rows.sort((a, b) => compareSpellValues(spellBrowseSortValue(a, options.filters.sortBy, options.filters.selected),
