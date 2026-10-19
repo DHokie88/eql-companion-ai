@@ -54,10 +54,10 @@ export interface SpellLibraryStatus {
   storageBytes: number
 }
 export interface SpellQueryContext { snapshotId?: string }
-export const SPELL_BROWSE_SORTS = ['id', 'name', 'level', 'classes', 'category', 'type', 'amount', 'mana', 'efficiency', 'selected'] as const
+export const SPELL_BROWSE_SORTS = ['id', 'name', 'level', 'classes', 'category', 'subcategory', 'type', 'amount', 'mana', 'efficiency', 'selected'] as const
 export type SpellBrowseSort = typeof SPELL_BROWSE_SORTS[number]
 export type SpellSortDirection = 'asc' | 'desc'
-export type SpellBrowseType = 'dd' | 'dot' | 'aoe' | 'heal' | 'hot' | 'other'
+export type SpellBrowseType = 'dd' | 'dot' | 'aoe' | 'rain' | 'aoe4' | 'aoe8' | 'heal' | 'hot' | 'other'
 export interface SpellSearchQuery extends SpellQueryContext {
   analysis?: SpellAnalysisOptions
   minLevel?: number

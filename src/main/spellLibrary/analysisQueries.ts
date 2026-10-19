@@ -1,3 +1,4 @@
+import type { SpellMechanicsCatalog } from '../../shared/clientSpellMechanics'
 import type { ClientSpellRecord, SpellDataset, SpellSummary } from '../../shared/spellLibrary'
 import { SPELL_ANALYSIS_MODEL_VERSION, type SpellAnalysisSort, type SpellByLevelResult, type SpellRankingRow, type SpellRankingsResult } from '../../shared/spellAnalysis'
 import { compareSpellValues, matchesSpellType, minimumSpellLevel, spellBrowseSortValue } from '../../shared/clientSpellBrowse'
@@ -40,8 +41,8 @@ function addRow(groups: RankingGroups, row: SpellRankingRow): void {
   else if (row.mana === 0) groups.zeroMana.push(row)
   else groups.ranked.push(row)
 }
-function countCategories(record: ClientSpellRecord, counts: SpellRankingsResult['counts']): void {
-  for (const category of RANKING_CATEGORIES) if (matchesSpellType(record, category)) counts[category]++
+function countCategories(record: ClientSpellRecord, counts: SpellRankingsResult['counts'], mechanics?: SpellMechanicsCatalog): void {
+  for (const category of RANKING_CATEGORIES) if (matchesSpellType(record, category, mechanics)) counts[category]++
 }
 function facets(record: ClientSpellRecord, options: ReturnType<typeof spellSearchOptions>, result: { categories: Set<string>; subcategories: Set<string> }): void {
   if (record.category) result.categories.add(record.category)
@@ -97,29 +98,31 @@ export class SpellAnalysisQueries {
 
   private rankingRows(dataset: SpellDataset | null, input: { options: ReturnType<typeof rankingOptions>; context: unknown }, calculate: SpellCalculator) {
     const { options, context } = input
+    const mechanics = dataset ? this.evaluation.mechanics(dataset) : undefined
     const groups: RankingGroups = { ranked: [], zeroMana: [], excluded: [] }
     const result = { groups, categories: new Set<string>(), subcategories: new Set<string>(), counts: { dd: 0, dot: 0, aoe: 0, heal: 0, hot: 0 } }
     if (dataset) for (const record of this.storage.records(dataset.snapshotId)) {
       facets(record, options.filters, result)
-      if (!matchesSpellSearch(record, options.filters)) continue
-      countCategories(record, result.counts)
-      if (!matchesSpellType(record, options.category)) continue
+      if (!matchesSpellSearch(record, options.filters, mechanics)) continue
+      countCategories(record, result.counts, mechanics)
+      if (!matchesSpellType(record, options.category, mechanics)) continue
       const calculation = calculate(record, options.level, record.beneficial ? 'healing' : 'damage')
-      addRow(groups, { ...catalogSummary(record, options.filters.classes), rankEvidence: this.evaluation.rankEvidence(dataset, record, context), calculation, calculations: [calculation] })
+      addRow(groups, { ...catalogSummary(record, options.filters.classes, mechanics), rankEvidence: this.evaluation.rankEvidence(dataset, record, context), calculation, calculations: [calculation] })
     }
     return result
   }
 
   byLevel(dataset: SpellDataset | null, input: unknown, context: unknown): SpellByLevelResult {
     const options = byLevelOptions(input)
+    const mechanics = dataset ? this.evaluation.mechanics(dataset) : undefined
     const calculate = this.evaluation.calculator(dataset, options.query, context)
     const rows: SpellSummary[] = [], result = { categories: new Set<string>(), subcategories: new Set<string>() }
     if (dataset && !options.empty) for (const record of this.storage.records(dataset.snapshotId)) {
       facets(record, options.filters, result)
-      if (!matchesSpellSearch(record, options.filters)) continue
+      if (!matchesSpellSearch(record, options.filters, mechanics)) continue
       const learned = minimumSpellLevel(record.classes, options.filters.classes)
       if (learned === null) continue
-      rows.push({ ...catalogSummary(record, options.filters.classes), description: clientSpellDescription(record),
+      rows.push({ ...catalogSummary(record, options.filters.classes, mechanics), description: clientSpellDescription(record),
         detectedRank: this.evaluation.detectedRank(dataset, record, context), rankEvidence: this.evaluation.rankEvidence(dataset, record, context),
         calculations: this.byLevelCalculations(record, learned, options.query, calculate) })
     }

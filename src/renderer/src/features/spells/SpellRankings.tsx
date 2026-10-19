@@ -10,6 +10,11 @@ import { amount } from './SpellEstimate'
 import { useSpellScroll } from './spellWorkspace'
 
 const CATEGORIES: { key: SpellRankingCategory; label: string }[] = [{ key: 'dd', label: 'DD' }, { key: 'dot', label: 'DoT' }, { key: 'aoe', label: 'AOE' }, { key: 'heal', label: 'Heal' }, { key: 'hot', label: 'HoT' }]
+function rankingScope(category: SpellRankingCategory, targets: SpellTargetCount): string {
+  if (category === 'aoe') return `Aggregate pack total · ${targets === 'maximum' ? 'Spell maximum' : `${targets} requested targets`}`
+  if (category === 'heal' || category === 'hot') return 'Per recipient · full cast'
+  return 'One-target full cast · pack size does not change this ranking'
+}
 export function SpellRankings({ classes, level, evaluation, targets, selected, initialCategory, onFocusConsumed, onOpen, onToggle }: {
   classes: SpellClass[]; level: number; evaluation: SpellEvaluationOptions; targets: SpellTargetCount; selected: number[]; initialCategory?: SpellRankingCategory
   onOpen: (id: number, scope?: 'single' | 'pack') => void; onToggle: (id: number) => void; onFocusConsumed?: () => void
@@ -22,6 +27,7 @@ export function SpellRankings({ classes, level, evaluation, targets, selected, i
   return <Stack spacing={1.5} data-testid="spells-rankings">
     <Tabs value={r.categoryTab} onChange={(_e, value: SpellRankingCategory) => r.setCategory(value)} variant="scrollable" aria-label="Ranking category">{CATEGORIES.map((c) => <Tab key={c.key} value={c.key} label={`${c.label} (${data?.counts[c.key] ?? 0})`} data-testid={`rankings-tab-${c.key}`} />)}</Tabs>
     <SpellBrowseFilters {...r} hideTypes categories={data?.categories ?? []} subcategories={data?.subcategories ?? []} />
+    <Typography variant="body2" data-testid="rankings-amount-scope">{rankingScope(r.categoryTab, targets)}</Typography>
     <Typography variant="caption">Rankings cover the entire filtered catalog. Amounts are full-duration modeled values; eligibility does not confirm ownership. Partial inputs are labeled. Healing is potential healing before overheal.</Typography>
     {r.error && <Alert severity="error">{r.error}</Alert>}{r.loading && <CircularProgress size={22} aria-label="Ranking spells" />}
     {data && <>

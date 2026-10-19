@@ -229,3 +229,19 @@ test('cached bard rankings, highlights and By level refresh export provenance wi
     assert.equal(scans, before)
   } finally { f.close() }
 })
+
+
+test('Rankings and By level share the verified rain and finite area classification used by Browse', () => {
+  const rain = spellRow(1, 'Frost Storm'), area = spellRow(2, 'Ordinary Area'), unknown = spellRow(3, 'Unknown Waves')
+  for (const row of [rain, area, unknown]) { row[30] = '8'; row[143] = '4' }
+  rain[13] = '7500'; unknown[13] = '7500'
+  const f = fixture([rain, area, unknown])
+  try {
+    assert.deepEqual(f.rankings().records.map((r) => [r.id, r.spellType]), [[1, 'rain'], [2, 'aoe4']])
+    assert.deepEqual(f.rankings({ group: 'excluded' }).records.map((r) => [r.id, r.spellType]), [[3, 'aoe']])
+    assert.deepEqual(f.rankings().counts, { dd: 3, dot: 0, aoe: 3, heal: 0, hot: 0 })
+    const byLevel = f.call<SpellByLevelResult>('byLevel', { level: 1, classes: ['WIZ'], view: 'at', type: 'rain' })
+    assert.deepEqual(ids(byLevel), [1]); assert.equal(byLevel.records[0].spellType, 'rain')
+    assert.equal(f.storage.snapshots(f.dataset.installId).length, 1)
+  } finally { f.close() }
+})

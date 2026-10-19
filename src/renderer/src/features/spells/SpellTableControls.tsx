@@ -16,12 +16,13 @@ export function useSpellSort<T extends string>(initial: T, direction: SpellSortD
   return { ...sort, changeSort, selectSort }
 }
 
-export function SpellSortHeader<T extends string>({ field, label, sort, numeric = false }: {
-  field: T; label: string; numeric?: boolean; sort: { field: T; direction: SpellSortDirection; changeSort: (field: T) => void }
+export function SpellSortHeader<T extends string>({ field, label, sort, numeric = false, align }: {
+  field: T; label: string; numeric?: boolean; align?: 'left' | 'center' | 'right'; sort: { field: T; direction: SpellSortDirection; changeSort: (field: T) => void }
 }): JSX.Element {
   const active = sort.field === field
-  return <TableCell align={numeric ? 'right' : 'left'} sortDirection={active ? sort.direction : false}>
+  const alignment = align ?? (numeric ? 'right' : 'left')
+  return <TableCell align={alignment} sortDirection={active ? sort.direction : false}>
     <TableSortLabel active={active} direction={active ? sort.direction : 'asc'} onClick={() => sort.changeSort(field)}
-      data-testid={`spells-sort-${field}`} sx={{ whiteSpace: 'normal' }}>{label}</TableSortLabel>
+      data-testid={`spells-sort-${field}`} sx={{ whiteSpace: 'normal', ...(alignment === 'center' ? { '& .MuiTableSortLabel-icon': { position: 'absolute', right: -22, ml: 0 } } : {}) }}>{label}</TableSortLabel>
   </TableCell>
 }

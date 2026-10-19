@@ -70,6 +70,29 @@ function calculationFor(record: ClientSpellRecord, options: ClientSpellAnalysisO
     : calculateClientSpell(record, options.level, options.metric)
 }
 
+/** Ideal stationary-pack opportunities, not promises about which mob takes a hit.
+ * One shared budget is spent across pulses; resists may consume opportunities too.
+ */
+function rainWaveHits(mechanics: ClientSpellMechanics, scenario: AnalysisScenario): number[] | null {
+  if (scenario.reason || mechanics.waves <= 1 || scenario.hits === null) return null
+  const targets = scenario.requestedTargets === 'maximum' ? mechanics.hitCap : scenario.requestedTargets
+  if (targets === null) return null
+  let remaining = scenario.hits
+  const waves: number[] = []
+  for (let wave = 0; wave < mechanics.waves && remaining > 0; wave++) {
+    const spent = Math.min(targets, remaining)
+    waves.push(spent)
+    remaining -= spent
+  }
+  return waves
+}
+
+function deliveryKind(record: ClientSpellRecord, mechanics: ClientSpellMechanics): SpellAnalysis['deliveryKind'] {
+  if (mechanics.reason) return 'unverified'
+  if (mechanics.waves > 1) return 'rain'
+  return isAreaTarget(record.target) ? 'aoe' : 'single'
+}
+
 function buildAnalysis(record: ClientSpellRecord, options: ClientSpellAnalysisOptions, input: { calculation: SpellCalculation; mechanics: ClientSpellMechanics; scenario: AnalysisScenario }): SpellAnalysis {
   const { calculation, mechanics, scenario } = input
   const single = scaleAnalysisCalculation(calculation, mechanics.reason ? null : scenario.singleHits)
@@ -80,6 +103,8 @@ function buildAnalysis(record: ClientSpellRecord, options: ClientSpellAnalysisOp
     scenario: { ...options.analysis }, scope: scenario.scope, requestedTargets: scenario.requestedTargets,
     effectiveTargets: scenario.effectiveTargets, waves: mechanics.reason ? null : mechanics.waves,
     hits: scenario.reason ? null : scenario.hits, hitCap: mechanics.hitCap, capSource: scenario.capSource,
+    deliveryKind: deliveryKind(record, mechanics), perHitTotal: mechanics.reason ? null : calculation.total,
+    waveHits: rainWaveHits(mechanics, scenario),
     singleTargetTotal: single.total, packTotal: scenario.scope === 'aggregate pack total' ? total.total : null,
     partial: warnings.length > 0, warnings,
     timing: analysisTiming(record, total, mechanics),

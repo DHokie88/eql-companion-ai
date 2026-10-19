@@ -5,6 +5,7 @@ import { buildIfStale, dumpArtifacts, settle, waitHydrated } from './appHarness.
 import { mainWindow } from './appWindow.mjs'
 import { launchOnFixture, stageFixture } from './logFixture.mjs'
 import { stageAnalysisSources } from './spellAnalysisFixture.mjs'
+import { browseRainChecks, categoryAndTableChecks } from './spellRainBrowseSteps.mjs'
 
 async function choose(page: Page, id: string, name: string): Promise<void> {
   await page.getByTestId(id).click()
@@ -44,7 +45,7 @@ async function areaAndCompare(page: Page): Promise<void> {
   await choose(page, 'spells-target-count', '2 targets')
   await settle(() => page.getByTestId('spells-amount-301-damage').innerText(), (text) => text === '50')
   await choose(page, 'spells-target-count', 'Spell maximum')
-  await settle(() => page.getByTestId('spells-amount-301-damage').innerText(), (text) => text === '150')
+  assert.equal(await settle(() => page.getByTestId('spells-amount-301-damage').innerText(), (text) => text === '200'), '200')
   await choose(page, 'spells-target-count', '4 targets')
   await page.getByTestId('rankings-compare-301').click(); await page.getByTestId('rankings-compare-302').click()
   await page.getByTestId('spells-open-301').click()
@@ -104,10 +105,14 @@ const page = await mainWindow(launch.app)
 page.setDefaultTimeout(20_000)
 try {
   await waitHydrated(page)
+  const notice = page.getByTestId('telemetry-notice-off')
+  if (await notice.isVisible()) await notice.click()
   await settle(() => page.evaluate(() => window.eq.spellLibrary.status()), (s) => s.dataset?.recordCount === count, { timeoutMs: 30_000 })
   await page.getByTestId('nav-spells').click()
   await choose(page, 'spells-scope', 'All spells, including internal records')
   await page.getByTestId('spells-level').fill('50')
+  await browseRainChecks(page)
+  await categoryAndTableChecks(page)
   await rankings(page); console.log('Rankings pagination, highlights, groups and sorting passed.')
   await areaAndCompare(page); console.log('AOE scenarios and reference comparisons passed.')
   await levelsAndEffects(page)

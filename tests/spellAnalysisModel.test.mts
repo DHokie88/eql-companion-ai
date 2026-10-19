@@ -40,7 +40,7 @@ test('ordinary one-target client calculations retain baseline amounts, zero mana
     assert.deepEqual(withoutAnalysis, baseline)
     assert.equal(result.analysis.singleTargetTotal, baseline.total)
     assert.equal(result.analysis.contextRevision, null)
-    assert.equal(result.analysis.modelVersion, '3')
+    assert.equal(result.analysis.modelVersion, '4')
   }
 })
 
@@ -131,6 +131,7 @@ test('verified rain has a whole-cast hit budget, never waves times every target'
   assert.equal(four.total, 400)
   assert.equal(four.perMana, 40)
   assert.equal(analyze(record, pack(2)).total, 400)
+  assert.equal(analyze(record, pack(3)).total, 400)
   assert.equal(analyze(record, pack('maximum')).total, 400)
   assert.deepEqual([single.analysis.waves, single.analysis.hits, four.analysis.waves, four.analysis.hits], [3, 3, 3, 4])
   assert.equal(four.analysis.effectiveTargets, null)
@@ -138,6 +139,31 @@ test('verified rain has a whole-cast hit budget, never waves times every target'
   assert.equal(four.analysis.timing.deliveryMs, 7500)
   assert.equal(four.analysis.timing.cycleMs, 8500)
   near(four.analysis.timing.rate, 400 / 8.5)
+})
+
+test('rain explains potential opportunities per wave for every pack size and never spends mana per hit', () => {
+  const record = rain({ mana: 271, effects: [effect(79, -512)] })
+  const expected = [[1, 1, 1], [2, 2], [3, 1], [4]]
+  for (let targets = 1; targets <= 4; targets++) {
+    const result = analyze(record, pack(targets))
+    const hits = targets === 1 ? 3 : 4
+    assert.equal(result.analysis.deliveryKind, 'rain')
+    assert.deepEqual(result.analysis.waveHits, expected[targets - 1])
+    assert.equal(result.analysis.hits, hits)
+    assert.equal(result.analysis.perHitTotal, 512)
+    assert.equal(result.total, 512 * hits)
+    assert.equal(result.perMana, Math.round(512 * hits / 271 * 1_000_000) / 1_000_000)
+    assert.equal(result.mana, 271)
+    assert.equal(result.analysis.singleTargetTotal, 1536)
+    assert.equal(result.analysis.timing.deliveryMs, 7500, 'uses the captured conservative window, not an asserted last-pulse time')
+  }
+  assert.deepEqual(analyze(record, pack('maximum')).analysis.waveHits, [4])
+  assert.equal(analyze(area(4), pack()).analysis.waveHits, null)
+  assert.equal(analyze(area(4), pack()).analysis.deliveryKind, 'aoe')
+  const unknown = analyze(rain({ name: 'Unknown Wave' }), pack())
+  assert.equal(unknown.analysis.waveHits, null)
+  assert.equal(unknown.analysis.deliveryKind, 'unverified')
+  assert.equal(unknown.analysis.perHitTotal, null)
 })
 
 test('rain applies per-hit modifiers before waves and scales its displayed baseline and focus range', () => {
@@ -149,6 +175,8 @@ test('rain applies per-hit modifiers before waves and scales its displayed basel
   assert.equal(result.analysis.contributions[0].clientAmount, 100)
   assert.equal(result.analysis.contributions[0].afterRank, 112)
   near(result.analysis.contributions[0].total, result.total)
+  near(result.analysis.perHitTotal * result.analysis.hits, result.total)
+  assert.deepEqual(result.analysis.waveHits, [4])
 })
 
 test('rain binding requires one exact compatible player identity and never promotes NPC or classic suffix records', () => {

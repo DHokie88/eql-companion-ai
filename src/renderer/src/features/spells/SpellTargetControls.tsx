@@ -8,6 +8,7 @@ export function SpellTargetControls({ targets, onChange, disabled = false }: { t
         {Array.from({ length: 100 }, (_, n) => <MenuItem key={n + 1} value={n + 1}>{n + 1} target{n ? 's' : ''}</MenuItem>)}
         <MenuItem value="maximum">Spell maximum</MenuItem>
       </Select></FormControl>
-    <Typography variant="caption" color="text.secondary">AOE uses the same requested pack size for every spell. Captured caps and rain hit budgets still apply. Healing remains per recipient.</Typography>
+    <Typography variant="caption" color="text.secondary" sx={{ maxWidth: 760 }}>Browse and AOE rankings use this pack size, limited by target caps or rain hit budgets. DD/DoT rankings show one target; healing stays per recipient. Mana is spent once.</Typography>
+    <Typography variant="caption" color="text.secondary" sx={{ flexBasis: '100%' }} data-testid="spells-rain-guide">Rain example · 3 available waves, 4 hits per cast: 1 target → 3 hits; 2, 3 or 4 targets → up to 4 hits. Assumes targets stay in the area and no resists; hits need not split evenly.</Typography>
   </Stack>
 }

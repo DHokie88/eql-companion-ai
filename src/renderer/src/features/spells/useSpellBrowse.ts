@@ -43,8 +43,13 @@ export function useSpellBrowse({ classes, level, allSpells, evaluation, selected
   }, [queryText, classKey, level, allSpells, min, category, subcategory, effect, type, polarity, mana, maximum, sort.field, sort.direction, selectedKey, page, evaluation, invalid, analysis])
   const result = useLibraryQuery(load, undefined, enabled)
   const change = <K extends keyof BrowseFilters>(key: K, value: BrowseFilters[K]): void => {
+    const category = key === 'category' ? value : filters.category
+    const subcategory = key === 'category' ? '' : key === 'subcategory' ? value : filters.subcategory
+    if (category && subcategory && ['category', 'subcategory'].includes(sort.field)) sort.selectSort('name', 'asc')
+    else if (category && sort.field === 'category') sort.selectSort('subcategory', sort.direction)
+    else if (!category && sort.field === 'subcategory') sort.selectSort('category', sort.direction)
     setFilters((current) => ({ ...current, [key]: value, ...(key === 'category' ? { subcategory: '' } : {}) })); setPage(1)
   }
-  const reset = (): void => { setFilters(defaultBrowseFilters()); setPage(1) }
+  const reset = (): void => { setFilters(defaultBrowseFilters()); setPage(1); if (sort.field === 'subcategory') sort.selectSort('category', sort.direction) }
   return { ...result, filters, maximum, change, reset, page, setPage, sort, invalid }
 }

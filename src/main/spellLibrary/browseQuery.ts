@@ -1,3 +1,4 @@
+import type { SpellMechanicsCatalog } from '../../shared/clientSpellMechanics'
 import { SPELL_BROWSE_SORTS, type ClientSpellRecord, type SpellBrowseSort, type SpellBrowseType, type SpellSortDirection } from '../../shared/spellLibrary'
 import { matchesSpellType, minimumSpellLevel } from '../../shared/clientSpellBrowse'
 import { classesArg, levelArg, optionalText } from './queryValidation'
@@ -31,7 +32,7 @@ export function spellSearchOptions(query: Record<string, unknown>) {
     subcategory: optionalText(query.subcategory, 'subcategory', 256),
     effect: query.effect === undefined ? undefined : integerArg(query.effect, 'effect', 0, 100000),
     allSpells: optionalBoolean(query.allSpells, 'allSpells'), allLevels: optionalBoolean(query.allLevels, 'allLevels'), minLevel, maxLevel,
-    type: optionalChoice<SpellBrowseType>(query.type, 'spell type', ['dd', 'dot', 'aoe', 'heal', 'hot', 'other']),
+    type: optionalChoice<SpellBrowseType>(query.type, 'spell type', ['dd', 'dot', 'aoe', 'rain', 'aoe4', 'aoe8', 'heal', 'hot', 'other']),
     polarity: optionalChoice(query.polarity, 'polarity', ['beneficial', 'detrimental'] as const),
     mana: optionalChoice(query.mana, 'mana filter', ['free', 'cost'] as const),
     sortBy: optionalChoice<SpellBrowseSort>(query.sortBy, 'sort column', SPELL_BROWSE_SORTS) ?? 'id',
@@ -49,16 +50,16 @@ function matchesLevel(record: ClientSpellRecord, options: SearchOptions): boolea
 function matchesText(record: ClientSpellRecord, text: string): boolean {
   return /^\d+$/.test(text) ? record.id === Number(text) : `${record.name} ${record.description}`.toLowerCase().includes(text)
 }
-function matchesTraits(record: ClientSpellRecord, options: SearchOptions): boolean {
-  if (options.type && !matchesSpellType(record, options.type)) return false
+function matchesTraits(record: ClientSpellRecord, options: SearchOptions, mechanics?: SpellMechanicsCatalog): boolean {
+  if (options.type && !matchesSpellType(record, options.type, mechanics)) return false
   if (options.polarity && record.beneficial !== (options.polarity === 'beneficial')) return false
   if (options.mana === 'free' && record.mana !== 0) return false
   return options.mana !== 'cost' || record.mana > 0
 }
-export function matchesSpellSearch(record: ClientSpellRecord, options: SearchOptions): boolean {
+export function matchesSpellSearch(record: ClientSpellRecord, options: SearchOptions, mechanics?: SpellMechanicsCatalog): boolean {
   if (options.text && !matchesText(record, options.text)) return false
   if (options.category && record.category !== options.category) return false
   if (options.subcategory && record.subcategory !== options.subcategory) return false
   if (options.effect !== undefined && !record.effects.some((slot) => slot.spa === options.effect)) return false
-  return matchesLevel(record, options) && matchesTraits(record, options)
+  return matchesLevel(record, options) && matchesTraits(record, options, mechanics)
 }

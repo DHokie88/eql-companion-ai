@@ -46,7 +46,7 @@ function SpellsWorkspace({ routing, status, modifiers }: { routing: AppRouting; 
     mode: context.preferences.mode, contextRevision: context.revision, classes: classKey ? classKey.split(',') as SpellClass[] : []
   } : undefined, [context, classKey])
   const targets = modifiers.context?.preferences.targets ?? 4
-  const analysis = useMemo(() => ({ scope: 'single' as const, targets }), [targets])
+  const analysis = useMemo(() => ({ scope: 'pack' as const, targets }), [targets])
   const busy = ['checking', 'importing', 'activating'].includes(status.phase)
   return (
     <Stack spacing={2} data-testid="spells-view">
@@ -75,7 +75,7 @@ function LibraryContent({ routing, state, modifiers, evaluation, analysis, class
   if (tab === 'history' && routing.librarySpellId === null) return <SpellHistory focusId={state.timelineId} onOpen={routing.openLibrarySpell} />
   if (!evaluation) return <CircularProgress size={22} aria-label="Loading calculation context" />
   return <>
-    {tab === 'browse' && <SpellBrowse classes={classes} level={level} evaluation={evaluation} analysis={analysis} allSpells={mode === 'all'} enabled={mode === 'all' || classes.length > 0} selected={selected} onToggle={toggle} onOpen={state.open} />}
+    {tab === 'browse' && <SpellBrowse classes={classes} level={level} evaluation={evaluation} analysis={analysis} allSpells={mode === 'all'} enabled={mode === 'all' || classes.length > 0} selected={selected} onToggle={toggle} onOpen={(id) => state.open(id, 'pack')} />}
     {tab === 'rankings' && <SpellRankings classes={classes} level={level} evaluation={evaluation} targets={analysis.targets} selected={selected} initialCategory={state.focusCategory} onFocusConsumed={() => state.setFocusCategory(undefined)} onToggle={toggle} onOpen={state.open} />}
     {tab === 'compare' && <SpellCompare ids={selected} classes={classes} level={level} evaluation={evaluation} targets={analysis.targets} initialScope={state.focusScope} onFocusConsumed={() => state.setFocusScope(undefined)} onRemove={toggle} onOpen={state.open} />}
     {tab === 'by-level' && <SpellByLevel classes={classes} level={level} evaluation={evaluation} selected={selected} onOpen={state.open} onPreview={state.preview} onToggle={toggle} />}

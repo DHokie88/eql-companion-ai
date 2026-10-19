@@ -98,3 +98,51 @@ test('invalid filters and arbitrary sort keys are rejected before scanning', () 
     }
   } finally { f.close() }
 })
+
+
+function areaRow(id: number, name: string, cap: number, repeats = false): string[] {
+  const row = spellRow(id, name)
+  row[30] = '8'; row[143] = String(cap); row[13] = repeats ? '7500' : '0'
+  return row
+}
+
+test('Browse classifies snapshot-bound rains separately from ordinary area caps across the complete catalog', () => {
+  const periodic = areaRow(7, 'Area Burn', 4); periodic[11] = '5'
+  const f = fixture([areaRow(1, 'Frost Storm', 4, true), areaRow(2, 'Four Target Blast', 4),
+    areaRow(3, 'Eight Target Blast', 8), areaRow(4, 'Unknown Cap Blast', 0),
+    areaRow(5, 'Unverified Waves', 4, true), spellRow(6, 'Single Bolt'), periodic])
+  try {
+    assert.deepEqual(f.search().records.map((r) => r.spellType), ['rain', 'aoe4', 'aoe8', 'aoe', 'aoe', 'dd', 'dot'])
+    assert.deepEqual(ids(f.search({ type: 'rain', pageSize: 1 })), [1])
+    assert.deepEqual(ids(f.search({ type: 'aoe4', pageSize: 1 })), [2])
+    assert.deepEqual(ids(f.search({ type: 'aoe8', pageSize: 1 })), [3])
+    assert.deepEqual(ids(f.search({ type: 'dd' })), [1, 2, 3, 4, 5, 6], 'DD remains the broad instant-damage filter')
+    assert.deepEqual(ids(f.search({ type: 'aoe' })), [1, 2, 3, 4, 5, 7], 'AOE includes periodic damage as well as all direct area types')
+    const legacy = f.search({ type: 'rain', level: 50, sortBy: 'amount' }).records[0]
+    assert.equal(legacy.calculations?.[0].analysis, undefined, 'classification does not opt legacy callers into wave calculations')
+  } finally { f.close() }
+})
+
+test('rain filters never promote duplicate-compatible or incompatible researched records by name alone', () => {
+  const incompatible = areaRow(3, 'Lava Storm', 4, true); incompatible[13] = '5000'
+  const f = fixture([areaRow(1, 'Frost Storm', 4, true), areaRow(2, 'Frost Storm', 4, true), incompatible])
+  try {
+    assert.deepEqual(ids(f.search({ type: 'rain' })), [])
+    assert.deepEqual(f.search().records.map((r) => r.spellType), ['aoe', 'aoe', 'aoe'])
+    assert.deepEqual(ids(f.search({ type: 'aoe4' })), [], 'an unverified repeating hit budget is not an ordinary four-target cap')
+    assert.deepEqual(ids(f.search({ type: 'dd' })), [1, 2, 3])
+    assert.deepEqual(ids(f.search({ type: 'aoe' })), [1, 2, 3])
+  } finally { f.close() }
+})
+
+test('subcategory sorting covers all matches before pagination and keeps unknown values last', () => {
+  const unknown = spellRow(1, 'No subcategory'); unknown[87] = '0'
+  const f = fixture([unknown, spellRow(2, 'Known first'), spellRow(3, 'Known second')])
+  try {
+    for (const direction of ['asc', 'desc'] as const) {
+      assert.deepEqual(ids(f.search({ sortBy: 'subcategory', direction, pageSize: 1 })), [2])
+      assert.deepEqual(ids(f.search({ sortBy: 'subcategory', direction, page: 2, pageSize: 1 })), [3])
+      assert.deepEqual(ids(f.search({ sortBy: 'subcategory', direction, page: 3, pageSize: 1 })), [1])
+    }
+  } finally { f.close() }
+})

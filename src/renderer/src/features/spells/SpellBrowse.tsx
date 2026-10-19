@@ -28,7 +28,7 @@ export function SpellBrowse({ classes, level, evaluation, analysis, allSpells, e
     {loading && <CircularProgress size={22} aria-label="Searching spells" />}
     {data && <>
       <ResultCount total={data.total} contentId={data.dataset?.contentId} />
-      <SpellBrowseTable records={data.records} selected={selected} sort={browse.sort} onOpen={onOpen} onToggle={onToggle} />
+      <SpellBrowseTable records={data.records} selected={selected} sort={browse.sort} filters={browse.filters} onOpen={onOpen} onToggle={onToggle} />
       {data.total === 0 && <Typography>No matching spells in this captured dataset.</Typography>}
       {data.total > 40 && <Pagination count={Math.ceil(data.total / 40)} page={browse.page} onChange={(_e, value) => browse.setPage(value)} data-testid="spells-pagination" />}
     </>}

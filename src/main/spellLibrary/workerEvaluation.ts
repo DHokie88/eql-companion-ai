@@ -31,7 +31,7 @@ export class WorkerSpellEvaluation {
     }
     return this.cached.catalog
   }
-  private mechanics(dataset: SpellDataset): SpellMechanicsCatalog {
+  mechanics(dataset: SpellDataset): SpellMechanicsCatalog {
     this.catalog(dataset)
     if (!this.cached) throw new Error('Spell catalog is unavailable')
     this.cached.mechanics ??= new SpellMechanicsCatalog(this.storage.records(dataset.snapshotId))

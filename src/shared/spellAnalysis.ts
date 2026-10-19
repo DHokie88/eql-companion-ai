@@ -1,6 +1,6 @@
 import type { SpellCalculation, SpellSearchQuery, SpellSearchResult, SpellSummary } from './spellLibrary'
 
-export const SPELL_ANALYSIS_MODEL_VERSION = '3'
+export const SPELL_ANALYSIS_MODEL_VERSION = '4'
 export type SpellTargetCount = number | 'maximum'
 export interface SpellAnalysisOptions { scope: 'single' | 'pack'; targets: SpellTargetCount }
 export const DEFAULT_SPELL_ANALYSIS: SpellAnalysisOptions = { scope: 'single', targets: 4 }
@@ -18,6 +18,8 @@ export interface SpellAnalysis {
   modelVersion: string; level: number; contextRevision: string | null; scenario: SpellAnalysisOptions
   scope: 'one-target full cast' | 'aggregate pack total'; requestedTargets: SpellTargetCount
   effectiveTargets: number | null; waves: number | null; hits: number | null; hitCap: number | null; capSource: string
+  deliveryKind: 'rain' | 'aoe' | 'single' | 'unverified'
+  perHitTotal: number | null; waveHits: number[] | null
   singleTargetTotal: number | null; packTotal: number | null; partial: boolean; warnings: string[]
   timing: SpellAnalysisTiming; contributions: SpellEffectContribution[]
 }

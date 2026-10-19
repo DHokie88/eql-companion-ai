@@ -114,7 +114,7 @@ export class SpellLibraryQueries {
     const query = queryObject(input, SEARCH_QUERY_FIELDS)
     const dataset = this.dataset(installId, query)
     const calculate = this.evaluation.calculator(dataset, query, context)
-    const result = searchCatalog(this.storage, dataset, query, calculate)
+    const result = searchCatalog(this.storage, dataset, query, { calculate, mechanics: dataset ? this.evaluation.mechanics(dataset) : undefined })
     if (dataset) for (const row of result.records) {
       const record = this.storage.record(dataset.snapshotId, row.id)
       if (record) row.rankEvidence = this.evaluation.rankEvidence(dataset, record, context)

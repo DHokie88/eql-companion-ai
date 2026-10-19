@@ -1,6 +1,7 @@
 import type { JSX } from 'react'
 import { Chip, Stack, Typography } from '@mui/material'
 import type { SpellCalculation } from '@shared/spellLibrary'
+import { SpellCastSummary } from './SpellCastSummary'
 
 export function amount(value: number | null): string {
   return value === null ? 'Excluded' : value.toLocaleString(undefined, { maximumFractionDigits: 3 })
@@ -67,6 +68,7 @@ export function SpellHpValues({ calculations, showExplanation = true }: { calcul
     {calculations.map((calculation) => <Stack key={calculation.metric} spacing={0.5}>
       <Typography variant="subtitle2">{calculation.metric === 'damage' ? 'Damage' : 'Healing'} · {calculation.analysis?.scope ?? 'per target'}</Typography>
       <EstimateAmount calculation={calculation} />
+      <SpellCastSummary calculation={calculation} align="left" />
       <Typography variant="caption" color="text.secondary">{calculation.total === null ? 'This HP formula is not supported yet. Open the calculation details for exclusions.' : `Instant ${amount(calculation.instant)} · Per tick ${amount(calculation.perTick)} × ${calculation.ticks ?? '?'} · Client mana ${calculation.mana} · Amount / client mana ${calculation.mana === 0 ? 'Zero mana' : amount(calculation.perMana)}`}</Typography>
       {showExplanation && <EstimateExplanation calculation={calculation} />}
       {!showExplanation && <><RankExplanation calculation={calculation} /><InstrumentExplanation calculation={calculation} /></>}

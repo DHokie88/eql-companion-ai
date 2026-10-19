@@ -14,7 +14,9 @@ Ordinary AOE respects a captured finite cap. Unknown caps support a labeled part
 a chosen count, while Spell maximum is unavailable. Verified rains require an exact, uniquely
 compatible player definition in the active snapshot; their whole-cast hit budget caps waves times
 targets. The existing researched three-wave/four-hit examples are not defaults for arbitrary waves.
-Healing stays per recipient. DD shows one-target full casts, including verified rain waves.
+Browse uses the selected pack size, including when its DD filter includes area spells. Opening
+a Browse record preserves that scope. Healing stays per recipient. The DD/DoT ranking views
+explicitly show one-target full casts; AOE rankings use pack totals.
 
 Modeled cycle DPS/HPS divides full amount by cast plus max(recovery, recast, delivery). Delivery
 includes full periodic duration or a verified wave window. This is a ranking estimate, not measured
@@ -95,3 +97,26 @@ display a badge. A lone classic-suffix record cannot borrow an observation of it
 
 Modifier model 3 tightens that observation association. Source parser versions, captured spell
 history and live combat state are unchanged by previews, badges or preference updates.
+
+## Rain scope and table clarity
+
+Analysis model 4 exposes per-hit amounts and ideal potential-hit allocations for verified rains.
+The whole-cast formula remains min(available waves × requested targets, hit budget). For a
+three-wave/four-hit rain, 1/2/3/4 targets illustrate 1+1+1, 2+2, 3+1, and 4 opportunities.
+Mana is paid once. These are pack totals, not equal damage per target; movement and resists can
+reduce realized damage. The captured 7500 ms window remains the conservative rate denominator
+input, rather than asserting the last active pulse happens then.
+
+The scope bug was in Browse's request: it always selected single-target analysis despite the pack
+control. Browse now sends pack scope and preserves it when opening details. DD/DoT rankings
+retain their explicitly labeled one-target scope. Ordinary AOE4/AOE8 caps remain separate from
+RAIN's across-wave hit budget. Specific type filters and subcategory sorting scan the full catalog
+before paging. Category detail narrows with its filters and columns after Spell are centered.
+
+Reference implementation inspected 2026-10-18: [EQEmu beacon](https://github.com/EQEmu/Server/blob/master/zone/beacon.cpp)
+retains the shared budget between pulses; [EQEmu AESpell](https://github.com/EQEmu/Server/blob/master/zone/effects.cpp)
+spends it per target attempt. Its OldRainTargets rule can change that behavior. The reference and
+cached EQL community spell pages support the model; this is not a fresh EQL server measurement.
+The current local Frost Storm ID 660 at level 50 reads 512 per hit and 271 mana: 1536/5.667897
+for one target, 2048/7.557196 for two through four. This was checked read-only against the player's
+client files. Calculation, view and equipment changes create no captured source-history entries.
