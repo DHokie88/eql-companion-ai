@@ -63,13 +63,13 @@ async function unifiedRankings(page: Page): Promise<void> {
   assert.match(await page.getByTestId('spells-group-ranked').innerText(), /Ranked \(2\)/i)
   await page.getByTestId('spells-highlight-efficiency').waitFor()
   assert.match(await page.getByTestId('spells-highlight-efficiency').innerText(), /Test Beacon II/)
-  const metric = page.getByTestId('spells-browse').getByTestId('spells-metric')
-  await metric.getByRole('button', { name: 'Healing', exact: true }).click()
+  await page.getByTestId('spells-type-healing').click()
   await recordCount(page, 1)
   assert.match(await page.getByTestId('spells-highlight-efficiency').innerText(), /Test Remedy/)
-  await metric.getByRole('button', { name: 'Damage', exact: true }).click()
+  await page.getByTestId('spells-type-damage').click()
   await recordCount(page, 2)
   await page.getByTestId('spells-group-all').click()
+  await page.getByTestId('spells-type-all').click()
   await recordCount(page, 3)
 }
 

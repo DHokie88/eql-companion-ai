@@ -54,11 +54,14 @@ export interface SpellLibraryStatus {
   storageBytes: number
 }
 export interface SpellQueryContext { snapshotId?: string }
-export const SPELL_BROWSE_SORTS = ['id', 'name', 'level', 'classes', 'category', 'subcategory', 'type', 'amount', 'mana', 'efficiency', 'selected', 'rate', 'cast', 'recovery', 'recast', 'duration', 'ticks', 'waves', 'targets', 'hits'] as const
+export const SPELL_BROWSE_SORTS = ['id', 'name', 'level', 'classes', 'category', 'subcategory', 'type', 'description', 'amount', 'mana', 'efficiency', 'selected', 'rate', 'cast', 'recovery', 'recast', 'duration', 'ticks', 'waves', 'targets', 'hits'] as const
 export type SpellBrowseSort = typeof SPELL_BROWSE_SORTS[number]
 export type SpellSortDirection = 'asc' | 'desc'
 export type SpellBrowseType = 'dd' | 'dot' | 'aoe' | 'rain' | `aoe${number}` | 'heal' | 'hot' | 'other'
 export interface SpellSearchQuery extends SpellQueryContext {
+  bestInLine?: boolean
+  /** HP families, separate from the metric used to evaluate and order results. */
+  hpFilter?: SpellMetric
   group?: 'all' | 'ranked' | 'zero-mana' | 'excluded'
   metric?: SpellMetric
   includeHighlights?: boolean
@@ -83,7 +86,7 @@ export interface SpellSearchQuery extends SpellQueryContext {
   page?: number
   pageSize?: number
 }
-export type SpellSummary = Pick<ClientSpellRecord, 'id' | 'name' | 'rank' | 'classes' | 'mana' | 'category' | 'subcategory' | 'beneficial' | 'target'> & { calculations?: SpellCalculation[]; learnedLevel?: number | null; spellType?: SpellBrowseType; typeLabel?: string; castMs?: number; recoveryMs?: number; recastMs?: number; description?: string; detectedRank?: number | null; rankEvidence?: SpellRankEvidence | null }
+export type SpellSummary = Pick<ClientSpellRecord, 'id' | 'name' | 'rank' | 'classes' | 'mana' | 'category' | 'subcategory' | 'beneficial' | 'target'> & { calculations?: SpellCalculation[]; learnedLevel?: number | null; spellType?: SpellBrowseType; typeLabel?: string; castMs?: number; recoveryMs?: number; recastMs?: number; description?: string; detectedRank?: number | null; rankEvidence?: SpellRankEvidence | null; line?: { key: string; reason: string; alternatives: SpellSummary[] } }
 export interface SpellSearchResult {
   dataset: SpellDataset | null
   total: number
@@ -93,6 +96,9 @@ export interface SpellSearchResult {
   categories: string[]
   /** Categories across every matching record, before pagination. */
   matchingCategories?: string[]
+  matchingTypes?: string[]
+  /** Uncollapsed count, so a line never makes matching spells disappear from the count. */
+  matchingRecords?: number
   subcategories: string[]
   typeOptions?: { value: SpellBrowseType; label: string }[]
   groupCounts?: { ranked: number; zeroMana: number; excluded: number }

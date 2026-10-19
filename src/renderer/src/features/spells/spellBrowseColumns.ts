@@ -8,16 +8,27 @@ export const BROWSE_EXTRA_COLUMNS: { field: SpellBrowseSort; label: string }[] =
 
 export type CategoryDisplay = 'both' | 'subcategory' | 'none'
 export interface BrowseColumn { field: SpellBrowseSort; label: string }
-export function browseColumns(metric: SpellMetric, display: CategoryDisplay, optional: SpellBrowseSort[]): BrowseColumn[] {
+export const DEFAULT_BROWSE_COLUMNS: SpellBrowseSort[] = ['id', 'category', 'type', 'amount', 'mana', 'efficiency', 'rate', 'selected']
+export function selectableBrowseColumns(metric: SpellMetric): BrowseColumn[] {
   const metricLabel = metric === 'damage' ? 'Damage' : 'Healing'
-  const columns: BrowseColumn[] = [
-    { field: 'id', label: 'ID' }, { field: 'name', label: 'Spell' }, { field: 'level', label: 'Level' },
-    { field: 'classes', label: 'Class/Level' }
-  ]
-  if (display !== 'none') columns.push({ field: display === 'both' ? 'category' : 'subcategory', label: display === 'both' ? 'Category' : 'Subcategory' })
-  return [...columns, { field: 'type', label: 'Type' }, { field: 'amount', label: metricLabel }, { field: 'mana', label: 'Mana' },
+  return [
+    { field: 'id', label: 'ID' }, { field: 'description', label: 'Description' }, { field: 'category', label: 'Category / subcategory' },
+    { field: 'type', label: 'Type' }, { field: 'amount', label: metricLabel }, { field: 'mana', label: 'Mana' },
     { field: 'efficiency', label: `${metricLabel}/Mana` }, { field: 'rate', label: metric === 'damage' ? 'Modeled DPS' : 'Modeled HPS' },
-    ...BROWSE_EXTRA_COLUMNS.filter((column) => optional.includes(column.field)), { field: 'selected', label: 'Compare' }]
+    ...BROWSE_EXTRA_COLUMNS, { field: 'selected', label: 'Compare' }
+  ]
+}
+export function browseColumns(metric: SpellMetric, display: CategoryDisplay, visible: SpellBrowseSort[], uniformType = false): BrowseColumn[] {
+  const choices = selectableBrowseColumns(metric).filter((column) => visible.includes(column.field))
+  const columns: BrowseColumn[] = [
+    ...choices.filter((c) => c.field === 'id'), { field: 'name', label: 'Spell' }, { field: 'classes', label: 'Class/Level' }
+  ]
+  for (const column of choices.filter((c) => c.field !== 'id')) {
+    if (column.field === 'category') {
+      if (display !== 'none') columns.push({ field: display === 'both' ? 'category' : 'subcategory', label: display === 'both' ? 'Category' : 'Subcategory' })
+    } else if (column.field !== 'type' || !uniformType) columns.push(column)
+  }
+  return columns
 }
 export function browseTimingValue(record: SpellSummary, field: SpellBrowseSort): number | null {
   const rawFields: Partial<Record<SpellBrowseSort, 'castMs' | 'recoveryMs' | 'recastMs'>> = { cast: 'castMs', recovery: 'recoveryMs', recast: 'recastMs' }

@@ -116,7 +116,7 @@ export class SpellLibraryQueries {
     const calculate = this.evaluation.calculator(dataset, query, context)
     const result = searchCatalog(this.storage, dataset, query, { calculate, mechanics: dataset ? this.evaluation.mechanics(dataset) : undefined })
     const highlights = result.highlights?.flatMap((entry) => entry.record ? [entry.record] : []) ?? []
-    if (dataset) for (const row of [...result.records, ...highlights]) {
+    if (dataset) for (const row of [...result.records.flatMap((row) => [row, ...row.line?.alternatives ?? []]), ...highlights]) {
       const record = this.storage.record(dataset.snapshotId, row.id)
       if (record) row.rankEvidence = this.evaluation.rankEvidence(dataset, record, context)
     }

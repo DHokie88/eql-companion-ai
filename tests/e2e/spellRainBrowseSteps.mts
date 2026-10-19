@@ -14,7 +14,7 @@ export async function browseRainChecks(page: Page): Promise<void> {
   await page.getByTestId('spells-search').fill('302')
   const row = page.getByTestId('spells-record')
   assert.equal(await settle(() => row.count(), (n) => n === 1), 1)
-  assert.match(await row.innerText(), /RAIN/)
+  assert.equal(await page.getByTestId('spells-sort-type').count(), 0, 'one matching type is redundant')
   for (let targets = 1; targets <= 4; targets++) {
     await choose(page, 'spells-target-count', `${targets} target${targets > 1 ? 's' : ''}`)
     const expected = targets === 1 ? '60' : '80'
@@ -22,7 +22,7 @@ export async function browseRainChecks(page: Page): Promise<void> {
     const compact = `20 × ${targets === 1 ? 3 : 4}`
     assert.equal(await settle(() => row.getByTestId('rain-summary-302').innerText(), (value) => value === compact), compact)
     assert.doesNotMatch(await row.getByTestId('spells-amount-302-damage').innerText(), /Partial|Range|→/)
-    const efficiencyColumn = await page.getByRole('table', { name: 'Spell catalog' }).locator('thead th').evaluateAll((headers) => headers.findIndex((header) => header.textContent?.includes('Damage/Mana')))
+    const efficiencyColumn = await page.getByRole('table', { name: 'Spell catalog' }).locator('thead th').evaluateAll((headers) => headers.findIndex((header) => header.textContent?.replace(/\s/g, '').includes('Damage/Mana')))
     assert.equal(await row.locator('td').nth(efficiencyColumn).innerText(), targets === 1 ? '6' : '8', 'efficiency uses one client mana payment')
   }
   await choose(page, 'spells-target-count', '3 targets')
@@ -67,6 +67,7 @@ export async function categoryAndTableChecks(page: Page): Promise<void> {
   await choose(page, 'spells-type-cap', 'AOE8')
   assert.equal(await settle(() => table.getByTestId('spells-record').count(), (n) => n === 1), 1)
   assert.equal(await settle(() => table.getByTestId('spells-open-301').count(), (n) => n === 1), 1)
-  assert.match(await table.getByTestId('spells-record').innerText(), /Test Area.*AOE8/is)
+  assert.match(await table.getByTestId('spells-record').innerText(), /Test Area/i)
+  assert.equal(await table.getByTestId('spells-sort-type').count(), 0)
   await page.getByTestId('spells-reset-filters').click()
 }

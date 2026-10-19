@@ -1,6 +1,6 @@
 import type { JSX } from 'react'
 import { useState } from 'react'
-import { FormControl, IconButton, InputLabel, MenuItem, Select, Stack, TextField, Tooltip } from '@mui/material'
+import { FormControl, FormControlLabel, Switch, IconButton, InputLabel, MenuItem, Select, Stack, TextField, Tooltip } from '@mui/material'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import MyLocationIcon from '@mui/icons-material/MyLocation'
@@ -26,6 +26,7 @@ export function SpellWorkspaceControls({ state, classes, combo, level, statedLev
           if (modifiers.context) modifiers.update({ ...modifiers.context.preferences, targets: value })
         }} />
       </SpellModifierControls>
+      {state.tab === 'browse' && <Tooltip title="Show the strongest matching spell in supported replacement lines. Expand its arrow for alternatives. Unverified stacking and shared timers stay separate."><FormControlLabel sx={{ mr: 0 }} control={<Switch size="small" checked={state.bestInLine} onChange={(_event, checked) => state.setBestInLine(checked)} data-testid="spells-best-in-line" />} label="Best in line" /></Tooltip>}
       <Tooltip disableInteractive title="Class/Level shows eligibility in the spell files. It does not confirm ownership, scroll availability, or acquisition. Yours badges show observed upgrades."><InfoOutlinedIcon sx={{ color: 'text.secondary', fontSize: 18 }} /></Tooltip>
     </Stack>
   </Stack>
@@ -53,7 +54,7 @@ function ClassesPicker({ mode, classes, combo, onChange }: {
 export function SpellLevelPicker({ level, onChange, statedLevel }: { level: number; onChange: (value: number | null) => void; statedLevel: number | null }): JSX.Element {
   return <Stack direction="row" gap={0.25} alignItems="center" data-testid="spells-level-picker">
     <IconButton size="small" disabled={level <= 1} onClick={() => onChange(level - 1)} aria-label="Previous level" data-testid="spells-level-previous"><ChevronLeftIcon /></IconButton>
-    <TextField label="Level" type="number" size="small" value={level} slotProps={{ htmlInput: { min: 1, max: 255, 'data-testid': 'spells-level', style: { textAlign: 'center' } } }} sx={{ width: 84 }} onChange={(event) => { const value = Number(event.target.value); if (Number.isInteger(value) && value >= 1 && value <= 255) onChange(value) }} />
+    <TextField label="Level" size="small" value={level} slotProps={{ htmlInput: { inputMode: 'numeric', pattern: '[0-9]*', 'data-testid': 'spells-level', style: { textAlign: 'center' } } }} sx={{ width: 70 }} onChange={(event) => { const value = Number(event.target.value); if (Number.isInteger(value) && value >= 1 && value <= 255) onChange(value) }} />
     <IconButton size="small" disabled={level >= 255} onClick={() => onChange(level + 1)} aria-label="Next level" data-testid="spells-level-next"><ChevronRightIcon /></IconButton>
     {statedLevel !== null && <Tooltip disableInteractive title={`Follow character level ${statedLevel}`}><IconButton size="small" onClick={() => onChange(null)} aria-label={`Follow level ${statedLevel}`}><MyLocationIcon sx={{ fontSize: 18 }} /></IconButton></Tooltip>}
   </Stack>

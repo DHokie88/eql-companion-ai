@@ -5,7 +5,7 @@ import { classesArg, levelArg, optionalText } from './queryValidation'
 import { integerArg } from './workerProtocol'
 
 export const SEARCH_QUERY_FIELDS = ['snapshotId', 'text', 'classes', 'level', 'category', 'subcategory', 'effect', 'allSpells', 'allLevels',
-  'minLevel', 'maxLevel', 'type', 'polarity', 'mana', 'sortBy', 'direction', 'selectedIds', 'page', 'pageSize', 'evaluation', 'analysis', 'group', 'metric', 'includeHighlights']
+  'minLevel', 'maxLevel', 'type', 'polarity', 'mana', 'sortBy', 'direction', 'selectedIds', 'page', 'pageSize', 'evaluation', 'analysis', 'group', 'metric', 'includeHighlights', 'bestInLine', 'hpFilter']
 
 function optionalChoice<T extends string>(value: unknown, name: string, choices: readonly T[]): T | undefined {
   if (value === undefined) return undefined
@@ -43,6 +43,8 @@ export function spellSearchOptions(query: Record<string, unknown>) {
     effect: query.effect === undefined ? undefined : integerArg(query.effect, 'effect', 0, 100000),
     allSpells: optionalBoolean(query.allSpells, 'allSpells'), allLevels: optionalBoolean(query.allLevels, 'allLevels'), minLevel, maxLevel,
     type: spellTypeArg(query.type),
+    bestInLine: optionalBoolean(query.bestInLine, 'bestInLine'),
+    hpFilter: optionalChoice(query.hpFilter, 'HP filter', ['damage', 'healing'] as const),
     ...resultOptions(query),
     polarity: optionalChoice(query.polarity, 'polarity', ['beneficial', 'detrimental'] as const),
     mana: optionalChoice(query.mana, 'mana filter', ['free', 'cost'] as const),
@@ -62,6 +64,10 @@ function matchesText(record: ClientSpellRecord, text: string): boolean {
   return /^\d+$/.test(text) ? record.id === Number(text) : `${record.name} ${record.description}`.toLowerCase().includes(text)
 }
 function matchesTraits(record: ClientSpellRecord, options: SearchOptions, mechanics?: SpellMechanicsCatalog): boolean {
+  if (options.hpFilter) {
+    const sign = options.hpFilter === 'damage' ? -1 : 1
+    if (record.beneficial !== (sign === 1) || !record.effects.some((effect) => [0, 79, 100, 101, 334].includes(effect.spa) && effect.base * sign > 0)) return false
+  }
   if (options.type && !matchesSpellType(record, options.type, mechanics)) return false
   if (options.polarity && record.beneficial !== (options.polarity === 'beneficial')) return false
   if (options.mana === 'free' && record.mana !== 0) return false

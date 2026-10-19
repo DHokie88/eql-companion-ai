@@ -58,6 +58,7 @@ export function spellBrowseSortValue(record: SpellSummary, field: SpellBrowseSor
   if (field === 'amount') return record.calculations?.[0]?.total ?? null
   if (field === 'efficiency') return record.calculations?.[0]?.perMana ?? null
   if (field === 'classes') return record.classes.map((c) => c.code).sort().join(' / ') || null
+  if (field === 'description') return record.description || null
   return recordSortValue(record, field, selected)
     ?? analysisSortValue(record, field)
 }

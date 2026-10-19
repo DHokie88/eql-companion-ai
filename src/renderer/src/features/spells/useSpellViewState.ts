@@ -14,6 +14,7 @@ export function useSpellViewState(routing: AppRouting, ready = true) {
   const [savedTab, setTab] = useSpellWorkspaceState<SpellLibraryTab>('active-tab', 'browse')
   const tab = savedTab === 'rankings' ? 'browse' : savedTab
   const [selected, setSelected] = useSpellWorkspaceState<number[]>('comparison-selection', [])
+  const [bestInLine, setBestInLine] = useSpellWorkspaceState('browse-best-in-line', false)
   const [timelineId, setTimelineId] = useState<number | null>(null)
   const [previewLevel, setPreviewLevel] = useState<number | null>(null)
   const [previewScope, setPreviewScope] = useState<'single' | 'pack'>('single')
@@ -37,7 +38,7 @@ export function useSpellViewState(routing: AppRouting, ready = true) {
   const open = (id: number, scope: 'single' | 'pack' = 'single'): void => { setPreviewLevel(null); setPreviewScope(scope); routing.openLibrarySpell(id) }
   const preview = (id: number, level: number): void => { setPreviewLevel(level); setPreviewScope('single'); routing.openLibrarySpell(id) }
   return { mode, setMode, pickedClasses, setClasses, pickedLevel, setLevel, tab, setTab, selected, toggle, timelineId, setTimelineId,
-    previewLevel, previewScope, focusCategory, setFocusCategory, focusScope, setFocusScope, browseTargets, setBrowseTargets, open, preview }
+    previewLevel, previewScope, focusCategory, setFocusCategory, focusScope, setFocusScope, browseTargets, setBrowseTargets, bestInLine, setBestInLine, open, preview }
 }
 
 function focusedTargets(focus: SpellLibraryFocus): SpellTargetCount | null {

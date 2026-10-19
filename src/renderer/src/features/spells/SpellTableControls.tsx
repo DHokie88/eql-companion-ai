@@ -28,7 +28,7 @@ export function SpellSortHeader<T extends string>({ field, label, sort, numeric 
     <ButtonBase onClick={() => sort.changeSort(field)} data-testid={`spells-sort-${field}`} aria-label={`Sort by ${label}`}
       sx={{ width: '100%', minHeight: 54, flexDirection: 'column', alignItems: alignment === 'left' ? 'flex-start' : 'center', gap: 0.5, textAlign: alignment, color: active ? 'primary.main' : 'inherit', fontWeight: 600 }}>
       <Box component="span" sx={{ display: 'flex', justifyContent: 'center', width: '100%', height: 18 }}><Icon aria-hidden sx={{ fontSize: 18, visibility: active ? 'visible' : 'hidden' }} /></Box>
-      <Box component="span">{label}</Box>
+      <Box component="span" sx={{ whiteSpace: 'pre-line' }}>{label.includes('/Mana') ? label.replace('/Mana', '/\nMana') : label}</Box>
     </ButtonBase>
   </TableCell>
 }

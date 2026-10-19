@@ -36,7 +36,7 @@ async function rankings(page: Page): Promise<void> {
   await page.getByTestId('spells-sort-cast').click()
   await page.getByTestId('spells-highlight-amount').click()
   await settle(() => page.getByTestId('spells-record').first().locator('td').first().innerText(), (value) => value === '501')
-  assert.match(await page.getByTestId('spells-record').innerText(), /Zero mana/)
+  assert.match(await page.getByTestId('spells-group-zero-mana').innerText(), /Zero mana \(1\)/i)
   await page.getByTestId('spells-group-excluded').click()
   await settle(() => page.getByTestId('spells-record').count(), (n) => n === 1)
   await page.getByTestId('spells-open-502').click()
