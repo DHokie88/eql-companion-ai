@@ -90,6 +90,7 @@ async function levelsAndEffects(page: Page): Promise<void> {
   assert.match(await summary.innerText(), /Slows attacks by 30%/)
   assert.match(await summary.innerText(), /12 seconds.*single.*magic/s)
   assert.match(await summary.innerText(), /Casting range 150 game units/)
+  await page.getByTestId('spells-technical-details').getByRole('button').click()
   assert.match(await page.getByRole('table', { name: 'Decoded client effects' }).innerText(), /Movement speed.*SPA 3/s)
   await page.getByTestId('spells-detail-back').click()
   assert.equal(await page.getByTestId('spells-search').inputValue(), '738')

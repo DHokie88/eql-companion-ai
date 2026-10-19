@@ -96,6 +96,22 @@ async function refreshAndSinging(page: Page, staged: FixtureLog): Promise<void> 
   assert.match(await page.getByTestId('bard-effect-1').innerText(), /Slows movement by 20%/)
 }
 
+async function detailAppearance(page: Page): Promise<void> {
+  const surface = await page.getByRole('dialog').evaluate((element) => ({ background: getComputedStyle(element).backgroundColor, overlay: getComputedStyle(element).backgroundImage }))
+  assert.equal(surface.background, 'rgb(15, 17, 21)'); assert.equal(surface.overlay, 'none')
+  const summary = page.getByTestId('spell-effect-summary'), instruments = page.getByTestId('bard-song-instruments')
+  assert.ok((await summary.boundingBox())!.y < (await instruments.boundingBox())!.y, 'spell effects lead the detail page')
+  const technical = page.getByTestId('spells-technical-details').getByRole('button')
+  assert.equal(await technical.getAttribute('aria-expanded'), 'false')
+  await technical.click()
+  assert.match(await page.getByRole('table', { name: 'Decoded client effects' }).innerText(), /SPA 3/)
+  await technical.click()
+  await dumpArtifacts(page, 'spell-detail-mine-clean')
+  await page.getByTestId('spells-detail').getByTestId('spells-mode-client').click()
+  await settle(() => instruments.getByRole('columnheader', { name: 'Client effect', exact: true }).count(), (count) => count === 0)
+  await dumpArtifacts(page, 'spell-detail-client-clean')
+}
+
 buildIfStale()
 const staged = stageFixture('e2e-leveling.log')
 stageSources(staged); inventory(staged, 'carried')
@@ -106,6 +122,7 @@ try {
   await waitHydrated(page)
   const before = await epoch(page)
   await mine(page); await refreshAndSinging(page, staged)
+  await detailAppearance(page)
   assert.equal(await epoch(page), before)
   assert.equal((await page.evaluate(() => window.eq.spellLibrary.history())).snapshots.length, 1)
   await dumpArtifacts(page, 'bard-instruments-ready')

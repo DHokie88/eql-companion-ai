@@ -3,16 +3,18 @@ import { Box, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typograph
 import type { ClientSpellRecord } from '@shared/spellLibrary'
 import type { SpellPresentation } from '@shared/clientSpellDescriptions'
 import { clientSpellEffectLabel } from '@shared/clientSpellParser'
+import { SpellDetailSection } from './SpellDetailSection'
 
 export function SpellEffectSummary({ presentation }: { presentation?: SpellPresentation }): JSX.Element | null {
   if (!presentation) return null
-  return <Stack spacing={1} data-testid="spell-effect-summary">
+  return <SpellDetailSection><Stack spacing={2.5} data-testid="spell-effect-summary">
     <Typography variant="h6">What this spell does</Typography>
-    {presentation.effects.map((effect) => effect.neutral ? null : <Typography key={effect.slot}><strong>{effect.label}:</strong> {effect.text}</Typography>)}
-    <Typography><strong>Duration:</strong> {presentation.duration} · <strong>Target:</strong> {presentation.target} · <strong>Resist:</strong> {presentation.resist}</Typography>
-    <Typography><strong>Range:</strong> {presentation.range}</Typography>
-    <Typography variant="caption" color="text.secondary">Unmodified client effects at caster level {presentation.level}. Modeled instrument and combined HP estimates are labeled separately. Other modified buff statistics are not simulated.</Typography>
-  </Stack>
+    <Stack spacing={2}>{presentation.effects.map((effect) => effect.neutral ? null : <Box key={effect.slot}><Typography variant="subtitle2" sx={{ mb: 0.5 }}>{effect.label}</Typography><Typography color="text.secondary" sx={{ maxWidth: '85ch' }}>{effect.text}</Typography></Box>)}</Stack>
+    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2.5, pt: 2.5, borderTop: 1, borderColor: 'divider' }}>
+      {Object.entries({ Duration: presentation.duration, Target: presentation.target, Resist: presentation.resist, Range: presentation.range }).map(([label, value]) => <Box key={label}><Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.5 }}>{label}</Typography><Typography>{value}</Typography></Box>)}
+    </Box>
+    <Typography variant="caption" color="text.secondary">Client effects at caster level {presentation.level}. Character estimates are shown separately.</Typography>
+  </Stack></SpellDetailSection>
 }
 export function SpellTechnicalEffects({ record, presentation }: { record: ClientSpellRecord; presentation?: SpellPresentation }): JSX.Element {
   return <Box sx={{ overflowX: 'auto' }}><Table size="small" aria-label="Decoded client effects"><TableHead><TableRow>{['Slot', 'Effect (SPA)', 'English description', 'Base', 'Limit', 'Formula', 'Maximum'].map((label) => <TableCell key={label}>{label}</TableCell>)}</TableRow></TableHead><TableBody>

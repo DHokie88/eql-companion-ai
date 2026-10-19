@@ -57,13 +57,14 @@ export function rankLabel(rank: number): string {
   return ['Base', 'Base / I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'][rank] ?? String(rank)
 }
 
-export function SpellHpValues({ calculations }: { calculations: SpellCalculation[] }): JSX.Element {
+export function SpellHpValues({ calculations, showExplanation = true }: { calculations: SpellCalculation[]; showExplanation?: boolean }): JSX.Element {
   return <Stack spacing={1} data-testid="spells-hp-values">
     {calculations.map((calculation) => <Stack key={calculation.metric} spacing={0.5}>
       <Typography variant="subtitle2">{calculation.metric === 'damage' ? 'Damage' : 'Healing'} · {calculation.analysis?.scope ?? 'per target'}</Typography>
       <EstimateAmount calculation={calculation} />
-      <Typography variant="caption">Instant {amount(calculation.instant)} · Per tick {amount(calculation.perTick)} × {calculation.ticks ?? '?'} · Client mana {calculation.mana} · Amount / client mana {calculation.mana === 0 ? 'Zero mana' : amount(calculation.perMana)}</Typography>
-      <EstimateExplanation calculation={calculation} />
+      <Typography variant="caption" color="text.secondary">{calculation.total === null ? 'This HP formula is not supported yet. Open the calculation details for exclusions.' : `Instant ${amount(calculation.instant)} · Per tick ${amount(calculation.perTick)} × ${calculation.ticks ?? '?'} · Client mana ${calculation.mana} · Amount / client mana ${calculation.mana === 0 ? 'Zero mana' : amount(calculation.perMana)}`}</Typography>
+      {showExplanation && <EstimateExplanation calculation={calculation} />}
+      {!showExplanation && <InstrumentExplanation calculation={calculation} />}
     </Stack>)}
   </Stack>
 }

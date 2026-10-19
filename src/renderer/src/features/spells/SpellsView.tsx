@@ -78,7 +78,7 @@ function LibraryContent({ routing, state, modifiers, evaluation, analysis, class
     {tab === 'rankings' && <SpellRankings classes={classes} level={level} evaluation={evaluation} targets={analysis.targets} selected={selected} initialCategory={state.focusCategory} onFocusConsumed={() => state.setFocusCategory(undefined)} onToggle={toggle} onOpen={state.open} />}
     {tab === 'compare' && <SpellCompare ids={selected} classes={classes} level={level} evaluation={evaluation} targets={analysis.targets} initialScope={state.focusScope} onFocusConsumed={() => state.setFocusScope(undefined)} onRemove={toggle} onOpen={state.open} />}
     {tab === 'by-level' && <SpellByLevel classes={classes} level={level} evaluation={evaluation} selected={selected} onOpen={state.open} onPreview={state.preview} onToggle={toggle} />}
-    <Dialog fullScreen open={routing.librarySpellId !== null} onClose={routing.clearLibrarySpellFocus} data-testid="library-spell-dialog"><Box sx={{ p: 3 }}>
+    <Dialog fullScreen open={routing.librarySpellId !== null} onClose={routing.clearLibrarySpellFocus} data-testid="library-spell-dialog" slotProps={{ paper: { sx: { bgcolor: 'background.default', backgroundImage: 'none' } } }}><Box sx={{ p: { xs: 2, md: 4 }, width: '100%', maxWidth: 1440, mx: 'auto', boxSizing: 'border-box' }}>
       {routing.librarySpellId !== null && <LibrarySpellDetail id={routing.librarySpellId} level={state.previewLevel ?? level} evaluation={evaluation} analysis={{ ...analysis, scope: state.previewScope }} controls={<SpellModifierControls state={modifiers} ids={[routing.librarySpellId]} />} onBack={() => { routing.clearLibrarySpellFocus(); if (routing.nav.origin) routing.nav.back() }} onWiki={routing.openSpell} onHistory={onHistory} />}
     </Box></Dialog>
   </>
