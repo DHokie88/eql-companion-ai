@@ -82,10 +82,10 @@ Decoding references (consulted 2026-10-18; EQL behavior still needs separate ver
 
 ## Visible mote rank previews and observation badges
 
-The always-visible mote preview dropdown switches between client values, detected values, or an
-Emulate group default. Exact numeric-ID row overrides are available in Emulate across Browse,
-Rankings, Compare, By level and details. Group changes preserve matching per-spell overrides;
-their count and a clear action stay visible. Base=0 and Base/I=1 remain exact choices, and previews
+The compact mote preview dropdown follows Base values, Show mine, or Emulate. Exact numeric-ID
+row overrides are available in Emulate across Browse,
+Compare, Progression and details. Group changes preserve matching per-spell overrides;
+their count and a clear action stay visible. 0 and I remain separate exact choices, and previews
 below an observed rank are allowed. Existing profile/session persistence owns these preferences.
 
 Green Yours VII badges mean highest observed upgraded rank from the selected character's own
@@ -120,3 +120,28 @@ cached EQL community spell pages support the model; this is not a fresh EQL serv
 The current local Frost Storm ID 660 at level 50 reads 512 per hit and 271 mana: 1536/5.667897
 for one target, 2048/7.557196 for two through four. This was checked read-only against the player's
 client files. Calculation, view and equipment changes create no captured source-history entries.
+
+## Unified spell workspace
+
+Browse now contains full-catalog rankings, efficiency/amount/rate highlights, optional timing
+columns, and separate ranked, zero-mana and unsupported/utility groups. The old Rankings route
+opens Browse with its category and target scenario intact. Compare, Progression and History
+remain separate tasks. Filters and shared class/level/value/rank/target controls live together;
+explanations move into tooltips and expandable details. Classes offers All, None and My classes,
+and level arrows preserve the existing per-profile view settings.
+
+Area delivery labels use captured positive target caps, including utility spells (AOE20/AOE30).
+Unknown or unverified layouts show AOE ?. Rain retains its verified separate hit budget. Type
+remains distinct from target count. Column sort indicators sit above their centered labels and
+highlight the active column. Routine labels use Base values, Class/Level, Mana and Damage/Mana
+or Healing/Mana; history and raw records retain their technical terminology.
+
+Modifier model 4 and analysis model 5 separate explicit simulated rank I from unupgraded 0.
+The spell-library model applies the measured 6% damage / 3% healing step at I, with existing
+per-effect rounding. Collapsed legacy Base/I observations remain unknown and never manufacture
+an owned-I badge. Legacy supplementary cards retain their previous calculation behavior.
+
+Modifier saves remain revision-checked in main. A stale same-profile edit is rebased onto fresh
+facts and retried at most twice, preserving unrelated newer preferences. Installation/server/
+character changes cancel the stale edit. These settings and model changes create no source
+snapshots and do not restart the log engine.

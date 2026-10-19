@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { calculateClientSpell } from '../src/shared/clientSpellCalculations'
 import { evaluateModifiedSpell, SpellModifierCatalog } from '../src/shared/clientSpellModifiers'
-import { scaleSpellDamage, scaleSpellHeal } from '../src/shared/spellScale'
+import { scaleExactSpellDamage, scaleExactSpellHeal, scaleSpellDamage, scaleSpellHeal } from '../src/shared/spellScale'
 import { effect, modifierContext, modifierFocus, modifierSpell } from './helpers/spellModifierFixtures.mts'
 
 function evaluate(record = modifierSpell(), context = modifierContext(), others = [], metric = 'damage') {
@@ -21,14 +21,31 @@ test('client mode returns exactly the baseline calculation, without modifier met
   assert.deepEqual(evaluate(record, context, [modifierFocus()]), calculateClientSpell(record, 50, 'damage'))
 })
 
-test('base and rank I are identity for damage/healing; every supported rank uses measured rules', () => {
+test('exact Base and I differ for library estimates while legacy cards retain collapsed I', () => {
   for (const rank of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
     const damage = evaluate(modifierSpell(), emulation({ rank, focus: 'none' }))
     const healing = evaluate(modifierSpell({ beneficial: true, effects: [effect(0, 100)] }), emulation({ rank, focus: 'none' }), [], 'healing')
-    assert.equal(damage.total, scaleSpellDamage(100, rank))
-    assert.equal(healing.total, scaleSpellHeal(100, rank))
+    assert.equal(damage.total, scaleExactSpellDamage(100, rank))
+    assert.equal(healing.total, scaleExactSpellHeal(100, rank))
+    assert.equal(damage.total, 100 + rank * 6)
+    assert.equal(healing.total, 100 + rank * 3)
     assert.equal(damage.modifiers?.rank, rank)
   }
+  assert.equal(scaleSpellDamage(100, 1), 100)
+  assert.equal(scaleSpellHeal(100, 1), 100)
+  assert.match(evaluate(modifierSpell(), emulation({ rank: 1, focus: 'none' })).restrictions.join(' '), /rank I.*model assumption.*not an official server formula/)
+})
+
+test('detected I stays unknown while exact per-spell I overrides higher evidence', () => {
+  const record = modifierSpell(), detected = evaluate(record, modifierContext())
+  assert.equal(detected.total, 100)
+  assert.equal(detected.modifiers?.rank, null)
+  assert.equal(detected.modifiers?.rankSource, 'unknown')
+  assert.equal(detected.modifiers?.partial, true)
+  const simulated = emulation({ rank: 10, focus: 'none', ranks: { 101: { name: record.name, rank: 1 } } })
+  simulated.ranks['synthetic bolt'].rank = 9
+  assert.equal(evaluate(record, simulated).total, 106)
+  assert.equal(evaluate(record, simulated).modifiers?.rankSource, 'simulated')
 })
 
 test('mote rounding occurs per HP slot before instant/periodic aggregation and after client caps', () => {
@@ -117,6 +134,7 @@ test('focus qualification is preserved on simulations and zero-mana never create
 
 test('detected focus keeps item provenance, exact rank-bearing joins and distinguishes missing inventory from no focus', () => {
   const context = modifierContext()
+  context.ranks!['synthetic bolt'].rank = 0
   context.inventory.candidates = [{ effect: 'synthetic focus ii', item: 'Synthetic Mask' }]
   const result = evaluate(modifierSpell(), context, [modifierFocus()])
   assert.equal(result.total, 110.5)

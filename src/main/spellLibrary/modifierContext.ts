@@ -123,7 +123,7 @@ export class SpellModifierCoordinator {
       if (token !== this.invalidation || key !== selectionKey(this.deps.selection())) continue
       const preferences = (selection.character === null ? this.sessionProfiles[key] : this.profiles[key]) ?? defaultSpellModifierPreferences()
       const character = selection.character === null ? null : { ...selection.character, key }
-      const value = { modelVersion: SPELL_MODIFIER_MODEL_VERSION, character, preferences, ...facts }
+      const value = { profileKey: key, modelVersion: SPELL_MODIFIER_MODEL_VERSION, character, preferences, ...facts }
       // Export timestamps are provenance. Rewriting identical gear must not re-rank the catalog.
       const revision = digest({ key, ...value, preferences: { ...preferences, targets: preferences.targets ?? 4 },
         inventory: { ...value.inventory, exportedAt: undefined } })

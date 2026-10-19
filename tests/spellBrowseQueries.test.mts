@@ -146,3 +146,70 @@ test('subcategory sorting covers all matches before pagination and keeps unknown
     }
   } finally { f.close() }
 })
+
+
+test('unified Browse groups and highlights scan the full filtered catalog without losing utility or internal records', () => {
+  const efficient = spellRow(1, 'Efficient', 10, 100), large = spellRow(2, 'Large', 100, 300)
+  const free = spellRow(3, 'Free', 0, 1000), unsupported = spellRow(4, 'Unknown Formula')
+  const utility = spellRow(5, 'Mesmerize'), healing = spellRow(6, 'Mend', 10, 60), internal = spellRow(7, 'Internal', 10, 50)
+  for (const row of [efficient, large, free, unsupported, utility, healing, internal]) row[8] = '1000'
+  efficient[8] = '2000'; internal[8] = '2000'; internal[47] = '255'
+  unsupported[172] = '1|0|-100|0|999|0'; utility[172] = '1|31|1|0|100|0'
+  healing[28] = '1'; healing[172] = '1|0|60|0|100|0'
+  const f = fixture([efficient, large, free, unsupported, utility, healing, internal])
+  const query = { level: 50, allSpells: true, analysis: { scope: 'single', targets: 4 }, includeHighlights: true } as const
+  try {
+    const all = f.search(query)
+    assert.equal(all.total, 7); assert.deepEqual(ids(all), [1, 2, 3, 4, 5, 6, 7])
+    assert.deepEqual(all.groupCounts, { ranked: 3, zeroMana: 1, excluded: 3 })
+    assert.deepEqual(all.highlights?.map((h) => [h.kind, h.record?.id]), [['efficiency', 1], ['amount', 3], ['rate', 3]])
+    assert.deepEqual(ids(f.search({ ...query, group: 'ranked', sortBy: 'efficiency', direction: 'desc', pageSize: 1 })), [1])
+    assert.deepEqual(ids(f.search({ ...query, group: 'ranked', sortBy: 'efficiency', direction: 'desc', page: 2, pageSize: 1 })), [7])
+    const zero = f.search({ ...query, group: 'zero-mana' })
+    assert.deepEqual(ids(zero), [3]); assert.equal(zero.records[0].calculations?.[0].perMana, null)
+    assert.deepEqual(ids(f.search({ ...query, group: 'excluded' })), [4, 5, 6])
+    assert.deepEqual(ids(f.search({ ...query, metric: 'healing', group: 'ranked' })), [6])
+    const healingView = f.search({ ...query, metric: 'healing' })
+    assert.equal(healingView.highlights?.[0].record?.id, 6)
+    assert.equal(healingView.records[0].calculations?.[0].metric, 'healing')
+    assert.equal(healingView.records[0].calculations?.[0].total, null, 'off-metric damage does not outrank healing results')
+    const legacy = f.search()
+    assert.equal(legacy.groupCounts, undefined); assert.equal(legacy.highlights, undefined)
+    assert.equal(legacy.records[0].calculations, undefined, 'old searches do not silently opt into analysis')
+  } finally { f.close() }
+})
+
+test('unified Browse sorts modeled rate across pages with unknown values last and captured utility timing retained', () => {
+  const rows = Array.from({ length: 45 }, (_, i) => {
+    const row = spellRow(i + 1, `Rate ${i + 1}`, 10, 10 + i); row[8] = '1000'; return row
+  })
+  const utility = spellRow(90, 'Utility'); utility[172] = '1|31|1|0|100|0'; utility[8] = '3500'
+  const unknown = spellRow(91, 'Zero timing')
+  const f = fixture([...rows, utility, unknown])
+  const query = { level: 50, analysis: { scope: 'single', targets: 4 }, sortBy: 'rate', direction: 'desc', pageSize: 40 } as const
+  try {
+    assert.deepEqual(ids(f.search(query)).slice(0, 3), [45, 44, 43])
+    assert.deepEqual(ids(f.search({ ...query, page: 2 })), [5, 4, 3, 2, 1, 90, 91])
+    assert.deepEqual(ids(f.search({ ...query, direction: 'asc', page: 2 })).slice(-2), [90, 91])
+    const timed = f.search({ ...query, sortBy: 'cast', direction: 'desc', pageSize: 1 })
+    assert.deepEqual(ids(timed), [90]); assert.equal(timed.records[0].castMs, 3500)
+  } finally { f.close() }
+})
+
+test('arbitrary captured area caps include utility delivery labels without inventing caps or rain eligibility', () => {
+  const damage = areaRow(1, 'Twenty Target Blast', 20), mez = areaRow(2, 'Thirty Target Mez', 30)
+  const unknown = areaRow(3, 'Unknown Target Mez', 0), repeated = areaRow(4, 'Unverified Repeat', 30, true)
+  mez[172] = '1|31|1|0|100|0'; unknown[172] = mez[172]
+  const f = fixture([damage, mez, unknown, repeated])
+  try {
+    const all = f.search()
+    assert.deepEqual(all.records.map((r) => [r.spellType, r.typeLabel]), [['aoe20', 'AOE20'], ['other', 'AOE30'], ['other', 'AOE ?'], ['aoe', 'AOE ?']])
+    assert.deepEqual(ids(f.search({ type: 'aoe20' })), [1])
+    assert.deepEqual(ids(f.search({ type: 'aoe30' })), [2], 'an unverified repeated hit budget is never presented as an ordinary target cap')
+    assert.deepEqual(ids(f.search({ type: 'other' })), [2, 3], 'delivery labels preserve the Buffs / utility kind')
+    assert.ok(all.typeOptions?.some((option) => option.value === 'aoe30' && option.label === 'AOE30'))
+    assert.deepEqual(ids(f.search({ type: 'dd' })), [1, 4])
+    for (const type of ['aoe0', 'aoe-4', 'aoe1.5', 'aoe004', 'aoe2147483648']) assert.throws(() => f.search({ type } as SpellSearchQuery), /Invalid/)
+    for (const query of [{ group: 'random' }, { metric: 'buff' }, { includeHighlights: 'yes' }]) assert.throws(() => f.search(query as SpellSearchQuery), /Invalid/)
+  } finally { f.close() }
+})

@@ -60,7 +60,7 @@ function FocusExplanation({ calculation }: { calculation: SpellCalculation }): J
 }
 
 export function rankLabel(rank: number): string {
-  return ['Base', 'Base / I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'][rank] ?? String(rank)
+  return ['0', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'][rank] ?? String(rank)
 }
 
 export function SpellHpValues({ calculations, showExplanation = true }: { calculations: SpellCalculation[]; showExplanation?: boolean }): JSX.Element {
@@ -69,7 +69,7 @@ export function SpellHpValues({ calculations, showExplanation = true }: { calcul
       <Typography variant="subtitle2">{calculation.metric === 'damage' ? 'Damage' : 'Healing'} · {calculation.analysis?.scope ?? 'per target'}</Typography>
       <EstimateAmount calculation={calculation} />
       <SpellCastSummary calculation={calculation} align="left" />
-      <Typography variant="caption" color="text.secondary">{calculation.total === null ? 'This HP formula is not supported yet. Open the calculation details for exclusions.' : `Instant ${amount(calculation.instant)} · Per tick ${amount(calculation.perTick)} × ${calculation.ticks ?? '?'} · Client mana ${calculation.mana} · Amount / client mana ${calculation.mana === 0 ? 'Zero mana' : amount(calculation.perMana)}`}</Typography>
+      <Typography variant="caption" color="text.secondary">{calculation.total === null ? 'This HP formula is not supported yet. Open the calculation details for exclusions.' : `Instant ${amount(calculation.instant)} · Per tick ${amount(calculation.perTick)} × ${calculation.ticks ?? '?'} · Mana ${calculation.mana} · ${calculation.metric === 'damage' ? 'Damage' : 'Healing'}/Mana ${calculation.mana === 0 ? 'Zero mana' : amount(calculation.perMana)}`}</Typography>
       {showExplanation && <EstimateExplanation calculation={calculation} />}
       {!showExplanation && <><RankExplanation calculation={calculation} /><InstrumentExplanation calculation={calculation} /></>}
     </Stack>)}

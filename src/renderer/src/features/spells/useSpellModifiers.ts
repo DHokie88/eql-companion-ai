@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { SpellModifierContext, SpellModifierPreferences } from '@shared/spellModifiers'
+import { sameSpellModifierCharacter, saveSpellModifierPreferences, spellModifierProfileKey } from '@shared/spellModifierUpdates'
 import { useSpellRevision } from './libraryState'
 
 export interface SpellModifiersState {
@@ -10,7 +11,7 @@ export interface SpellModifiersState {
   update: (preferences: SpellModifierPreferences) => void
 }
 
-/** Character/context changes invalidate both reads and writes already in flight. */
+/** Selection changes cancel writes; same-profile fact changes rebase stale saves. */
 export function useSpellModifiers(): SpellModifiersState {
   const revision = useSpellRevision()
   const [context, setContext] = useState<SpellModifierContext | null>(null)
@@ -19,8 +20,13 @@ export function useSpellModifiers(): SpellModifiersState {
   const [error, setError] = useState<string | null>(null)
   const turn = useRef(0)
   const writing = useRef(false)
+  const pendingWrites = useRef<(() => Promise<void>)[]>([])
   const current = useRef(context)
+  const alive = useRef(true)
+  const selectionTurn = useRef(0)
+  const refreshCurrent = useRef<() => void>(() => undefined)
   current.current = context
+  useEffect(() => { alive.current = true; return () => { alive.current = false } }, [])
   useEffect(() => {
     let alive = true
     const invalidate = (): number => ++turn.current
@@ -30,28 +36,44 @@ export function useSpellModifiers(): SpellModifiersState {
       setLoading(true)
       setError(null)
       void window.eq.spellLibrary.modifierContext().then((next) => {
-        if (alive && turn.current === ticket) { setContext(next); setLoading(false) }
+        if (alive && turn.current === ticket) { current.current = next; setContext(next); setLoading(false) }
       }).catch((cause: unknown) => {
         if (alive && turn.current === ticket) { setError(message(cause)); setLoading(false) }
       })
     }
-    const offCharacter = window.eq.onCharacter(() => refresh(true))
+    refreshCurrent.current = () => refresh(false)
+    const offCharacter = window.eq.onCharacter((character) => {
+      const changed = !sameSpellModifierCharacter(current.current, character)
+      if (changed) selectionTurn.current++
+      refresh(changed)
+    })
     const offModifiers = window.eq.spellLibrary.onModifiersChanged(() => refresh(false))
     refresh(true)
     return () => { alive = false; invalidate(); offCharacter(); offModifiers() }
   }, [revision])
   const update = useCallback((preferences: SpellModifierPreferences): void => {
     const previous = current.current
-    if (!previous || writing.current) return
+    if (!previous) return
+    setError(null)
+    const selection = selectionTurn.current
+    const isCurrent = (): boolean => alive.current && selectionTurn.current === selection &&
+      (current.current === null || spellModifierProfileKey(current.current) === spellModifierProfileKey(previous))
+    const save = (): Promise<void> => saveSpellModifierPreferences(previous, preferences, {
+      read: () => window.eq.spellLibrary.modifierContext(),
+      write: (update) => window.eq.spellLibrary.updateModifiers(update), isCurrent
+    }).then(() => {
+      if (isCurrent()) { setError(null); refreshCurrent.current() }
+    }).catch((cause: unknown) => {
+      if (isCurrent()) setError(message(cause))
+    })
+    pendingWrites.current.push(save)
+    if (writing.current) return
     writing.current = true
     setSaving(true)
-    setError(null)
-    const ticket = turn.current
-    void window.eq.spellLibrary.updateModifiers({ expectedRevision: previous.revision, preferences }).then((next) => {
-      if (turn.current === ticket) setContext(next)
-    }).catch((cause: unknown) => {
-      if (turn.current === ticket) setError(message(cause))
-    }).finally(() => { writing.current = false; setSaving(false) })
+    const drain = async (): Promise<void> => {
+      while (pendingWrites.current.length) await pendingWrites.current.shift()?.()
+    }
+    void drain().finally(() => { writing.current = false; if (alive.current) setSaving(false) })
   }, [])
   return { context, saving, loading, error, update }
 }

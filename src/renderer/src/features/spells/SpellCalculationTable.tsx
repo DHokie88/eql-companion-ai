@@ -11,16 +11,17 @@ import { SpellRowRank } from './SpellRowRank'
 
 const COLUMNS: { field: SpellCalculationSort; label: string; numeric?: boolean }[] = [
   { field: 'name', label: 'Spell' }, { field: 'instant', label: 'Instant', numeric: true }, { field: 'perTick', label: 'Per tick × ticks', numeric: true },
-  { field: 'total', label: 'Full amount', numeric: true }, { field: 'mana', label: 'Client mana', numeric: true },
-  { field: 'perMana', label: 'Amount / client mana', numeric: true }, { field: 'rate', label: 'Modeled cycle DPS/HPS', numeric: true }, { field: 'scope', label: 'Scope / exclusions' }
+  { field: 'total', label: 'Full amount', numeric: true }, { field: 'mana', label: 'Mana', numeric: true },
+  { field: 'perMana', label: 'Amount / mana', numeric: true }, { field: 'rate', label: 'Modeled cycle DPS/HPS', numeric: true }, { field: 'scope', label: 'Scope / exclusions' }
 ]
 export function SpellCalculationTable({ rows, onOpen, onRemove, referenceId, rankEvidence }: {
   rows: SpellCalculation[]; onOpen: (id: number) => void; onRemove?: (id: number) => void; referenceId?: number; rankEvidence?: Record<string, SpellRankEvidence | null>
 }): JSX.Element {
   const sort = useSpellSort<SpellCalculationSort>('total', 'desc')
   const sorted = sortSpellCalculations(rows, sort.field, sort.direction)
+  const metric = rows.every((row) => row.metric === 'healing') ? 'Healing' : 'Damage'
   return <Box sx={{ overflowX: 'auto' }}><Table size="small" sx={{ '& .MuiTableCell-root': { px: 1 } }}><TableHead><TableRow>
-    {COLUMNS.map((column) => <SpellSortHeader key={column.field} {...column} sort={sort} />)}{onRemove && <TableCell />}
+    {COLUMNS.map((column) => <SpellSortHeader key={column.field} {...column} label={column.field === 'total' ? metric : column.field === 'perMana' ? `${metric}/Mana` : column.label} sort={sort} />)}{onRemove && <TableCell />}
   </TableRow></TableHead><TableBody>{sorted.map((row) => <CalculationRow key={row.id} row={row} evidence={rankEvidence?.[String(row.id)]} onOpen={onOpen} onRemove={onRemove} reference={rows.find((r) => r.id === referenceId)} />)}</TableBody></Table></Box>
 }
 function CalculationRow({ row, onOpen, onRemove, reference, evidence }: { row: SpellCalculation; onOpen: (id: number) => void; onRemove?: (id: number) => void; reference?: SpellCalculation; evidence?: SpellRankEvidence | null }): JSX.Element {

@@ -69,7 +69,7 @@ export class SpellModifierCatalog {
     const warnings: string[] = []
     const key = spellLineKey(record.name)
     const observation = context.ranks?.[key]
-    if (!observation || !validRank(observation.rank)) {
+    if (!observation || !validRank(observation.rank) || observation.rank === 1) {
       warnings.push('Mote rank is unknown; the partial estimate assumes the client base amount.')
       return { rank: null, source: 'unknown', warnings }
     }

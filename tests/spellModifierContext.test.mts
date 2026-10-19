@@ -113,11 +113,22 @@ test('without a character emulation is session-only and detected mode is refused
   const r = rig(); r.selected({ installation: 'C:/EQ', character: null })
   const original = await r.coordinator.get()
   assert.equal(original.ranks, null); assert.equal(r.reads(), 0)
+  assert.match(original.profileKey ?? '', /^[a-f0-9]{64}$/)
   const preferences = defaultSpellModifierPreferences(); preferences.mode = 'emulate'; preferences.emulation.rank = 5
   const simulated = await r.coordinator.update({ expectedRevision: original.revision, preferences })
   assert.equal(simulated.preferences.emulation.rank, 5); assert.equal(r.writes(), 0)
   preferences.mode = 'mine'
   await assert.rejects(r.coordinator.update({ expectedRevision: simulated.revision, preferences }), /Select a character/)
+  r.coordinator.stop()
+})
+
+test('characterless profile identity changes with installation even without rank or inventory evidence', async () => {
+  const r = rig(); r.selected({ installation: 'C:/EQ', character: null })
+  const first = await r.coordinator.get()
+  r.selected({ installation: 'D:/EQ', character: null }); r.coordinator.inputsChanged()
+  const second = await r.coordinator.get()
+  assert.notEqual(first.profileKey, second.profileKey)
+  assert.equal(second.character, null)
   r.coordinator.stop()
 })
 

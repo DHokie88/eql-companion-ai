@@ -5,7 +5,7 @@ import { classesArg, levelArg, optionalText } from './queryValidation'
 import { integerArg } from './workerProtocol'
 
 export const SEARCH_QUERY_FIELDS = ['snapshotId', 'text', 'classes', 'level', 'category', 'subcategory', 'effect', 'allSpells', 'allLevels',
-  'minLevel', 'maxLevel', 'type', 'polarity', 'mana', 'sortBy', 'direction', 'selectedIds', 'page', 'pageSize', 'evaluation', 'analysis']
+  'minLevel', 'maxLevel', 'type', 'polarity', 'mana', 'sortBy', 'direction', 'selectedIds', 'page', 'pageSize', 'evaluation', 'analysis', 'group', 'metric', 'includeHighlights']
 
 function optionalChoice<T extends string>(value: unknown, name: string, choices: readonly T[]): T | undefined {
   if (value === undefined) return undefined
@@ -16,12 +16,22 @@ function optionalBoolean(value: unknown, name: string): boolean {
   if (value !== undefined && typeof value !== 'boolean') throw new Error(`Invalid ${name}`)
   return value === true
 }
+function spellTypeArg(value: unknown): SpellBrowseType | undefined {
+  if (value === undefined) return undefined
+  if (typeof value === 'string' && /^aoe[1-9]\d*$/.test(value) && Number.isSafeInteger(Number(value.slice(3))) && Number(value.slice(3)) <= 2147483647) return value as SpellBrowseType
+  return optionalChoice<SpellBrowseType>(value, 'spell type', ['dd', 'dot', 'aoe', 'rain', 'heal', 'hot', 'other'])
+}
 function selection(value: unknown): number[] {
   if (value === undefined) return []
   if (!Array.isArray(value) || value.length > 4) throw new Error('Invalid selected spell IDs')
   return value.map((id: unknown) => integerArg(id, 'selected spell ID', 0, 2147483647))
 }
 
+function resultOptions(query: Record<string, unknown>) {
+  return { group: optionalChoice(query.group, 'result group', ['all', 'ranked', 'zero-mana', 'excluded'] as const) ?? 'all',
+    metric: optionalChoice(query.metric, 'metric', ['damage', 'healing'] as const) ?? 'damage',
+    includeHighlights: optionalBoolean(query.includeHighlights, 'includeHighlights') }
+}
 export function spellSearchOptions(query: Record<string, unknown>) {
   const minLevel = query.minLevel === undefined ? undefined : levelArg(query.minLevel)
   const maxLevel = query.maxLevel === undefined ? undefined : levelArg(query.maxLevel)
@@ -32,7 +42,8 @@ export function spellSearchOptions(query: Record<string, unknown>) {
     subcategory: optionalText(query.subcategory, 'subcategory', 256),
     effect: query.effect === undefined ? undefined : integerArg(query.effect, 'effect', 0, 100000),
     allSpells: optionalBoolean(query.allSpells, 'allSpells'), allLevels: optionalBoolean(query.allLevels, 'allLevels'), minLevel, maxLevel,
-    type: optionalChoice<SpellBrowseType>(query.type, 'spell type', ['dd', 'dot', 'aoe', 'rain', 'aoe4', 'aoe8', 'heal', 'hot', 'other']),
+    type: spellTypeArg(query.type),
+    ...resultOptions(query),
     polarity: optionalChoice(query.polarity, 'polarity', ['beneficial', 'detrimental'] as const),
     mana: optionalChoice(query.mana, 'mana filter', ['free', 'cost'] as const),
     sortBy: optionalChoice<SpellBrowseSort>(query.sortBy, 'sort column', SPELL_BROWSE_SORTS) ?? 'id',

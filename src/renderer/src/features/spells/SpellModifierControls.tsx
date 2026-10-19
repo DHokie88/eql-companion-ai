@@ -1,5 +1,5 @@
-import type { JSX } from 'react'
-import { Accordion, AccordionDetails, AccordionSummary, Alert, Button, CircularProgress, FormControl, InputLabel, MenuItem, Select, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
+import type { JSX, ReactNode } from 'react'
+import { Accordion, AccordionDetails, AccordionSummary, Alert, Button, CircularProgress, FormControl, InputLabel, MenuItem, Select, Stack, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from '@mui/material'
 import { defaultSpellModifierPreferences, type SpellEmulation, type SpellModifierContext, type SpellModifierPreferences, type SpellValueMode } from '@shared/spellModifiers'
 import type { SpellModifiersState } from './useSpellModifiers'
 import { rankLabel } from './SpellEstimate'
@@ -7,24 +7,24 @@ import { SpellFocusPicker } from './SpellFocusPicker'
 import { SpellRankOverrides } from './SpellRankOverrides'
 import { SpellRankPreview } from './SpellRankPreview'
 
-export function SpellModifierControls({ state, ids }: { state: SpellModifiersState; ids: number[] }): JSX.Element {
+export function SpellModifierControls({ state, ids, children }: { state: SpellModifiersState; ids: number[]; children?: ReactNode }): JSX.Element {
   const { context, saving, loading, error, update } = state
   const preferences = context?.preferences
   const disabled = saving || loading
-  return <Stack spacing={1} data-testid="spells-modifier-controls">
+  return <Stack direction="row" gap={1} alignItems="flex-start" flexWrap="wrap" data-testid="spells-modifier-controls">
     {error && <Alert severity="error">{error}</Alert>}
     {!context && !error && <CircularProgress size={20} aria-label="Loading spell modifiers" />}
     {context && preferences && <>
       <ValueModeButtons context={context} disabled={disabled} onChange={update} />
       <SpellRankPreview state={state} />
-      {!context.character && <Typography variant="caption" color="text.secondary">Select a character to use Show mine. Characterless emulation lasts for this session.</Typography>}
-      {saving && <Typography variant="caption">Saving modifier settings…</Typography>}
-      <Accordion data-testid="spells-modifiers-panel">
+      {children}
+      <Accordion disableGutters data-testid="spells-modifiers-panel" sx={{ width: 145, minWidth: 145, bgcolor: 'transparent', backgroundImage: 'none', boxShadow: 'none', border: 1, borderColor: 'divider', borderRadius: '6px !important', '&::before': { display: 'none' }, '&.Mui-expanded': { flexBasis: '100%', width: '100%' }, '& .MuiAccordionSummary-root': { minHeight: 40 }, '& .MuiAccordionSummary-content': { my: 0.75 } }}>
         <AccordionSummary>Modifiers{preferences.mode === 'emulate' ? ' · Simulated' : ''}</AccordionSummary>
         <AccordionDetails><Stack spacing={2}>
           <DetectedInputs context={context} />
           {preferences.mode === 'emulate' && <EmulationControls preferences={preferences} ids={ids} disabled={disabled} onChange={update} />}
-          <Typography variant="caption" color="text.secondary">Estimates use measured mote rules, qualifying worn damage/healing focus, and supported bard instrument equipment. Show mine and Emulate use the best known carried instrument; details also show the equipped result and any required swap. AA, temporary singing bonuses, critical hits, resists, mana/casting-speed modifiers, and recourse are excluded. Only verified rain layouts are modeled; other repeated waves remain unsupported. Efficiency uses client mana cost.</Typography>
+          {!context.character && <Typography variant="caption">No character selected. Emulation lasts for this session.</Typography>}
+          <Typography variant="caption" color="text.secondary">Estimates use measured mote rules, worn focus, and supported bard instruments. Details show equipped and best carried instruments. AA, temporary singing bonuses, critical hits, resists, mana/casting-speed changes, and recourse are excluded. Efficiency uses the unmodified mana cost.</Typography>
         </Stack></AccordionDetails>
       </Accordion>
     </>}
@@ -34,11 +34,11 @@ export function SpellModifierControls({ state, ids }: { state: SpellModifiersSta
 function ValueModeButtons({ context, disabled, onChange }: {
   context: SpellModifierContext; disabled: boolean; onChange: (preferences: SpellModifierPreferences) => void
 }): JSX.Element {
-  return <ToggleButtonGroup size="small" exclusive value={context.preferences.mode} disabled={disabled} onChange={(_event, mode: SpellValueMode | null) => { if (mode) onChange({ ...context.preferences, mode }) }} aria-label="Spell value mode">
-    <ToggleButton value="client" data-testid="spells-mode-client">Client values</ToggleButton>
+  return <Tooltip disableInteractive title="Base: unmodified spell values. Show mine: detected upgrades and equipment. Emulate: independent preview assumptions."><ToggleButtonGroup size="small" exclusive value={context.preferences.mode} disabled={disabled} onChange={(_event, mode: SpellValueMode | null) => { if (mode) onChange({ ...context.preferences, mode }) }} aria-label="Spell value mode">
+    <ToggleButton value="client" data-testid="spells-mode-client">Base values</ToggleButton>
     <ToggleButton value="mine" disabled={disabled || !context.character} data-testid="spells-mode-mine">Show mine</ToggleButton>
     <ToggleButton value="emulate" data-testid="spells-mode-emulate">Emulate</ToggleButton>
-  </ToggleButtonGroup>
+  </ToggleButtonGroup></Tooltip>
 }
 
 function DetectedInputs({ context }: { context: SpellModifierContext }): JSX.Element {

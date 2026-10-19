@@ -56,10 +56,10 @@ function DetailCalculations({ calculations }: { calculations?: SpellCalculation[
 }
 function DetailDescription({ record, presentation }: { record: ClientSpellRecord; presentation?: import('@shared/clientSpellDescriptions').SpellPresentation }): JSX.Element {
   const description = presentation?.description ?? record.description
-  return <Typography data-testid="spell-description" sx={{ whiteSpace: 'pre-wrap', maxWidth: '90ch', pt: 0.5 }}>{description || 'No description supplied by the client.'}</Typography>
+  return <Typography data-testid="spell-description" sx={{ whiteSpace: 'pre-wrap', maxWidth: '90ch', pt: 0.5 }}>{description || 'No description in the spell files.'}</Typography>
 }
 function DetailTiming({ record }: { record: ClientSpellRecord }): JSX.Element {
-  return <SpellDetailSection><Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: 'repeat(4, 1fr)' }, gap: 3 }}>{Object.entries({ 'Client mana': record.mana, 'Cast time': `${record.castMs / 1000}s`, Recovery: `${record.recoveryMs / 1000}s`, Recast: `${record.recastMs / 1000}s` }).map(([label, value]) => <Box key={label}><Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.5 }}>{label}</Typography><Typography variant="h6">{value}</Typography></Box>)}</Box></SpellDetailSection>
+  return <SpellDetailSection><Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: 'repeat(4, 1fr)' }, gap: 3 }}>{Object.entries({ 'Mana': record.mana, 'Cast time': `${record.castMs / 1000}s`, Recovery: `${record.recoveryMs / 1000}s`, Recast: `${record.recastMs / 1000}s` }).map(([label, value]) => <Box key={label}><Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.5 }}>{label}</Typography><Typography variant="h6">{value}</Typography></Box>)}</Box></SpellDetailSection>
 }
 function DetailInstruments({ presentation }: { presentation?: import('@shared/clientSpellDescriptions').SpellPresentation }): JSX.Element | null {
   return presentation?.bard ? <BardSongInstruments song={presentation.bard} /> : null

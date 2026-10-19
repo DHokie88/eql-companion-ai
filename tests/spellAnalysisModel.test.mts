@@ -40,11 +40,11 @@ test('ordinary one-target client calculations retain baseline amounts, zero mana
     assert.deepEqual(withoutAnalysis, baseline)
     assert.equal(result.analysis.singleTargetTotal, baseline.total)
     assert.equal(result.analysis.contextRevision, null)
-    assert.equal(result.analysis.modelVersion, '4')
+    assert.equal(result.analysis.modelVersion, '5')
   }
 })
 
-test('identity modifiers and Base/I preserve all original HP totals', () => {
+test('Base and small per-effect I rounding retain totals consistently with the exact calculator', () => {
   for (const rank of [0, 1]) {
     const record = ordinary({ durationFormula: 7, durationCap: 3, effects: [effect(79, -8), { ...effect(0, -8), slot: 2 }] })
     const context = emulate({ rank })
@@ -53,6 +53,19 @@ test('identity modifiers and Base/I preserve all original HP totals', () => {
     assert.equal(result.total, original.total)
     assert.equal(result.total, 32)
     assert.deepEqual(result.modifiers, original.modifiers)
+  }
+})
+
+test('explicit rank I applies per-effect damage and healing rounding in evaluation and contributions', () => {
+  for (const [metric, sign, expected] of [['damage', -1, 126], ['healing', 1, 123]]) {
+    const record = ordinary({ beneficial: metric === 'healing', durationFormula: 7, durationCap: 2,
+      effects: [effect(79, sign * 100), { ...effect(0, sign * 10), slot: 2 }] })
+    const context = emulate({ rank: 1 })
+    const result = analyze(record, { metric, context })
+    assert.equal(result.total, expected)
+    assert.deepEqual(result.analysis.contributions.map((row) => row.afterRank), [metric === 'damage' ? 106 : 103, 10])
+    assert.equal(result.analysis.contributions.reduce((total, row) => total + row.total, 0), result.total)
+    assert.equal(result.modifiers.baseline.total, 120)
   }
 })
 

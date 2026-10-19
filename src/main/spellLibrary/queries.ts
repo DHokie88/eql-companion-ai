@@ -16,9 +16,9 @@ import type { SpellModifierContext } from '../../shared/spellModifiers'
 import type { SpellByLevelResult, SpellRankingsResult } from '../../shared/spellAnalysis'
 
 /** Cached arithmetic survives identical exports; displayed evidence still follows the latest export. */
-function refreshInstrumentProvenance(result: SpellRankingsResult | SpellByLevelResult, context?: SpellModifierContext) {
+function refreshInstrumentProvenance<T extends SpellSearchResult>(result: T, context?: SpellModifierContext): T {
   if (!context) return result
-  const highlights = 'highlights' in result ? result.highlights.flatMap((entry) => entry.record ? [entry.record] : []) : []
+  const highlights = result.highlights?.flatMap((entry) => entry.record ? [entry.record] : []) ?? []
   for (const row of [...result.records, ...highlights]) {
     const calculations = [...row.calculations ?? [], ...('calculation' in row ? [row.calculation as SpellCalculation] : [])]
     for (const calculation of calculations) {
@@ -115,7 +115,8 @@ export class SpellLibraryQueries {
     const dataset = this.dataset(installId, query)
     const calculate = this.evaluation.calculator(dataset, query, context)
     const result = searchCatalog(this.storage, dataset, query, { calculate, mechanics: dataset ? this.evaluation.mechanics(dataset) : undefined })
-    if (dataset) for (const row of result.records) {
+    const highlights = result.highlights?.flatMap((entry) => entry.record ? [entry.record] : []) ?? []
+    if (dataset) for (const row of [...result.records, ...highlights]) {
       const record = this.storage.record(dataset.snapshotId, row.id)
       if (record) row.rankEvidence = this.evaluation.rankEvidence(dataset, record, context)
     }

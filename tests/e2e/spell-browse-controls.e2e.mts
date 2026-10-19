@@ -27,12 +27,14 @@ async function visibleIds(page: Page): Promise<number[]> {
   return page.locator('[data-testid="spells-record"]').evaluateAll((elements) => elements.map((e) => Number(e.querySelector('td')?.textContent)))
 }
 async function expectIds(page: Page, expected: number[]): Promise<void> {
-  await settle(async () => ({ ids: await visibleIds(page), loading: await page.getByLabel('Searching spells').count() }),
+  const result = await settle(async () => ({ ids: await visibleIds(page), loading: await page.getByLabel('Searching spells').count() }),
     ({ ids, loading }) => !loading && ids.join(',') === expected.join(','), { timeoutMs: 30_000 })
+  assert.deepEqual(result.ids, expected)
 }
 async function firstId(page: Page, id: number): Promise<void> {
-  await settle(async () => ({ ids: await visibleIds(page), loading: await page.getByLabel('Searching spells').count() }),
+  const result = await settle(async () => ({ ids: await visibleIds(page), loading: await page.getByLabel('Searching spells').count() }),
     (state) => !state.loading && state.ids[0] === id, { timeoutMs: 30_000 })
+  assert.equal(result.ids[0], id)
 }
 async function choose(page: Page, testId: string, label: string): Promise<void> {
   await page.getByTestId(testId).click(); await page.getByRole('option', { name: label, exact: true }).click()
@@ -47,24 +49,35 @@ const page = await mainWindow(launched.app)
 page.setDefaultTimeout(20_000)
 try {
   await settle(() => page.evaluate(() => window.eq.spellLibrary.status()), (s) => s.phase === 'ready', { timeoutMs: 120_000 })
+  const notice = page.getByTestId('telemetry-notice-off')
+  if (await notice.isVisible()) await notice.click()
   await page.getByTestId('nav-spells').click()
-  await choose(page, 'spells-scope', 'All spells, including internal records')
+  await page.getByTestId('spells-classes').click(); await page.getByTestId('spells-classes-all').click()
+  await page.getByTestId('spells-level').fill('50')
+  await page.getByTestId('spells-max-level').fill('')
+  await page.getByTestId('spells-sort-id').click()
   await firstId(page, 7)
   const nameStyle = await page.getByTestId('spells-open-7').evaluate((button) => {
     const style = getComputedStyle(button)
     return { textAlign: style.textAlign, justifyContent: style.justifyContent, paddingLeft: style.paddingLeft }
   })
   assert.deepEqual(nameStyle, { textAlign: 'left', justifyContent: 'flex-start', paddingLeft: '0px' })
-  const tableFits = await page.locator('table[aria-label="Client spell records"]').evaluate((table) => {
+  const tableFits = await page.locator('table[aria-label="Spell catalog"]').evaluate((table) => {
     const container = table.parentElement
     return !!container && container.scrollWidth <= container.clientWidth + 2
   })
   assert.ok(tableFits, 'all Browse columns fit the default desktop width')
   await page.getByTestId('spells-search').evaluate((input) => input.scrollIntoView({ block: 'start' }))
   await dumpArtifacts(page, 'browse-controls-ready')
-  assert.equal(await page.locator('table[aria-label="Client spell records"] th [data-testid^="spells-sort-"]').count(), 10)
+  assert.equal(await page.locator('table[aria-label="Spell catalog"] th [data-testid^="spells-sort-"]').count(), 11)
   await page.getByTestId('spells-sort-id').click(); await firstId(page, 904)
   assert.equal(await page.getByTestId('spells-sort-id').locator('..').getAttribute('aria-sort'), 'descending')
+  const arrow = await page.getByTestId('spells-sort-id').evaluate((header) => {
+    const icon = header.querySelector('svg')!.getBoundingClientRect()
+    const label = header.children[1].getBoundingClientRect()
+    return { above: icon.bottom <= label.top, centered: Math.abs((icon.left + icon.right) / 2 - (header.getBoundingClientRect().left + header.getBoundingClientRect().right) / 2) < 2 }
+  })
+  assert.deepEqual(arrow, { above: true, centered: true }, 'sort direction sits above its own column label')
   await page.getByTestId('spells-sort-id').click(); await firstId(page, 7)
   await page.getByTestId('spells-sort-mana').click(); await firstId(page, 7)
   await page.getByTestId('spells-sort-mana').click(); await firstId(page, 249)
@@ -78,6 +91,7 @@ try {
   await page.getByTestId('spells-min-level').fill('26')
   await page.getByText('Minimum spell level must not exceed maximum spell level.', { exact: true }).waitFor()
   await page.getByTestId('spells-reset-filters').click(); await firstId(page, 901)
+  await page.getByTestId('spells-max-level').fill('')
   await page.getByTestId('spells-type-hot').click(); await expectIds(page, [7])
   await page.getByTestId('spells-type-dot').click(); await expectIds(page, [900])
   await page.getByTestId('spells-type-aoe').click(); await expectIds(page, [901])

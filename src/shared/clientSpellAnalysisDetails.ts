@@ -1,5 +1,5 @@
 import { clientSpellEffectAmount } from './clientSpellCalculations'
-import { scaleSpellDamage, scaleSpellHeal } from './spellScale'
+import { scaleExactSpellDamage, scaleExactSpellHeal } from './spellScale'
 import type { ClientSpellEffect, ClientSpellRecord, SpellCalculation } from './spellLibrary'
 import type { SpellAnalysisTiming, SpellEffectContribution } from './spellAnalysis'
 import type { ClientSpellMechanics } from './clientSpellMechanics'
@@ -54,7 +54,7 @@ function contributionAmounts(effect: ClientSpellEffect, calculation: SpellCalcul
   if (effect.spa !== 0 && effect.spa !== 79) return empty
   const clientAmount = clientSpellEffectAmount(effect, input.level)
   if (clientAmount === null) return empty
-  const scale = calculation.metric === 'damage' ? scaleSpellDamage : scaleSpellHeal
+  const scale = calculation.metric === 'damage' ? scaleExactSpellDamage : scaleExactSpellHeal
   const afterRank = scale(clientAmount, calculation.modifiers?.rank ?? null)
   const instrument = calculation.modifiers?.instrument
   const afterInstrument = instrument ? bardInstrumentAmount(afterRank, effect, { record: input.record, multiplier: instrument.bestMultiplier }) : afterRank

@@ -1,6 +1,8 @@
-import { type JSX, type ReactNode } from 'react'
+import { type JSX, type ReactNode, useCallback } from 'react'
 import { useSpellWorkspaceState } from './spellWorkspace'
-import { Button, TableCell, TableSortLabel } from '@mui/material'
+import { Box, Button, ButtonBase, TableCell } from '@mui/material'
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
 import type { SpellSortDirection } from '@shared/spellLibrary'
 
 export function SpellNameButton({ id, children, onOpen }: { id: number; children: ReactNode; onOpen: (id: number) => void }): JSX.Element {
@@ -10,9 +12,9 @@ export function SpellNameButton({ id, children, onOpen }: { id: number; children
 
 export function useSpellSort<T extends string>(initial: T, direction: SpellSortDirection = 'asc', key: string = initial) {
   const [sort, setSort] = useSpellWorkspaceState<{ field: T; direction: SpellSortDirection }>(`sort-${key}`, { field: initial, direction })
-  const changeSort = (field: T): void => setSort((previous) => ({ field,
-    direction: previous.field === field && previous.direction === 'asc' ? 'desc' : 'asc' }))
-  const selectSort = (field: T, direction: SpellSortDirection): void => setSort({ field, direction })
+  const changeSort = useCallback((field: T): void => setSort((previous) => ({ field,
+    direction: previous.field === field && previous.direction === 'asc' ? 'desc' : 'asc' })), [setSort])
+  const selectSort = useCallback((field: T, direction: SpellSortDirection): void => setSort({ field, direction }), [setSort])
   return { ...sort, changeSort, selectSort }
 }
 
@@ -21,8 +23,12 @@ export function SpellSortHeader<T extends string>({ field, label, sort, numeric 
 }): JSX.Element {
   const active = sort.field === field
   const alignment = align ?? (numeric ? 'right' : 'left')
-  return <TableCell align={alignment} sortDirection={active ? sort.direction : false}>
-    <TableSortLabel active={active} direction={active ? sort.direction : 'asc'} onClick={() => sort.changeSort(field)}
-      data-testid={`spells-sort-${field}`} sx={{ whiteSpace: 'normal', ...(alignment === 'center' ? { '& .MuiTableSortLabel-icon': { position: 'absolute', right: -22, ml: 0 } } : {}) }}>{label}</TableSortLabel>
+  const Icon = sort.direction === 'asc' ? ArrowUpwardIcon : ArrowDownwardIcon
+  return <TableCell align={alignment} sortDirection={active ? sort.direction : false} sx={{ bgcolor: active ? 'action.selected' : undefined, borderBottomColor: active ? 'primary.main' : undefined }}>
+    <ButtonBase onClick={() => sort.changeSort(field)} data-testid={`spells-sort-${field}`} aria-label={`Sort by ${label}`}
+      sx={{ width: '100%', minHeight: 54, flexDirection: 'column', alignItems: alignment === 'left' ? 'flex-start' : 'center', gap: 0.5, textAlign: alignment, color: active ? 'primary.main' : 'inherit', fontWeight: 600 }}>
+      <Box component="span" sx={{ display: 'flex', justifyContent: 'center', width: '100%', height: 18 }}><Icon aria-hidden sx={{ fontSize: 18, visibility: active ? 'visible' : 'hidden' }} /></Box>
+      <Box component="span">{label}</Box>
+    </ButtonBase>
   </TableCell>
 }

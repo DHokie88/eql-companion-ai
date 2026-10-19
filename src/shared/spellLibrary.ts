@@ -1,5 +1,5 @@
 import type { SpellEvaluationOptions, SpellFocusOptions, SpellModifierApplied, SpellModifierContext, SpellModifierUpdate, SpellRankEvidence } from './spellModifiers'
-import type { SpellAnalysis, SpellAnalysisOptions, SpellByLevelQuery, SpellByLevelResult, SpellRankingsQuery, SpellRankingsResult } from './spellAnalysis'
+import type { SpellAnalysis, SpellAnalysisOptions, SpellByLevelQuery, SpellByLevelResult, SpellRankingsQuery, SpellRankingsResult, SpellRankingRow } from './spellAnalysis'
 /** Local client catalog contract. Source bytes and filesystem paths never cross this bridge. */
 export const SPELL_SOURCE_FILES = ['spells_us.txt', 'spells_us_str.txt', 'dbstr_us.txt'] as const
 export type SpellSourceFile = (typeof SPELL_SOURCE_FILES)[number]
@@ -54,11 +54,14 @@ export interface SpellLibraryStatus {
   storageBytes: number
 }
 export interface SpellQueryContext { snapshotId?: string }
-export const SPELL_BROWSE_SORTS = ['id', 'name', 'level', 'classes', 'category', 'subcategory', 'type', 'amount', 'mana', 'efficiency', 'selected'] as const
+export const SPELL_BROWSE_SORTS = ['id', 'name', 'level', 'classes', 'category', 'subcategory', 'type', 'amount', 'mana', 'efficiency', 'selected', 'rate', 'cast', 'recovery', 'recast', 'duration', 'ticks', 'waves', 'targets', 'hits'] as const
 export type SpellBrowseSort = typeof SPELL_BROWSE_SORTS[number]
 export type SpellSortDirection = 'asc' | 'desc'
-export type SpellBrowseType = 'dd' | 'dot' | 'aoe' | 'rain' | 'aoe4' | 'aoe8' | 'heal' | 'hot' | 'other'
+export type SpellBrowseType = 'dd' | 'dot' | 'aoe' | 'rain' | `aoe${number}` | 'heal' | 'hot' | 'other'
 export interface SpellSearchQuery extends SpellQueryContext {
+  group?: 'all' | 'ranked' | 'zero-mana' | 'excluded'
+  metric?: SpellMetric
+  includeHighlights?: boolean
   analysis?: SpellAnalysisOptions
   minLevel?: number
   maxLevel?: number
@@ -80,7 +83,7 @@ export interface SpellSearchQuery extends SpellQueryContext {
   page?: number
   pageSize?: number
 }
-export type SpellSummary = Pick<ClientSpellRecord, 'id' | 'name' | 'rank' | 'classes' | 'mana' | 'category' | 'subcategory' | 'beneficial' | 'target'> & { calculations?: SpellCalculation[]; learnedLevel?: number | null; spellType?: SpellBrowseType; description?: string; detectedRank?: number | null; rankEvidence?: SpellRankEvidence | null }
+export type SpellSummary = Pick<ClientSpellRecord, 'id' | 'name' | 'rank' | 'classes' | 'mana' | 'category' | 'subcategory' | 'beneficial' | 'target'> & { calculations?: SpellCalculation[]; learnedLevel?: number | null; spellType?: SpellBrowseType; typeLabel?: string; castMs?: number; recoveryMs?: number; recastMs?: number; description?: string; detectedRank?: number | null; rankEvidence?: SpellRankEvidence | null }
 export interface SpellSearchResult {
   dataset: SpellDataset | null
   total: number
@@ -89,6 +92,9 @@ export interface SpellSearchResult {
   records: SpellSummary[]
   categories: string[]
   subcategories: string[]
+  typeOptions?: { value: SpellBrowseType; label: string }[]
+  groupCounts?: { ranked: number; zeroMana: number; excluded: number }
+  highlights?: { kind: 'efficiency' | 'amount' | 'rate'; record: SpellRankingRow | null }[]
 }
 export interface SpellDetailQuery extends SpellQueryContext { id: number; level?: number; evaluation?: SpellEvaluationOptions; analysis?: SpellAnalysisOptions }
 export interface SpellDetailResult { dataset: SpellDataset | null; record: ClientSpellRecord | null; calculations?: SpellCalculation[]; presentation?: import('./clientSpellDescriptions').SpellPresentation; rankEvidence?: SpellRankEvidence | null }

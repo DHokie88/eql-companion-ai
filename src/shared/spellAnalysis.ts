@@ -1,6 +1,6 @@
 import type { SpellCalculation, SpellSearchQuery, SpellSearchResult, SpellSummary } from './spellLibrary'
 
-export const SPELL_ANALYSIS_MODEL_VERSION = '4'
+export const SPELL_ANALYSIS_MODEL_VERSION = '5'
 export type SpellTargetCount = number | 'maximum'
 export interface SpellAnalysisOptions { scope: 'single' | 'pack'; targets: SpellTargetCount }
 export const DEFAULT_SPELL_ANALYSIS: SpellAnalysisOptions = { scope: 'single', targets: 4 }

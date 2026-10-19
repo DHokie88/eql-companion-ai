@@ -4,7 +4,7 @@
 import { calculateClientSpell, type ClientSpellAmountTransform } from './clientSpellCalculations'
 import { qualifyClientSpellFocus } from './clientSpellFocus'
 import { SpellModifierCatalog, type CatalogFocusSource } from './clientSpellModifierCatalog'
-import { scaleSpellDamage, scaleSpellHeal } from './spellScale'
+import { scaleExactSpellDamage, scaleExactSpellHeal } from './spellScale'
 import type { ClientSpellRecord, SpellCalculation, SpellClass, SpellMetric } from './spellLibrary'
 import type { SpellModifierApplied, SpellModifierContext } from './spellModifiers'
 import type { BardInstrumentEstimate } from './bardInstruments'
@@ -42,7 +42,7 @@ function bestFocus(record: ClientSpellRecord, options: SpellModifierEvaluation, 
 }
 
 function transformFor(metric: SpellMetric, rank: number | null, pct: number, instrument?: { record: ClientSpellRecord; estimate: BardInstrumentEstimate | null }): ClientSpellAmountTransform {
-  const scale = metric === 'damage' ? scaleSpellDamage : scaleSpellHeal
+  const scale = metric === 'damage' ? scaleExactSpellDamage : scaleExactSpellHeal
   return (amount, effect) => {
     const ranked = scale(amount, rank)
     return (instrument?.estimate ? bardInstrumentAmount(ranked, effect, { record: instrument.record, multiplier: instrument.estimate.bestMultiplier }) : ranked) * (1 + pct / 100)
@@ -52,7 +52,8 @@ function transformFor(metric: SpellMetric, rank: number | null, pct: number, ins
 function withMetadata(baseline: SpellCalculation, result: SpellCalculation, options: SpellModifierEvaluation, applied: Omit<SpellModifierApplied, 'baseline' | 'mode' | 'modelVersion' | 'contextRevision'>): SpellCalculation {
   return {
     ...result,
-    restrictions: [...result.restrictions.map((text) => applied.instrument && text === 'Bard singing and instrument modifiers are not included.' ? 'Supported instrument equipment scaling is included; AA and temporary singing bonuses are excluded.' : text), 'Mote scaling uses measured estimates. Efficiency uses client mana cost; duration and casting times are unchanged.'],
+    restrictions: [...result.restrictions.map((text) => applied.instrument && text === 'Bard singing and instrument modifiers are not included.' ? 'Supported instrument equipment scaling is included; AA and temporary singing bonuses are excluded.' : text), 'Mote scaling uses measured estimates. Efficiency uses client mana cost; duration and casting times are unchanged.',
+      ...(applied.rank === 1 && applied.rankSource === 'simulated' ? ['Simulated rank I extrapolates the measured model: +6% damage or +3% healing per effect before rounding. This is a model assumption, not an official server formula.'] : [])],
     modifiers: {
       mode: options.context.preferences.mode, modelVersion: options.context.modelVersion, contextRevision: options.context.revision,
       baseline: { instant: baseline.instant, perTick: baseline.perTick, ticks: baseline.ticks, total: baseline.total, perMana: baseline.perMana }, ...applied

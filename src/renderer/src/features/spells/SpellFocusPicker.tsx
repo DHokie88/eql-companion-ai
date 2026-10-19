@@ -18,7 +18,7 @@ export function SpellFocusPicker({ value, disabled, onChange }: {
   }
   return <Stack spacing={1} data-testid="spells-focus-picker">
     <TextField size="small" label="Find damage or healing focus" value={text} onChange={(event) => setText(event.target.value)} slotProps={{ htmlInput: { 'data-testid': 'spells-focus-search' } }} />
-    <Typography variant="caption">Choose real client focus effects. Their qualification limits still apply; qualifying focuses are not added together.</Typography>
+    <Typography variant="caption">Choose focus effects from the spell files. Their qualification limits still apply; qualifying focuses are not added together.</Typography>
     <Stack direction="row" gap={0.5} flexWrap="wrap">{value.focusIds.map((id) => <Chip key={id} size="small" label={`Focus ID ${id}`} disabled={disabled} onDelete={() => toggle(id)} />)}</Stack>
     {error && <Alert severity="error">{error}</Alert>}
     {loading && <CircularProgress size={20} />}

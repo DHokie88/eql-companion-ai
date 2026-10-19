@@ -42,11 +42,11 @@ export async function browseRainChecks(page: Page): Promise<void> {
   await page.getByTestId('spells-reset-filters').click()
 }
 export async function categoryAndTableChecks(page: Page): Promise<void> {
-  const table = page.getByRole('table', { name: 'Client spell records' })
-  assert.equal(await table.getByRole('columnheader', { name: 'Category', exact: true }).count(), 1)
+  const table = page.getByRole('table', { name: 'Spell catalog' })
+  assert.equal(await table.getByTestId('spells-sort-category').count(), 1)
   await table.getByTestId('spells-sort-category').click()
   await choose(page, 'spells-category', 'Test category')
-  assert.equal(await table.getByRole('columnheader', { name: 'Category', exact: true }).count(), 0)
+  assert.equal(await table.getByTestId('spells-sort-category').count(), 0)
   const subcategory = table.getByTestId('spells-sort-subcategory')
   await subcategory.waitFor()
   assert.equal(await settle(() => subcategory.locator('..').getAttribute('aria-sort'), (value) => value === 'ascending'), 'ascending')
@@ -58,7 +58,7 @@ export async function categoryAndTableChecks(page: Page): Promise<void> {
   assert.equal(await settle(() => table.getByTestId('spells-record').count(), (n) => n === 1), 1)
   assert.equal(await settle(() => table.getByTestId('spells-open-302').count(), (n) => n === 1), 1)
   assert.match(await table.getByTestId('spells-record').innerText(), /Lava Storm/i)
-  await page.getByTestId('spells-type-aoe8').click()
+  await choose(page, 'spells-type-cap', 'AOE8')
   assert.equal(await settle(() => table.getByTestId('spells-record').count(), (n) => n === 1), 1)
   assert.equal(await settle(() => table.getByTestId('spells-open-301').count(), (n) => n === 1), 1)
   assert.match(await table.getByTestId('spells-record').innerText(), /Test Area.*AOE8/is)

@@ -1,6 +1,6 @@
 import type { SpellCalculation, SpellClass } from './spellLibrary'
 
-export const SPELL_MODIFIER_MODEL_VERSION = '3'
+export const SPELL_MODIFIER_MODEL_VERSION = '4'
 export interface SpellRankEvidence { rank: number; characterKey: string; contextRevision: string; snapshotId: string }
 export type SpellValueMode = 'client' | 'mine' | 'emulate'
 export interface SpellEmulation {
@@ -15,6 +15,8 @@ export function defaultSpellModifierPreferences(): SpellModifierPreferences {
 }
 export interface SpellFocusCandidate { effect: string; item: string }
 export interface SpellModifierContext {
+  /** Opaque installation/server/character identity, including characterless sessions. */
+  profileKey?: string
   revision: string
   modelVersion: string
   character: { key: string; name: string; server: string } | null

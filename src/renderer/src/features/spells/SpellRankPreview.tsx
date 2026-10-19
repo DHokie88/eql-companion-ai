@@ -1,26 +1,19 @@
 import type { JSX } from 'react'
-import { Button, Chip, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from '@mui/material'
-import type { SpellModifierPreferences } from '@shared/spellModifiers'
+import { Button, FormControl, InputLabel, MenuItem, Select, Stack, Tooltip } from '@mui/material'
 import type { SpellModifiersState } from './useSpellModifiers'
 import { MOTE_RANKS } from './SpellRankOverrides'
 import { rankLabel } from './SpellEstimate'
 
-function selection(preferences: SpellModifierPreferences): string {
-  return preferences.mode === 'emulate' ? String(preferences.emulation.rank ?? 'detected') : preferences.mode
-}
 export function SpellRankPreview({ state }: { state: SpellModifiersState }): JSX.Element | null {
   const { context, saving, loading, update } = state
   if (!context) return null
-  const preferences = context.preferences, count = Object.keys(preferences.emulation.ranks).length
-  const change = (choice: string): void => {
-    if (choice === 'client' || choice === 'mine') { update({ ...preferences, mode: choice }); return }
-    update({ ...preferences, mode: 'emulate', emulation: { ...preferences.emulation, rank: choice === 'detected' ? null : Number(choice) } })
-  }
-  return <Stack direction="row" alignItems="center" gap={1.5} flexWrap="wrap" data-testid="spells-rank-preview">
-    <FormControl size="small" sx={{ minWidth: 245 }}><InputLabel id="spell-rank-preview-label">Mote rank preview</InputLabel><Select labelId="spell-rank-preview-label" label="Mote rank preview" value={selection(preferences)} disabled={saving || loading} data-testid="spells-global-rank" onChange={(event) => change(event.target.value)}>
-      <MenuItem value="client">Client values</MenuItem><MenuItem value="mine" disabled={!context.character}>Yours (detected)</MenuItem><MenuItem value="detected">Emulate: use detected ranks</MenuItem>{MOTE_RANKS.map((rank) => <MenuItem key={rank} value={String(rank)}>Group default: {rankLabel(rank)}</MenuItem>)}
-    </Select></FormControl>
-    <Typography variant="caption" color="text.secondary" sx={{ maxWidth: '44ch' }}>“Yours” badges show the highest observed upgrade in this character’s log.</Typography>
-    {preferences.mode === 'emulate' && <><Chip size="small" color="warning" variant="outlined" label="Simulated" /><Typography variant="caption" color="text.secondary">{count ? `${count} saved per-spell overrides; matching records take priority.` : 'Applies to every modeled spell. Use row dropdowns for exact overrides.'}</Typography>{count > 0 && <Button size="small" disabled={saving || loading} onClick={() => update({ ...preferences, emulation: { ...preferences.emulation, ranks: {} } })} data-testid="spells-clear-rank-overrides">Clear spell overrides</Button>}</>}
+  const preferences = context.preferences
+  const value = preferences.mode === 'client' ? '0' : preferences.mode === 'mine' ? 'mine' : String(preferences.emulation.rank ?? 'detected')
+  const count = Object.keys(preferences.emulation.ranks).length
+  return <Stack direction="row" gap={0.5} alignItems="center" data-testid="spells-rank-preview">
+    <Tooltip disableInteractive title="Mote rank. 0 is unupgraded; I through X are exact ranks. Auto uses observed ranks. Individual spell choices take precedence. Change to Emulate to preview a rank."><span><FormControl size="small" sx={{ width: 100 }}><InputLabel id="spell-rank-preview-label">Rank</InputLabel><Select labelId="spell-rank-preview-label" label="Rank" value={value} disabled={saving || loading || preferences.mode !== 'emulate'} data-testid="spells-global-rank" onChange={(event) => update({ ...preferences, emulation: { ...preferences.emulation, rank: event.target.value === 'detected' ? null : Number(event.target.value) } })}>
+      {preferences.mode === 'mine' && <MenuItem value="mine">Yours</MenuItem>}<MenuItem value="detected">Auto</MenuItem>{MOTE_RANKS.map((rank) => <MenuItem key={rank} value={String(rank)}>{rankLabel(rank)}</MenuItem>)}
+    </Select></FormControl></span></Tooltip>
+    {preferences.mode === 'emulate' && count > 0 && <Tooltip disableInteractive title="Remove per-spell rank choices and follow the Rank control again."><Button size="small" disabled={saving || loading} onClick={() => update({ ...preferences, emulation: { ...preferences.emulation, ranks: {} } })} data-testid="spells-clear-rank-overrides">Clear ({count})</Button></Tooltip>}
   </Stack>
 }

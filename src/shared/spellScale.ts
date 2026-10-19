@@ -139,6 +139,21 @@ export function scaleSpellHeal(amount: number, rank: number | null | undefined):
   return amount + Math.floor((amount * SPELL_HEAL_RANK_PERCENT * n) / 100)
 }
 
+/** Library simulations distinguish explicit Base=0 from I=1. Rank I extrapolates
+ * the measured per-rank model; ambiguous legacy observations must be resolved
+ * before calling this exact path. Legacy cards retain normalizeSpellRank above.
+ */
+function scaleExactSpell(amount: number, rank: number | null | undefined, percent: number): number {
+  const n = typeof rank === 'number' && Number.isInteger(rank) && rank >= 0 && rank <= SPELL_MAX_RANK ? rank : 0
+  return n === 0 || amount <= 0 ? amount : amount + Math.floor(amount * percent * n / 100)
+}
+export function scaleExactSpellDamage(amount: number, rank: number | null | undefined): number {
+  return scaleExactSpell(amount, rank, SPELL_DAMAGE_RANK_PERCENT)
+}
+export function scaleExactSpellHeal(amount: number, rank: number | null | undefined): number {
+  return scaleExactSpell(amount, rank, SPELL_HEAL_RANK_PERCENT)
+}
+
 /**
  * The rank a row is EVALUATED at: the higher of what has been observed and what is being simulated.
  *
