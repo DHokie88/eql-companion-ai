@@ -39,11 +39,11 @@ function SpellsWorkspace({ routing, status, modifiers }: { routing: AppRouting; 
   const following = mode === 'character' && combo.resolved.length > 0
   const classes = scopeClasses(mode, combo.resolved, pickedClasses)
   const classKey = classes.join(',')
-  const contextRevision = modifiers.context?.revision
-  const valueMode = modifiers.context?.preferences.mode
-  const evaluation = useMemo<SpellEvaluationOptions | undefined>(() => contextRevision && valueMode ? {
-    mode: valueMode, contextRevision, classes: classKey ? classKey.split(',') as SpellClass[] : []
-  } : undefined, [contextRevision, valueMode, classKey])
+  const context = modifiers.context
+  // Provenance-only exports refresh visible evidence; the worker reuses cached arithmetic.
+  const evaluation = useMemo<SpellEvaluationOptions | undefined>(() => context ? {
+    mode: context.preferences.mode, contextRevision: context.revision, classes: classKey ? classKey.split(',') as SpellClass[] : []
+  } : undefined, [context, classKey])
   const targets = modifiers.context?.preferences.targets ?? 4
   const analysis = useMemo(() => ({ scope: 'single' as const, targets }), [targets])
   const busy = ['checking', 'importing', 'activating'].includes(status.phase)

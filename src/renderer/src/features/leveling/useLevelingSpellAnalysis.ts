@@ -11,11 +11,10 @@ export function useLevelingSpellAnalysis(category: SpellRankingCategory = 'dd') 
   const modifiers = useSpellModifiers()
   const classKey = combo.resolved.join(',')
   const classes = useMemo(() => classKey ? classKey.split(',') as SpellClass[] : [], [classKey])
-  const revision = modifiers.context?.revision
-  const mode = modifiers.context?.preferences.mode
+  const context = modifiers.context
   const targets = modifiers.context?.preferences.targets ?? 4
-  const evaluation = useMemo<SpellEvaluationOptions | undefined>(() => revision && mode
-    ? { mode, contextRevision: revision, classes } : undefined, [revision, mode, classes])
+  const evaluation = useMemo<SpellEvaluationOptions | undefined>(() => context
+    ? { mode: context.preferences.mode, contextRevision: context.revision, classes } : undefined, [context, classes])
   const analysis = useMemo<SpellAnalysisOptions>(() => ({ scope: category === 'aoe' ? 'pack' : 'single', targets }), [category, targets])
   return { classes, modifiers, evaluation, analysis }
 }

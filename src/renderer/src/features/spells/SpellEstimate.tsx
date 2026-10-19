@@ -34,10 +34,17 @@ export function EstimateExplanation({ calculation }: { calculation: SpellCalcula
     {modifier && modifier.mode !== 'client' && <>
       <Typography variant="caption">{modifier.rank === null ? 'Mote rank unknown; using base amount.' : `Mote rank ${rankLabel(modifier.rank)} (${modifier.rankSource}).`} Measured rank model {modifier.modelVersion}.</Typography>
       <FocusExplanation calculation={calculation} />
+      <InstrumentExplanation calculation={calculation} />
       {modifier.warnings.map((warning) => <Typography key={warning} variant="caption" color="warning.main">{warning}</Typography>)}
     </>}
     <Typography variant="caption" color="text.secondary">{[...calculation.restrictions, ...calculation.reasons].join('; ') || 'Supported HP calculation, one target, full duration.'}</Typography>
   </Stack>
+}
+function InstrumentExplanation({ calculation }: { calculation: SpellCalculation }): JSX.Element | null {
+  const instrument = calculation.modifiers?.instrument
+  if (!instrument) return null
+  return <Stack spacing={0.5}><Typography variant="caption">Song skill {instrument.family}. Best known carried: {instrument.bestCarried?.item ?? 'no qualifying modifier'} · {instrument.bestMultiplier}×{instrument.bestCarried?.requiresEquip ? ' · requires equipment swap' : ''}. Equipped: {instrument.equipped?.item ?? 'no qualifying modifier'} · {instrument.equippedMultiplier}×.</Typography>
+    <Typography variant="caption" data-testid="bard-combined-hp">Combined amount with equipped instrument {amount(calculation.modifiers?.equippedInstrument?.total ?? null)} → with best carried {amount(calculation.total)}. Same mote/focus inputs and target scope; instrument estimates remain partial.</Typography></Stack>
 }
 
 function FocusExplanation({ calculation }: { calculation: SpellCalculation }): JSX.Element {

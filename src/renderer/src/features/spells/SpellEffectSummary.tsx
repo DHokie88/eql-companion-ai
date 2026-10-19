@@ -11,7 +11,7 @@ export function SpellEffectSummary({ presentation }: { presentation?: SpellPrese
     {presentation.effects.map((effect) => effect.neutral ? null : <Typography key={effect.slot}><strong>{effect.label}:</strong> {effect.text}</Typography>)}
     <Typography><strong>Duration:</strong> {presentation.duration} · <strong>Target:</strong> {presentation.target} · <strong>Resist:</strong> {presentation.resist}</Typography>
     <Typography><strong>Range:</strong> {presentation.range}</Typography>
-    <Typography variant="caption" color="text.secondary">Unmodified client effects at caster level {presentation.level}. Character HP estimates appear below; this release does not simulate modified slow, haste, or other buff statistics.</Typography>
+    <Typography variant="caption" color="text.secondary">Unmodified client effects at caster level {presentation.level}. Modeled instrument and combined HP estimates are labeled separately. Other modified buff statistics are not simulated.</Typography>
   </Stack>
 }
 export function SpellTechnicalEffects({ record, presentation }: { record: ClientSpellRecord; presentation?: SpellPresentation }): JSX.Element {

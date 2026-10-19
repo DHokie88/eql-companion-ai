@@ -22,7 +22,7 @@ export function SpellModifierControls({ state, ids }: { state: SpellModifiersSta
         <AccordionDetails><Stack spacing={2}>
           <DetectedInputs context={context} />
           {preferences.mode === 'emulate' && <EmulationControls preferences={preferences} ids={ids} disabled={disabled} onChange={update} />}
-          <Typography variant="caption" color="text.secondary">Estimates use measured mote rules and qualifying worn damage/healing focus. AA, instruments, critical hits, resists, mana and casting-speed modifiers, and recourse are excluded. Only verified rain layouts are modeled; other repeated waves remain unsupported. Efficiency uses client mana cost.</Typography>
+          <Typography variant="caption" color="text.secondary">Estimates use measured mote rules, qualifying worn damage/healing focus, and supported bard instrument equipment. Show mine and Emulate use the best known carried instrument; details also show the equipped result and any required swap. AA, temporary singing bonuses, critical hits, resists, mana/casting-speed modifiers, and recourse are excluded. Only verified rain layouts are modeled; other repeated waves remain unsupported. Efficiency uses client mana cost.</Typography>
         </Stack></AccordionDetails>
       </Accordion>
     </>}

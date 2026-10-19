@@ -3,6 +3,7 @@ import { scaleSpellDamage, scaleSpellHeal } from './spellScale'
 import type { ClientSpellEffect, ClientSpellRecord, SpellCalculation } from './spellLibrary'
 import type { SpellAnalysisTiming, SpellEffectContribution } from './spellAnalysis'
 import type { ClientSpellMechanics } from './clientSpellMechanics'
+import { bardInstrumentAmount } from './bardSongRules'
 
 const multiply = (value: number | null, factor: number | null): number | null => value === null || factor === null ? null : value * factor
 const efficiency = (total: number | null, mana: number): number | null => total !== null && mana > 0 ? Math.round(total / mana * 1_000_000) / 1_000_000 : null
@@ -22,9 +23,16 @@ export function scaleAnalysisCalculation(calculation: SpellCalculation, factor: 
     ...scaled, modifiers: {
       ...calculation.modifiers,
       baseline: { ...baseline, instant: multiply(baseline.instant, factor), perTick: multiply(baseline.perTick, factor), total: baselineTotal, perMana: efficiency(baselineTotal, calculation.mana) },
+      equippedInstrument: scaleEquippedInstrument(calculation, factor),
       range: range && factor !== null ? { min: range.min * factor, max: range.max * factor } : null
     }
   }
+}
+function scaleEquippedInstrument(calculation: SpellCalculation, factor: number | null) {
+  const equipped = calculation.modifiers?.equippedInstrument
+  if (!equipped) return undefined
+  const total = multiply(equipped.total, factor)
+  return { ...equipped, instant: multiply(equipped.instant, factor), perTick: multiply(equipped.perTick, factor), total, perMana: efficiency(total, calculation.mana) }
 }
 
 export function analysisTiming(record: ClientSpellRecord, calculation: SpellCalculation, mechanics: ClientSpellMechanics): SpellAnalysisTiming {
@@ -41,19 +49,22 @@ export function analysisTiming(record: ClientSpellRecord, calculation: SpellCalc
   return { castMs, recoveryMs, recastMs, deliveryMs, cycleMs, rate: calculation.total / (cycleMs / 1000), reason: null }
 }
 
-function contributionAmounts(effect: ClientSpellEffect, calculation: SpellCalculation, level: number): Pick<SpellEffectContribution, 'clientAmount' | 'afterRank' | 'afterFocus'> {
+function contributionAmounts(effect: ClientSpellEffect, calculation: SpellCalculation, input: { record: ClientSpellRecord; level: number }): Pick<SpellEffectContribution, 'clientAmount' | 'afterRank' | 'afterInstrument' | 'afterFocus'> {
   const empty = { clientAmount: null, afterRank: null, afterFocus: null }
   if (effect.spa !== 0 && effect.spa !== 79) return empty
-  const clientAmount = clientSpellEffectAmount(effect, level)
+  const clientAmount = clientSpellEffectAmount(effect, input.level)
   if (clientAmount === null) return empty
   const scale = calculation.metric === 'damage' ? scaleSpellDamage : scaleSpellHeal
   const afterRank = scale(clientAmount, calculation.modifiers?.rank ?? null)
-  const afterFocus = afterRank * (1 + (calculation.modifiers?.focus?.pct ?? 0) / 100)
-  return { clientAmount, afterRank, afterFocus }
+  const instrument = calculation.modifiers?.instrument
+  const afterInstrument = instrument ? bardInstrumentAmount(afterRank, effect, { record: input.record, multiplier: instrument.bestMultiplier }) : afterRank
+  const afterFocus = afterInstrument * (1 + focusPercent(calculation) / 100)
+  return { clientAmount, afterRank, ...(instrument ? { afterInstrument } : {}), afterFocus }
 }
+function focusPercent(calculation: SpellCalculation): number { return calculation.modifiers?.focus?.pct ?? 0 }
 
 function contribution(effect: ClientSpellEffect, calculation: SpellCalculation, options: { record: ClientSpellRecord; level: number; hits: number | null }): SpellEffectContribution {
-  const amounts = contributionAmounts(effect, calculation, options.level)
+  const amounts = contributionAmounts(effect, calculation, options)
   const periodic = effect.spa === 100 || (effect.spa === 0 && options.record.durationFormula !== 0)
   const ticks = periodic ? calculation.ticks : null
   const total = calculation.total === null ? null : multiply(multiply(amounts.afterFocus, periodic ? ticks : 1), options.hits)

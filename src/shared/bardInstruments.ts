@@ -20,6 +20,7 @@ export interface BardInstrumentChoice {
   requiresEquip: boolean
 }
 export interface BardInstrumentEstimate {
+  knownSources?: BardInstrumentSource[]
   mode: SpellValueMode
   family: BardInstrumentFamily
   equipped: BardInstrumentChoice | null

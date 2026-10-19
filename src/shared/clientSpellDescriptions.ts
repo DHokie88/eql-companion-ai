@@ -3,7 +3,7 @@ import { clientSpellEffectAmount, clientSpellDurationTicks } from './clientSpell
 import { clientSpellEffectLabel } from './clientSpellParser'
 
 export interface SpellEffectDescription { slot: number; spa: number; label: string; text: string; neutral: boolean }
-export interface SpellPresentation { level: number; duration: string; target: string; range: string; resist: string; effects: SpellEffectDescription[] }
+export interface SpellPresentation { level: number; duration: string; target: string; range: string; resist: string; effects: SpellEffectDescription[]; bard?: import('./bardInstruments').BardSongPresentation }
 function number(value: number): string { return value.toLocaleString('en-US', { maximumFractionDigits: 3 }) }
 function duration(record: ClientSpellRecord, level: number): string {
   const ticks = clientSpellDurationTicks(record, level)
@@ -26,14 +26,18 @@ function healthText(effect: ClientSpellEffect, value: number, record: ClientSpel
   const timing = effect.spa === 0 && record.durationFormula !== 0 ? ' every tick (6 seconds)' : ' once'
   return `${verb} ${number(value)} ${unit}${timing}.`
 }
-function effectText(effect: ClientSpellEffect, record: ClientSpellRecord, level: number): string {
-  const value = clientSpellEffectAmount(effect, level)
+function simpleEffectText(effect: ClientSpellEffect, value: number, record: ClientSpellRecord): string {
+  if (effect.spa >= 1 && effect.spa <= 10) return `${effect.base < 0 ? 'Decreases' : 'Increases'} ${clientSpellEffectLabel(effect.spa).toLowerCase()} by ${number(value)}${value === 0 ? ' (no change)' : ''}.`
+  if ([15, 46, 47, 48, 49, 50, 55, 59, 78].includes(effect.spa)) return `${clientSpellEffectLabel(effect.spa)}: ${effect.base < 0 ? '-' : '+'}${number(value)}${effect.spa === 15 && record.durationFormula !== 0 ? ' per tick (6 seconds)' : ''}.`
+  return capturedDescription(effect, record)
+}
+export function describeClientSpellEffect(effect: ClientSpellEffect, record: ClientSpellRecord, level: number, override?: number): string {
+  const value = override ?? clientSpellEffectAmount(effect, level)
   if (effect.spa === 254) return 'Unused client effect slot.'
   if (value === null) return `${String(record.fields[`effect${effect.slot}`] ?? clientSpellEffectLabel(effect.spa))}. Magnitude uses an unsupported client formula; no estimate is assumed.`
   if (effect.spa === 3 || effect.spa === 11) return speedText(effect, value)
   if (effect.spa === 0 || effect.spa === 79) return healthText(effect, value, record)
-  if (effect.spa >= 1 && effect.spa <= 10) return `${effect.base < 0 ? 'Decreases' : 'Increases'} ${clientSpellEffectLabel(effect.spa).toLowerCase()} by ${number(value)}${value === 0 ? ' (no change)' : ''}.`
-  return capturedDescription(effect, record)
+  return simpleEffectText(effect, value, record)
 }
 function capturedDescription(effect: ClientSpellEffect, record: ClientSpellRecord): string {
   const captured = record.fields[`effect${effect.slot}`]
@@ -45,7 +49,7 @@ export function describeClientSpell(record: ClientSpellRecord, level: number): S
     level, duration: duration(record, level), target: String(record.fields.targetName ?? `Client target type ${record.target}`),
     range: `Casting range ${number(record.range)} game units${record.aeRange > 0 ? `; area radius ${number(record.aeRange)} game units` : '; no area radius'}.`,
     resist: String(record.fields.resistName ?? 'Unspecified'),
-    effects: record.effects.map((effect) => ({ slot: effect.slot, spa: effect.spa, label: clientSpellEffectLabel(effect.spa), text: effectText(effect, record, level),
+    effects: record.effects.map((effect) => ({ slot: effect.slot, spa: effect.spa, label: clientSpellEffectLabel(effect.spa), text: describeClientSpellEffect(effect, record, level),
       neutral: effect.spa === 254 || (effect.base === 0 && effect.max === 0 && effect.limit === 0 && effect.calc === 100) }))
   }
 }

@@ -1,6 +1,6 @@
 import type { SpellCalculation, SpellClass } from './spellLibrary'
 
-export const SPELL_MODIFIER_MODEL_VERSION = '1'
+export const SPELL_MODIFIER_MODEL_VERSION = '2'
 export type SpellValueMode = 'client' | 'mine' | 'emulate'
 export interface SpellEmulation {
   rank: number | null
@@ -27,6 +27,8 @@ export interface SpellModifierUpdate { expectedRevision: string; preferences: Sp
 export interface SpellFocusOption { id: number; name: string; kind: 'damage' | 'healing' | null; supported: boolean; reason: string | null }
 export interface SpellFocusOptions { datasetId: string | null; total: number; records: SpellFocusOption[] }
 export interface SpellModifierApplied {
+  instrument?: import('./bardInstruments').BardInstrumentEstimate
+  equippedInstrument?: Pick<SpellCalculation, 'instant' | 'perTick' | 'ticks' | 'total' | 'perMana'>
   mode: SpellValueMode
   modelVersion: string
   contextRevision: string

@@ -8,6 +8,7 @@ import type { SpellCalculation } from '@shared/spellLibrary'
 import type { SpellAnalysisOptions } from '@shared/spellAnalysis'
 import { SpellAnalysisBreakdown } from './SpellAnalysisBreakdown'
 import { SpellEffectSummary, SpellTechnicalEffects } from './SpellEffectSummary'
+import { BardSongInstruments } from './BardSongInstruments'
 
 export function LibrarySpellDetail({ id, snapshotId, level, evaluation, analysis, controls, onBack, onWiki, onHistory }: {
   id: number; snapshotId?: string; onBack: () => void; onWiki?: (name: string) => void; onHistory: (id: number) => void
@@ -28,6 +29,7 @@ export function LibrarySpellDetail({ id, snapshotId, level, evaluation, analysis
       <Stack direction="row" gap={1} flexWrap="wrap" alignItems="center"><Typography variant="h5">{record.name}</Typography><Chip size="small" label={`ID ${record.id}`} /><Chip size="small" variant="outlined" label={`Client layout ${record.layout}`} /></Stack>
       <Typography color="text.secondary">{record.classes.length ? record.classes.map((c) => `${c.code} ${c.level}`).join(' · ') : 'Internal / NPC record'} · {record.category} {record.subcategory && `/ ${record.subcategory}`}</Typography>
       <Typography sx={{ whiteSpace: 'pre-wrap' }}>{record.description || 'No description supplied by the client.'}</Typography>
+      <DetailInstruments presentation={data.presentation} />
       <SpellEffectSummary presentation={data.presentation} />
       <Typography>Client mana {record.mana} · Cast {record.castMs / 1000}s · Recovery {record.recoveryMs / 1000}s · Recast {record.recastMs / 1000}s</Typography>
       <Typography variant="caption" color="text.secondary">Unmodified client record · first observed {data.dataset && new Date(data.dataset.firstObserved).toLocaleString()} · revision {data.dataset?.contentId.slice(0, 14)}. Eligibility does not confirm ownership or acquisition.</Typography>
@@ -44,6 +46,9 @@ export function LibrarySpellDetail({ id, snapshotId, level, evaluation, analysis
 
 function DetailCalculations({ calculations }: { calculations?: SpellCalculation[] }): JSX.Element | null {
   return calculations?.length ? <><SpellHpValues calculations={calculations} />{calculations.map((c) => <SpellAnalysisBreakdown key={c.metric} calculation={c} />)}</> : null
+}
+function DetailInstruments({ presentation }: { presentation?: import('@shared/clientSpellDescriptions').SpellPresentation }): JSX.Element | null {
+  return presentation?.bard ? <BardSongInstruments song={presentation.bard} /> : null
 }
 
 function SupplementaryLink({ name, open }: { name: string; open?: (name: string) => void }): JSX.Element | null {

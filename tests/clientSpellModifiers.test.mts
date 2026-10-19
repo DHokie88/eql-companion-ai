@@ -161,7 +161,7 @@ test('modifiers never enable unsupported HP formulas, durations or repeated wave
   }
 })
 
-test('bard instruments stay excluded and context model/revision are carried to every result', () => {
+test('unknown non-song bard skills stay excluded and context model/revision are carried to every result', () => {
   const result = evaluate(modifierSpell({ classes: [{ code: 'BRD', level: 1 }] }), emulation({ rank: 5, focus: 'none' }))
   assert.equal(result.modifiers?.partial, true)
   assert.match(result.modifiers?.warnings.join(' ') ?? '', /instrument modifiers are not modeled/)

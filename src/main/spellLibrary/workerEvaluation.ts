@@ -6,6 +6,8 @@ import { analyzeClientSpell, SpellMechanicsCatalog } from '../../shared/clientSp
 import { analysisArg } from './analysisValidation'
 import { classesArg, evaluationArg } from './queryValidation'
 import type { SpellLibraryStorage } from './storage'
+import { describeClientSpell } from '../../shared/clientSpellDescriptions'
+import { bardSongPresentation } from '../../shared/bardSongPresentation'
 
 export type SpellCalculator = (record: ClientSpellRecord, level: number, metric: SpellMetric) => SpellCalculation
 
@@ -40,6 +42,12 @@ export class WorkerSpellEvaluation {
     if (!context?.character) return null
     return this.catalog(dataset).rank(record, { ...context, preferences: { ...context.preferences, mode: 'mine' } }).rank
   }
+  presentation(dataset: SpellDataset | null, input: { record: ClientSpellRecord; level: number; query: Record<string, unknown>; context: unknown }) {
+    const presentation = describeClientSpell(input.record, input.level)
+    const { modifiers } = modifierInputs(input.query, input.context)
+    const estimate = dataset && modifiers ? this.catalog(dataset).instruments.resolve(input.record, modifiers, input.level) : null
+    return estimate ? { ...presentation, bard: bardSongPresentation(input.record, presentation, estimate) } : presentation
+  }
   calculator(dataset: SpellDataset | null, query: Record<string, unknown>, context: unknown): SpellCalculator {
     const { options, modifiers } = modifierInputs(query, context)
     const analysis = analysisArg(query.analysis)
@@ -64,5 +72,5 @@ export function spellEvaluationScope(query: Record<string, unknown>): string {
   if (analysis) return `${analysis.scope === 'pack' ? 'Aggregate pack total' : 'One-target full cast'}. Supported direct effects, full-duration periodic effects and verified rain hit budgets. Modeled cycle rate divides amount by cast time plus the maximum of recovery, recast and delivery. Efficiency uses client mana cost. Partial estimates identify missing inputs and unknown caps.`
   const options = evaluationArg(query.evaluation)
   if (!options || options.mode === 'client') return CLIENT_SPELL_CALCULATION_SCOPE
-  return `${options.mode === 'emulate' ? 'Simulated' : 'Detected-character'} estimate: measured mote rules and qualifying worn damage/healing focus, one target, full duration. Efficiency uses client mana cost. AA, bard instruments, critical hits, resists, mana/cast-time modifiers, recourse and repeated waves are excluded. Partial estimates identify missing inputs.`
+  return `${options.mode === 'emulate' ? 'Simulated' : 'Detected-character'} estimate: measured mote rules, qualifying worn damage/healing focus and supported best-carried bard instrument equipment, one target, full duration. Efficiency uses client mana cost. AA, temporary singing bonuses, critical hits, resists, mana/cast-time modifiers, recourse and repeated waves are excluded. Partial estimates identify missing inputs and unknown instrument caps.`
 }

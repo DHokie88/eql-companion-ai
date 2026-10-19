@@ -190,3 +190,29 @@ test('unchanged queries and provenance-only inventory rewrites do not rescan the
     assert.ok(scans > before)
   } finally { f.close() }
 })
+
+test('cached bard rankings, highlights and By level refresh export provenance without another scan', () => {
+  const row = spellRow(1, 'Synthetic String Recovery', 10, 4)
+  row[47] = '255'; row[43] = '50'; row[32] = '49'; row[28] = '1'; row[11] = '5'; row[12] = '2'; row[172] = '1|0|4|0|100|0'
+  const f = fixture([row]), context = observedContext()
+  context.inventory.instruments = { sources: [], warnings: [] }
+  context.inventory.exportedAt = '2026-10-18T10:00:00Z'
+  const evaluation = { mode: 'emulate', contextRevision: context.revision, classes: ['BRD'] } as const
+  const ranking = { classes: ['BRD'], categoryTab: 'hot', evaluation } as Partial<SpellRankingsQuery>
+  const byLevel = { classes: ['BRD'], level: 50, view: 'at', analysis: single, evaluation }
+  const original = f.storage.records.bind(f.storage)
+  let scans = 0
+  f.storage.records = (snapshotId: string) => { scans++; return original(snapshotId) }
+  try {
+    assert.equal(f.rankings(ranking, context).records[0].calculation.modifiers?.instrument?.exportedAt, context.inventory.exportedAt)
+    f.call('byLevel', byLevel, context)
+    const before = scans, refreshed = structuredClone(context)
+    refreshed.inventory.exportedAt = '2026-10-18T20:00:00Z'
+    const ranked = f.rankings(ranking, refreshed)
+    assert.equal(ranked.records[0].calculation.modifiers?.instrument?.exportedAt, refreshed.inventory.exportedAt)
+    assert.equal(ranked.highlights[0].record?.calculation.modifiers?.instrument?.exportedAt, refreshed.inventory.exportedAt)
+    const levels = f.call<SpellByLevelResult>('byLevel', byLevel, refreshed)
+    assert.equal(levels.records[0].calculations?.[0].modifiers?.instrument?.exportedAt, refreshed.inventory.exportedAt)
+    assert.equal(scans, before)
+  } finally { f.close() }
+})

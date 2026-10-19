@@ -1,6 +1,6 @@
 import type { SpellCalculation, SpellSearchQuery, SpellSearchResult, SpellSummary } from './spellLibrary'
 
-export const SPELL_ANALYSIS_MODEL_VERSION = '2'
+export const SPELL_ANALYSIS_MODEL_VERSION = '3'
 export type SpellTargetCount = number | 'maximum'
 export interface SpellAnalysisOptions { scope: 'single' | 'pack'; targets: SpellTargetCount }
 export const DEFAULT_SPELL_ANALYSIS: SpellAnalysisOptions = { scope: 'single', targets: 4 }
@@ -8,6 +8,7 @@ export type SpellRankingCategory = 'dd' | 'dot' | 'aoe' | 'heal' | 'hot'
 export type SpellAnalysisSort = 'id' | 'name' | 'level' | 'amount' | 'mana' | 'efficiency' | 'rate' | 'cast' | 'recovery' | 'recast' | 'duration' | 'ticks' | 'waves' | 'targets' | 'hits'
 export interface SpellEffectContribution {
   slot: number; spa: number; clientAmount: number | null; afterRank: number | null; afterFocus: number | null
+  afterInstrument?: number | null
   periodic: boolean; ticks: number | null; hits: number | null; total: number | null
 }
 export interface SpellAnalysisTiming {

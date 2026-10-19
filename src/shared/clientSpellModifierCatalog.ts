@@ -3,6 +3,7 @@
  */
 import { decodeClientSpellFocus, type ClientSpellFocus } from './clientSpellFocus'
 import { spellLineKey } from './spellLines'
+import { BardInstrumentCatalog } from './bardInstrumentCatalog'
 import type { ClientSpellRecord } from './spellLibrary'
 import type { SpellFocusOption, SpellModifierContext } from './spellModifiers'
 
@@ -27,6 +28,7 @@ export class SpellModifierCatalog {
   private readonly lines = new Map<string, number[]>()
   private readonly identities = new Map<number, string>()
   private readonly focuses = new Map<number, ClientSpellFocus>()
+  readonly instruments = new BardInstrumentCatalog(this.names)
 
   constructor(records: Iterable<ClientSpellRecord>) {
     for (const record of records) {
@@ -34,6 +36,7 @@ export class SpellModifierCatalog {
       this.identities.set(record.id, record.name)
       append(this.names, nameKey(record.name), record.id)
       append(this.lines, spellLineKey(record.name), record.id)
+      this.instruments.add(record)
       const focus = decodeClientSpellFocus(record)
       if (focus) this.focuses.set(record.id, focus)
     }
@@ -108,6 +111,7 @@ export class SpellModifierCatalog {
     if (inventory.state !== 'ready') warnings.push('Worn focus is unknown until a valid inventory output is available; no focus was assumed.')
     if (inventory.state !== 'ready') return { sources, warnings, simulated: false }
     for (const candidate of inventory.candidates) {
+      if (this.instruments.handles(candidate.effect)) continue
       const ids = this.names.get(nameKey(candidate.effect)) ?? []
       if (ids.length !== 1) {
         warnings.push(`${candidate.item}: focus ${candidate.effect} ${ids.length ? 'has multiple client IDs' : 'is absent from this dataset'} and was not applied.`)

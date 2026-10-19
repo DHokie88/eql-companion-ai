@@ -5,7 +5,6 @@ import type {
 } from '../../shared/spellLibrary'
 import { WorkerSpellEvaluation, spellEvaluationScope, type SpellCalculator } from './workerEvaluation'
 import { searchCatalog } from './searchCatalog'
-import { describeClientSpell } from '../../shared/clientSpellDescriptions'
 import { SEARCH_QUERY_FIELDS } from './browseQuery'
 import { SpellAnalysisQueries } from './analysisQueries'
 import { SpellQueryCache } from './queryCache'
@@ -14,6 +13,21 @@ import { SpellLibraryStorage } from './storage'
 import { integerArg, objectArgs, stringArg } from './workerProtocol'
 import { classesArg, levelArg, metricArg, optionalText, pageArgs, queryObject, requiredSnapshotArg, snapshotArg, spellId } from './queryValidation'
 import type { SpellModifierContext } from '../../shared/spellModifiers'
+import type { SpellByLevelResult, SpellRankingsResult } from '../../shared/spellAnalysis'
+
+/** Cached arithmetic survives identical exports; displayed evidence still follows the latest export. */
+function refreshInstrumentProvenance(result: SpellRankingsResult | SpellByLevelResult, context?: SpellModifierContext) {
+  if (!context) return result
+  const highlights = 'highlights' in result ? result.highlights.flatMap((entry) => entry.record ? [entry.record] : []) : []
+  for (const row of [...result.records, ...highlights]) {
+    const calculations = [...row.calculations ?? [], ...('calculation' in row ? [row.calculation as SpellCalculation] : [])]
+    for (const calculation of calculations) {
+      const instrument = calculation.modifiers?.instrument
+      if (instrument) instrument.exportedAt = context.inventory.exportedAt
+    }
+  }
+  return result
+}
 
 export function spellSummary(record: ClientSpellRecord): SpellSummary {
   const { id, name, rank, classes, mana, category, subcategory, beneficial, target } = record
@@ -87,7 +101,7 @@ export class SpellLibraryQueries {
     const effectiveContext = context ? { ...context, inventory: { ...context.inventory, exportedAt: undefined } } : undefined
     const key = this.cache.key(method, { installId, dataset, query, context: effectiveContext })
     const cached = this.cache.get(key)
-    if (cached !== undefined) return cached
+    if (cached !== undefined) return refreshInstrumentProvenance(cached as SpellRankingsResult | SpellByLevelResult, context)
     const result = this.analysis[method](dataset, query, args.modifiers)
     this.cache.set(key, result)
     return result
@@ -108,7 +122,7 @@ export class SpellLibraryQueries {
     const dataset = this.dataset(installId, query)
     const record = dataset ? this.storage.record(dataset.snapshotId, id) : null
     const calculate = this.evaluation.calculator(dataset, query, context)
-    const presentation = record && query.level !== undefined ? describeClientSpell(record, levelArg(query.level)) : undefined
+    const presentation = record && query.level !== undefined ? this.evaluation.presentation(dataset, { record, level: levelArg(query.level), query, context }) : undefined
     return { dataset, record, presentation, ...((query.evaluation !== undefined || query.analysis !== undefined) && record ? { calculations: hpCalculations(record, levelArg(query.level), calculate) } : {}) }
   }
   private compare(installId: string, input: unknown, context: unknown): SpellComparisonResult {
