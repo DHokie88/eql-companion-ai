@@ -28,7 +28,7 @@ export function LibrarySpellDetail({ id, snapshotId, level, evaluation, analysis
     {record && <>
       <Stack spacing={1.5}><Stack direction="row" gap={1.5} flexWrap="wrap" alignItems="center"><Typography variant="h4" sx={{ fontWeight: 600 }}>{record.name}</Typography><Chip size="small" variant="outlined" label={`ID ${record.id}`} /></Stack>
         <Typography color="text.secondary">{record.classes.length ? record.classes.map((c) => `${c.code} ${c.level}`).join(' · ') : 'Internal / NPC record'} · {record.category} {record.subcategory && `/ ${record.subcategory}`}</Typography>
-        <Typography sx={{ whiteSpace: 'pre-wrap', maxWidth: '90ch', pt: 0.5 }}>{record.description || 'No description supplied by the client.'}</Typography>
+        <DetailDescription record={record} presentation={data.presentation} />
       </Stack>
       {controls}
       <SpellEffectSummary presentation={data.presentation} />
@@ -51,6 +51,10 @@ export function LibrarySpellDetail({ id, snapshotId, level, evaluation, analysis
 
 function DetailCalculations({ calculations }: { calculations?: SpellCalculation[] }): JSX.Element | null {
   return calculations?.length ? <SpellDetailSection><Stack spacing={2.5}><Typography variant="h6">Damage and healing estimates</Typography><SpellHpValues calculations={calculations} showExplanation={false} />{calculations.map((c) => <SpellAnalysisBreakdown key={c.metric} calculation={c} />)}</Stack></SpellDetailSection> : null
+}
+function DetailDescription({ record, presentation }: { record: ClientSpellRecord; presentation?: import('@shared/clientSpellDescriptions').SpellPresentation }): JSX.Element {
+  const description = presentation?.description ?? record.description
+  return <Typography data-testid="spell-description" sx={{ whiteSpace: 'pre-wrap', maxWidth: '90ch', pt: 0.5 }}>{description || 'No description supplied by the client.'}</Typography>
 }
 function DetailTiming({ record }: { record: ClientSpellRecord }): JSX.Element {
   return <SpellDetailSection><Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: 'repeat(4, 1fr)' }, gap: 3 }}>{Object.entries({ 'Client mana': record.mana, 'Cast time': `${record.castMs / 1000}s`, Recovery: `${record.recoveryMs / 1000}s`, Recast: `${record.recastMs / 1000}s` }).map(([label, value]) => <Box key={label}><Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.5 }}>{label}</Typography><Typography variant="h6">{value}</Typography></Box>)}</Box></SpellDetailSection>

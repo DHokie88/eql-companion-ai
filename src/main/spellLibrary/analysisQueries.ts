@@ -8,6 +8,7 @@ import { levelArg, pageArgs, queryObject } from './queryValidation'
 import type { SpellModifierContext } from '../../shared/spellModifiers'
 import type { SpellLibraryStorage } from './storage'
 import type { SpellCalculator, WorkerSpellEvaluation } from './workerEvaluation'
+import { clientSpellDescription } from '../../shared/clientSpellDescriptions'
 
 interface RankingGroups { ranked: SpellRankingRow[]; zeroMana: SpellRankingRow[]; excluded: SpellRankingRow[] }
 
@@ -117,7 +118,7 @@ export class SpellAnalysisQueries {
       if (!matchesSpellSearch(record, options.filters)) continue
       const learned = minimumSpellLevel(record.classes, options.filters.classes)
       if (learned === null) continue
-      rows.push({ ...catalogSummary(record, options.filters.classes), description: record.description,
+      rows.push({ ...catalogSummary(record, options.filters.classes), description: clientSpellDescription(record),
         detectedRank: this.evaluation.detectedRank(dataset, record, context),
         calculations: this.byLevelCalculations(record, learned, options.query, calculate) })
     }

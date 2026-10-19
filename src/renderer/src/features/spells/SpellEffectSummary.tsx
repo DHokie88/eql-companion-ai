@@ -18,7 +18,7 @@ export function SpellEffectSummary({ presentation }: { presentation?: SpellPrese
 }
 export function SpellTechnicalEffects({ record, presentation }: { record: ClientSpellRecord; presentation?: SpellPresentation }): JSX.Element {
   return <Box sx={{ overflowX: 'auto' }}><Table size="small" aria-label="Decoded client effects"><TableHead><TableRow>{['Slot', 'Effect (SPA)', 'English description', 'Base', 'Limit', 'Formula', 'Maximum'].map((label) => <TableCell key={label}>{label}</TableCell>)}</TableRow></TableHead><TableBody>
-    {record.effects.map((effect) => <TableRow key={effect.slot}><TableCell>{effect.slot}</TableCell><TableCell>{clientSpellEffectLabel(effect.spa)}<Typography variant="caption" display="block">SPA {effect.spa}</Typography></TableCell>
+    {record.effects.map((effect) => <TableRow key={effect.slot}><TableCell>{effect.slot}</TableCell><TableCell>{presentation?.effects.find((entry) => entry.slot === effect.slot)?.label ?? clientSpellEffectLabel(effect.spa)}<Typography variant="caption" display="block">SPA {effect.spa}</Typography></TableCell>
       <TableCell sx={{ minWidth: 230 }}>{presentation?.effects.find((entry) => entry.slot === effect.slot)?.text ?? String(record.fields[`effect${effect.slot}`] ?? 'No decoded description available.')}</TableCell>
       {[effect.base, effect.limit, effect.calc, effect.max].map((value, index) => <TableCell key={index}>{value}</TableCell>)}
     </TableRow>)}

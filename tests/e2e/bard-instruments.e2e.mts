@@ -14,12 +14,15 @@ function stageSources(staged: FixtureLog): void {
   song[47] = '255'; song[43] = '1'; song[32] = '49'; song[28] = '1'; song[11] = '5'; song[12] = '2'; song[172] = '1|0|4|0|100|0'
   const slow = spellFields(738, 'Test Singing Binding')
   slow[47] = '255'; slow[43] = '1'; slow[32] = '41'; slow[11] = '5'; slow[12] = '2'; slow[172] = '1|3|-20|0|100|0$2|11|80|0|100|0'
+  const haste = spellFields(8461, 'Test Supplemental Tempo', 174)
+  haste[47] = '255'; haste[43] = '1'; haste[32] = '41'; haste[173] = '1|98|105|0|100|105'
   const focuses = [11, 14].map((rank) => {
     const fields = spellFields(1000 + rank, `String Resonance ${rank}`)
     fields[47] = '255'; fields[172] = `1|413|${rank * 10}|0|100|0$2|411|256|0|100|0$3|414|49|0|100|0`
     return fields.join('^')
   })
-  const sources = spellBundle([song.join('^'), slow.join('^'), ...focuses])
+  const sources = spellBundle([song.join('^'), slow.join('^'), haste.join('^'), ...focuses])
+  sources['dbstr_us.txt'] = sources['dbstr_us.txt'].replace(/^900\^6\^.*$/m, '900^6^Binds up to %T nearby enemies.^0^')
   for (const name of SPELL_SOURCE_FILES) writeFileSync(join(staged.installDir, name), sources[name])
 }
 function inventory(staged: FixtureLog, state: 'carried' | 'equipped' | 'removed'): void {
@@ -97,6 +100,7 @@ async function refreshAndSinging(page: Page, staged: FixtureLog): Promise<void> 
 }
 
 async function detailAppearance(page: Page): Promise<void> {
+  assert.equal(await page.getByTestId('spell-description').innerText(), 'Binds up to 8 nearby enemies.')
   const surface = await page.getByRole('dialog').evaluate((element) => ({ background: getComputedStyle(element).backgroundColor, overlay: getComputedStyle(element).backgroundImage }))
   assert.equal(surface.background, 'rgb(15, 17, 21)'); assert.equal(surface.overlay, 'none')
   const summary = page.getByTestId('spell-effect-summary'), instruments = page.getByTestId('bard-song-instruments')
@@ -112,6 +116,17 @@ async function detailAppearance(page: Page): Promise<void> {
   await dumpArtifacts(page, 'spell-detail-client-clean')
 }
 
+async function supplementalHaste(page: Page): Promise<void> {
+  await page.getByTestId('spells-detail-back').click()
+  await page.getByTestId('spells-open-8461').click()
+  const summary = page.getByTestId('spell-effect-summary')
+  await settle(() => summary.innerText(), (text) => text.includes('Adds 5 percentage points'))
+  assert.match(await summary.innerText(), /Supplemental spell haste \(type II\)/)
+  assert.match(await summary.innerText(), /within the normal total-haste cap; adds no speed once that cap is reached/)
+  await page.getByTestId('spells-technical-details').getByRole('button').click()
+  assert.match(await page.getByRole('table', { name: 'Decoded client effects' }).innerText(), /Supplemental spell haste.*SPA 98.*Adds 5/s)
+}
+
 buildIfStale()
 const staged = stageFixture('e2e-leveling.log')
 stageSources(staged); inventory(staged, 'carried')
@@ -123,6 +138,7 @@ try {
   const before = await epoch(page)
   await mine(page); await refreshAndSinging(page, staged)
   await detailAppearance(page)
+  await supplementalHaste(page)
   assert.equal(await epoch(page), before)
   assert.equal((await page.evaluate(() => window.eq.spellLibrary.history())).snapshots.length, 1)
   await dumpArtifacts(page, 'bard-instruments-ready')

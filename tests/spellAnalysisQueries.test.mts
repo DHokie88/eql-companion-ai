@@ -15,8 +15,8 @@ function observedContext(): SpellModifierContext {
     preferences, ranks: { 'synthetic bolt': { name: 'Synthetic Bolt', rank: 9 } },
     inventory: { state: 'ready', exportedAt: null, candidates: [], warnings: [] }, warnings: [] }
 }
-function fixture(rows: string[][]) {
-  const f = storageFixture(), source = f.storage.publish({ root: f.root, reason: 'startup', parserVersion: '1', ...syntheticCatalog(rows) })
+function fixture(rows: string[][], description?: string) {
+  const f = storageFixture(), source = f.storage.publish({ root: f.root, reason: 'startup', parserVersion: '1', ...syntheticCatalog(rows, description) })
   const queries = new SpellLibraryQueries(f.storage)
   return { ...f, dataset: source.dataset, call<T>(method: string, query: unknown, modifiers?: SpellModifierContext): T {
     return queries.handle(method, { installId: source.dataset.installId, query, modifiers }) as T
@@ -26,6 +26,19 @@ function fixture(rows: string[][]) {
   } }
 }
 const ids = (result: { records: { id: number }[] }): number[] => result.records.map((r) => r.id)
+
+test('detail and By level resolve maximum targets while preserving captured source history', () => {
+  const row = spellRow(1, 'Synthetic Area Song'); row[143] = '8'
+  const f = fixture([row], 'Binds up to %T nearby enemies.')
+  try {
+    const detail = f.call<SpellDetailResult>('detail', { id: 1, level: 50 })
+    assert.equal(detail.presentation?.description, 'Binds up to 8 nearby enemies.')
+    assert.equal(detail.record?.description, 'Binds up to %T nearby enemies.')
+    const levels = f.call<SpellByLevelResult>('byLevel', { level: 1, classes: ['WIZ'], view: 'at' })
+    assert.equal(levels.records[0].description, detail.presentation?.description)
+    assert.equal(f.storage.observations(f.dataset.installId).total, 1)
+  } finally { f.close() }
+})
 
 test('rankings sort the entire eligible catalog before paging and default to paid efficiency', () => {
   const rows = Array.from({ length: 45 }, (_, i) => spellRow(i + 1, `Bolt ${i + 1}`, 10, 10 + i))

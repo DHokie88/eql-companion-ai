@@ -3,7 +3,13 @@ import { clientSpellEffectAmount, clientSpellDurationTicks } from './clientSpell
 import { clientSpellEffectLabel } from './clientSpellParser'
 
 export interface SpellEffectDescription { slot: number; spa: number; label: string; text: string; neutral: boolean }
-export interface SpellPresentation { level: number; duration: string; target: string; range: string; resist: string; effects: SpellEffectDescription[]; bard?: import('./bardInstruments').BardSongPresentation }
+export interface SpellPresentation { description: string; level: number; duration: string; target: string; range: string; resist: string; effects: SpellEffectDescription[]; bard?: import('./bardInstruments').BardSongPresentation }
+/** Resolve display tokens against this captured record without rewriting source history. */
+export function clientSpellDescription(record: ClientSpellRecord): string {
+  const cap = record.fields.aeMaxTargets
+  const targets = typeof cap === 'number' && Number.isSafeInteger(cap) && cap > 0 ? String(cap) : 'an unspecified number of'
+  return record.description.replace(/%T\b/g, targets)
+}
 function number(value: number): string { return value.toLocaleString('en-US', { maximumFractionDigits: 3 }) }
 function duration(record: ClientSpellRecord, level: number): string {
   const ticks = clientSpellDurationTicks(record, level)
@@ -20,6 +26,20 @@ function speedText(effect: ClientSpellEffect, value: number): string {
   const cap = effect.max > 0 ? ` Client cap: ${number(effect.max)}% of normal attack speed (${number(Math.abs(100 - effect.max))}% ${effect.max < 100 ? 'slow' : 'haste'}).` : ''
   return `${change} (${number(value)}% of normal attack speed).${cap}`
 }
+function hasteTypeText(effect: ClientSpellEffect, value: number): string {
+  const bonus = effect.spa === 98 ? value - 100 : effect.base < 0 ? -value : value
+  const type = effect.spa === 98 ? 'II' : 'III'
+  if (bonus === 0) return `No attack-speed change (type ${type}).`
+  if (bonus < 0) return `Reduces attack speed by ${number(-bonus)} percentage points (type ${type} slow, before slow mitigation). Instruments do not increase this effect. Server interactions are not simulated.`
+  const scope = effect.spa === 98
+    ? `Adds ${number(bonus)} percentage points of supplemental spell haste. Client value ${number(value)} means ${number(bonus)} points above the normal 100. Combines with ordinary spell haste (SPA 11) within the normal total-haste cap; adds no speed once that cap is reached. This is type II haste; cap-breaking overhaste is type III (SPA 119).`
+    : `Adds ${number(bonus)} percentage points of type III overhaste. Applies after the ordinary total-haste cap, subject to a separate overhaste cap. Type II supplemental haste (SPA 98) stays within the ordinary cap.`
+  return `${scope} Only the strongest source of this type applies; instruments do not multiply it. These are reference mechanics: EQL's exact cap and recipient-level rules require server verification. Total character haste is not simulated.`
+}
+function effectLabel(spa: number): string {
+  const haste: Record<number, string> = { 98: 'Supplemental spell haste (type II)', 119: 'Overhaste (type III)' }
+  return haste[spa] ?? clientSpellEffectLabel(spa)
+}
 function healthText(effect: ClientSpellEffect, value: number, record: ClientSpellRecord): string {
   const verb = effect.base < 0 ? 'Deals' : 'Restores'
   const unit = effect.base < 0 ? 'damage' : 'health'
@@ -35,6 +55,7 @@ export function describeClientSpellEffect(effect: ClientSpellEffect, record: Cli
   const value = override ?? clientSpellEffectAmount(effect, level)
   if (effect.spa === 254) return 'Unused client effect slot.'
   if (value === null) return `${String(record.fields[`effect${effect.slot}`] ?? clientSpellEffectLabel(effect.spa))}. Magnitude uses an unsupported client formula; no estimate is assumed.`
+  if (effect.spa === 98 || effect.spa === 119) return hasteTypeText(effect, value)
   if (effect.spa === 3 || effect.spa === 11) return speedText(effect, value)
   if (effect.spa === 0 || effect.spa === 79) return healthText(effect, value, record)
   return simpleEffectText(effect, value, record)
@@ -46,10 +67,10 @@ function capturedDescription(effect: ClientSpellEffect, record: ClientSpellRecor
 /** Client-only, level-evaluated explanations. It never simulates non-HP buff statistics. */
 export function describeClientSpell(record: ClientSpellRecord, level: number): SpellPresentation {
   return {
-    level, duration: duration(record, level), target: String(record.fields.targetName ?? `Client target type ${record.target}`),
+    description: clientSpellDescription(record), level, duration: duration(record, level), target: String(record.fields.targetName ?? `Client target type ${record.target}`),
     range: `Casting range ${number(record.range)} game units${record.aeRange > 0 ? `; area radius ${number(record.aeRange)} game units` : '; no area radius'}.`,
     resist: String(record.fields.resistName ?? 'Unspecified'),
-    effects: record.effects.map((effect) => ({ slot: effect.slot, spa: effect.spa, label: clientSpellEffectLabel(effect.spa), text: describeClientSpellEffect(effect, record, level),
+    effects: record.effects.map((effect) => ({ slot: effect.slot, spa: effect.spa, label: effectLabel(effect.spa), text: describeClientSpellEffect(effect, record, level),
       neutral: effect.spa === 254 || (effect.base === 0 && effect.max === 0 && effect.limit === 0 && effect.calc === 100) }))
   }
 }

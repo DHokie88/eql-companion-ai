@@ -1,8 +1,29 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { describeClientSpell } from '../src/shared/clientSpellDescriptions'
+import { clientSpellDescription, describeClientSpell } from '../src/shared/clientSpellDescriptions'
 import { clientSpellEffectLabel } from '../src/shared/clientSpellParser'
 import { spellRow, syntheticCatalog } from './spellLibrarySynthetic.mts'
+import { spellFields, spellBundle } from './fixtures/spell-library/synthetic'
+import { parseClientSpellBundle } from '../src/shared/clientSpellParser'
+
+test('maximum-target tokens use captured caps in both layouts without rewriting source descriptions', () => {
+  for (const layout of [173, 174] as const) {
+    const sources = spellBundle([spellFields(101, 'Synthetic Area Song', layout).join('^')])
+    sources['dbstr_us.txt'] = '900^6^Binds up to %T nearby enemies; affects %T targets.\n'
+    const record = parseClientSpellBundle(sources)[0], before = JSON.stringify(record)
+    assert.equal(describeClientSpell(record, 50).description, 'Binds up to 8 nearby enemies; affects 8 targets.')
+    assert.equal(JSON.stringify(record), before)
+    assert.match(record.description, /%T/); assert.match(record.rawDescription, /%T/)
+  }
+})
+
+test('unknown target caps stay explicit, and unrelated description tokens remain untouched', () => {
+  // The parser preserves unresolved tokens; display must never invent a finite cap.
+  const spell = syntheticCatalog([spellRow()], 'Binds up to %T nearby enemies. %Q %Target').records[0]
+  for (const cap of [0, -1, 2.5, null, Number.NaN]) {
+    assert.equal(clientSpellDescription({ ...spell, fields: { ...spell.fields, aeMaxTargets: cap } }), 'Binds up to an unspecified number of nearby enemies. %Q %Target')
+  }
+})
 
 test('slow details explain movement, attack percentage, duration, human target and casting range at the chosen level', () => {
   const row = spellRow(42, 'Synthetic Binding Song')
@@ -31,6 +52,32 @@ test('haste is a speed increase and unknown formulas keep descriptions without i
   assert.match(detail.effects[2].label, /Unknown client effect \(SPA 999\)/)
   assert.equal(clientSpellEffectLabel(3), 'Movement speed')
   assert.equal(clientSpellEffectLabel(79), 'Direct health change')
+})
+
+test('SPA 98 explains supplemental haste and its ordinary cap for arbitrary spell identities', () => {
+  const row = spellRow(182, 'Synthetic Tempo'); row[172] = '1|98|105|0|100|105'
+  const record = syntheticCatalog([row]).records[0], before = JSON.stringify(record)
+  const effect = describeClientSpell(record, 50).effects[0]
+  assert.equal(effect.label, 'Supplemental spell haste (type II)')
+  assert.match(effect.text, /Adds 5 percentage points/)
+  assert.match(effect.text, /within the normal total-haste cap; adds no speed once that cap is reached/)
+  assert.match(effect.text, /strongest source.*instruments do not multiply/)
+  assert.match(effect.text, /EQL's exact cap.*require server verification/)
+  assert.equal(JSON.stringify(record), before)
+  record.effects[0].base = 110; record.effects[0].max = 110
+  assert.match(describeClientSpell(record, 50).effects[0].text, /Adds 10 percentage points/)
+})
+
+test('SPA 119 uses a direct bonus, while zero, slow and unsupported haste formulas stay distinct', () => {
+  const row = spellRow(183, 'Synthetic Speed Effects')
+  row[172] = '1|119|25|0|100|25$2|98|100|0|100|100$3|98|90|0|100|90$4|119|-15|0|100|-15$5|98|105|0|999|105'
+  const effects = describeClientSpell(syntheticCatalog([row]).records[0], 50).effects
+  assert.equal(effects[0].label, 'Overhaste (type III)')
+  assert.match(effects[0].text, /Adds 25 percentage points.*after the ordinary total-haste cap.*separate overhaste cap/)
+  assert.match(effects[1].text, /No attack-speed change/)
+  assert.match(effects[2].text, /Reduces attack speed by 10 percentage points/)
+  assert.match(effects[3].text, /Reduces attack speed by 15 percentage points/)
+  assert.match(effects[4].text, /unsupported client formula; no estimate is assumed/)
 })
 
 test('comparison differences distinguish unknown and zero references', async () => {
