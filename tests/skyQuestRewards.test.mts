@@ -186,12 +186,25 @@ test('THE WHOLE POINT: the corrected quest infers from a held reward, the stale 
   }
 })
 
-test('the corrected reward is what an inventory export actually spells (the report)', () => {
-  // The join this row exists to close: the export's raw name, lowercased the way
-  // `heldCountsFromDump` stores it, must equal the corrected reward's counting key. Item id 27723,
-  // "Amulet of the Fae", Bank7-Slot1 of the export attached to 01M0FH3XC4ST5Q3XXPJ0H3X75J.
-  const bard = SKY_QUEST_REWARDS.find((r) => r.questName === 'Bard Test of Wind')
-  assert.ok(bard, 'the reported row has left the table')
-  assert.equal(itemKey('Amulet of the Fae'), itemKey(bard.to))
-  assert.notEqual(itemKey('Amulet of the Fae'), itemKey(bard.from))
+test('the RETIRED Bard row stays fixed upstream: the scrape itself spells what the export does', () => {
+  // The join the Bard row existed to close (JOS-428): the export's raw name, lowercased the way
+  // `heldCountsFromDump` stores it — item id 27723, "Amulet of the Fae", Bank7-Slot1 of the export
+  // attached to 01M0FH3XC4ST5Q3XXPJ0H3X75J. The 2026-10-07 rescrape landed that name in posky.json,
+  // so the row was deleted as the audit above prescribes; this is the tripwire that the wiki has
+  // not drifted back, which would need the row again.
+  const bard = POSKY.quests.find((q) => q.className === 'Bard' && q.name === 'Bard Test of Wind')
+  assert.ok(bard, 'Bard Test of Wind is in the committed scrape')
+  assert.equal(itemKey(bard.reward ?? ''), itemKey('Amulet of the Fae'))
+  assert.equal(skyQuestRewardFor('Bard', 'Bard Test of Wind'), undefined, 'the retired row is back')
+  assert.equal(correctSkyQuestReward(bard), bard)
+})
+
+test('the Beastlord row corrects to the spelling the game client ships', () => {
+  // The game's own string, AchievementComponentsClient.txt row 20000215, as it reaches the
+  // committed achievements fixture: `Obtain Griffin-Hide Armguards`. The corrected reward must be
+  // that item's counting key and the scrape's twin page must not be.
+  const harpy = skyQuestRewardFor('Beastlord', 'Beastlord Test of Harpy')
+  assert.ok(harpy, 'the Beastlord row has left the table')
+  assert.equal(itemKey(harpy.to), itemKey('Griffin-Hide Armguards'))
+  assert.notEqual(itemKey(harpy.from), itemKey('Griffin-Hide Armguards'))
 })

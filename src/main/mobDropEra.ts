@@ -32,13 +32,20 @@
 // ELECTRON-FREE on purpose, the `mobLookupLocal.ts` precedent: `tests/mobDropEra.test.mts` drives
 // the real annotation over the real committed corpus under the node runner.
 
-import { itemKey, type ItemDbFile } from './itemsDb'
+import { corpusItemTest, itemKey, type ItemDbFile } from './itemsDb'
 import type { MobDrop, MobKnowledge } from '../shared/types'
 // ES-imported so electron-vite INLINES it into the main bundle — a path-relative readFile would
 // miss in out/main/ (AGENTS.md toolchain note). Same module instance as itemLookup.ts's import.
 import itemsJson from './data/items.json'
 
 const items = (itemsJson as unknown as ItemDbFile).items
+
+/**
+ * "Is this wiki title an item page?" over the SAME corpus, for the live mob lookup's
+ * `parseMobWikitext` (a `[[Item]]` loot link counts only when it is). The scraper builds the
+ * identical test from the same file, so a live page and the committed catalog read links alike.
+ */
+export const isCorpusItemPage = corpusItemTest(items)
 
 /**
  * ONE drop, annotated with what the ITEM PAGE says about its era. Returns the drop UNCHANGED when

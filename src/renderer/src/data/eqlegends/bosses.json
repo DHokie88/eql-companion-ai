@@ -1,5 +1,5 @@
 {
-  "scrapedAt": "2026-08-02T06:37:16.108Z",
+  "scrapedAt": "2026-10-08T04:02:39.753Z",
   "targets": [
     {
       "name": "Lord Nagafen",
@@ -34,7 +34,8 @@
       "match": [
         "Phinigel Autropos"
       ],
-      "zone": "Kedge Keep"
+      "zone": "Kedge Keep",
+      "image": "https://wiki.project1999.com/images/thumb/Npc_phinny.png/250px-Npc_phinny.png"
     },
     {
       "name": "Cazic Thule",
@@ -126,7 +127,8 @@
       "match": [
         "Master of Spite"
       ],
-      "zone": "Plane of Hate"
+      "zone": "Plane of Hate",
+      "image": "https://eqlwiki.com/images/3/3b/Npc_master_of_spite.png"
     },
     {
       "name": "Mistress of Scorn",

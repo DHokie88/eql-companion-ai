@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "baseline": "275d069b3d458877bbefc4554ca2d70c5ec28fb3",
+  "upstream": "780c7afb3fe71f65db2cd8ae9d8c191b8ecc9db4",
+  "catalogs": [
+    {
+      "path": "src/main/data/items.json",
+      "before_sha256": "c3e4e273c60e0f9abbb0a1e0c5d1541b647cf447e6e1ce130d8b6b7d3ec72018",
+      "after_sha256": "1baef09d06d9a57f2edaf2e74361200afaafea4a0965f5d867495d93bd90eda9",
+      "before": {
+        "count": 11437
+      },
+      "after": {
+        "count": 11590
+      },
+      "upstream_blob": "9bd48d87ba14817786785358daf362a1c51c0113",
+      "integrated_blob": "9bd48d87ba14817786785358daf362a1c51c0113",
+      "matches_upstream": true
+    },
+    {
+      "path": "src/main/data/spells.json",
+      "before_sha256": "ede195a5dbe6ea8bf1a86f721e280af187bff8bf0f1dec29212c0c3ed81fd36c",
+      "after_sha256": "d475b3e1ce56f41deae284ff869914b67478b62a4a48ac796feaecde3e6f2a31",
+      "before": {
+        "schema": 3,
+        "count": 2006,
+        "withEffects": 2003,
+        "spells": 2006
+      },
+      "after": {
+        "schema": 3,
+        "count": 2013,
+        "withEffects": 2010,
+        "spells": 2013
+      },
+      "upstream_blob": "c36f32fd6d1bb1966c7800f986026f2e0479fafc",
+      "integrated_blob": "c36f32fd6d1bb1966c7800f986026f2e0479fafc",
+      "matches_upstream": true
+    },
+    {
+      "path": "src/main/data/respawns.json",
+      "before_sha256": "62976c7f9e71412ec351115d6014a3ea4f130a670ebf87979225cd89aaa69fc9",
+      "after_sha256": "2427efc9af871958ea3bb215b91112de8c337437c69fe61b45aac167b35e9fa4",
+      "before": {
+        "rows": 507
+      },
+      "after": {
+        "rows": 541
+      },
+      "upstream_blob": "5a0391d6e5ef05451ad70f7fb1d94ed37e458e5a",
+      "integrated_blob": "5a0391d6e5ef05451ad70f7fb1d94ed37e458e5a",
+      "matches_upstream": true
+    },
+    {
+      "path": "src/main/data/pageEra.json",
+      "before_sha256": "4ddc4410a3225e1e94370ca8e0088a4afa1f44d5a761105ef13f6cd9b9098972",
+      "after_sha256": "097b15957186c4ec40d7d249cf6d88bfc3345ee1c7c103bc48fc000d371081a1",
+      "before": {
+        "count": 151,
+        "eraRevision": 156232
+      },
+      "after": {
+        "count": 137,
+        "eraRevision": 156232
+      },
+      "upstream_blob": "31f9725455ddfc694c79f80fde61fe6c3540e7c7",
+      "integrated_blob": "31f9725455ddfc694c79f80fde61fe6c3540e7c7",
+      "matches_upstream": true
+    },
+    {
+      "path": "src/renderer/src/data/eqlegends/mobs.json",
+      "before_sha256": "3cb0b3a0150b41c33036255fa96ca4999084961353d22399bb6e6a1e297aef18",
+      "after_sha256": "a18f72f9d3571a60a1c38178974704c218e56e52e86f76360a8793bb2729d738",
+      "before": {
+        "mobs": 7918
+      },
+      "after": {
+        "mobs": 7952
+      },
+      "upstream_blob": "4d43ae7e2601177fe682a78e27738c0a885c8731",
+      "integrated_blob": "4d43ae7e2601177fe682a78e27738c0a885c8731",
+      "matches_upstream": true
+    },
+    {
+      "path": "src/renderer/src/data/eqlegends/quests.json",
+      "before_sha256": "31b1cd9d110d712ca7c1cbf0c10c683cc5c711182246af828d29965c0eab178b",
+      "after_sha256": "926e3ff81a5dd8389effc187af64975f11f22f844f434a385117aef81503230a",
+      "before": {
+        "quests": 904
+      },
+      "after": {
+        "quests": 907
+      },
+      "upstream_blob": "d73f2d6f02406d06eec182e39894c9853249b2e6",
+      "integrated_blob": "d73f2d6f02406d06eec182e39894c9853249b2e6",
+      "matches_upstream": true
+    },
+    {
+      "path": "src/renderer/src/data/eqlegends/posky.json",
+      "before_sha256": "87b4a5fcd16e46a2b93fad5d83c87d3752ed058583414fea89905f71054dd422",
+      "after_sha256": "f39e04a597edc32882f38391d4c72301e2daa0dc29a98dace87ecaf1201ad295",
+      "before": {
+        "quests": 95
+      },
+      "after": {
+        "quests": 95
+      },
+      "upstream_blob": "5bc5bbb1df8b1f62e1231e4e6e8ca465fffbfbc4",
+      "integrated_blob": "5bc5bbb1df8b1f62e1231e4e6e8ca465fffbfbc4",
+      "matches_upstream": true
+    },
+    {
+      "path": "src/renderer/src/data/eqlegends/crawlRosters.json",
+      "before_sha256": "61885f4102fb5751bf1f364bbedd5accb3402e21881459f3c0ce7cf736cd4310",
+      "after_sha256": "c6794be2823562924e5c2d172e63262bd66bd590c9e299dfa74069e4cf357e42",
+      "before": {},
+      "after": {},
+      "upstream_blob": "11ea6407df5d7a60538e054e279b4f275e45d8ac",
+      "integrated_blob": "11ea6407df5d7a60538e054e279b4f275e45d8ac",
+      "matches_upstream": true
+    }
+  ],
+  "hash_notes": "before_sha256 hashes baseline Git bytes; after_sha256 hashes the integrated working file. Git blob identities below verify the integrated catalog against the upstream tag independent of checkout line endings."
+}

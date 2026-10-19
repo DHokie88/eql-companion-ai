@@ -16,7 +16,7 @@
  *   2. THE COMPACT PROJECTION. The committed catalog is names only (see MobEntry) — no drop
  *      rates, no wikitext — because it is inlined into the main bundle.
  */
-import { parseMobWikitext } from '../../src/main/mobLookupParse'
+import { type MobLootOptions, parseMobWikitext } from '../../src/main/mobLookupParse'
 import type { MobEntry } from '../../src/shared/types'
 
 /**
@@ -64,9 +64,11 @@ export function splitZones(zone: string | undefined): string[] {
  * The entry's `name` is the page's OWN `|name` when it states one (the in-game name, with the
  * lowercase article EQ actually prints) and the page title otherwise — never a name we made up.
  */
-export function parseMobPage(title: string, wikitext: string): MobEntry | null {
+export function parseMobPage(title: string, wikitext: string, opts: MobLootOptions = {}): MobEntry | null {
   if (!isMobPage(wikitext)) return null
-  const facts = parseMobWikitext(wikitext)
+  // `opts.isItem` is the item-corpus membership test that lets a `[[Item]]` loot LINK count as a
+  // drop (see `parseMobLoot`); the scraper passes one built from `src/main/data/items.json`.
+  const facts = parseMobWikitext(wikitext, opts)
   // `|name` can be present-but-empty (or unlink to nothing), and an EMPTY name is "the page
   // does not state one" — so the fallback is on emptiness, not merely on absence.
   const stated = facts.pageName ?? ''

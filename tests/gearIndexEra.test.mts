@@ -123,8 +123,14 @@ test('layer 3 is counted in the build census, and only its ONE definitive edge o
 
   // AND THE IN-ERA DIRECTION IS REAL AND SMALL: 40 rows are shown BECAUSE a page the wiki files as
   // classic content vouches for them. Each one carries no chip at all, which is what in-era means.
+  //
+  // 2026-10-07 RESCRAPE: 39 -> 14 rows. The in-era direction shrank because the wiki put a banner
+  // on 418 item pages (409 `Classic`), and the gear pages it used to vouch for are among them: they
+  // are now in-era by their OWN banner (layer 1), so layer 3 no longer speaks for them and they
+  // still render unchipped. tests/plannerEraCorpus.test.mts carries the per-page accounting. The
+  // property below is unchanged; the floor drops under the new measurement.
   const shown = rows.filter((r) => r.eraDerived?.verdict === 'in-era')
-  assert.ok(shown.length >= 30, `only ${String(shown.length)} rows are derived in-era`)
+  assert.ok(shown.length >= 10, `only ${String(shown.length)} rows are derived in-era`)
   for (const row of shown) {
     assert.equal(row.eraDerived?.basis, 'page', `${row.name} was derived in-era by a ${String(row.eraDerived?.basis)} edge`)
     assert.equal(eraChip(row), null, `${row.name} is in-era and still wears a chip`)

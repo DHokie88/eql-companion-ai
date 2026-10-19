@@ -1,8 +1,8 @@
 {
-  "scrapedAt": "2026-08-22T19:37:30.196Z",
+  "scrapedAt": "2026-10-08T03:43:00.164Z",
   "schema": 3,
-  "count": 2006,
-  "withEffects": 2003,
+  "count": 2013,
+  "withEffects": 2010,
   "spells": [
     {
       "name": "Aanya's Animation",
@@ -2820,7 +2820,7 @@
       "illusion": false,
       "mana": 136,
       "effects": [
-        "Decrease Hitpoints by 24 per tick"
+        "Decrease Hitpoints by 67 per tick"
       ]
     },
     {
@@ -3132,6 +3132,17 @@
       "illusion": false,
       "effects": [
         "Increases the power of brass instrument based bard songs by up to 140%"
+      ]
+    },
+    {
+      "name": "Brass Resonance 14| spellicon = C",
+      "durationText": "2:27:00",
+      "durationMs": 8820000,
+      "targetType": "Self",
+      "classes": "BRD",
+      "illusion": false,
+      "effects": [
+        "Increases the power of brass instrument based bard songs by up to 150%"
       ]
     },
     {
@@ -5081,7 +5092,8 @@
       "illusion": false,
       "mana": 200,
       "effects": [
-        "Increase Hitpoints by 10 (L39) to 16 (L50) per tick"
+        "Increase Hitpoints by 10 (L39) to 16 (L50) per tick",
+        "Increase Endurance by 7 (L39) to 10 (L50) per tick"
       ]
     },
     {
@@ -7357,7 +7369,7 @@
         "Decrease Hitpoints by 315",
         "Requires 800 Mana"
       ],
-      "instrumentEnhanced": "Yes"
+      "instrumentEnhanced": "No"
     },
     {
       "name": "Denon's Disruptive Discord",
@@ -12259,9 +12271,9 @@
       "illusion": false,
       "mana": 100,
       "effects": [
-        "Increase ATK by 20",
-        "Increase Damage Shield by 5",
         "Increase Hitpoints by 6 per tick. Max: 19 per tick",
+        "Increase Damage Shield by 5",
+        "Increase ATK by 20",
         "Increase Endurance by 6 per tick. Max: 19 per tick"
       ]
     },
@@ -12581,7 +12593,7 @@
       "illusion": false,
       "mana": 90,
       "effects": [
-        "Increase STR by 40 (effect decreases over time)"
+        "Increase STR by 40 (effect decreases over time). Upgrading the spell increases the strength gained (+100 STR at level III)"
       ]
     },
     {
@@ -13753,22 +13765,6 @@
       ]
     },
     {
-      "name": "Greater Healing",
-      "durationText": "Instant",
-      "durationMs": null,
-      "castTimeMs": 750,
-      "recastMs": 6000,
-      "targetType": "Single Friendly (or Self)",
-      "spellType": "Beneficial",
-      "classes": "* Druid - Level 34",
-      "msgCastOnYou": "Healing water flows over you.",
-      "illusion": false,
-      "mana": 150,
-      "effects": [
-        "Increase Hitpoints by 345 (L34) to 425 (L50)"
-      ]
-    },
-    {
       "name": "Greater Mass Imbue Fire Opal",
       "durationText": "Instant",
       "durationMs": null,
@@ -14653,6 +14649,22 @@
       ]
     },
     {
+      "name": "Healing Water",
+      "durationText": "Instant",
+      "durationMs": null,
+      "castTimeMs": 750,
+      "recastMs": 6000,
+      "targetType": "Single Friendly (or Self)",
+      "spellType": "Beneficial",
+      "classes": "* Druid - Level 34",
+      "msgCastOnYou": "Healing water flows over you.",
+      "illusion": false,
+      "mana": 150,
+      "effects": [
+        "Increase Hitpoints by 345 (L34) to 425 (L50)"
+      ]
+    },
+    {
       "name": "Health",
       "durationText": "54 Min",
       "durationMs": 3240000,
@@ -15277,7 +15289,6 @@
       "recastMs": 2250,
       "targetType": "Single",
       "spellType": "Beneficial",
-      "classes": "* Bard - Level 14 (Lyssa's Cataloging Libretto) * Wizard - Level 16 * Magician - Level 16 * Enchanter - Level 16 * Necromancer - Level 20",
       "illusion": false,
       "mana": 50,
       "effects": [
@@ -19984,7 +19995,7 @@
       "illusion": false,
       "mana": 0,
       "effects": [
-        "Increase Melee Haste by 8%",
+        "Increase Melee Haste by 18%",
         "Increase STR by 15 (L42) to 21 (L60)",
         "Increase AC by 6 (L42) to 9 (L60)"
       ],
@@ -21331,8 +21342,7 @@
       "mana": 0,
       "effects": [
         "Increase Magic Resist by 3 (L1) to 25 (L12)",
-        "Increase DEX by 3 (L1) to 25 (L12)",
-        "Decrease AGI by 3 (L1) to 15 (L12)"
+        "Increase DEX by 3 (L1) to 25 (L12)"
       ]
     },
     {
@@ -21662,7 +21672,8 @@
       "illusion": false,
       "mana": 400,
       "effects": [
-        "Increase Hitpoints by 13 (L45) to 16 (L50) per tick"
+        "Increase Hitpoints by 13 (L45) to 16 (L50) per tick",
+        "Increase Endurance by 10 (L45) per tick"
       ]
     },
     {
@@ -23570,6 +23581,21 @@
       ]
     },
     {
+      "name": "Reanimation Efficiency III",
+      "durationText": "2:06:00",
+      "durationMs": 7560000,
+      "targetType": "Self",
+      "spellType": "Beneficial",
+      "classes": "No eligible class",
+      "illusion": false,
+      "effects": [
+        "Decrease Spell Mana Cost by 1% to 25%",
+        "Limit Max Level: 60 (lose 5% per level after)",
+        "Limit Effect: Summon Skeleton Pet",
+        "Limit Type: Exclude Combat Skills"
+      ]
+    },
+    {
       "name": "Reanimation Haste I",
       "durationText": "2:24:00 (3:36:00)",
       "durationMs": 8640000,
@@ -23809,7 +23835,7 @@
       "mana": 0,
       "effects": [
         "Decrease INT by 2 (L1) to 61 (L60)",
-        "Decrease Attack Speed by 20% / (Decrease STR by 2 (L1) to 61 (L60)??)",
+        "Decrease Attack Speed by 20%",
         "Increase Hitpoints by 2 per tick (L1) to 61 per tick (L60)"
       ]
     },
@@ -24378,7 +24404,7 @@
       "mana": 40,
       "effects": [
         "Increase Damage Shield by 2",
-        "Increase Armor Class by 30"
+        "Increase Armor Class by 10"
       ]
     },
     {
@@ -25390,8 +25416,8 @@
       "mana": 199,
       "effects": [
         "Increase Disease Counter by 4",
-        "Decrease Hitpoints by 24 per tick",
-        "Decrease HP when cast by 40"
+        "Decrease Hitpoints by 98 per tick",
+        "Decrease HP when cast by 58"
       ]
     },
     {
@@ -26114,7 +26140,7 @@
       "classes": "* Druid - Level 45",
       "msgCastOnYou": "You are now a wolf.",
       "msgCastOnOther": "Player turns into a wolf.",
-      "msgWearsOff": "You are no longer a wolf. || where_to_obtain = }}",
+      "msgWearsOff": "You are no longer a wolf.",
       "illusion": true,
       "mana": 350,
       "effects": [
@@ -27436,7 +27462,7 @@
       "illusion": false,
       "mana": 180,
       "effects": [
-        "Increase Current Hit Points by 160 per Tick",
+        "Increase Current Hit Points by 200 per Tick",
         "Decrease Movement Speed by 100%"
       ]
     },
@@ -30048,6 +30074,17 @@
       ]
     },
     {
+      "name": "Summon Drogmor",
+      "durationMs": null,
+      "castTimeMs": 3000,
+      "targetType": "Self",
+      "spellType": "Beneficial",
+      "illusion": false,
+      "effects": [
+        "Summons a drogmor mount"
+      ]
+    },
+    {
       "name": "Summon Elemental Blanket",
       "durationText": "Instant",
       "durationMs": null,
@@ -30075,6 +30112,23 @@
       "mana": 40,
       "effects": [
         "Summon Item:"
+      ]
+    },
+    {
+      "name": "Summon Familiar: Murderbee",
+      "durationText": "6:00:00",
+      "durationMs": 21600000,
+      "castTimeMs": 14000,
+      "recastMs": 1000,
+      "targetType": "Self",
+      "spellType": "Beneficial",
+      "classes": "NPC Only Spell",
+      "msgCastOnYou": "You summon forth a small murderbee.",
+      "msgCastOnOther": "Soandso summons forth a small murderbee.",
+      "msgWearsOff": "Your small murderbee departs.",
+      "illusion": false,
+      "effects": [
+        "Summon Familiar: Murderbee"
       ]
     },
     {
@@ -30165,6 +30219,17 @@
       "mana": 15,
       "effects": [
         "Summon Item: Brell's Blessed Stout"
+      ]
+    },
+    {
+      "name": "Summon Horse",
+      "durationMs": null,
+      "castTimeMs": 3000,
+      "targetType": "Self",
+      "spellType": "Beneficial",
+      "illusion": false,
+      "effects": [
+        "Summons a horse mount"
       ]
     },
     {
@@ -34798,6 +34863,27 @@
       "illusion": false,
       "effects": [
         "Increases the power of wind instrument based bard songs by up to 100%"
+      ]
+    },
+    {
+      "name": "Wind Resonance 10",
+      "durationText": "1:54:00",
+      "durationMs": 6840000,
+      "targetType": "Self",
+      "classes": "BRD",
+      "illusion": false,
+      "effects": [
+        "Increases the power of wind instrument based bard songs by up to 110%"
+      ]
+    },
+    {
+      "name": "Wind Resonance 8",
+      "durationMs": null,
+      "spellType": "Beneficial",
+      "classes": "NPC Only Spell",
+      "illusion": false,
+      "effects": [
+        "Increases the power of wind instrument based bard songs by up to 80%"
       ]
     },
     {

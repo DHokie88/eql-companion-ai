@@ -1,14 +1,14 @@
 {
   "project": "eql-companion-ai",
   "created": "2026-10-13",
-  "status": "hosted development fork created; AI implementation pending",
+  "status": "EQ Oracle desktop with upstream 1.26.1 integrated; AI implementation pending",
   "fork_repository": "https://github.com/DHokie88/eql-companion-ai",
   "baseline": {
     "repository": "https://github.com/Zeratfule/EQ-Zera",
-    "tag": "v1.26.0",
-    "commit": "b95051bf5eb24dca10f1a505233d60e8b863c2c4",
+    "tag": "v1.26.1",
+    "commit": "780c7afb3fe71f65db2cd8ae9d8c191b8ecc9db4",
     "branch": "ai-foundation",
-    "reason": "Continued Companion development with quest, gear, crafting and farming surfaces suitable for character-aware AI. This is a development-base choice, not a verified ranking of all apps."
+    "reason": "Desktop data and bug fixes integrated through upstream 1.26.1; separate native mobile project excluded by user direction."
   },
   "secondary": {
     "repository": "https://github.com/brianmontanaweb/everquest-companion",
@@ -49,15 +49,53 @@
     "launcher": "Open-Fork.cmd",
     "desktop_shortcut": "EQ Oracle (EQO)",
     "settings": "%APPDATA%/everquest-companion-dev",
-    "engine": "Reused the matching installed EQ Zera 1.26.0 release binary; Rust source unchanged.",
-    "engine_sha256": "42b517d2f79656d9b1e9bf4338a1330c88f4248416ccc9675245f00b27c1440d"
+    "engine": "Source-built Oracle release engine using pinned Rust 1.98.0 and the refreshed 1.26.1 reference data.",
+    "engine_sha256": "92a75b5b93e02b066662e44c1d29b09d52f4567477352a7989ec40a29aefd7d6"
   },
   "appearance": {
     "reference": "brianmontanaweb/everquest-companion v1.17.0",
-    "changes": ["System fonts", "Dark-and-gold theme", "220px icon-and-text sidebar", "Plain title bar and component styling"],
-    "preserved": ["Zera feature routes", "Quests", "Zone Loot", "Gear and exaltation planner"],
+    "changes": [
+      "System fonts",
+      "Dark-and-gold theme",
+      "220px icon-and-text sidebar",
+      "Plain title bar and component styling"
+    ],
+    "preserved": [
+      "Zera feature routes",
+      "Quests",
+      "Zone Loot",
+      "Gear and exaltation planner"
+    ],
     "review": "Hermes using local Qwen38; findings checked against source and the live application.",
-    "checks": ["87 focused unit regressions", "Typecheck", "Lint", "Desktop build", "Live Electron font, colour and navigation checks"],
-    "e2e_harness_limit": "The upstream title-bar harness requires a local Cargo rebuild; Rust/Cargo is absent on AORUS. Live UI checks use the matching shipped engine instead."
-  }
+    "checks": [
+      "87 focused unit regressions",
+      "Typecheck",
+      "Lint",
+      "Desktop build",
+      "Live Electron font, colour and navigation checks"
+    ]
+  },
+  "upstream_integrations": [
+    {
+      "date": "2026-10-19",
+      "previous_base": {
+        "repository": "https://github.com/Zeratfule/EQ-Zera",
+        "tag": "v1.26.0",
+        "commit": "b95051bf5eb24dca10f1a505233d60e8b863c2c4",
+        "branch": "ai-foundation",
+        "reason": "Continued Companion development with quest, gear, crafting and farming surfaces suitable for character-aware AI. This is a development-base choice, not a verified ranking of all apps."
+      },
+      "source_repository": "https://github.com/Zeratfule/EQ-Zera",
+      "source_tag": "v1.26.1",
+      "source_commit": "780c7afb3fe71f65db2cd8ae9d8c191b8ecc9db4",
+      "fork_before": "275d069b3d458877bbefc4554ca2d70c5ec28fb3",
+      "scope": "desktop-only",
+      "codeweave_evidence": "docs/upgrades/v1.26.1-codeweave.json",
+      "release_notes": "docs/upgrades/v1.26.1.md",
+      "omitted": [
+        "Separate mobile project and mobile-only CI/configuration/docs",
+        "Upstream promotional website changes"
+      ]
+    }
+  ]
 }

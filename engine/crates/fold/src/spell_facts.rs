@@ -441,7 +441,9 @@ mod tests {
                 .map(|(k, v)| (k.as_str(), *v))
                 .collect::<Vec<_>>(),
             vec![
-                ("Buff", 486),
+                // 486 -> 487 on the 2026-10-07 rescrape: the wiki added six beneficial spells (Summon
+                // Familiar: Murderbee, Summon Drogmor, Summon Horse, ...) and merged a duplicate Greater Healing row.
+                ("Buff", 487),
                 ("CrowdControl", 90),
                 ("Debuff", 123),
                 ("DotHot", 193),

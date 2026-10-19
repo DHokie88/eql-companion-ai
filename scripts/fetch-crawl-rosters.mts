@@ -35,7 +35,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { crawlZoneKey, type CrawlRoster, type CrawlRosterTable } from '../src/shared/crawlRoster'
+import { crawlZoneKey, mobMatchKey, type CrawlRoster, type CrawlRosterTable } from '../src/shared/crawlRoster'
 
 const API = 'https://eqlwiki.com/api.php'
 const UA = 'eq-zera/0.1 (crawl roster refresher; personal desktop toolkit)'
@@ -44,6 +44,34 @@ const MAX_RETRIES = 5
 /** MEASURED, not tunable: >50 titles per revisions batch returns HTTP 200 with zero pages. */
 const BATCH = 50
 const COUNTS_PAGE = 'Talk:Dungeon_Crawl'
+
+/**
+ * NPCs a patch took OUT of a zone's Dungeon Crawl requirement. The wiki's zone pages may still list
+ * them as rares, so a re-scrape would put them back and the tracker would show a rare the crawl no
+ * longer asks for. Every rebuild drops these names. Source: the 2026-09-22 patch notes,
+ * https://www.everquestlegends.com/patch-notes/eql-update-notes-9-22-2026 ("Dungeon Crawls").
+ * Keyed by the table's zone name; names are matched with mobMatchKey.
+ */
+const REMOVED_FROM_CRAWL: Readonly<Record<string, readonly string[]>> = {
+  'Clan Crushbone': ["Ambassador D'Vinn", 'Retlon Brenclog'],
+  Befallen: ['Boondin Babbinsbort'],
+  'The Castle of Mistmoore': ['Ssynthi'],
+  'The Plane of Hate': ['Corrupter of Life'],
+  Najena: ['Linara Parlone'],
+  'The Lair of the Splitpaw': ['Brother Hayle', 'Brother Gruff'],
+  'Kedge Keep': ['Auraline'],
+  'The Ruins of Old Paineel': ['Aderius Rhenar']
+}
+
+/** The rare list with every patch-removed name for this zone taken out. */
+function withoutRemoved(zone: string, names: readonly string[]): string[] {
+  const gone = new Set((REMOVED_FROM_CRAWL[zone] ?? []).map(mobMatchKey))
+  const kept = names.filter((n) => !gone.has(mobMatchKey(n)))
+  if (kept.length !== names.length) {
+    console.log(`  ${zone}: dropped ${String(names.length - kept.length)} patch-removed name(s)`)
+  }
+  return kept
+}
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const OUT_PATH = resolve(HERE, '../src/renderer/src/data/eqlegends/crawlRosters.json')
@@ -246,7 +274,7 @@ function rebuildRow(
   }
   return {
     ...row,
-    rares: scraped?.names ?? row.rares,
+    rares: withoutRemoved(zone, scraped?.names ?? row.rares),
     rareCount: stated?.rares ?? row.rareCount,
     killsToComplete: stated?.kills ?? row.killsToComplete
   }

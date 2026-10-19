@@ -1,6 +1,6 @@
 {
  "source": "eqlwiki.com — |respawn_time on every page in the committed mob catalog",
- "scrapedAt": "2026-08-11",
+ "scrapedAt": "2026-10-08",
  "rows": [
   {
    "key": "a alchemist`s acolyte",
@@ -151,8 +151,8 @@
   {
    "key": "a ferocious hammerhead",
    "page": "A ferocious hammerhead",
-   "text": "22 min (with PH)",
-   "seconds": 1320
+   "text": "15 min",
+   "seconds": 900
   },
   {
    "key": "a frenzied ghoul",
@@ -161,22 +161,50 @@
    "seconds": 570
   },
   {
+   "key": "a froglok crusader",
+   "page": "A froglok crusader",
+   "text": "10 min",
+   "seconds": 600
+  },
+  {
    "key": "a froglok guk shaman",
    "page": "A froglok guk shaman",
    "text": "28 min",
    "seconds": 1680
   },
   {
+   "key": "a fungus ancient",
+   "page": "A Fungus Ancient",
+   "text": "~8:00",
+   "seconds": 480
+  },
+  {
    "key": "a fungus mutant",
    "page": "A Fungus Mutant",
-   "text": "~17 min (PH)",
-   "seconds": 1020
+   "text": "~8:00",
+   "seconds": 480
+  },
+  {
+   "key": "a ghoul cavalier",
+   "page": "A ghoul cavalier",
+   "text": "10 Minutes}}",
+   "seconds": 600
   },
   {
    "key": "a ghoul ritualist",
    "page": "A ghoul ritualist",
    "text": "28 min 00 sec",
    "seconds": 1680
+  },
+  {
+   "key": "a giant wood spider",
+   "page": "A giant wood spider",
+   "text": "?"
+  },
+  {
+   "key": "a giant yellowjacket",
+   "page": "A giant yellowjacket",
+   "text": "?"
   },
   {
    "key": "a glacier bear",
@@ -209,8 +237,8 @@
   {
    "key": "a goblin scryer",
    "page": "A goblin scryer",
-   "text": "22 minutes",
-   "seconds": 1320
+   "text": "7 minutes",
+   "seconds": 420
   },
   {
    "key": "a goblin traitor",
@@ -230,10 +258,37 @@
    "seconds": 780
   },
   {
+   "key": "a halfling skeleton",
+   "page": "A halfling skeleton",
+   "text": "?"
+  },
+  {
+   "key": "a halfling zombie",
+   "page": "A halfling zombie",
+   "text": "?"
+  },
+  {
    "key": "a hermit",
    "page": "A Hermit",
    "text": "2 min",
    "seconds": 120
+  },
+  {
+   "key": "a kerran puma",
+   "page": "A kerran puma",
+   "text": "3 min",
+   "seconds": 180
+  },
+  {
+   "key": "a large fruit bat",
+   "page": "A large fruit bat",
+   "text": "?"
+  },
+  {
+   "key": "a large gorilla",
+   "page": "A large gorilla",
+   "text": "10 minutes",
+   "seconds": 600
   },
   {
    "key": "a lesser spirit",
@@ -260,14 +315,20 @@
   {
    "key": "a priest of najena",
    "page": "A priest of najena",
-   "text": "55 min",
-   "seconds": 3300
+   "text": "20 min",
+   "seconds": 1200
   },
   {
    "key": "a raider",
    "page": "A Raider",
    "text": "3 min",
    "seconds": 180
+  },
+  {
+   "key": "a reanimated hand",
+   "page": "A reanimated hand (Unrest)",
+   "text": "7:30",
+   "seconds": 450
   },
   {
    "key": "a ry'gorr messenger",
@@ -297,6 +358,11 @@
    "seconds": 990
   },
   {
+   "key": "a sand scarab hatchling",
+   "page": "A sand scarab hatchling",
+   "text": "?"
+  },
+  {
    "key": "a seahorse matriarch",
    "page": "A seahorse matriarch",
    "text": "15 minutes}}",
@@ -313,6 +379,12 @@
    "page": "A shady goblin",
    "text": "24 hours",
    "seconds": 86400
+  },
+  {
+   "key": "a silverflank guardian",
+   "page": "A Silverflank guardian",
+   "text": "10 minutes",
+   "seconds": 600
   },
   {
    "key": "a skeletal cook",
@@ -338,6 +410,11 @@
    "text": "Triggered"
   },
   {
+   "key": "a spectral shimmer",
+   "page": "A spectral shimmer",
+   "text": "Triggered"
+  },
+  {
    "key": "a spirit of flame",
    "page": "A Spirit of Flame",
    "text": "Triggered"
@@ -345,7 +422,7 @@
   {
    "key": "a splitpaw assassin",
    "page": "A Splitpaw assassin",
-   "text": "[[Triggered]]"
+   "text": "Triggered"
   },
   {
    "key": "a steel golem",
@@ -370,6 +447,12 @@
    "page": "A Tar Goo",
    "text": "14 mins 30 secs",
    "seconds": 870
+  },
+  {
+   "key": "a teir`dal priest",
+   "page": "A Teir`Dal priest",
+   "text": "4:27",
+   "seconds": 267
   },
   {
    "key": "a teir`dal priestess",
@@ -402,6 +485,11 @@
    "seconds": 400
   },
   {
+   "key": "a thorn drakeling",
+   "page": "A thorn drakeling",
+   "text": "?"
+  },
+  {
    "key": "a thought bleeder",
    "page": "A thought bleeder",
    "text": "Ultra Rare"
@@ -419,6 +507,18 @@
    "seconds": 21600
   },
   {
+   "key": "a tier'dal priest",
+   "page": "A Tier'Dal Priest",
+   "text": "10 minutes",
+   "seconds": 600
+  },
+  {
+   "key": "a tier'dal spellbinder",
+   "page": "A Tier'Dal Spellbinder",
+   "text": "10 minutes",
+   "seconds": 600
+  },
+  {
    "key": "a tortured revenant",
    "page": "A Tortured Revenant",
    "text": "Triggered"
@@ -432,6 +532,18 @@
    "key": "a treant",
    "page": "A Treant",
    "text": "4 min (South Karana) - 6 min 30 sec (West Karana)"
+  },
+  {
+   "key": "a troll greenblood",
+   "page": "A Troll Greenblood",
+   "text": "10 minutes",
+   "seconds": 600
+  },
+  {
+   "key": "a troll marauder",
+   "page": "A Troll Marauder",
+   "text": "10 minutes",
+   "seconds": 600
   },
   {
    "key": "a tundra yeti",
@@ -474,8 +586,8 @@
   {
    "key": "aglthin dasmore",
    "page": "Aglthin Dasmore",
-   "text": "6 Minutes",
-   "seconds": 360
+   "text": "1 Hour",
+   "seconds": 3600
   },
   {
    "key": "allizewsaur",
@@ -577,8 +689,25 @@
    "seconds": 3600
   },
   {
+   "key": "an ogre priestess",
+   "page": "An Ogre Priestess",
+   "text": "16:00",
+   "seconds": 960
+  },
+  {
+   "key": "an ogre shaman",
+   "page": "An Ogre Shaman",
+   "text": "16:00",
+   "seconds": 960
+  },
+  {
    "key": "an orc arsonist",
    "page": "An orc arsonist",
+   "text": "?"
+  },
+  {
+   "key": "an orc lumberjack",
+   "page": "An orc lumberjack",
    "text": "?"
   },
   {
@@ -686,8 +815,18 @@
    "text": "?"
   },
   {
+   "key": "bidils the quickhand",
+   "page": "Bidils the Quickhand",
+   "text": "?"
+  },
+  {
    "key": "bizazzzt",
    "page": "Bizazzzt",
+   "text": "Triggered"
+  },
+  {
+   "key": "bizzzzt",
+   "page": "Bizzzzt",
    "text": "Triggered"
   },
   {
@@ -774,8 +913,13 @@
   {
    "key": "cauldronbubble",
    "page": "Cauldronbubble",
-   "text": "6 hours",
-   "seconds": 21600
+   "text": "~14.5 min (Aug 18, 2026 - D1 zone)",
+   "seconds": 870
+  },
+  {
+   "key": "cazic thule",
+   "page": "Cazic-Thule (God)",
+   "text": "N/A (raid boss)"
   },
   {
    "key": "ceel moonwhisper",
@@ -799,6 +943,12 @@
    "key": "chancellor of di`zok",
    "page": "Chancellor of Di`Zok",
    "text": "2 hours <span class='ddb'>(8/13/11 patch)</span>"
+  },
+  {
+   "key": "chief goonda",
+   "page": "Chief Goonda",
+   "text": "15:00",
+   "seconds": 900
   },
   {
    "key": "chief ry`gorr",
@@ -1111,8 +1261,8 @@
   {
    "key": "dyrna nlith",
    "page": "Dyrna Nlith",
-   "text": "6 Minutes",
-   "seconds": 360
+   "text": "3 Minutes",
+   "seconds": 180
   },
   {
    "key": "dzan amo",
@@ -1140,8 +1290,8 @@
   {
    "key": "efreeti lord djarn",
    "page": "Efreeti Lord Djarn",
-   "text": "22 min",
-   "seconds": 1320
+   "text": "9 minute",
+   "seconds": 540
   },
   {
    "key": "eichvul",
@@ -1185,6 +1335,11 @@
    "seconds": 1320
   },
   {
+   "key": "epicurean halfling",
+   "page": "Epicurean halfling",
+   "text": "?"
+  },
+  {
    "key": "equestrielle the corrupted",
    "page": "Equestrielle the Corrupted",
    "text": "60 min (Placeholder: a mist wolf)",
@@ -1213,6 +1368,12 @@
    "page": "Faydedar",
    "text": "7 Days (+/- 8 Hours Variance)",
    "seconds": 604800
+  },
+  {
+   "key": "fire goblin bartender",
+   "page": "Fire Goblin Bartender",
+   "text": "8 minutes}}",
+   "seconds": 480
   },
   {
    "key": "flame goblin foreman",
@@ -1302,6 +1463,12 @@
    "page": "Garanel Rucksif",
    "text": "22 minutes (or A Festering Hag)",
    "seconds": 1320
+  },
+  {
+   "key": "gaz commander faltip",
+   "page": "Gaz Commander Faltip",
+   "text": "10 minutes",
+   "seconds": 600
   },
   {
    "key": "gharg oberbord",
@@ -1726,14 +1893,20 @@
   {
    "key": "hasten bootstrutter",
    "page": "Hasten Bootstrutter",
-   "text": "2 min 45 seconds",
-   "seconds": 165
+   "text": "2 min 20 seconds",
+   "seconds": 140
   },
   {
    "key": "hoshkar",
    "page": "Hoshkar",
    "text": "7 days +/- 8(?) hours",
    "seconds": 604800
+  },
+  {
+   "key": "ice goblin caster",
+   "page": "Ice goblin caster",
+   "text": "~1.5 minutes",
+   "seconds": 90
   },
   {
    "key": "ikatiar the venom",
@@ -1838,7 +2011,7 @@
   },
   {
    "key": "khrix abomination",
-   "page": "Khrix Abomination",
+   "page": "Khrix`s Abomination",
    "text": "Triggered"
   },
   {
@@ -1942,6 +2115,12 @@
    "seconds": 360
   },
   {
+   "key": "lasna cheroon",
+   "page": "Lasna Cheroon",
+   "text": "8:50",
+   "seconds": 530
+  },
+  {
    "key": "lava elemental",
    "page": "Lava elemental",
    "text": "~18 min",
@@ -2007,8 +2186,8 @@
   {
    "key": "lord gimblox",
    "page": "Lord Gimblox",
-   "text": "18 min",
-   "seconds": 1080
+   "text": "~5 min",
+   "seconds": 300
   },
   {
    "key": "lord koi`doken",
@@ -2041,12 +2220,6 @@
    "seconds": 259200
   },
   {
-   "key": "magi p`tasa",
-   "page": "Magi P`Tasa",
-   "text": "3 Days +/- 12 Hours",
-   "seconds": 259200
-  },
-  {
    "key": "magnus boran",
    "page": "Magnus Boran",
    "text": "22 min",
@@ -2071,8 +2244,7 @@
   {
    "key": "master yael",
    "page": "Master Yael",
-   "text": "3 Days -/+8",
-   "seconds": 259200
+   "text": "Never respawns, only appears in Raid instances"
   },
   {
    "key": "maugarim",
@@ -2140,11 +2312,6 @@
    "page": "Nexona",
    "text": "7 days +/- 8(?) hours",
    "seconds": 604800
-  },
-  {
-   "key": "noble dojorn",
-   "page": "Noble Dojorn",
-   "text": "7 Days / 3 Days (No Variance)"
   },
   {
    "key": "nyzil bloodforge",
@@ -2224,8 +2391,7 @@
   {
    "key": "phinigel autropos",
    "page": "Phinigel Autropos",
-   "text": "12 hours",
-   "seconds": 43200
+   "text": "Spawns once per raid instance"
   },
   {
    "key": "pietro drast",
@@ -2273,10 +2439,22 @@
    "seconds": 4200
   },
   {
+   "key": "refugee splitpaw",
+   "page": "Refugee Splitpaw",
+   "text": "3:55",
+   "seconds": 235
+  },
+  {
    "key": "renell bekea",
    "page": "Renell Bekea",
    "text": "6 Minutes",
    "seconds": 360
+  },
+  {
+   "key": "retseth tretse",
+   "page": "Retseth Tretse",
+   "text": "7m 50s",
+   "seconds": 470
   },
   {
    "key": "rlabok",
@@ -2434,14 +2612,15 @@
    "seconds": 25200
   },
   {
-   "key": "sister of the spire",
-   "page": "Sister of the Spire",
-   "text": "[[Triggered]]"
-  },
-  {
    "key": "slaythe",
    "page": "Slaythe",
    "text": "[[Triggered]]"
+  },
+  {
+   "key": "slizik the mighty",
+   "page": "Slizik the Mighty",
+   "text": "10 minutes}}",
+   "seconds": 600
   },
   {
    "key": "smithy xzatik",
@@ -2450,10 +2629,16 @@
    "seconds": 640
   },
   {
+   "key": "socho darkpaw",
+   "page": "Socho Darkpaw",
+   "text": "3:55",
+   "seconds": 235
+  },
+  {
    "key": "soldier of v`zher",
    "page": "Soldier of V`Zher",
-   "text": "5:30",
-   "seconds": 330
+   "text": "5:00",
+   "seconds": 300
   },
   {
    "key": "solusek goblin king",
@@ -2601,6 +2786,12 @@
    "seconds": 1680
   },
   {
+   "key": "the froglok shin lord",
+   "page": "The froglok shin lord",
+   "text": "8.5 minutes}}",
+   "seconds": 510
+  },
+  {
    "key": "the froglok warden",
    "page": "The Froglok Warden",
    "text": "16min 30sec",
@@ -2660,8 +2851,8 @@
   {
    "key": "tolkar parlone",
    "page": "Tolkar Parlone",
-   "text": "6:40",
-   "seconds": 400
+   "text": "2:00",
+   "seconds": 120
   },
   {
    "key": "tomekeeper danl",
@@ -2712,8 +2903,8 @@
   {
    "key": "tyrana slil",
    "page": "Tyrana Slil",
-   "text": "6 Minutes",
-   "seconds": 360
+   "text": "3 Minutes",
+   "seconds": 180
   },
   {
    "key": "ugrak da raider",

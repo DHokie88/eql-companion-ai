@@ -141,14 +141,13 @@
       "Maid Issis",
       "Mynthi Davissi",
       "Princess Cherista",
-      "Ssynthi",
       "Xicotl"
     ],
     "rareCount": null,
     "killsToComplete": null,
     "confidence": "stated on wiki",
     "source": "https://eqlwiki.com/Mistmoore_Castle",
-    "notes": "16 names in the wiki's Rare NPCs row."
+    "notes": "16 names in the wiki's Rare NPCs row. The 2026-09-22 patch removed Ssynthi from this zone's Dungeon Crawl requirement."
   },
   "The Estate of Unrest": {
     "aliases": [
@@ -179,7 +178,6 @@
       "Crushbone"
     ],
     "rares": [
-      "Ambassador DVinn",
       "Bloodgurgler",
       "Bonefire",
       "Chokehold",
@@ -190,7 +188,6 @@
       "Orc Trainer",
       "Orc Warden",
       "Orc Warlord",
-      "Retlon Brenclog",
       "Rondo Dunfire",
       "The Prophet"
     ],
@@ -198,7 +195,7 @@
     "killsToComplete": null,
     "confidence": "stated on wiki",
     "source": "https://eqlwiki.com/Crushbone",
-    "notes": "14 names in the wiki's Rare NPCs row."
+    "notes": "14 names in the wiki's Rare NPCs row. The 2026-09-22 patch removed Ambassador DVinn, Retlon Brenclog from this zone's Dungeon Crawl requirement."
   },
   "Solusek's Eye": {
     "rares": [
@@ -283,7 +280,6 @@
   },
   "Befallen": {
     "rares": [
-      "Boondin Babbinsbort",
       "Commander Windstream",
       "Elf Skeleton",
       "Gynok Moltor",
@@ -304,7 +300,7 @@
     "killsToComplete": null,
     "confidence": "inferred",
     "source": "https://eqlwiki.com/Befallen",
-    "notes": "Notable NPCs row plus the map; the log fixture tests/fixtures/befallen-run.log has 'You have slain Baron Telyx V`Zher!'."
+    "notes": "Notable NPCs row plus the map; the log fixture tests/fixtures/befallen-run.log has 'You have slain Baron Telyx V`Zher!'. The 2026-09-22 patch removed Boondin Babbinsbort from this zone's Dungeon Crawl requirement."
   },
   "Blackburrow": {
     "rares": [
@@ -381,7 +377,6 @@
       "BoneCracker",
       "Drelzna",
       "Ekeros",
-      "Linara Parlone",
       "Lost Crusader",
       "Moosh",
       "Najena",
@@ -400,7 +395,7 @@
     "killsToComplete": null,
     "confidence": "inferred",
     "source": "https://eqlwiki.com/Najena",
-    "notes": "Notable NPCs row."
+    "notes": "Notable NPCs row. The 2026-09-22 patch removed Linara Parlone from this zone's Dungeon Crawl requirement."
   },
   "The Lair of the Splitpaw": {
     "aliases": [
@@ -408,7 +403,6 @@
       "Splitpaw"
     ],
     "rares": [
-      "Brother Hayle",
       "The Ishva Mal",
       "Kurrpok Splitpaw",
       "Nisch Val Torash Mashk",
@@ -421,7 +415,7 @@
     "killsToComplete": null,
     "confidence": "inferred",
     "source": "https://eqlwiki.com/Splitpaw_Lair",
-    "notes": "Notable NPCs row plus the map."
+    "notes": "Notable NPCs row plus the map. The 2026-09-22 patch removed Brother Hayle from this zone's Dungeon Crawl requirement."
   },
   "The Ruins of Old Paineel": {
     "aliases": [

@@ -5,6 +5,11 @@
  *
  *   npm run scrape:bosses
  *
+ * The npm script runs node with `--use-system-ca` ON PURPOSE (measured 2026-10-08):
+ * wiki.project1999.com serves an incomplete certificate chain, so Node's bundled CA store fails
+ * every request with UNABLE_TO_VERIFY_LEAF_SIGNATURE while curl and browsers (which use the OS
+ * verifier) succeed. That one TLS error is why the 2026-10-07 run lost every P99 portrait.
+ *
  * `match` holds the exact in-log "slain" names used to detect kills.
  */
 import { mkdirSync, writeFileSync } from 'fs'
@@ -92,19 +97,61 @@ const TARGETS: Curated[] = [
   { name: 'The Hand of Veeshan', category: 'Plane of Sky', page: 'The Hand of Veeshan', match: ['The Hand of Veeshan', 'the Hand of Veeshan'], zone: 'Plane of Sky — Efreeti Cycle (Island 8)' }
 ]
 
+/** Scraper etiquette (AGENTS.md LAW): one request at a time, at least a second apart. */
+const DELAY_MS = 1000
+const MAX_ATTEMPTS = 5
+
+/**
+ * One page's parsed HTML, or `undefined` when the wiki ANSWERED that the page does not exist.
+ *
+ * A FAILED REQUEST IS NOT A MISSING PAGE. Until 2026-10-08 every error (timeout, 429, 5xx, a
+ * non-JSON body) was swallowed into `undefined`, and `undefined` from the P99 wiki means "fall
+ * back to eqlwiki". The 2026-10-07 rescrape hit exactly that: every P99 request failed, so all 29
+ * portraits silently switched host, and Protector of Sky picked up eqlwiki's empty `Item_.png`
+ * placeholder. Now a transport failure retries with backoff (obeying Retry-After) and then STOPS
+ * the run, so a bad night on one wiki can never rewrite the roster.
+ */
 async function pageHtml(apiBase: string, page: string): Promise<string | undefined> {
   const url = `${apiBase}/api.php?action=parse&page=${encodeURIComponent(
     page
-  )}&prop=text&format=json&redirects=1`
+  )}&prop=text&format=json&redirects=1&maxlag=5`
+  let lastError = ''
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    await sleep(attempt === 0 ? DELAY_MS : DELAY_MS * 2 ** attempt)
+    const result = await attemptOnce(url)
+    if (result.ok) return result.html
+    lastError = result.error
+    if (result.waitMs > 0) await sleep(result.waitMs)
+  }
+  throw new Error(`${apiBase} did not answer for "${page}" after ${String(MAX_ATTEMPTS)} attempts (${lastError})`)
+}
+
+type Attempt = { ok: true; html: string | undefined } | { ok: false; error: string; waitMs: number }
+
+/** One request. `ok` means the wiki ANSWERED (a page, or "no such page"); anything else retries. */
+async function attemptOnce(url: string): Promise<Attempt> {
   try {
     const res = await fetch(url, { headers: { 'User-Agent': UA } })
-    const json = (await res.json()) as { parse?: { text?: string | { '*'?: string } }; error?: unknown }
-    if (json.error) return undefined
-    const t = json.parse?.text
-    return typeof t === 'string' ? t : t?.['*']
-  } catch {
-    return undefined
+    const retryAfter = Number(res.headers.get('retry-after'))
+    const waitMs = retryAfter > 0 ? retryAfter * 1000 : 0
+    if (res.status === 429 || res.status >= 500) return { ok: false, error: `HTTP ${String(res.status)}`, waitMs }
+    return readParse((await res.json()) as ParseBody, waitMs)
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err), waitMs: 0 }
   }
+}
+
+interface ParseBody {
+  parse?: { text?: string | { '*'?: string } }
+  error?: { code?: string }
+}
+
+function readParse(json: ParseBody, waitMs: number): Attempt {
+  // The maxlag deferral arrives as HTTP 200 with an error body + Retry-After (AGENTS.md).
+  if (json.error?.code === 'maxlag') return { ok: false, error: 'maxlag', waitMs: waitMs || 5000 }
+  if (json.error) return { ok: true, html: undefined } // the wiki answered: no such page
+  const t = json.parse?.text
+  return { ok: true, html: typeof t === 'string' ? t : t?.['*'] }
 }
 
 function imgSrcs(html: string): string[] {
@@ -125,7 +172,8 @@ async function p99Image(page: string): Promise<string | undefined> {
 async function eqlImage(page: string): Promise<string | undefined> {
   const html = await pageHtml(EQL, page)
   if (!html) return undefined
-  const pick = imgSrcs(html).find((s) => !/Item_\d+/i.test(s))
+  // `Item_\d*` — a loot icon, or the bare `Item_.png` placeholder an item box with no icon id draws.
+  const pick = imgSrcs(html).find((s) => !/Item_\d*\./i.test(s))
   if (!pick) return undefined
   return pick.startsWith('http') ? pick : EQL + pick
 }
@@ -135,7 +183,6 @@ async function fetchImage(t: Curated): Promise<string | undefined> {
   if (t.image) return t.image
   const p99 = await p99Image(t.p99 ?? t.name)
   if (p99) return p99
-  await sleep(80)
   return eqlImage(t.page ?? t.name)
 }
 
@@ -147,7 +194,6 @@ async function main(): Promise<void> {
     if (image) withImg++
     targets.push({ name: t.name, category: t.category, match: t.match, zone: t.zone, image })
     console.log(`  ${image ? '🖼 ' : '·  '}${t.name}`)
-    await sleep(120)
   }
   const data: BossData = { scrapedAt: new Date().toISOString(), targets }
   const here = dirname(fileURLToPath(import.meta.url))

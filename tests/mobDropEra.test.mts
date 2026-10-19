@@ -44,7 +44,11 @@ const REVAMP_TABLE = [
 function cazicThule(): MobKnowledge {
   const entry = localMobEntry('Cazic Thule')
   assert.ok(entry, 'the committed mob catalog must still hold Cazic Thule')
-  assert.equal(entry.page, 'Cazic Thule (God)')
+  // The 2026-10-07 rescrape: the wiki MOVED the page to `Cazic-Thule (God)` (the old title is now a
+  // redirect to it). Only the page title moved - the catalog `name` the lookup resolves by is still
+  // `Cazic Thule`, and the hyphen/space bridge for the LOG spelling stays the roster's job
+  // (`main/mobAliases.ts`), so this pin follows the wiki's title rather than folding it.
+  assert.equal(entry.page, 'Cazic-Thule (God)')
   return knowledgeFromCatalog('Cazic Thule', entry)
 }
 
@@ -88,12 +92,26 @@ test('E4: a drop whose page states no era is NOT hidden', () => {
   // layer 1 speaks first and every mob the catalog says drops it lives in Plane of Fear, which
   // `shared/zones.ts` calls classic. Both verdicts render the row PLAINLY, which is the claim the
   // brief was making, so the fold is unchanged - what moves is only which chip (none, vs `era?`).
+  //
+  // THE WITNESS MOVED ON THE 2026-10-07 RESCRAPE: the wiki put `{{Classic Era}}` on Blood Fire's
+  // page (as on all eleven of the god's classic drops), so Cazic Thule no longer carries a drop
+  // that states no era. Blood Fire is kept as a pin on what it now says; the bannerless case is
+  // carried by `a nightmare` - same zone, same layer-1 argument - whose `Wand of Darkness` page
+  // still states no era at all.
   const annotated = annotateDropEras(cazicThule())
   const bloodFire = (annotated.dropsWiki ?? []).find((d) => d.item === 'Blood Fire')
   assert.ok(bloodFire)
-  assert.equal(bloodFire.eraTag, undefined, 'its item page carries no era banner')
-  assert.notEqual(donorEra(dropEraSubject(bloodFire)).verdict, 'out-of-era')
-  const { shown } = splitDropsByEra([bloodFire])
+  assert.equal(bloodFire.eraTag, 'Classic', 'Blood Fire lost the banner the 2026-10-07 rescrape gave it')
+  assert.equal(splitDropsByEra([bloodFire]).shown.length, 1)
+
+  const nightmareEntry = localMobEntry('a nightmare')
+  assert.ok(nightmareEntry, 'the committed mob catalog must still hold a nightmare')
+  const nightmare = annotateDropEras(knowledgeFromCatalog('a nightmare', nightmareEntry))
+  const wand = (nightmare.dropsWiki ?? []).find((d) => d.item === 'Wand of Darkness')
+  assert.ok(wand, 'Wand of Darkness must still be one of a nightmare\'s catalog drops')
+  assert.equal(wand.eraTag, undefined, 'its item page carries no era banner')
+  assert.notEqual(donorEra(dropEraSubject(wand)).verdict, 'out-of-era')
+  const { shown } = splitDropsByEra([wand])
   assert.equal(shown.length, 1, 'no verdict is never a reason to hide what the wiki listed')
 })
 

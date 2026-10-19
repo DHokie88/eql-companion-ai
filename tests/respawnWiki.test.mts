@@ -14,7 +14,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { parseWikiRespawn, type WikiRespawnData } from '../src/shared/respawnWiki'
+import { parseWikiRespawn, respawnKey, type WikiRespawnData } from '../src/shared/respawnWiki'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 1. THE WIKI GRAMMAR — every accepted shape below was OBSERVED in the sweep
@@ -171,6 +171,18 @@ test('the floor is THIN, and the numbers that say so are the reason this feature
   assert.ok(parsed >= 380, `only ${String(parsed)} parse`)
   // …and the honest half: a large minority of what the wiki DOES state is not a duration at all.
   assert.ok(FLOOR.rows.length - parsed >= 50, 'the non-duration rows are a real and kept category')
+})
+
+test('the join key drops a wiki disambiguator ONLY when the page title states the bare name', () => {
+  // The 2026-10-07 rescrape: `The Ghoul Lord`'s |name became `the ghoul lord (Hoptor Thaggelum)`,
+  // and the row keyed under a name no death line prints. The title is the witness for the bare name.
+  assert.equal(respawnKey('the ghoul lord (Hoptor Thaggelum)', 'The Ghoul Lord'), 'the ghoul lord')
+  assert.equal(respawnKey('Kaiaren (Mad)', 'Kaiaren'), 'kaiaren')
+  // A title that KEEPS its qualifier keeps the key it always had: no qualifier is stripped on our say.
+  assert.equal(respawnKey('a kobold (Warrens)', 'A kobold (Warrens)'), 'a kobold (warrens)')
+  assert.equal(respawnKey('Clockwork Merchant (1105, -1030)', 'Clockwork Merchant (LG-16)'), 'clockwork merchant (1105, -1030)')
+  // And an unqualified name is the plain lowercase it always was.
+  assert.equal(respawnKey('a ghoul', 'A ghoul'), 'a ghoul')
 })
 
 test('the four dungeons the report named still resolve to the values the wiki states', () => {

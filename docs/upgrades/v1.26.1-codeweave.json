@@ -1,0 +1,182 @@
+{
+  "schema_version": 1,
+  "tool": "CodeWeave",
+  "tool_commit": "d96330bd83e445c47a5ebb0ff48e16245b659c97",
+  "mode": "external Codex lead; deterministic source acquisition, inventory, comparison and bounded briefs",
+  "candidate_execution": false,
+  "model_calls": 0,
+  "paid_calls": 0,
+  "spec_sha256": "a30d76cd6e7ac3d523288b7324b62058eef7fd9b8483329f27f8c35a00720d49",
+  "fork_attachment": {
+    "attached_head": "275d069b3d458877bbefc4554ca2d70c5ec28fb3",
+    "branch": "refs/heads/oracle-baseline",
+    "created_at": "2026-10-19T10:27:05.834051+00:00",
+    "fork_id": "fork-20261019T102705.834028Z",
+    "goals": [
+      "Integrate upstream 1.26.1 feature and data fixes into EQ Oracle"
+    ],
+    "kind": "maintained-fork",
+    "product": "eq-oracle-upstream-1-26-1",
+    "protected_behaviors": [
+      "Oracle branding, icons, local profiles, versioned spells, calculations, disabled telemetry and running sessions"
+    ],
+    "relationships": {
+      "EQ-Zera": "upstream",
+      "oracle": "fork"
+    },
+    "repository": "/home/andrew/codeweave-eqo-upgrade-20261019/sources/oracle",
+    "schema_version": 1,
+    "sources": [
+      {
+        "attached_commit": "275d069b3d458877bbefc4554ca2d70c5ec28fb3",
+        "location": "/home/andrew/codeweave-eqo-upgrade-20261019/sources/oracle",
+        "name": "oracle",
+        "relationship": "fork",
+        "requested_ref": "275d069"
+      },
+      {
+        "attached_commit": "780c7afb3fe71f65db2cd8ae9d8c191b8ecc9db4",
+        "location": "https://github.com/Zeratfule/EQ-Zera.git",
+        "name": "EQ-Zera",
+        "relationship": "upstream",
+        "requested_ref": "780c7afb3fe71f65db2cd8ae9d8c191b8ecc9db4"
+      }
+    ]
+  },
+  "decision": "Integrate desktop changes; native mobile project and mobile-only CI/configuration/docs are excluded at Andrew's explicit direction.",
+  "integration_transport": "Related upstream Git merge, inspected and adapted by Codex; CodeWeave patch submission does not support the changed binary wiki assets.",
+  "verification_host": "Windows AORUS; Linux source evidence is not runtime qualification.",
+  "tool_limitations": [
+    "Broad initial query exceeded the default 32768-byte envelope (235947 required) and favored a cached wiki page. Retained as failed/low-value evidence; not used as code proof.",
+    "Single-symbol queries fit the default 32768-byte envelope and returned the actual changed implementation and tests.",
+    "The forest report exceeded CodeWeave's 32 MiB read bound. No call-graph or semantic completeness claim is made."
+  ],
+  "briefs": [
+    {
+      "file": "brief-parseMobLoot-32k.json",
+      "sha256": "1c602598abac3df1a45ce8c02b9967d520c23e8e44a3d3d90a1cebf797e2376e",
+      "query": "parseMobLoot",
+      "status": "COMPLETED",
+      "evidence_sha256": "8263db3981c4491e025a71508ce1ef23269e4e3672ec519be07f581ccf7efbd1",
+      "sources": [
+        {
+          "license_status": "PASS",
+          "name": "EQ-Zera",
+          "requested_ref": "780c7afb3fe71f65db2cd8ae9d8c191b8ecc9db4",
+          "resolved_commit": "780c7afb3fe71f65db2cd8ae9d8c191b8ecc9db4",
+          "role": "idea",
+          "tree_id": "1e645d390329e7e7e3ff452732dab1bc4795aec1"
+        }
+      ],
+      "citations": [
+        {
+          "blob_sha256": "b84069c6224f94e80ea762984bc40537b2847ba5a0f976063786a0a0425c3e86",
+          "commit": "780c7afb3fe71f65db2cd8ae9d8c191b8ecc9db4",
+          "line_end": 184,
+          "line_start": 155,
+          "matched_terms": [
+            "parsemobloot"
+          ],
+          "path": "src/main/mobLookupParse.ts",
+          "source": "EQ-Zera",
+          "tree_id": "1e645d390329e7e7e3ff452732dab1bc4795aec1"
+        },
+        {
+          "blob_sha256": "b84069c6224f94e80ea762984bc40537b2847ba5a0f976063786a0a0425c3e86",
+          "commit": "780c7afb3fe71f65db2cd8ae9d8c191b8ecc9db4",
+          "line_end": 305,
+          "line_start": 276,
+          "matched_terms": [
+            "parsemobloot"
+          ],
+          "path": "src/main/mobLookupParse.ts",
+          "source": "EQ-Zera",
+          "tree_id": "1e645d390329e7e7e3ff452732dab1bc4795aec1"
+        }
+      ],
+      "limitations": [
+        "Source excerpts read strictly from locked Git commit mirrors; working-tree files are never inspected.",
+        "Excerpts are selective: up to 64 matched files, 8 MiB read per source, 256 KiB per file, and five windows per file; they are not exhaustive source coverage.",
+        "Observations tagged 'extracted' represent direct AST/forest extractions; 'inferred' represent derived capability assessments.",
+        "Forest intelligence graph could not be parsed: analysis report exceeds the 32 MiB read bound"
+      ],
+      "omissions": []
+    },
+    {
+      "file": "brief-respawnKey.json",
+      "sha256": "5f15652c0619c34464990195538c29b91d1d0f802109186abfcdaeb91e695296",
+      "query": "respawnKey",
+      "status": "COMPLETED",
+      "evidence_sha256": "e9c53a0555a05d7f270759230685b0a0ad04a989122f79636cd7bd261af75119",
+      "sources": [
+        {
+          "license_status": "PASS",
+          "name": "EQ-Zera",
+          "requested_ref": "780c7afb3fe71f65db2cd8ae9d8c191b8ecc9db4",
+          "resolved_commit": "780c7afb3fe71f65db2cd8ae9d8c191b8ecc9db4",
+          "role": "idea",
+          "tree_id": "1e645d390329e7e7e3ff452732dab1bc4795aec1"
+        }
+      ],
+      "citations": [
+        {
+          "blob_sha256": "450704346c16ed57a88d4f60e389d2f17e2d8b2fd7bbe97777aff5fcbd27cca6",
+          "commit": "780c7afb3fe71f65db2cd8ae9d8c191b8ecc9db4",
+          "line_end": 227,
+          "line_start": 211,
+          "matched_terms": [
+            "respawnkey"
+          ],
+          "path": "src/shared/respawnWiki.ts",
+          "source": "EQ-Zera",
+          "tree_id": "1e645d390329e7e7e3ff452732dab1bc4795aec1"
+        }
+      ],
+      "limitations": [
+        "Source excerpts read strictly from locked Git commit mirrors; working-tree files are never inspected.",
+        "Excerpts are selective: up to 64 matched files, 8 MiB read per source, 256 KiB per file, and five windows per file; they are not exhaustive source coverage.",
+        "Observations tagged 'extracted' represent direct AST/forest extractions; 'inferred' represent derived capability assessments.",
+        "Forest intelligence graph could not be parsed: analysis report exceeds the 32 MiB read bound"
+      ],
+      "omissions": []
+    },
+    {
+      "file": "brief-normalizeSlotTokens.json",
+      "sha256": "b3ad674640162d5b963065335ff4a7b1e73a08c91290f212cf0bac8f5f5ea943",
+      "query": "normalizeSlotTokens",
+      "status": "COMPLETED",
+      "evidence_sha256": "4be00fc91ac5cef0465439d8174ee655a48319d28e65fbd6b40cf4b2a9115dee",
+      "sources": [
+        {
+          "license_status": "PASS",
+          "name": "EQ-Zera",
+          "requested_ref": "780c7afb3fe71f65db2cd8ae9d8c191b8ecc9db4",
+          "resolved_commit": "780c7afb3fe71f65db2cd8ae9d8c191b8ecc9db4",
+          "role": "idea",
+          "tree_id": "1e645d390329e7e7e3ff452732dab1bc4795aec1"
+        }
+      ],
+      "citations": [
+        {
+          "blob_sha256": "5aa76fee565d5a5fe776b2b94cddeef7fe03ae7a61631f7bce00d50943102d95",
+          "commit": "780c7afb3fe71f65db2cd8ae9d8c191b8ecc9db4",
+          "line_end": 90,
+          "line_start": 61,
+          "matched_terms": [
+            "normalizeslottokens"
+          ],
+          "path": "src/shared/planner/normalize.ts",
+          "source": "EQ-Zera",
+          "tree_id": "1e645d390329e7e7e3ff452732dab1bc4795aec1"
+        }
+      ],
+      "limitations": [
+        "Source excerpts read strictly from locked Git commit mirrors; working-tree files are never inspected.",
+        "Excerpts are selective: up to 64 matched files, 8 MiB read per source, 256 KiB per file, and five windows per file; they are not exhaustive source coverage.",
+        "Observations tagged 'extracted' represent direct AST/forest extractions; 'inferred' represent derived capability assessments.",
+        "Forest intelligence graph could not be parsed: analysis report exceeds the 32 MiB read bound"
+      ],
+      "omissions": []
+    }
+  ]
+}

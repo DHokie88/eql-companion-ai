@@ -143,9 +143,15 @@ test('zoneLootSummary: mobs are DISTINCT pages, drops are rows, seen is a sum', 
 
 const REAL: MobEntry[] = (mobsJson as unknown as { mobs: MobEntry[] }).mobs
 
-test('zoneOptions over the REAL catalog: 185 zones, Cazic Thule folded to one 30-mob option', () => {
+test('zoneOptions over the REAL catalog: 186 zones, Cazic Thule folded to one 30-mob option', () => {
   const opts = zoneOptions(REAL)
-  assert.equal(opts.length, 185, 'the committed catalog stopped yielding 185 folded zones')
+  // 185 -> 186 on the 2026-10-07 rescrape, and the one new option is a SPELLING, not a place:
+  // `The Lair of the Splitpaw` (one row, Nisch Mal Gnoll), which is `shared/zones.ts`'s own `paw`
+  // name beside the catalog's `Splitpaw Lair` (31) and `Infected Paw` (1). The picker folds on
+  // `zoneKey` only, so all three were never going to merge here - `Splitpaw Lair` and `Infected
+  // Paw` were already two options before - while `mobsInZone` joins the verified aliases, so any
+  // of the three serves the same bestiary. Nothing else in the option list appeared or vanished.
+  assert.equal(opts.length, 186, 'the committed catalog stopped yielding 186 folded zones')
   // The corpus spells it `Cazic Thule` (28 rows) AND `Cazic-Thule` (2); the fold is why this is one
   // option and not two, and 30 is the number the picker states beside it.
   const ct = opts.find((o) => o.zone === 'Cazic Thule')
@@ -156,24 +162,37 @@ test('zoneOptions over the REAL catalog: 185 zones, Cazic Thule folded to one 30
   assert.deepEqual(names, [...names].sort((a, b) => a.localeCompare(b)))
 })
 
-test('zoneLootRows over the REAL catalog: Cazic Thule is 42 drops across 15 mobs', () => {
+test('zoneLootRows over the REAL catalog: Cazic Thule is 61 drops across 21 mobs', () => {
+  // 42/15 -> 47/14 on the 2026-10-07 rescrape, all of it the wiki's own edits: `a lizard
+  // ritualist` gained five Rubicite drops (1 -> 6), `Cazic Cenobite` and `Tae Ew Templar`/`Diviner`
+  // gained Lizard Meat/Tail rows (+4), and `Tae Ew Archon` LEFT the table - its page (rev
+  // 2026-09-04) rewrote `|known_loot` from `{{:Item}}` transclusions to plain `[[Item]]` links.
+  // 47/14 -> 61/21 when `parseMobLoot` learned to read a loot LINK whose target is an item page
+  // (same 2026-10-18 cache, offline reparse): +14 edges on 7 mobs, each hand-checked as a loot list
+  // entry - Tae Ew Archon is back (+4), a lizard judicator (+3 Words), a lizard page (+2), a lizard
+  // warder (+2), a lizard defender (+1), and the `Cazic-Thule`-spelled a dwarven merc / a gnomish
+  // mage (+1 each). The group link "Fine Steel Weapons" on the Archon's list is NOT read.
   const rows = zoneLootRows({ zone: 'Cazic Thule', catalog: REAL, seenByItem: NO_SEEN })
-  assert.deepEqual(zoneLootSummary(rows), { mobs: 15, drops: 42, outOfEra: 0, seen: 0, upgrades: 0 })
+  assert.deepEqual(zoneLootSummary(rows), { mobs: 21, drops: 61, outOfEra: 0, seen: 0, upgrades: 0 })
   assert.ok(rows.every((r) => r.item.trim() !== ''), 'a drop row carried an empty item name')
   assert.ok(rows.every((r) => r.mobPage !== '' && r.era.key === r.itemKey))
   assert.equal(new Set(rows.map((r) => r.key)).size, rows.length, 'a row key collided')
 })
 
-test('zoneLootRows over the REAL catalog: Kaesora folds 67 of its 111 drops out of era', () => {
+test('zoneLootRows over the REAL catalog: Kaesora folds 72 of its 117 drops out of era', () => {
+  // 111/67/44 -> 117/72/45 when `parseMobLoot` learned to read item-page loot LINKS: the only new
+  // mob is `Strathbone spider` (Kaesora/Temple of Droga/Mines of Nurga), whose list is six links,
+  // all hand-checked list entries; five fold out of era (the Strathbone/Truesilver set its siblings
+  // already fold) and Spider Legs is shown.
   const rows = zoneLootRows({ zone: 'Kaesora', catalog: REAL, seenByItem: NO_SEEN })
   const summary = zoneLootSummary(rows)
-  assert.equal(summary.drops, 111)
-  assert.equal(summary.outOfEra, 67)
+  assert.equal(summary.drops, 117)
+  assert.equal(summary.outOfEra, 72)
   // The DISCLOSURE, not a deletion: hidden + folded = the wiki's whole claim, always.
   const shown = filterRows(rows, '', false)
   const all = filterRows(rows, '', true)
-  assert.equal(shown.length, 44)
-  assert.equal(all.length, 111)
+  assert.equal(shown.length, 45)
+  assert.equal(all.length, 117)
   assert.equal(shown.length + summary.outOfEra, all.length)
   // …and nothing shown is one of the folded ones.
   assert.ok(!shown.some((r) => r.outOfEra))
