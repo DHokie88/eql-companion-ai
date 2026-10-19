@@ -30,9 +30,12 @@ export function browseFilterError(filters: BrowseFilters, maximum: string): stri
   if (filters.effect && (!/^\d+$/.test(filters.effect) || Number(filters.effect) > 100000)) return 'Effect must be a whole SPA number from 0 to 100000.'
   return null
 }
+export function browseCategory(filters: BrowseFilters, data?: import('@shared/spellLibrary').SpellSearchResult | null): string {
+  return filters.category || ((filters.type || filters.hpFilter) && data?.matchingCategories?.length === 1 ? data.matchingCategories[0] : '')
+}
 function useVisibleSort(input: { sort: ReturnType<typeof useSpellSort<SpellBrowseSort>>; filters: BrowseFilters; metric: SpellMetric; columns: SpellBrowseSort[]; data?: import('@shared/spellLibrary').SpellSearchResult | null }): void {
   const { sort, filters, metric, columns, data } = input
-  const category = filters.category || ((filters.type || filters.hpFilter) && data?.matchingCategories?.length === 1 ? data.matchingCategories[0] : '')
+  const category = browseCategory(filters, data)
   useEffect(() => { adjustCategorySort(sort, category, filters.subcategory) }, [category, filters.subcategory, sort])
   const fields = browseColumns(metric, !category ? 'both' : filters.subcategory ? 'none' : 'subcategory', columns, data?.matchingTypes?.length === 1).map((column) => column.field).join(',')
   useEffect(() => {

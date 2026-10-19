@@ -55,12 +55,15 @@ export function compareSpellValues(a: string | number | null, b: string | number
 }
 
 export function spellBrowseSortValue(record: SpellSummary, field: SpellBrowseSort, selected: ReadonlySet<number>): string | number | null {
-  if (field === 'amount') return record.calculations?.[0]?.total ?? null
-  if (field === 'efficiency') return record.calculations?.[0]?.perMana ?? null
+  if (field === 'amount' || field === 'efficiency') return summaryCalculationValue(record, field)
   if (field === 'classes') return record.classes.map((c) => c.code).sort().join(' / ') || null
-  if (field === 'description') return record.description || null
+  if (field === 'description') return record.description ?? null
   return recordSortValue(record, field, selected)
     ?? analysisSortValue(record, field)
+}
+function summaryCalculationValue(record: SpellSummary, field: 'amount' | 'efficiency'): number | null {
+  const calculation = record.calculations?.[0]
+  return calculation?.[field === 'amount' ? 'total' : 'perMana'] ?? null
 }
 function summaryTypeLabel(record: SpellSummary): string | null {
   return record.typeLabel ?? (record.spellType ? spellTypeLabel(record.spellType) : null)

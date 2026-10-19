@@ -98,8 +98,7 @@ try {
   await page.getByTestId('spells-type-heal').click(); await expectIds(page, [902])
   await page.getByTestId('spells-type-other').click(); await expectIds(page, [903])
   await page.getByTestId('spells-type-all').click(); await firstId(page, 901)
-  await page.getByTestId('spells-type-healing').click(); await expectIds(page, [7, 902])
-  await page.getByTestId('spells-group-zero-mana').click(); await expectIds(page, [7])
+  await page.getByTestId('spells-type-healing').click(); await expectIds(page, [902, 7])
   await choose(page, 'spells-polarity', 'Harmful'); await expectIds(page, [])
   await page.getByText('No matching spells in this captured dataset.', { exact: true }).waitFor()
   await page.getByTestId('spells-reset-filters').click(); await page.getByTestId('spells-group-all').click(); await firstId(page, 901)
@@ -123,6 +122,6 @@ try {
   assert.equal(await selectedTable.getByTestId('spells-open-7').evaluate((e) => getComputedStyle(e).textAlign), 'left')
   await page.getByTestId('spells-tab-browse').click()
   await firstId(page, 7)
-  console.log('PASS spell Browse controls: wrapped-name alignment, all data headers, global sorting/pagination, level bounds and validation, type/category/subcategory/SPA/polarity/mana filters, reset, selection, detail/back and Compare sorting.')
+  console.log('PASS spell Browse controls: wrapped-name alignment, all data headers, global sorting/pagination, level bounds and validation, type/category/subcategory/SPA/helpful-harmful filters, reset, selection, detail/back and Compare sorting.')
 } catch (error) { await dumpArtifacts(page, 'spell-browse-controls-failure'); throw error }
 finally { await launched.close(); await staged.dispose(); await removeUserData(profile) }

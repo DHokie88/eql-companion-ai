@@ -3,7 +3,7 @@ import { Alert, CircularProgress, Pagination, Stack, Tooltip, Typography } from 
 import type { SpellClass } from '@shared/spellLibrary'
 import type { SpellEvaluationOptions } from '@shared/spellModifiers'
 import type { SpellAnalysisOptions, SpellRankingCategory } from '@shared/spellAnalysis'
-import { useSpellBrowse } from './useSpellBrowse'
+import { browseCategory, useSpellBrowse } from './useSpellBrowse'
 import { SpellBrowseFilters } from './SpellBrowseFilters'
 import { SpellBrowseTable } from './SpellBrowseTable'
 import { useSpellScroll } from './spellWorkspace'
@@ -23,7 +23,7 @@ function BrowseResults({ browse, selected, onOpen, onToggle }: {
       <BrowseHighlights highlights={data.highlights} onSelect={(kind, group) => { browse.sort.selectSort(kind, 'desc'); browse.setGroup(group); browse.setPage(1) }} />
       <BrowseGroups group={browse.group} onChange={browse.setGroup} counts={data.groupCounts} />
       <ResultCount total={data.total} matching={data.matchingRecords} contentId={data.dataset?.contentId} />
-      <SpellBrowseTable uniformType={data.matchingTypes?.length === 1} records={data.records} selected={selected} sort={browse.sort} filters={{ ...browse.filters, category: browse.filters.category || ((browse.filters.type || browse.filters.hpFilter) && data.matchingCategories?.length === 1 ? data.matchingCategories[0] : '') }} metric={browse.metric} columns={browse.columns} onOpen={onOpen} onToggle={onToggle} />
+      <SpellBrowseTable uniformType={data.matchingTypes?.length === 1} records={data.records} selected={selected} sort={browse.sort} filters={{ ...browse.filters, category: browseCategory(browse.filters, data) }} metric={browse.metric} columns={browse.columns} onOpen={onOpen} onToggle={onToggle} />
       {data.total === 0 && <Typography>No matching spells in this captured dataset.</Typography>}
       {data.total > 40 && <Pagination count={Math.ceil(data.total / 40)} page={browse.page} onChange={(_e, value) => browse.setPage(value)} data-testid="spells-pagination" />}
     </>}

@@ -9,27 +9,46 @@ import { SpellCastSummary } from './SpellCastSummary'
 import { browseColumns, browseTimingValue, DEFAULT_BROWSE_COLUMNS, type CategoryDisplay } from './spellBrowseColumns'
 import { useSpellWorkspaceState } from './spellWorkspace'
 
-function SpellCell({ record, field, display, selected, expanded, toggleLine, onOpen, onToggle }: {
+interface CellProps {
   record: SpellSummary; field: SpellBrowseSort; display: CategoryDisplay; selected: number[]; expanded: boolean
   toggleLine: () => void; onOpen: (id: number) => void; onToggle: (id: number) => void
-}): JSX.Element {
-  const calculation = record.calculations?.[0]
-  switch (field) {
-    case 'id': return <>{record.id}</>
-    case 'name': return <><Stack direction="row" alignItems="center" gap={0.5}><SpellNameButton id={record.id} onOpen={onOpen}>{record.name}</SpellNameButton>
+}
+function NameCell({ record, expanded, toggleLine, onOpen }: CellProps): JSX.Element {
+  return <><Stack direction="row" alignItems="center" gap={0.5}><SpellNameButton id={record.id} onOpen={onOpen}>{record.name}</SpellNameButton>
       {record.line && <Tooltip title={`${record.line.alternatives.length} alternatives. ${record.line.reason}`}><IconButton size="small" aria-label={`Alternatives for ${record.name}`} aria-expanded={expanded} onClick={toggleLine} data-testid={`spells-expand-${record.id}`}><ExpandMoreIcon sx={{ transform: expanded ? 'rotate(180deg)' : undefined }} /></IconButton></Tooltip>}</Stack>
       <SpellRowRank id={record.id} name={record.name} evidence={record.rankEvidence} /></>
-    case 'classes': return <>{record.classes.length ? record.classes.map((c) => `${c.code} ${c.level}`).join(' · ') : 'Internal / NPC'}</>
-    case 'description': return <Typography variant="body2" sx={{ minWidth: 220, maxWidth: 420, whiteSpace: 'normal', lineHeight: 1.6 }}>{record.description || '-'}</Typography>
+}
+function CategoryCell({ record, display }: CellProps): JSX.Element {
+  return <>{display === 'subcategory' ? record.subcategory || '-' : record.category || 'Uncategorized'}{display === 'both' && record.subcategory && <Typography variant="caption" display="block" color="text.secondary">{record.subcategory}</Typography>}</>
+}
+function CalculationCell({ record, field }: CellProps): JSX.Element {
+  const calculation = record.calculations?.[0]
+  if (field === 'efficiency') return <>{record.mana === 0 ? '-' : amount(calculation?.perMana ?? null)}</>
+  return <>{calculation ? <><EstimateAmount calculation={calculation} compact /><SpellCastSummary calculation={calculation} compact /></> : '-'}</>
+}
+function CompareCell({ record, selected, onToggle }: CellProps): JSX.Element {
+  const active = selected.includes(record.id)
+  return <Button size="small" variant={active ? 'contained' : 'outlined'} disabled={!active && selected.length >= 4} onClick={() => onToggle(record.id)} data-testid={`spells-compare-${record.id}`}>{active ? 'Selected' : 'Add'}</Button>
+}
+function SpellCell(props: CellProps): JSX.Element {
+  const { record, field } = props
+  switch (field) {
+    case 'id': return <>{record.id}</>
+    case 'name': return <NameCell {...props} />
     case 'category':
-    case 'subcategory': return <>{display === 'subcategory' ? record.subcategory || '-' : record.category || 'Uncategorized'}{display === 'both' && record.subcategory && <Typography variant="caption" display="block" color="text.secondary">{record.subcategory}</Typography>}</>
-    case 'type': return <>{record.typeLabel ?? record.spellType?.toUpperCase() ?? '-'}</>
-    case 'amount': return <>{calculation ? <><EstimateAmount calculation={calculation} compact /><SpellCastSummary calculation={calculation} compact /></> : '-'}</>
+    case 'subcategory': return <CategoryCell {...props} />
+    case 'amount':
+    case 'efficiency': return <CalculationCell {...props} />
     case 'mana': return <>{record.mana}</>
-    case 'efficiency': return <>{record.mana === 0 ? '-' : calculation ? amount(calculation.perMana) : '-'}</>
-    case 'selected': return <Button size="small" variant={selected.includes(record.id) ? 'contained' : 'outlined'} disabled={!selected.includes(record.id) && selected.length >= 4} onClick={() => onToggle(record.id)} data-testid={`spells-compare-${record.id}`}>{selected.includes(record.id) ? 'Selected' : 'Add'}</Button>
-    default: return <>{amount(browseTimingValue(record, field))}</>
+    case 'selected': return <CompareCell {...props} />
+    default: return <TextCell record={record} field={field} />
   }
+}
+function TextCell({ record, field }: Pick<CellProps, 'record' | 'field'>): JSX.Element {
+  if (field === 'classes') return <>{record.classes.length ? record.classes.map((c) => `${c.code} ${c.level}`).join(' · ') : 'Internal / NPC'}</>
+  if (field === 'description') return <Typography variant="body2" sx={{ minWidth: 220, maxWidth: 420, whiteSpace: 'normal', lineHeight: 1.6 }}>{record.description ?? '-'}</Typography>
+  if (field === 'type') return <>{record.typeLabel ?? record.spellType?.toUpperCase() ?? '-'}</>
+  return <>{amount(browseTimingValue(record, field))}</>
 }
 export function SpellBrowseTable({ records, selected, sort, filters, metric = 'damage', columns = DEFAULT_BROWSE_COLUMNS, uniformType = false, onOpen, onToggle }: {
   records: SpellSummary[]; selected: number[]; sort: ReturnType<typeof useSpellSort<SpellBrowseSort>>
