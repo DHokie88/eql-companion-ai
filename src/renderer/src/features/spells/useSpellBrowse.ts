@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import type { SpellBrowseSort, SpellBrowseType, SpellClass, SpellMetric, SpellSearchQuery } from '@shared/spellLibrary'
 import type { SpellEvaluationOptions } from '@shared/spellModifiers'
 import { useLibraryQuery } from './useLibraryQuery'
@@ -54,6 +54,8 @@ export function useSpellBrowse({ classes, level, allSpells, evaluation, selected
     return window.eq.spellLibrary.search(query)
   }, [queryText, classKey, level, allSpells, min, category, subcategory, effect, type, polarity, mana, maximum, sort.field, sort.direction, selectedKey, page, evaluation, invalid, analysis, group, metric])
   const result = useLibraryQuery(load, undefined, enabled)
+  const effectiveCategory = category || (type && result.data?.matchingCategories?.length === 1 ? result.data.matchingCategories[0] : '')
+  useEffect(() => { adjustCategorySort(sort, effectiveCategory, subcategory) }, [effectiveCategory, subcategory, sort])
   const change = <K extends keyof BrowseFilters>(key: K, value: BrowseFilters[K]): void => {
     const category = key === 'category' ? value : filters.category
     const subcategory = key === 'category' ? '' : key === 'subcategory' ? value : filters.subcategory

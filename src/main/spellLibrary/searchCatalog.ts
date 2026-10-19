@@ -100,5 +100,6 @@ export function searchCatalog(storage: SpellLibraryStorage, dataset: SpellDatase
   const records = rows.slice((page - 1) * pageSize, page * pageSize)
   evaluatePage(storage, dataset, records, evaluation)
   return { dataset, total: rows.length, page, pageSize, records, ...facets,
+    matchingCategories: [...new Set(rows.map((row) => row.category ?? ''))].sort(),
     ...(summary ? { groupCounts: summary.groupCounts, highlights: summary.highlights } : {}) }
 }

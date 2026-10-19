@@ -23,7 +23,7 @@ function BrowseResults({ browse, selected, onOpen, onToggle }: {
       <BrowseHighlights highlights={data.highlights} onSelect={(kind, group) => { browse.sort.selectSort(kind, 'desc'); browse.setGroup(group); browse.setPage(1) }} />
       <BrowseGroups group={browse.group} onChange={browse.setGroup} counts={data.groupCounts} />
       <ResultCount total={data.total} contentId={data.dataset?.contentId} />
-      <SpellBrowseTable records={data.records} selected={selected} sort={browse.sort} filters={browse.filters} metric={browse.metric} columns={browse.columns} onOpen={onOpen} onToggle={onToggle} />
+      <SpellBrowseTable records={data.records} selected={selected} sort={browse.sort} filters={{ ...browse.filters, category: browse.filters.category || (browse.filters.type && data.matchingCategories?.length === 1 ? data.matchingCategories[0] : '') }} metric={browse.metric} columns={browse.columns} onOpen={onOpen} onToggle={onToggle} />
       {data.total === 0 && <Typography>No matching spells in this captured dataset.</Typography>}
       {data.total > 40 && <Pagination count={Math.ceil(data.total / 40)} page={browse.page} onChange={(_e, value) => browse.setPage(value)} data-testid="spells-pagination" />}
     </>}

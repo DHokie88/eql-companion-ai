@@ -91,6 +91,8 @@ export interface SpellSearchResult {
   pageSize: number
   records: SpellSummary[]
   categories: string[]
+  /** Categories across every matching record, before pagination. */
+  matchingCategories?: string[]
   subcategories: string[]
   typeOptions?: { value: SpellBrowseType; label: string }[]
   groupCounts?: { ranked: number; zeroMana: number; excluded: number }

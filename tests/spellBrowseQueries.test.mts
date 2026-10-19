@@ -196,6 +196,16 @@ test('unified Browse sorts modeled rate across pages with unknown values last an
   } finally { f.close() }
 })
 
+test('matching categories describe the full filtered catalog, never only the visible page', () => {
+  const rows = Array.from({ length: 51 }, (_, i) => spellRow(i + 1, `Spell ${i}`))
+  rows[50][86] = '11'
+  const f = fixture(rows)
+  try {
+    assert.deepEqual(f.search({ type: 'dd', pageSize: 1 }).matchingCategories, ['Damage', 'Direct'])
+    assert.deepEqual(f.search({ type: 'dd', category: 'Damage', pageSize: 1 }).matchingCategories, ['Damage'])
+  } finally { f.close() }
+})
+
 test('arbitrary captured area caps include utility delivery labels without inventing caps or rain eligibility', () => {
   const damage = areaRow(1, 'Twenty Target Blast', 20), mez = areaRow(2, 'Thirty Target Mez', 30)
   const unknown = areaRow(3, 'Unknown Target Mez', 0), repeated = areaRow(4, 'Unverified Repeat', 30, true)

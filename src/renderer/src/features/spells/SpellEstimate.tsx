@@ -1,5 +1,5 @@
 import type { JSX } from 'react'
-import { Chip, Stack, Typography } from '@mui/material'
+import { Chip, Stack, Tooltip, Typography } from '@mui/material'
 import type { SpellCalculation } from '@shared/spellLibrary'
 import { SpellCastSummary } from './SpellCastSummary'
 
@@ -7,8 +7,9 @@ export function amount(value: number | null): string {
   return value === null ? 'Excluded' : value.toLocaleString(undefined, { maximumFractionDigits: 3 })
 }
 
-export function EstimateAmount({ calculation }: { calculation: SpellCalculation }): JSX.Element {
+export function EstimateAmount({ calculation, compact = false }: { calculation: SpellCalculation; compact?: boolean }): JSX.Element {
   const modifier = calculation.modifiers
+  if (compact) return <CompactEstimateAmount calculation={calculation} />
   const changedMode = modifier && modifier.mode !== 'client'
   return <Stack spacing={0.25} data-testid={`spells-amount-${calculation.id}-${calculation.metric}`}>
     <Typography variant="body2">
@@ -18,6 +19,17 @@ export function EstimateAmount({ calculation }: { calculation: SpellCalculation 
     <EstimateBadges calculation={calculation} />
     {calculation.analysis?.partial && <Chip size="small" color="warning" variant="outlined" label="Partial scenario" />}
   </Stack>
+}
+
+function CompactEstimateAmount({ calculation }: { calculation: SpellCalculation }): JSX.Element {
+  const modifier = calculation.modifiers
+  const title = [
+    modifier ? `Base ${amount(modifier.baseline.total)}; displayed ${amount(calculation.total)}.` : '',
+    modifier?.range ? `Focus roll ${amount(modifier.range.min)} - ${amount(modifier.range.max)}.` : '',
+    ...(modifier?.warnings ?? []), ...(calculation.analysis?.warnings ?? []), ...calculation.reasons,
+    'Open spell details for inputs and calculation scope.'
+  ].filter(Boolean).join(' ')
+  return <Tooltip disableInteractive title={title}><Typography variant="body2" data-testid={`spells-amount-${calculation.id}-${calculation.metric}`} sx={{ whiteSpace: 'nowrap' }}>{calculation.total === null ? '-' : amount(calculation.total)}</Typography></Tooltip>
 }
 
 export function EstimateBadges({ calculation }: { calculation: SpellCalculation }): JSX.Element | null {

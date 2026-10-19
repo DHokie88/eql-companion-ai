@@ -9,7 +9,7 @@ import { BROWSE_EXTRA_COLUMNS, browseColumns, browseTimingValue, type CategoryDi
 
 function CalculationCells({ record }: { record: SpellSummary }): JSX.Element {
   const calculation = record.calculations?.[0]
-  return <><TableCell align="center">{calculation ? <><EstimateAmount calculation={calculation} /><SpellCastSummary calculation={calculation} /></> : '-'}</TableCell>
+  return <><TableCell align="center">{calculation ? <><EstimateAmount calculation={calculation} compact /><SpellCastSummary calculation={calculation} compact /></> : '-'}</TableCell>
     <TableCell align="center">{record.mana}</TableCell><TableCell align="center">{record.mana === 0 ? 'Zero mana' : calculation ? amount(calculation.perMana) : '-'}</TableCell>
     <TableCell align="center">{amount(browseTimingValue(record, 'rate'))}</TableCell></>
 }

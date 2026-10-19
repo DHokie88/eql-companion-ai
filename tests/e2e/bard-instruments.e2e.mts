@@ -116,7 +116,7 @@ async function detailAppearance(page: Page): Promise<void> {
   await technical.click()
   await dumpArtifacts(page, 'spell-detail-mine-clean')
   assert.equal(await instruments.getByRole('columnheader', { name: 'Base effect', exact: true }).count(), 1)
-  await page.getByTestId('spells-detail').getByTestId('spells-mode-client').click()
+  await page.getByTestId('spells-detail').getByTestId('spells-mode-mine').click()
   await settle(() => instruments.getByRole('columnheader', { name: 'Base effect', exact: true }).count(), (count) => count === 0)
   await dumpArtifacts(page, 'spell-detail-client-clean')
 }

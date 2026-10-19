@@ -20,14 +20,14 @@ export function SpellWorkspaceControls({ state, classes, combo, level, statedLev
     <Stack direction="row" gap={1} alignItems="center" flexWrap="wrap">
       <ClassesPicker mode={state.mode} classes={classes} combo={combo} onChange={(mode, selected) => { state.setMode(mode); state.setClasses(selected) }} />
       <SpellLevelPicker level={level} onChange={state.setLevel} statedLevel={statedLevel} />
+      <SpellModifierControls state={modifiers}>
+        <SpellTargetControls targets={targets} disabled={!modifiers.context || modifiers.saving || modifiers.loading} onChange={(value) => {
+          state.setBrowseTargets(null)
+          if (modifiers.context) modifiers.update({ ...modifiers.context.preferences, targets: value })
+        }} />
+      </SpellModifierControls>
       <Tooltip disableInteractive title="Class/Level shows eligibility in the spell files. It does not confirm ownership, scroll availability, or acquisition. Yours badges show observed upgrades."><InfoOutlinedIcon sx={{ color: 'text.secondary', fontSize: 18 }} /></Tooltip>
     </Stack>
-    <SpellModifierControls state={modifiers} ids={state.selected}>
-      <SpellTargetControls targets={targets} disabled={!modifiers.context || modifiers.saving || modifiers.loading} onChange={(value) => {
-        state.setBrowseTargets(null)
-        if (modifiers.context) modifiers.update({ ...modifiers.context.preferences, targets: value })
-      }} />
-    </SpellModifierControls>
   </Stack>
 }
 
