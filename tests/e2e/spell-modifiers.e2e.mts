@@ -75,7 +75,11 @@ function stageSources(staged: FixtureLog): void {
   const focus = spellFields(110, 'Test Damage Focus', 174)
   focus[28] = '1'
   focus[173] = '1|124|10|20|100|0'
-  const sources = spellBundle([first.join('^'), second.join('^'), focus.join('^')])
+  // Real catalog shape: a castable player spell and a classless internal spell
+  // share a display name. Only the player ID may inherit cast/merge evidence.
+  const internal = spellFields(6864, 'Test Ember', 174)
+  internal[47] = '255'
+  const sources = spellBundle([first.join('^'), second.join('^'), focus.join('^'), internal.join('^')])
   for (const name of SPELL_SOURCE_FILES) writeFileSync(join(staged.installDir, name), sources[name])
 }
 

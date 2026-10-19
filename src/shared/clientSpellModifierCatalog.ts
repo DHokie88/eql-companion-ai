@@ -1,5 +1,6 @@
-/** Compact per-snapshot indexes. Full raw records stay in SQLite; ambiguity
- * detection includes every numeric ID, including internal and NPC records.
+/** Compact per-snapshot indexes. All records stay addressable by ID. Observed
+ * player casts resolve only against player-eligible records; focus joins still
+ * consider every record and retain their separate ambiguity checks.
  */
 import { decodeClientSpellFocus, type ClientSpellFocus } from './clientSpellFocus'
 import { spellLineKey } from './spellLines'
@@ -25,7 +26,7 @@ function validRank(rank: number): boolean { return Number.isInteger(rank) && ran
 
 export class SpellModifierCatalog {
   private readonly names = new Map<string, number[]>()
-  private readonly lines = new Map<string, number[]>()
+  private readonly playerLines = new Map<string, number[]>()
   private readonly identities = new Map<number, string>()
   private readonly focuses = new Map<number, ClientSpellFocus>()
   readonly instruments = new BardInstrumentCatalog(this.names)
@@ -35,7 +36,7 @@ export class SpellModifierCatalog {
       if (this.identities.has(record.id)) throw new Error(`Duplicate catalog spell ID ${record.id}.`)
       this.identities.set(record.id, record.name)
       append(this.names, nameKey(record.name), record.id)
-      append(this.lines, spellLineKey(record.name), record.id)
+      if (record.classes.length > 0) append(this.playerLines, spellLineKey(record.name), record.id)
       this.instruments.add(record)
       const focus = decodeClientSpellFocus(record)
       if (focus) this.focuses.set(record.id, focus)
@@ -73,7 +74,12 @@ export class SpellModifierCatalog {
       warnings.push('Mote rank is unknown; the partial estimate assumes the client base amount.')
       return { rank: null, source: 'unknown', warnings }
     }
-    if (this.lines.get(key)?.length !== 1 || nameKey(observation.name) !== nameKey(record.name)) {
+    if (record.classes.length === 0) {
+      warnings.push('This record has no player class levels; an observed player mote rank was not applied to it.')
+      return { rank: null, source: 'unknown', warnings }
+    }
+    const candidates = this.playerLines.get(key)
+    if (candidates?.length !== 1 || candidates[0] !== record.id || nameKey(observation.name) !== nameKey(record.name)) {
       warnings.push('The observed mote-rank name matches multiple client IDs or classic spell lines; no upgrade was assumed.')
       return { rank: null, source: 'unknown', warnings }
     }

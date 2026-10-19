@@ -9,8 +9,9 @@ import { spellRow, storageFixture, syntheticCatalog } from './spellLibrarySynthe
 
 function setup() {
   const storage = storageFixture()
-  const rows = ['Synthetic Ember', 'Synthetic Unknown', 'Synthetic Duplicate', 'Synthetic Duplicate', 'Synthetic Classic II'].map((name, i) => spellRow(i + 1, name))
+  const rows = ['Synthetic Ember', 'Synthetic Unknown', 'Synthetic Duplicate', 'Synthetic Duplicate', 'Synthetic Classic II', 'Synthetic Ember', 'Synthetic Duplicate'].map((name, i) => spellRow(i + 1, name))
   rows[3][47] = '255'
+  rows[5][47] = '255'
   const published = storage.storage.publish({ root: storage.root, reason: 'startup', parserVersion: '1', ...syntheticCatalog(rows) })
   const queries = new SpellLibraryQueries(storage.storage)
   const context: SpellModifierContext = { revision: 'character-a-ranks', modelVersion: '3', character: { key: 'character-a', name: 'A', server: 'test' },
@@ -30,7 +31,7 @@ test('all library views carry observed evidence independently of simulated group
     const known = search.records.find((r) => r.id === 1)!
     assert.equal(known.rankEvidence?.rank, 7)
     assert.equal(known.calculations?.[0].modifiers?.rank, 5)
-    for (const id of [2, 3, 4, 5]) assert.equal(search.records.find((r) => r.id === id)?.rankEvidence, null)
+    for (const id of [2, 3, 4, 5, 6, 7]) assert.equal(search.records.find((r) => r.id === id)?.rankEvidence, null)
     const detail = f.read<SpellDetailResult>('detail', { id: 1 })
     const compare = f.read<SpellComparisonResult>('compare', { ids: [1, 2], metric: 'damage' })
     const rankings = f.read<SpellRankingsResult>('rankings', { classes: ['WIZ'], categoryTab: 'dd', analysis: { scope: 'single', targets: 4 } })

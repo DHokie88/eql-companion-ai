@@ -36,7 +36,7 @@ test('a legacy upstream seen stamp cannot suppress Oracle news', () => {
 
 test('fresh, seen, explicit reset, and invalid stamps remain distinct', () => {
   assert.equal(whatsNewState(resolveOracleNotesSeen(undefined, undefined)).fresh, true)
-  assert.deepEqual(whatsNewState(resolveOracleNotesSeen('0.2.0', '1.26.1')).newVersions, [])
+  assert.deepEqual(whatsNewState(resolveOracleNotesSeen(latestReleaseVersion(), '1.26.1')).newVersions, [])
   assert.equal(resolveOracleNotesSeen(null, '1.26.1'), null)
   assert.equal(resolveOracleNotesSeen(undefined, 'junk'), null)
   assert.equal(resolveOracleNotesSeen('junk', '1.26.1'), '0.1.0')

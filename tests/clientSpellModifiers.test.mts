@@ -68,10 +68,20 @@ test('exact per-ID simulation beats global simulation and can preview below dete
   assert.equal(evaluate(record, context).modifiers?.simulated, false)
 })
 
-test('duplicate names including internal records and collapsed classic lines never borrow observed mote ranks', () => {
+test('a unique player spell keeps its observed rank when an internal record shares its name', () => {
+  const player = modifierSpell(), internal = modifierSpell({ id: 6864, classes: [] })
+  const context = modifierContext({ ranks: { 'synthetic bolt': { name: player.name, rank: 9 } } })
+  const catalog = new SpellModifierCatalog([internal, player])
+  assert.equal(catalog.observedRank(player, context).rank, 9)
+  assert.equal(catalog.observedRank(internal, context).rank, null)
+  assert.equal(evaluate(player, context, [internal]).total, 154)
+  assert.equal(evaluate(internal, context, [player]).total, 100)
+})
+
+test('duplicate player names and collapsed classic lines never borrow observed mote ranks', () => {
   const record = modifierSpell()
   const context = modifierContext({ ranks: { 'synthetic bolt': { name: record.name, rank: 9 } } })
-  for (const duplicate of [modifierSpell({ id: 102, classes: [] }), modifierSpell({ id: 102, name: 'Synthetic Bolt II' })]) {
+  for (const duplicate of [modifierSpell({ id: 102 }), modifierSpell({ id: 102, name: 'Synthetic Bolt II' })]) {
     const result = evaluate(record, context, [duplicate])
     assert.equal(result.total, 100)
     assert.equal(result.modifiers?.rankSource, 'unknown')
