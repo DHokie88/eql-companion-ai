@@ -118,6 +118,8 @@ export interface SpellCalculation {
   instant: number | null
   perTick: number | null
   ticks: number | null
+  /** Duration in six-second intervals, distinct from damage pulse count. */
+  durationTicks?: number
   total: number | null
   perMana: number | null
   reasons: string[]

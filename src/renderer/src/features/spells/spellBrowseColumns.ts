@@ -38,7 +38,7 @@ export function browseColumns(metric: SpellMetric, display: CategoryDisplay, vis
 export function browseTimingValue(record: SpellSummary, field: SpellBrowseSort): number | null {
   const rawFields: Partial<Record<SpellBrowseSort, 'castMs' | 'recoveryMs' | 'recastMs'>> = { cast: 'castMs', recovery: 'recoveryMs', recast: 'recastMs' }
   const rawField = rawFields[field]
-  if (rawField) return seconds(record[rawField])
+  if (rawField) return seconds(evaluatedTiming(record)[rawField])
   const calculation = record.calculations?.[0], analysis = calculation?.analysis
   if (!analysis || !calculation) return null
   switch (field) {
@@ -52,3 +52,4 @@ export function browseTimingValue(record: SpellSummary, field: SpellBrowseSort):
   }
 }
 function seconds(value: number | null | undefined): number | null { return value === undefined || value === null ? null : value / 1000 }
+function evaluatedTiming(record: SpellSummary) { return record.calculations?.[0]?.analysis?.timing ?? record }

@@ -2,6 +2,10 @@
 
 Date: 2026-10-19. Oracle 0.4.0.
 
+Follow-up: [Oracle 0.5.0 findings](spell-rank-followup-2026-10-19.md)
+correct the missing DoT pulse and add rank costs/timing and a 0-X breakdown.
+The findings below document the earlier 0.4.0 implementation.
+
 ## What the supplied files establish
 
 The inspected `C:/Users/andrew/EQL/spells_us.txt` has 74,001 records and SHA-256

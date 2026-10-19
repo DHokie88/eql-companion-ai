@@ -6,6 +6,9 @@ import { SpellCastSummary } from './SpellCastSummary'
 export function amount(value: number | null): string {
   return value === null ? 'Excluded' : value.toLocaleString(undefined, { maximumFractionDigits: 3 })
 }
+export function efficiencyAmount(value: number | null): string {
+  return value === null ? 'Excluded' : value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
 export function wholeAmount(value: number | null): string { return value === null ? '-' : Math.round(value).toLocaleString() }
 
 export function EstimateAmount({ calculation, compact = false }: { calculation: SpellCalculation; compact?: boolean }): JSX.Element {
@@ -58,7 +61,7 @@ export function EstimateExplanation({ calculation }: { calculation: SpellCalcula
 function RankExplanation({ calculation }: { calculation: SpellCalculation }): JSX.Element | null {
   const modifier = calculation.modifiers
   if (!modifier || modifier.mode === 'client') return null
-  return <Typography variant="caption">{modifier.rank === null ? 'Mote rank unknown; using base amount.' : `Mote rank ${rankLabel(modifier.rank)} (${modifier.rankSource}).`} Measured rank model {modifier.modelVersion}.</Typography>
+  return <Typography variant="caption">{modifier.rank === null ? 'Mote rank unknown; using base amount.' : `Mote rank ${rankLabel(modifier.rank)} (${modifier.rankSource}).`} Community rank model {modifier.modelVersion}.</Typography>
 }
 function InstrumentExplanation({ calculation }: { calculation: SpellCalculation }): JSX.Element | null {
   const instrument = calculation.modifiers?.instrument
@@ -83,7 +86,7 @@ export function SpellHpValues({ calculations, showExplanation = true }: { calcul
       <Typography variant="subtitle2">{calculation.metric === 'damage' ? 'Damage' : 'Healing'} · {calculation.analysis?.scope ?? 'per target'}</Typography>
       <EstimateAmount calculation={calculation} />
       <SpellCastSummary calculation={calculation} align="left" />
-      <Typography variant="caption" color="text.secondary">{calculation.total === null ? 'This HP formula is not supported yet. Open the calculation details for exclusions.' : `Instant ${amount(calculation.instant)} · Per tick ${amount(calculation.perTick)} × ${calculation.ticks ?? '?'} · Mana ${calculation.mana} · ${calculation.metric === 'damage' ? 'Damage' : 'Healing'}/Mana ${calculation.mana === 0 ? 'Zero mana' : amount(calculation.perMana)}`}</Typography>
+      <Typography variant="caption" color="text.secondary">{calculation.total === null ? 'This HP formula is not supported yet. Open the calculation details for exclusions.' : `Instant ${amount(calculation.instant)} · Per tick ${amount(calculation.perTick)} × ${calculation.ticks ?? '?'} · Mana ${calculation.mana} · ${calculation.metric === 'damage' ? 'Damage' : 'Healing'}/Mana ${calculation.mana === 0 ? 'Zero mana' : efficiencyAmount(calculation.perMana)}`}</Typography>
       {showExplanation && <EstimateExplanation calculation={calculation} />}
       {!showExplanation && <><RankExplanation calculation={calculation} /><InstrumentExplanation calculation={calculation} /></>}
     </Stack>)}

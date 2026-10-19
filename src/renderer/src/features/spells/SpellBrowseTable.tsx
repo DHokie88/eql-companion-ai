@@ -2,7 +2,7 @@ import { Fragment, type JSX } from 'react'
 import { Box, Button, IconButton, Stack, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import type { SpellBrowseSort, SpellMetric, SpellSummary } from '@shared/spellLibrary'
-import { amount, wholeAmount, EstimateAmount } from './SpellEstimate'
+import { amount, efficiencyAmount, wholeAmount, EstimateAmount } from './SpellEstimate'
 import { SpellNameButton, SpellSortHeader, type useSpellSort } from './SpellTableControls'
 import { SpellRowRank } from './SpellRowRank'
 import { SpellCastSummary } from './SpellCastSummary'
@@ -24,7 +24,7 @@ function CategoryCell({ record, display }: CellProps): JSX.Element {
 }
 function CalculationCell({ record, field }: CellProps): JSX.Element {
   const calculation = record.calculations?.[0]
-  if (field === 'efficiency') return <>{record.mana === 0 ? '-' : amount(calculation?.perMana ?? null)}</>
+  if (field === 'efficiency') return <>{record.mana === 0 ? '-' : efficiencyAmount(calculation?.perMana ?? null)}</>
   return <>{calculation ? <><EstimateAmount calculation={calculation} compact /><SpellCastSummary calculation={calculation} compact /></> : '-'}</>
 }
 function CompareCell({ record, selected, onToggle }: CellProps): JSX.Element {
@@ -40,7 +40,7 @@ function SpellCell(props: CellProps): JSX.Element {
     case 'subcategory': return <CategoryCell {...props} />
     case 'amount':
     case 'efficiency': return <CalculationCell {...props} />
-    case 'mana': return <>{record.mana}</>
+    case 'mana': return <>{record.calculations?.[0]?.mana ?? record.mana}</>
     case 'selected': return <CompareCell {...props} />
     default: return <TextCell record={record} field={field} />
   }

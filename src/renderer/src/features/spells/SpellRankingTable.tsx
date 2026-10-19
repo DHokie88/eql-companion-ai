@@ -1,14 +1,14 @@
 import { type JSX, useState } from 'react'
 import { Box, Button, Checkbox, FormControl, InputLabel, ListItemText, MenuItem, Select, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
 import type { SpellAnalysisSort, SpellRankingRow } from '@shared/spellAnalysis'
-import { amount, wholeAmount, EstimateAmount } from './SpellEstimate'
+import { amount, efficiencyAmount, wholeAmount, EstimateAmount } from './SpellEstimate'
 import { SpellNameButton, SpellSortHeader, type useSpellSort } from './SpellTableControls'
 import { SpellAnalysisBreakdown } from './SpellAnalysisBreakdown'
 import { useSpellWorkspaceState } from './spellWorkspace'
 import { SpellRowRank } from './SpellRowRank'
 import { SpellCastSummary } from './SpellCastSummary'
 
-const BASIC: { field: SpellAnalysisSort; label: string }[] = [{ field: 'id', label: 'ID' }, { field: 'name', label: 'Spell' }, { field: 'level', label: 'Level' }, { field: 'amount', label: 'Full amount' }, { field: 'mana', label: 'Client mana' }, { field: 'efficiency', label: 'Amount / mana' }, { field: 'rate', label: 'Modeled cycle DPS/HPS' }]
+const BASIC: { field: SpellAnalysisSort; label: string }[] = [{ field: 'id', label: 'ID' }, { field: 'name', label: 'Spell' }, { field: 'level', label: 'Level' }, { field: 'amount', label: 'Full amount' }, { field: 'mana', label: 'Mana' }, { field: 'efficiency', label: 'Amount / mana' }, { field: 'rate', label: 'Modeled cycle DPS/HPS' }]
 const OPTIONAL: { field: SpellAnalysisSort; label: string }[] = [{ field: 'cast', label: 'Cast (s)' }, { field: 'recovery', label: 'Recovery (s)' }, { field: 'recast', label: 'Recast (s)' }, { field: 'duration', label: 'Delivery (s)' }, { field: 'ticks', label: 'Ticks' }, { field: 'waves', label: 'Waves' }, { field: 'targets', label: 'Targets' }, { field: 'hits', label: 'Hits' }]
 function extraValue(row: SpellRankingRow, field: SpellAnalysisSort): number | null {
   const a = row.calculation.analysis
@@ -44,7 +44,7 @@ function RankingRows({ row, selected, expanded, expand, extras, onOpen, onToggle
   return <><TableRow data-testid="rankings-record" data-spell-id={row.id}>
     <TableCell>{row.id}</TableCell><TableCell sx={{ minWidth: 190 }}><SpellNameButton id={row.id} onOpen={() => onOpen(row.id, row.calculation.analysis?.scenario.scope)}>{row.name}</SpellNameButton><SpellRowRank id={row.id} name={row.name} evidence={row.rankEvidence} /><Typography variant="caption" display="block">{row.classes.map((c) => `${c.code} ${c.level}`).join(' · ')}</Typography></TableCell>
     <TableCell align="center">{row.learnedLevel ?? '-'}</TableCell><TableCell align="center"><EstimateAmount calculation={row.calculation} compact /><SpellCastSummary calculation={row.calculation} compact /></TableCell>
-    <TableCell align="center">{row.mana}</TableCell><TableCell align="center">{row.mana === 0 ? 'Zero mana' : amount(row.calculation.perMana)}</TableCell><TableCell align="center">{wholeAmount(row.calculation.analysis?.timing.rate ?? null)}</TableCell>
+    <TableCell align="center">{row.calculation.mana}</TableCell><TableCell align="center">{row.mana === 0 ? 'Zero mana' : efficiencyAmount(row.calculation.perMana)}</TableCell><TableCell align="center">{wholeAmount(row.calculation.analysis?.timing.rate ?? null)}</TableCell>
     {extras.map((c) => <TableCell key={c.field} align="center">{amount(extraValue(row, c.field))}</TableCell>)}
     <TableCell><Button size="small" disabled={!selected.includes(row.id) && selected.length >= 4} onClick={() => onToggle(row.id)} data-testid={`rankings-compare-${row.id}`}>{selected.includes(row.id) ? 'Selected' : 'Add'}</Button><Button size="small" onClick={expand} aria-expanded={expanded}>Explain</Button></TableCell>
   </TableRow>{expanded && <TableRow><TableCell colSpan={BASIC.length + extras.length + 1}><SpellAnalysisBreakdown calculation={row.calculation} /></TableCell></TableRow>}</>

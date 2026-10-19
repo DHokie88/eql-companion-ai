@@ -21,6 +21,15 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.5.0',
+    date: '2026-10-19',
+    entries: [
+      { kind: 'fixed', text: 'Damage/mana now displays exactly two decimal places across Browse, comparison, rankings and Leveling.', fromReport: true },
+      { kind: 'fixed', text: 'Ordinary DoT totals include the application pulse observed in combat logs, separately from duration. Modeled mana and casting cycles now apply rank reductions consistently.' },
+      { kind: 'new', text: 'Spell details show a rank 0-X breakdown of initial hits, periodic pulses, duration, mana and cast time. Unverified hybrid initial damage is identified explicitly.' }
+    ]
+  },
+  {
     version: '0.4.0',
     date: '2026-10-19',
     entries: [

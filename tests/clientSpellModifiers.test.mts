@@ -51,7 +51,7 @@ test('detected I stays unknown while exact per-spell I overrides higher evidence
 test('mote rounding occurs per HP slot before instant/periodic aggregation and after client caps', () => {
   const record = modifierSpell({ effects: [effect(79, -8), effect(0, -8)], durationFormula: 7, durationCap: 3 })
   const result = evaluate(record, emulation({ rank: 2, focus: 'none' }))
-  assert.deepEqual([result.instant, result.perTick, result.ticks, result.total], [8, 8, 3, 32])
+  assert.deepEqual([result.instant, result.perTick, result.ticks, result.total], [8, 8, 4, 40])
   const capped = modifierSpell({ effects: [{ ...effect(0, -100), calc: 103, max: 150 }] })
   assert.equal(evaluate(capped, emulation({ rank: 5, focus: 'none' })).total, 195)
 })
@@ -122,16 +122,16 @@ test('best qualifying focus uses midpoint, stable numeric ID tie break, and neve
   assert.equal(result.modifiers?.simulated, true)
 })
 
-test('focus follows rank on each slot while duration, mana, target, cast inputs and source record stay unchanged', () => {
+test('focus follows rank on each slot with modeled rank cost while target and source record stay unchanged', () => {
   const record = modifierSpell({ durationFormula: 7, durationCap: 3, effects: [effect(79, -8), effect(0, -8)] })
   const before = structuredClone(record)
   const result = evaluate(record, emulation({ rank: 2, focus: 'selected', focusIds: [9001] }), [modifierFocus()])
-  assert.deepEqual([result.instant, result.perTick, result.total], [8 * 1.105, 8 * 1.105, 32 * 1.105])
-  assert.equal(result.perMana, Math.round(result.total / record.mana * 1_000_000) / 1_000_000)
-  assert.equal(result.mana, record.mana)
+  assert.deepEqual([result.instant, result.perTick, result.total], [8 * 1.105, 8 * 1.105, 40 * 1.105])
+  assert.equal(result.perMana, result.total / result.mana)
+  assert.equal(result.mana, Math.round(record.mana * 0.96))
   assert.equal(result.target, record.target)
   assert.deepEqual(record, before)
-  assert.match(result.restrictions.join(' '), /client mana cost/)
+  assert.match(result.restrictions.join(' '), /Mana uses -2% per rank/)
 })
 
 test('focus qualification is preserved on simulations and zero-mana never creates efficiency', () => {

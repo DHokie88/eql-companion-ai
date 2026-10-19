@@ -40,7 +40,7 @@ test('ordinary one-target client calculations retain baseline amounts, zero mana
     assert.deepEqual(withoutAnalysis, baseline)
     assert.equal(result.analysis.singleTargetTotal, baseline.total)
     assert.equal(result.analysis.contextRevision, null)
-    assert.equal(result.analysis.modelVersion, '6')
+    assert.equal(result.analysis.modelVersion, '7')
   }
 })
 
@@ -51,13 +51,13 @@ test('Base and small per-effect I rounding retain totals consistently with the e
     const result = analyze(record, { context })
     const original = evaluateModifiedSpell(record, { level: 50, metric: 'damage', classes: ['WIZ'], context }, new SpellModifierCatalog([record]))
     assert.equal(result.total, original.total)
-    assert.equal(result.total, 32)
+    assert.equal(result.total, 40)
     assert.deepEqual(result.modifiers, original.modifiers)
   }
 })
 
 test('explicit rank I applies per-effect damage and healing rounding in evaluation and contributions', () => {
-  for (const [metric, sign, expected] of [['damage', -1, 126], ['healing', 1, 123]]) {
+  for (const [metric, sign, expected] of [['damage', -1, 136], ['healing', 1, 123]]) {
     const record = ordinary({ beneficial: metric === 'healing', durationFormula: 7, durationCap: 2,
       effects: [effect(79, sign * 100), { ...effect(0, sign * 10), slot: 2 }] })
     const context = emulate({ rank: 1 })
@@ -65,7 +65,7 @@ test('explicit rank I applies per-effect damage and healing rounding in evaluati
     assert.equal(result.total, expected)
     assert.deepEqual(result.analysis.contributions.map((row) => row.afterRank), [metric === 'damage' ? 106 : 103, 10])
     assert.equal(result.analysis.contributions.reduce((total, row) => total + row.total, 0), result.total)
-    assert.equal(result.modifiers.baseline.total, 120)
+    assert.equal(result.modifiers.baseline.total, metric === 'damage' ? 130 : 120)
   }
 })
 
@@ -73,11 +73,11 @@ test('contributions expose per-effect rank rounding, focus, periodic ticks and t
   const record = ordinary({ durationFormula: 7, durationCap: 3, effects: [effect(79, -8), { ...effect(0, -8), slot: 2 }] })
   const context = emulate({ rank: 2, focus: 'selected', focusIds: [9001] })
   const result = analyze(record, { context }, [modifierFocus()])
-  assert.deepEqual(result.analysis.contributions.map((row) => [row.clientAmount, row.afterRank, row.periodic, row.ticks, row.hits]), [[8, 8, false, null, 1], [8, 8, true, 3, 1]])
+  assert.deepEqual(result.analysis.contributions.map((row) => [row.clientAmount, row.afterRank, row.periodic, row.ticks, row.hits]), [[8, 8, false, null, 1], [8, 8, true, 4, 1]])
   near(result.analysis.contributions[0].afterFocus, 8 * 1.105)
   near(result.analysis.contributions.reduce((sum, row) => sum + row.total, 0), result.total)
-  near(result.total, 32 * 1.105)
-  assert.equal(result.modifiers.baseline.total, 32)
+  near(result.total, 40 * 1.105)
+  assert.equal(result.modifiers.baseline.total, 40)
   assert.equal(result.analysis.contextRevision, 'context-a')
 })
 
@@ -111,11 +111,11 @@ test('ordinary AOE applies chosen target count, captured cap and spell maximum w
 test('ordinary packs scale modifier baselines, focus ranges and each contribution into the same scope', () => {
   const record = area(8, { durationFormula: 7, durationCap: 3, effects: [effect(79, -8), { ...effect(0, -8), slot: 2 }] })
   const result = analyze(record, { ...pack(), context: emulate({ rank: 2, focus: 'selected', focusIds: [9001] }) }, [modifierFocus()])
-  near(result.total, 32 * 1.105 * 4)
-  assert.equal(result.modifiers.baseline.total, 128)
-  near(result.modifiers.range.min, 32 * 1.01 * 4)
-  near(result.modifiers.range.max, 32 * 1.2 * 4)
-  near(result.analysis.singleTargetTotal, 32 * 1.105)
+  near(result.total, 40 * 1.105 * 4)
+  assert.equal(result.modifiers.baseline.total, 160)
+  near(result.modifiers.range.min, 40 * 1.01 * 4)
+  near(result.modifiers.range.max, 40 * 1.2 * 4)
+  near(result.analysis.singleTargetTotal, 40 * 1.105)
   near(result.analysis.contributions.reduce((sum, row) => sum + row.total, 0), result.total)
 })
 
@@ -245,8 +245,8 @@ test('cycle timing uses cast plus the largest of recovery, recast and delivery',
   const samples = [
     [ordinary({ castMs: 2000, recoveryMs: 1500, recastMs: 0 }), 0, 3500],
     [ordinary({ castMs: 2000, recoveryMs: 1500, recastMs: 8000 }), 0, 10000],
-    [ordinary({ castMs: 2000, durationFormula: 7, durationCap: 5 }), 30000, 32000],
-    [ordinary({ castMs: 2000, recastMs: 40000, durationFormula: 7, durationCap: 5 }), 30000, 42000],
+    [ordinary({ castMs: 2000, durationFormula: 7, durationCap: 5 }), 36000, 38000],
+    [ordinary({ castMs: 2000, recastMs: 40000, durationFormula: 7, durationCap: 5 }), 36000, 42000],
     [ordinary({ effects: [effect(79, -100)], durationFormula: 7, durationCap: 5 }), 0, 2500]
   ]
   for (const [record, delivery, cycle] of samples) {

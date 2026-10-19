@@ -81,17 +81,18 @@ function recordSortValue(record: SpellSummary, field: Exclude<SpellBrowseSort, '
     case 'category':
     case 'subcategory': return record[field] || null
     case 'type': return summaryTypeLabel(record)
-    case 'mana': return record.mana
+    case 'mana': return summaryMana(record)
     case 'selected': return Number(selected.has(record.id))
     default: return null
   }
 }
+function summaryMana(record: SpellSummary): number { return record.calculations?.[0]?.mana ?? record.mana }
 
 
 function timingSortValues(record: SpellSummary): Partial<Record<SpellBrowseSort, number | null | undefined>> {
   const timing = record.calculations?.[0]?.analysis?.timing
-  return { rate: timing?.rate, cast: record.castMs ?? timing?.castMs, recovery: record.recoveryMs ?? timing?.recoveryMs,
-    recast: record.recastMs ?? timing?.recastMs, duration: timing?.deliveryMs }
+  return { rate: timing?.rate, cast: timing?.castMs ?? record.castMs, recovery: timing?.recoveryMs ?? record.recoveryMs,
+    recast: timing?.recastMs ?? record.recastMs, duration: timing?.deliveryMs }
 }
 function analysisSortValue(record: SpellSummary, field: SpellBrowseSort): number | null {
   const calculation = record.calculations?.[0], analysis = calculation?.analysis

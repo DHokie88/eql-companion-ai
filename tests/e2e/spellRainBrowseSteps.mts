@@ -23,7 +23,7 @@ export async function browseRainChecks(page: Page): Promise<void> {
     assert.equal(await settle(() => row.getByTestId('rain-summary-302').innerText(), (value) => value === compact), compact)
     assert.doesNotMatch(await row.getByTestId('spells-amount-302-damage').innerText(), /Partial|Range|→/)
     const efficiencyColumn = await page.getByRole('table', { name: 'Spell catalog' }).locator('thead th').evaluateAll((headers) => headers.findIndex((header) => header.textContent?.replace(/\s/g, '').includes('Damage/Mana')))
-    assert.equal(await row.locator('td').nth(efficiencyColumn).innerText(), targets === 1 ? '6' : '8', 'efficiency uses one client mana payment')
+    assert.equal(await row.locator('td').nth(efficiencyColumn).innerText(), targets === 1 ? '6.00' : '8.00', 'efficiency uses one client mana payment')
   }
   await choose(page, 'spells-target-count', '3 targets')
   assert.equal(await settle(() => row.getByTestId('rain-summary-302').innerText(), (value) => value === '20 × 4'), '20 × 4')

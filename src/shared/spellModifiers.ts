@@ -1,6 +1,6 @@
 import type { SpellCalculation, SpellClass } from './spellLibrary'
 
-export const SPELL_MODIFIER_MODEL_VERSION = '6'
+export const SPELL_MODIFIER_MODEL_VERSION = '7'
 export interface SpellRankEvidence { rank: number; characterKey: string; contextRevision: string; snapshotId: string }
 export type SpellValueMode = 'client' | 'mine' | 'emulate'
 export interface SpellEmulation {
@@ -36,7 +36,7 @@ export interface SpellModifierApplied {
   mode: SpellValueMode
   modelVersion: string
   contextRevision: string
-  baseline: Pick<SpellCalculation, 'instant' | 'perTick' | 'ticks' | 'total' | 'perMana'>
+  baseline: Pick<SpellCalculation, 'instant' | 'perTick' | 'ticks' | 'total' | 'perMana' | 'mana'>
   rank: number | null
   rankSource: 'detected' | 'simulated' | 'unknown'
   focus: { id: number; name: string; item: string; minPct: number; maxPct: number; pct: number } | null

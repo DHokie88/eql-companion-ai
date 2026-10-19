@@ -11,6 +11,7 @@ import { SpellEffectSummary, SpellTechnicalEffects } from './SpellEffectSummary'
 import { BardSongInstruments } from './BardSongInstruments'
 import { SpellDetailSection } from './SpellDetailSection'
 import { SpellRowRank } from './SpellRowRank'
+import { SpellRankProgression } from './SpellRankProgression'
 
 export function LibrarySpellDetail({ id, snapshotId, level, evaluation, analysis, controls, onBack, onWiki, onHistory }: {
   id: number; snapshotId?: string; onBack: () => void; onWiki?: (name: string) => void; onHistory: (id: number) => void
@@ -37,6 +38,7 @@ export function LibrarySpellDetail({ id, snapshotId, level, evaluation, analysis
       <DetailTiming record={record} />
       <DetailInstruments presentation={data.presentation} />
       <DetailCalculations calculations={data.calculations} />
+      <DetailRankProgression record={record} level={level} calculations={data.calculations} />
       <Stack spacing={1.5}><Typography variant="h6">Client data</Typography>
       <Typography variant="caption" color="text.secondary">Client layout {record.layout} · First observed {data.dataset && new Date(data.dataset.firstObserved).toLocaleString()} · Revision {data.dataset?.contentId.slice(0, 14)}. Eligibility does not confirm ownership or acquisition.</Typography>
       <Stack direction="row" spacing={1} flexWrap="wrap"><Button size="small" onClick={() => onHistory(id)}>Spell timeline</Button><SupplementaryLink name={record.name} open={onWiki} /></Stack>
@@ -54,12 +56,15 @@ export function LibrarySpellDetail({ id, snapshotId, level, evaluation, analysis
 function DetailCalculations({ calculations }: { calculations?: SpellCalculation[] }): JSX.Element | null {
   return calculations?.length ? <SpellDetailSection><Stack spacing={2.5}><Typography variant="h6">Damage and healing estimates</Typography><SpellHpValues calculations={calculations} showExplanation={false} />{calculations.map((c) => <SpellAnalysisBreakdown key={c.metric} calculation={c} />)}</Stack></SpellDetailSection> : null
 }
+function DetailRankProgression({ record, level, calculations }: { record: ClientSpellRecord; level?: number; calculations?: SpellCalculation[] }): JSX.Element | null {
+  return calculations?.some((c) => c.total !== null) ? <SpellRankProgression record={record} level={level ?? 50} metric={record.beneficial ? 'healing' : 'damage'} /> : null
+}
 function DetailDescription({ record, presentation }: { record: ClientSpellRecord; presentation?: import('@shared/clientSpellDescriptions').SpellPresentation }): JSX.Element {
   const description = presentation?.description ?? record.description
   return <Typography data-testid="spell-description" sx={{ whiteSpace: 'pre-wrap', maxWidth: '90ch', pt: 0.5 }}>{description || 'No description in the spell files.'}</Typography>
 }
 function DetailTiming({ record }: { record: ClientSpellRecord }): JSX.Element {
-  return <SpellDetailSection><Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: 'repeat(4, 1fr)' }, gap: 3 }}>{Object.entries({ 'Mana': record.mana, 'Cast time': `${record.castMs / 1000}s`, Recovery: `${record.recoveryMs / 1000}s`, Recast: `${record.recastMs / 1000}s` }).map(([label, value]) => <Box key={label}><Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.5 }}>{label}</Typography><Typography variant="h6">{value}</Typography></Box>)}</Box></SpellDetailSection>
+  return <SpellDetailSection><Typography variant="caption" color="text.secondary">Client base values (rank 0)</Typography><Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: 'repeat(4, 1fr)' }, gap: 3 }}>{Object.entries({ 'Mana': record.mana, 'Cast time': `${record.castMs / 1000}s`, Recovery: `${record.recoveryMs / 1000}s`, Recast: `${record.recastMs / 1000}s` }).map(([label, value]) => <Box key={label}><Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.5 }}>{label}</Typography><Typography variant="h6">{value}</Typography></Box>)}</Box></SpellDetailSection>
 }
 function DetailInstruments({ presentation }: { presentation?: import('@shared/clientSpellDescriptions').SpellPresentation }): JSX.Element | null {
   return presentation?.bard ? <BardSongInstruments song={presentation.bard} /> : null

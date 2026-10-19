@@ -1,7 +1,7 @@
 import type { JSX } from 'react'
 import { Button, Checkbox, FormControl, InputLabel, ListItemText, MenuItem, Select, Stack, Tab, Tabs } from '@mui/material'
 import type { SpellBrowseSort, SpellMetric, SpellSearchQuery, SpellSearchResult } from '@shared/spellLibrary'
-import { amount, wholeAmount } from './SpellEstimate'
+import { efficiencyAmount, wholeAmount } from './SpellEstimate'
 import { selectableBrowseColumns } from './spellBrowseColumns'
 export function BrowseColumnPicker({ metric, columns, setColumns }: {
   metric: SpellMetric; columns: SpellBrowseSort[]; setColumns: (columns: SpellBrowseSort[]) => void
@@ -33,4 +33,4 @@ export function BrowseHighlights({ highlights = [], onSelect }: {
     </Button>
   })}</Stack>
 }
-function highlightValue(kind: string, value: number | null): string { return kind === 'efficiency' ? amount(value) : wholeAmount(value) }
+function highlightValue(kind: string, value: number | null): string { return kind === 'efficiency' ? efficiencyAmount(value) : wholeAmount(value) }

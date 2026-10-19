@@ -3,6 +3,10 @@
 Subsequent screenshot feedback is addressed in Oracle 0.4.0. See
 [the rank-source audit and Browse corrections](docs/verification/spell-ranks-and-browse-2026-10-19.md).
 
+The 0.5.0 follow-up adds two-decimal efficiency, corrects the missing ordinary
+DoT pulse and documents the remaining hybrid initial-hit uncertainty. See
+[the follow-up evidence](docs/verification/spell-rank-followup-2026-10-19.md).
+
 The Windows recovery below is complete. The original Hermes handoff is preserved
 after this closure as historical evidence, not a remaining task list.
 

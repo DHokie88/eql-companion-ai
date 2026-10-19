@@ -2,7 +2,7 @@ import { type JSX, useState } from 'react'
 import { Alert, Box, Button, Stack, Table, TableBody, TableCell, TableHead, TableRow, TableSortLabel, Typography } from '@mui/material'
 import type { SpellAnalysisSort, SpellLibraryFocus, SpellRankingRow, SpellRankingsResult } from '@shared/spellAnalysis'
 import type { SpellCalculation, SpellSortDirection } from '@shared/spellLibrary'
-import { amount, wholeAmount, EstimateAmount, EstimateExplanation } from '../spells/SpellEstimate'
+import { efficiencyAmount, wholeAmount, EstimateAmount, EstimateExplanation } from '../spells/SpellEstimate'
 import { openLevelingSpells } from './useLevelingSpellAnalysis'
 
 type Group = 'ranked' | 'zero-mana' | 'excluded'
@@ -49,7 +49,7 @@ function CompactSpellRow({ row, focus }: { row: SpellRankingRow; focus: SpellLib
       <TableCell align="right" title={calculation.analysis?.timing.reason ?? undefined}>{calculation.analysis?.timing.rate === null || !calculation.analysis ? 'N/A' : wholeAmount(calculation.analysis.timing.rate)}</TableCell>
       <TableCell align="right" sx={{ '& .MuiTypography-root': { fontSize: 11 }, '& .MuiStack-root': { alignItems: 'flex-end' } }}><EstimateAmount calculation={calculation} /></TableCell>
       <TableCell align="right">{calculation.mana}</TableCell>
-      <TableCell align="right">{calculation.mana === 0 ? 'Zero mana' : amount(calculation.perMana)}</TableCell>
+      <TableCell align="right">{calculation.mana === 0 ? 'Zero mana' : efficiencyAmount(calculation.perMana)}</TableCell>
     </TableRow>
     <TableRow><TableCell colSpan={4}>
       <Button size="small" onClick={() => setExplaining(!explaining)} sx={{ p: 0, fontSize: 10 }} aria-expanded={explaining}>How calculated</Button>

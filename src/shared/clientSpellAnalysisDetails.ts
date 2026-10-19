@@ -1,5 +1,5 @@
 import { clientSpellEffectAmount } from './clientSpellCalculations'
-import { rankedHpAmount } from './clientSpellRankRules'
+import { rankedHpAmount, rankHpTiming } from './clientSpellRankRules'
 import type { ClientSpellEffect, ClientSpellRecord, SpellCalculation } from './spellLibrary'
 import type { SpellAnalysisTiming, SpellEffectContribution } from './spellAnalysis'
 import type { ClientSpellMechanics } from './clientSpellMechanics'
@@ -22,7 +22,7 @@ export function scaleAnalysisCalculation(calculation: SpellCalculation, factor: 
   return {
     ...scaled, modifiers: {
       ...calculation.modifiers,
-      baseline: { ...baseline, instant: multiply(baseline.instant, factor), perTick: multiply(baseline.perTick, factor), total: baselineTotal, perMana: efficiency(baselineTotal, calculation.mana) },
+      baseline: { ...baseline, instant: multiply(baseline.instant, factor), perTick: multiply(baseline.perTick, factor), total: baselineTotal, perMana: efficiency(baselineTotal, baseline.mana) },
       equippedInstrument: scaleEquippedInstrument(calculation, factor),
       range: range && factor !== null ? { min: range.min * factor, max: range.max * factor } : null
     }
@@ -36,12 +36,14 @@ function scaleEquippedInstrument(calculation: SpellCalculation, factor: number |
 }
 
 export function analysisTiming(record: ClientSpellRecord, calculation: SpellCalculation, mechanics: ClientSpellMechanics): SpellAnalysisTiming {
-  const { castMs, recoveryMs, recastMs } = record
+  const { castMs, recoveryMs, recastMs } = rankHpTiming(record, calculation.metric, calculation.total === null ? null : calculation.modifiers?.rank ?? null)
   const base = { castMs, recoveryMs, recastMs, deliveryMs: null, cycleMs: null, rate: null }
   if ([castMs, recoveryMs, recastMs, record.aoeDurationMs].some((value) => !Number.isFinite(value) || value < 0)) {
     return { ...base, reason: 'Negative or unknown client timing is not modeled.' }
   }
   if (mechanics.reason || calculation.total === null) return { ...base, reason: 'Timing requires a supported complete HP calculation.' }
+  // Include the possible wait for the first server pulse: duration alone can
+  // understate delivery by up to one tick. This is a conservative cycle window.
   const periodicMs = (calculation.perTick ?? 0) > 0 ? (calculation.ticks ?? 0) * 6000 : 0
   const deliveryMs = Math.max(periodicMs, mechanics.deliveryMs)
   const cycleMs = castMs + Math.max(recoveryMs, recastMs, deliveryMs)

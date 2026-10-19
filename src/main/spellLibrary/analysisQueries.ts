@@ -14,7 +14,7 @@ import { clientSpellDescription } from '../../shared/clientSpellDescriptions'
 interface RankingGroups { ranked: SpellRankingRow[]; zeroMana: SpellRankingRow[]; excluded: SpellRankingRow[] }
 
 function coreSortValues(row: SpellRankingRow) {
-  return { id: row.id, name: row.name, level: row.learnedLevel ?? null, amount: row.calculation.total, mana: row.mana, efficiency: row.calculation.perMana }
+  return { id: row.id, name: row.name, level: row.learnedLevel ?? null, amount: row.calculation.total, mana: row.calculation.mana, efficiency: row.calculation.perMana }
 }
 function timingSortValues(row: SpellRankingRow) {
   const analysis = row.calculation.analysis

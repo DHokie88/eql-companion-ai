@@ -77,7 +77,7 @@ function calculationProblems(record: ClientSpellRecord, effects: ClientSpellEffe
 /** Runs only after all formulas and durations pass validation, once per HP slot. */
 export type ClientSpellAmountTransform = (amount: number, effect: ClientSpellEffect) => number
 
-function finishCalculation(result: SpellCalculation, effects: ClientSpellEffect[], level: number, options: { ticks: number; transform?: ClientSpellAmountTransform }): SpellCalculation {
+function finishCalculation(result: SpellCalculation, effects: ClientSpellEffect[], level: number, options: { ticks: number; applicationPulse: boolean; transform?: ClientSpellAmountTransform }): SpellCalculation {
   const { ticks, transform } = options
   let instant = 0
   let perTick = 0
@@ -88,9 +88,15 @@ function finishCalculation(result: SpellCalculation, effects: ClientSpellEffect[
     if (effect.spa === 0 && ticks > 0) perTick += amount
     else instant += amount
   }
-  const total = instant + perTick * ticks
+  // EQL logs show an extra first periodic damage pulse, then one per duration
+  // interval. Venom X: 9 intervals, 10 pulses; Ignite Blood VIII: 10, 11.
+  // The first pulse waits for server tick phase (observed 0-6s after landing).
+  // Healing and bard songs are not validated here and keep their existing count.
+  const damagePulses = options.applicationPulse && perTick > 0 && ticks > 0
+  const pulses = ticks + (damagePulses ? 1 : 0)
+  const total = instant + perTick * pulses
   return {
-    ...result, instant, perTick, ticks, total, perMana: result.mana > 0 ? Math.round(total / result.mana * 1_000_000) / 1_000_000 : null,
+    ...result, instant, perTick, ticks: pulses, ...(damagePulses ? { durationTicks: ticks } : {}), total, perMana: result.mana > 0 ? Math.round(total / result.mana * 1_000_000) / 1_000_000 : null,
     restrictions: [...result.restrictions, ...(result.mana <= 0 ? ['Zero mana: excluded from efficiency rankings; amount remains available.'] : [])]
   }
 }
@@ -122,7 +128,7 @@ export function calculateClientSpell(record: ClientSpellRecord, level: number, m
   result.reasons = calculationProblems(record, effects, level)
   const ticks = clientSpellDurationTicks(record, level)
   if (result.reasons.length || ticks === null) return result
-  return finishCalculation(result, effects, level, { ticks, transform })
+  return finishCalculation(result, effects, level, { ticks, transform, applicationPulse: metric === 'damage' && !record.classes.some((entry) => entry.code === 'BRD') })
 }
 
 function requestProblem(level: number, metric: SpellMetric): string | null {

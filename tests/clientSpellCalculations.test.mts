@@ -16,7 +16,7 @@ function hp(calc: number, base = -100, max = 0, spa = 79) {
 test('instant SPA 79 stays instant on a duration spell and combines with timed SPA 0', () => {
   const record = spell({ durationFormula: 7, durationCap: 5, effects: [hp(100, -50), { ...hp(103, -20, 100, 0), slot: 2 }] })
   const result = calculateClientSpell(record, 20, 'damage')
-  assert.deepEqual([result.instant, result.perTick, result.ticks, result.total, result.perMana], [50, 60, 5, 350, 8.75])
+  assert.deepEqual([result.instant, result.perTick, result.ticks, result.total, result.perMana], [50, 60, 6, 410, 10.25])
   assert.deepEqual(result.reasons, [])
 })
 
@@ -67,15 +67,16 @@ const durationCases: [number, number][] = [
 for (const [formula, ticks] of durationCases) {
   test(`client duration formula ${formula} supports full-duration totals`, () => {
     const result = calculateClientSpell(spell({ durationFormula: formula, effects: [hp(100, -10, 0, 0)] }), 21, 'damage')
-    assert.equal(result.ticks, ticks)
-    assert.equal(result.total, formula === 0 ? 10 : 10 * ticks)
+    assert.equal(result.durationTicks ?? 0, ticks)
+    assert.equal(result.ticks, ticks > 0 ? ticks + 1 : 0)
+    assert.equal(result.total, formula === 0 ? 10 : 10 * (ticks + 1))
   })
 }
 
 test('duration truncation, low-level minimums and positive duration caps', () => {
-  assert.equal(calculateClientSpell(spell({ durationFormula: 1, effects: [hp(100, -10, 0, 0)] }), 1, 'damage').ticks, 1)
-  assert.equal(calculateClientSpell(spell({ durationFormula: 12, effects: [hp(100, -10, 0, 0)] }), 1, 'damage').ticks, 1)
-  assert.equal(calculateClientSpell(spell({ durationFormula: 3, durationCap: 7, effects: [hp(100, -10, 0, 0)] }), 21, 'damage').total, 70)
+  assert.equal(calculateClientSpell(spell({ durationFormula: 1, effects: [hp(100, -10, 0, 0)] }), 1, 'damage').ticks, 2)
+  assert.equal(calculateClientSpell(spell({ durationFormula: 12, effects: [hp(100, -10, 0, 0)] }), 1, 'damage').ticks, 2)
+  assert.equal(calculateClientSpell(spell({ durationFormula: 3, durationCap: 7, effects: [hp(100, -10, 0, 0)] }), 21, 'damage').total, 80)
 })
 
 test('zero-mana spells keep amount but have no efficiency value', () => {

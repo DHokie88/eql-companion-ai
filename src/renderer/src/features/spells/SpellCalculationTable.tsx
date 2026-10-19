@@ -2,7 +2,7 @@ import type { JSX } from 'react'
 import { Box, Button, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
 import type { SpellCalculation } from '@shared/spellLibrary'
 import { sortSpellCalculations, type SpellCalculationSort } from '@shared/clientSpellBrowse'
-import { amount, wholeAmount, EstimateAmount } from './SpellEstimate'
+import { amount, efficiencyAmount, wholeAmount, EstimateAmount } from './SpellEstimate'
 import { SpellCastSummary } from './SpellCastSummary'
 import { SpellAnalysisBreakdown } from './SpellAnalysisBreakdown'
 import { spellComparisonDifferences, type SpellDifference } from '@shared/spellAnalysisPresentation'
@@ -32,7 +32,7 @@ function CalculationRow({ row, onOpen, onRemove, reference, evidence }: { row: S
     <TableCell sx={{ minWidth: 190 }}><SpellNameButton id={row.id} onOpen={onOpen}>{row.name}</SpellNameButton><SpellRowRank id={row.id} name={row.name} evidence={evidence} /><Typography variant="caption" display="block">ID {row.id} · target {row.target}</Typography></TableCell>
     <TableCell align="right">{amount(row.instant)}</TableCell><PeriodicCell row={row} />
     <TableCell align="right"><EstimateAmount calculation={row} compact /><SpellCastSummary calculation={row} compact />{showDifference && <Delta value={differences.amount} />}</TableCell><TableCell align="right">{row.mana}{showDifference && <Delta value={differences.mana} />}</TableCell>
-    <TableCell align="right">{row.mana === 0 ? 'Zero mana' : amount(row.perMana)}{showDifference && <Delta value={differences.efficiency} />}</TableCell>
+    <TableCell align="right">{row.mana === 0 ? 'Zero mana' : efficiencyAmount(row.perMana)}{showDifference && <Delta value={differences.efficiency} />}</TableCell>
     <TableCell align="right">{wholeAmount(row.analysis?.timing.rate ?? null)}{showDifference && <Delta value={differences.rate} />}</TableCell>
     <TableCell sx={{ minWidth: 180 }}><Typography variant="caption">{row.analysis?.scope ?? 'One target'}</Typography><SpellAnalysisBreakdown calculation={row} /></TableCell>
     {onRemove && <TableCell><Button size="small" onClick={() => onRemove(row.id)}>Remove</Button></TableCell>}
