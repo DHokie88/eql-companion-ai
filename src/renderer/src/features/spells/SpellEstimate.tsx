@@ -6,6 +6,7 @@ import { SpellCastSummary } from './SpellCastSummary'
 export function amount(value: number | null): string {
   return value === null ? 'Excluded' : value.toLocaleString(undefined, { maximumFractionDigits: 3 })
 }
+export function wholeAmount(value: number | null): string { return value === null ? '-' : Math.round(value).toLocaleString() }
 
 export function EstimateAmount({ calculation, compact = false }: { calculation: SpellCalculation; compact?: boolean }): JSX.Element {
   const modifier = calculation.modifiers
@@ -24,12 +25,13 @@ export function EstimateAmount({ calculation, compact = false }: { calculation: 
 function CompactEstimateAmount({ calculation }: { calculation: SpellCalculation }): JSX.Element {
   const modifier = calculation.modifiers
   const title = [
+    modifier?.rankOnly ? 'Client-based spell value with the selected or observed mote rank. Equipment focus and instruments are excluded here; see spell details for equipment estimates.' : '',
     modifier ? `Base ${amount(modifier.baseline.total)}; displayed ${amount(calculation.total)}.` : '',
     modifier?.range ? `Focus roll ${amount(modifier.range.min)} - ${amount(modifier.range.max)}.` : '',
     ...(modifier?.warnings ?? []), ...(calculation.analysis?.warnings ?? []), ...calculation.reasons,
     'Open spell details for inputs and calculation scope.'
   ].filter(Boolean).join(' ')
-  return <Tooltip disableInteractive title={title}><Typography variant="body2" data-testid={`spells-amount-${calculation.id}-${calculation.metric}`} sx={{ whiteSpace: 'nowrap' }}>{calculation.total === null ? '-' : amount(calculation.total)}</Typography></Tooltip>
+  return <Tooltip disableInteractive title={title}><Typography variant="body2" data-testid={`spells-amount-${calculation.id}-${calculation.metric}`} sx={{ whiteSpace: 'nowrap' }}>{wholeAmount(calculation.total)}</Typography></Tooltip>
 }
 
 export function EstimateBadges({ calculation }: { calculation: SpellCalculation }): JSX.Element | null {

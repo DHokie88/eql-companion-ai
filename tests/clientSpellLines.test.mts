@@ -10,6 +10,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { SpellLibraryQueries } from '../src/main/spellLibrary/queries'
 import { bestSpellLines, spellLineCandidate } from '../src/shared/clientSpellLines'
+import { clientSpellTypeLabel } from '../src/shared/clientSpellBrowse'
 import type { SpellSearchQuery, SpellSearchResult } from '../src/shared/spellLibrary'
 import { spellRow, storageFixture, syntheticCatalog } from './spellLibrarySynthetic.mts'
 
@@ -43,13 +44,29 @@ test('Best in line selects strongest eligible AC before pagination, preserves ID
 })
 function publishedInstall(f: ReturnType<typeof fixture>): string { return f.search().dataset!.installId }
 
+test('captured poison DoT lines collapse hybrids with counters but preserve independent lines and area labels', () => {
+  const rows = [spellRow(101, 'Test Small Poison'), spellRow(102, 'Test Large Poison'), spellRow(103, 'Test Other Poison')]
+  for (const row of rows) { row[11] = '5'; row[12] = '2'; row[165] = '5001'; row[29] = '4'; row[172] = '1|36|5|0|100|0$2|79|-10|0|100|0$3|0|-20|0|100|0' }
+  rows[1][172] = '1|36|10|0|100|0$2|79|-20|0|100|0$3|0|-40|0|100|0'
+  rows[2][165] = '5002'
+  const f = fixture(rows)
+  try {
+    const result = f.search({ bestInLine: true, level: 50 })
+    assert.equal(result.total, 2)
+    assert.deepEqual(result.records.find((r) => r.id === 102)?.line?.alternatives.map((r) => r.id), [101])
+    const area = { ...f.source.records[0], target: 8, aoeDurationMs: 5, fields: { ...f.source.records[0].fields, aeMaxTargets: 4 } }
+    assert.equal(clientSpellTypeLabel(area), 'AoE4 DoT')
+    assert.equal(spellLineCandidate(area, 50), null, 'unverified repeated applications are not grouped')
+  } finally { f.close() }
+})
+
 test('ambiguous or incompatible definitions are not collapsed by category, name or equal recast time', () => {
   const rows = [ward(1, 'AC one', 20), ward(2, 'AC two', 60), ward(3, 'AC three', 90), ward(4, 'AC four', 100)]
   rows[1][172] = '5|1|60|0|100|0' // different slot
   rows[2][30] = '6' // self vs single target
   rows[3][172] = '4|1|100|0|100|0$5|69|50|0|100|0' // additional effect
   const dot = spellRow(5, 'Dot'); dot[11] = '5'; dot[165] = '9001'
-  const otherDot = [...dot]; otherDot[0] = '6'; otherDot[1] = 'Other Dot'
+  const otherDot = [...dot]; otherDot[0] = '6'; otherDot[1] = 'Other Dot'; otherDot[165] = '9002'
   const rain = spellRow(7, 'Rain'); rain[13] = '7500'; rain[30] = '8'; rain[165] = '9001'
   const secondRain = [...rain]; secondRain[0] = '8'; secondRain[1] = 'Second Rain'
   const f = fixture([...rows, dot, otherDot, rain, secondRain])

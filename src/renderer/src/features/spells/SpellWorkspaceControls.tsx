@@ -26,7 +26,7 @@ export function SpellWorkspaceControls({ state, classes, combo, level, statedLev
           if (modifiers.context) modifiers.update({ ...modifiers.context.preferences, targets: value })
         }} />
       </SpellModifierControls>
-      {state.tab === 'browse' && <Tooltip title="Show the strongest matching spell in supported replacement lines. Expand its arrow for alternatives. Unverified stacking and shared timers stay separate."><FormControlLabel sx={{ mr: 0 }} control={<Switch size="small" checked={state.bestInLine} onChange={(_event, checked) => state.setBestInLine(checked)} data-testid="spells-best-in-line" />} label="Best in line" /></Tooltip>}
+      {state.tab === 'browse' && <Tooltip title="Show the strongest matching spell in supported stat-buff and damage-over-time lines. Expand its arrow for alternatives. Shared recast duration alone does not establish a line."><FormControlLabel sx={{ mr: 0 }} control={<Switch size="small" checked={state.bestInLine} onChange={(_event, checked) => state.setBestInLine(checked)} data-testid="spells-best-in-line" />} label="Best in line" /></Tooltip>}
       <Tooltip disableInteractive title="Class/Level shows eligibility in the spell files. It does not confirm ownership, scroll availability, or acquisition. Yours badges show observed upgrades."><InfoOutlinedIcon sx={{ color: 'text.secondary', fontSize: 18 }} /></Tooltip>
     </Stack>
   </Stack>

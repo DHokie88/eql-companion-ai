@@ -1,7 +1,7 @@
 import { type JSX, useState } from 'react'
 import { Box, Button, Checkbox, FormControl, InputLabel, ListItemText, MenuItem, Select, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
 import type { SpellAnalysisSort, SpellRankingRow } from '@shared/spellAnalysis'
-import { amount, EstimateAmount } from './SpellEstimate'
+import { amount, wholeAmount, EstimateAmount } from './SpellEstimate'
 import { SpellNameButton, SpellSortHeader, type useSpellSort } from './SpellTableControls'
 import { SpellAnalysisBreakdown } from './SpellAnalysisBreakdown'
 import { useSpellWorkspaceState } from './spellWorkspace'
@@ -44,7 +44,7 @@ function RankingRows({ row, selected, expanded, expand, extras, onOpen, onToggle
   return <><TableRow data-testid="rankings-record" data-spell-id={row.id}>
     <TableCell>{row.id}</TableCell><TableCell sx={{ minWidth: 190 }}><SpellNameButton id={row.id} onOpen={() => onOpen(row.id, row.calculation.analysis?.scenario.scope)}>{row.name}</SpellNameButton><SpellRowRank id={row.id} name={row.name} evidence={row.rankEvidence} /><Typography variant="caption" display="block">{row.classes.map((c) => `${c.code} ${c.level}`).join(' · ')}</Typography></TableCell>
     <TableCell align="center">{row.learnedLevel ?? '-'}</TableCell><TableCell align="center"><EstimateAmount calculation={row.calculation} compact /><SpellCastSummary calculation={row.calculation} compact /></TableCell>
-    <TableCell align="center">{row.mana}</TableCell><TableCell align="center">{row.mana === 0 ? 'Zero mana' : amount(row.calculation.perMana)}</TableCell><TableCell align="center">{amount(row.calculation.analysis?.timing.rate ?? null)}</TableCell>
+    <TableCell align="center">{row.mana}</TableCell><TableCell align="center">{row.mana === 0 ? 'Zero mana' : amount(row.calculation.perMana)}</TableCell><TableCell align="center">{wholeAmount(row.calculation.analysis?.timing.rate ?? null)}</TableCell>
     {extras.map((c) => <TableCell key={c.field} align="center">{amount(extraValue(row, c.field))}</TableCell>)}
     <TableCell><Button size="small" disabled={!selected.includes(row.id) && selected.length >= 4} onClick={() => onToggle(row.id)} data-testid={`rankings-compare-${row.id}`}>{selected.includes(row.id) ? 'Selected' : 'Add'}</Button><Button size="small" onClick={expand} aria-expanded={expanded}>Explain</Button></TableCell>
   </TableRow>{expanded && <TableRow><TableCell colSpan={BASIC.length + extras.length + 1}><SpellAnalysisBreakdown calculation={row.calculation} /></TableCell></TableRow>}</>

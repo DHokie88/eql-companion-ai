@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { SpellAnalysisOptions, SpellLibraryFocus, SpellRankingCategory } from '@shared/spellAnalysis'
+import { spellPreviewTargets } from '@shared/spellAnalysis'
 import type { SpellEvaluationOptions } from '@shared/spellModifiers'
 import type { SpellClass } from '@shared/spellLibrary'
 import { useSpellModifiers } from '../spells/useSpellModifiers'
@@ -12,7 +13,7 @@ export function useLevelingSpellAnalysis(category: SpellRankingCategory = 'dd') 
   const classKey = combo.resolved.join(',')
   const classes = useMemo(() => classKey ? classKey.split(',') as SpellClass[] : [], [classKey])
   const context = modifiers.context
-  const targets = modifiers.context?.preferences.targets ?? 4
+  const targets = spellPreviewTargets(modifiers.context?.preferences.targets)
   const evaluation = useMemo<SpellEvaluationOptions | undefined>(() => context
     ? { mode: context.preferences.mode, contextRevision: context.revision, classes } : undefined, [context, classes])
   const analysis = useMemo<SpellAnalysisOptions>(() => ({ scope: category === 'aoe' ? 'pack' : 'single', targets }), [category, targets])

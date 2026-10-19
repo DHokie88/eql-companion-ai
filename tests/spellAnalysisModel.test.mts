@@ -40,7 +40,7 @@ test('ordinary one-target client calculations retain baseline amounts, zero mana
     assert.deepEqual(withoutAnalysis, baseline)
     assert.equal(result.analysis.singleTargetTotal, baseline.total)
     assert.equal(result.analysis.contextRevision, null)
-    assert.equal(result.analysis.modelVersion, '5')
+    assert.equal(result.analysis.modelVersion, '6')
   }
 })
 

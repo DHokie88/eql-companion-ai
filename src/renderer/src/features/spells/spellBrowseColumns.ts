@@ -8,6 +8,11 @@ export const BROWSE_EXTRA_COLUMNS: { field: SpellBrowseSort; label: string }[] =
 
 export type CategoryDisplay = 'both' | 'subcategory' | 'none'
 export interface BrowseColumn { field: SpellBrowseSort; label: string }
+export function browseColumnWidth(field: SpellBrowseSort): number {
+  const widths: Partial<Record<SpellBrowseSort, number>> = { id: 76, name: 240, classes: 148, category: 130, subcategory: 105,
+    type: 92, amount: 96, mana: 70, efficiency: 92, rate: 110, selected: 100, description: 300 }
+  return widths[field] ?? 90
+}
 export const DEFAULT_BROWSE_COLUMNS: SpellBrowseSort[] = ['id', 'category', 'type', 'amount', 'mana', 'efficiency', 'rate', 'selected']
 export function selectableBrowseColumns(metric: SpellMetric): BrowseColumn[] {
   const metricLabel = metric === 'damage' ? 'Damage' : 'Healing'

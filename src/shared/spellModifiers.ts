@@ -1,6 +1,6 @@
 import type { SpellCalculation, SpellClass } from './spellLibrary'
 
-export const SPELL_MODIFIER_MODEL_VERSION = '5'
+export const SPELL_MODIFIER_MODEL_VERSION = '6'
 export interface SpellRankEvidence { rank: number; characterKey: string; contextRevision: string; snapshotId: string }
 export type SpellValueMode = 'client' | 'mine' | 'emulate'
 export interface SpellEmulation {
@@ -25,11 +25,12 @@ export interface SpellModifierContext {
   inventory: { state: 'missing' | 'ready' | 'error'; exportedAt: string | null; candidates: SpellFocusCandidate[]; warnings: string[]; instruments?: import('./bardInstruments').BardInstrumentInventory }
   warnings: string[]
 }
-export interface SpellEvaluationOptions { mode: SpellValueMode; contextRevision: string; classes?: SpellClass[] }
+export interface SpellEvaluationOptions { mode: SpellValueMode; contextRevision: string; classes?: SpellClass[]; rankOnly?: boolean }
 export interface SpellModifierUpdate { expectedRevision: string; preferences: SpellModifierPreferences }
 export interface SpellFocusOption { id: number; name: string; kind: 'damage' | 'healing' | null; supported: boolean; reason: string | null }
 export interface SpellFocusOptions { datasetId: string | null; total: number; records: SpellFocusOption[] }
 export interface SpellModifierApplied {
+  rankOnly?: boolean
   instrument?: import('./bardInstruments').BardInstrumentEstimate
   equippedInstrument?: Pick<SpellCalculation, 'instant' | 'perTick' | 'ticks' | 'total' | 'perMana'>
   mode: SpellValueMode

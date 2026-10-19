@@ -37,7 +37,7 @@ async function mine(page: Page, checked: boolean): Promise<void> {
   await settle(() => toggle.isChecked(), (value) => value === checked)
 }
 async function amount(page: Page, expected: string): Promise<void> {
-  await settle(() => page.getByTestId('spells-amount-101-damage').innerText(), (text) => text === expected)
+  assert.equal(await settle(() => page.getByTestId('spells-amount-101-damage').innerText(), (text) => text === expected), expected)
 }
 function stageSources(staged: FixtureLog): void {
   const first = spellFields(101, 'Test Ember', 174), second = spellFields(102, 'Test Tide', 174)
@@ -99,6 +99,9 @@ try {
   await openSpells(page); await compactControls(page)
   await mine(page, true); staged.append('You begin casting Test Ember X.')
   await context(page, (c) => c.ranks?.['test ember']?.rank === 10); await amount(page, '64')
+  // The saved manual rank is already V. Select a different value first:
+  // re-selecting an unchanged MUI option does not emit a rank change.
+  await rank(page, 0, '0')
   await rank(page, 5, 'V'); await amount(page, '52')
   await dumpArtifacts(page, 'compact-spell-controls')
   await launch.close()

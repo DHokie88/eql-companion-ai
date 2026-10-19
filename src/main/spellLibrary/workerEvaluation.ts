@@ -60,14 +60,15 @@ export class WorkerSpellEvaluation {
     if (!options || options.mode === 'client' || !modifiers) return calculateClientSpell
     const catalog = this.catalog(dataset)
     const classes = options.classes ?? classesArg(query.classes) ?? []
-    return (record, level, metric) => evaluateModifiedSpell(record, { level, metric, classes, context: modifiers }, catalog)
+    return (record, level, metric) => evaluateModifiedSpell(record, { level, metric, classes, context: modifiers, rankOnly: options.rankOnly }, catalog)
   }
   private analysisCalculator(dataset: SpellDataset, query: Record<string, unknown>, context: SpellModifierContext | undefined): SpellCalculator {
     const analysis = analysisArg(query.analysis)
     if (!analysis) throw new Error('Spell analysis settings are required')
     const dependencies = { modifiers: this.catalog(dataset), mechanics: this.mechanics(dataset) }
-    const classes = evaluationArg(query.evaluation)?.classes ?? classesArg(query.classes) ?? []
-    return (record, level, metric) => analyzeClientSpell(record, { level, metric, classes, context, analysis }, dependencies)
+    const evaluation = evaluationArg(query.evaluation)
+    const classes = evaluation?.classes ?? classesArg(query.classes) ?? []
+    return (record, level, metric) => analyzeClientSpell(record, { level, metric, classes, context, analysis, rankOnly: evaluation?.rankOnly }, dependencies)
   }
 }
 

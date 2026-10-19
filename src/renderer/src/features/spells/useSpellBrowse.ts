@@ -18,6 +18,9 @@ function typeMetric(type: BrowseFilters['type']): SpellMetric | null {
   if (type === 'heal' || type === 'hot') return 'healing'
   return type === 'dd' || type === 'dot' || type === 'rain' || type.startsWith('aoe') ? 'damage' : null
 }
+function browseType(type: BrowseFilters['type']): SpellBrowseType | undefined {
+  return type.startsWith('aoe') ? 'aoe' : type || undefined
+}
 function adjustCategorySort(sort: ReturnType<typeof useSpellSort<SpellBrowseSort>>, category: string | null, subcategory: string | null): void {
   if (category && subcategory && ['category', 'subcategory'].includes(sort.field)) sort.selectSort('name', 'asc')
   else if (category && sort.field === 'category') sort.selectSort('subcategory', sort.direction)
@@ -31,7 +34,10 @@ export function browseFilterError(filters: BrowseFilters, maximum: string): stri
   return null
 }
 export function browseCategory(filters: BrowseFilters, data?: import('@shared/spellLibrary').SpellSearchResult | null): string {
-  return filters.category || ((filters.type || filters.hpFilter) && data?.matchingCategories?.length === 1 ? data.matchingCategories[0] : '')
+  const categories = data?.matchingCategories?.filter(Boolean) ?? []
+  if (!filters.category && filters.type === 'dd') return 'Direct Damage'
+  if (!filters.category && filters.type === 'dot') return 'Damage Over Time'
+  return filters.category || ((filters.type || filters.hpFilter) && categories.length === 1 ? categories[0] : '')
 }
 function useVisibleSort(input: { sort: ReturnType<typeof useSpellSort<SpellBrowseSort>>; filters: BrowseFilters; metric: SpellMetric; columns: SpellBrowseSort[]; data?: import('@shared/spellLibrary').SpellSearchResult | null }): void {
   const { sort, filters, metric, columns, data } = input
@@ -63,8 +69,8 @@ export function useSpellBrowse({ classes, level, allSpells, evaluation, selected
     const query: SpellSearchQuery = { text: queryText, classes: classKey ? classKey.split(',') as SpellClass[] : [], level, allSpells, allLevels: true,
       minLevel: min === '' ? undefined : Number(min), maxLevel: maximum === '' ? undefined : Number(maximum),
       category: category || undefined, subcategory: subcategory || undefined, effect: effect === '' ? undefined : Number(effect),
-      type: type || undefined, polarity: polarity || undefined, hpFilter: hpFilter || undefined, bestInLine, group, metric, includeHighlights: true,
-      sortBy: sort.field, direction: sort.direction, selectedIds: selectedKey ? selectedKey.split(',').map(Number) : [], page, pageSize: 40, evaluation, analysis }
+      type: browseType(type), polarity: polarity || undefined, hpFilter: hpFilter || undefined, bestInLine, group, metric, includeHighlights: true,
+      sortBy: sort.field, direction: sort.direction, selectedIds: selectedKey ? selectedKey.split(',').map(Number) : [], page, pageSize: 40, evaluation: { ...evaluation, rankOnly: true }, analysis }
     return window.eq.spellLibrary.search(query)
   }, [queryText, classKey, level, allSpells, min, category, subcategory, effect, type, polarity, hpFilter, bestInLine, maximum, sort.field, sort.direction, selectedKey, page, evaluation, invalid, analysis, group, metric])
   const result = useLibraryQuery(load, undefined, enabled)

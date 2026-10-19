@@ -4,7 +4,7 @@
 import { calculateClientSpell, type ClientSpellAmountTransform } from './clientSpellCalculations'
 import { qualifyClientSpellFocus } from './clientSpellFocus'
 import { SpellModifierCatalog, type CatalogFocusSource } from './clientSpellModifierCatalog'
-import { scaleExactSpellDamage, scaleExactSpellHeal } from './spellScale'
+import { rankedHpAmount, rankDotDuration } from './clientSpellRankRules'
 import type { ClientSpellRecord, SpellCalculation, SpellClass, SpellMetric } from './spellLibrary'
 import type { SpellModifierApplied, SpellModifierContext } from './spellModifiers'
 import type { BardInstrumentEstimate } from './bardInstruments'
@@ -12,6 +12,7 @@ import { bardEffectImpact, bardInstrumentAmount } from './bardSongRules'
 
 export { SpellModifierCatalog } from './clientSpellModifierCatalog'
 export interface SpellModifierEvaluation {
+  rankOnly?: boolean
   level: number
   metric: SpellMetric
   classes: SpellClass[]
@@ -41,10 +42,9 @@ function bestFocus(record: ClientSpellRecord, options: SpellModifierEvaluation, 
   return { focus: hits[0] ?? null, warnings, simulated: resolution.simulated }
 }
 
-function transformFor(metric: SpellMetric, rank: number | null, pct: number, instrument?: { record: ClientSpellRecord; estimate: BardInstrumentEstimate | null }): ClientSpellAmountTransform {
-  const scale = metric === 'damage' ? scaleExactSpellDamage : scaleExactSpellHeal
+function transformFor(metric: SpellMetric, rank: number | null, pct: number, instrument: { record: ClientSpellRecord; estimate: BardInstrumentEstimate | null }): ClientSpellAmountTransform {
   return (amount, effect) => {
-    const ranked = scale(amount, rank)
+    const ranked = rankedHpAmount(instrument.record, effect, amount, { metric, rank })
     return (instrument?.estimate ? bardInstrumentAmount(ranked, effect, { record: instrument.record, multiplier: instrument.estimate.bestMultiplier }) : ranked) * (1 + pct / 100)
   }
 }
@@ -52,8 +52,8 @@ function transformFor(metric: SpellMetric, rank: number | null, pct: number, ins
 function withMetadata(baseline: SpellCalculation, result: SpellCalculation, options: SpellModifierEvaluation, applied: Omit<SpellModifierApplied, 'baseline' | 'mode' | 'modelVersion' | 'contextRevision'>): SpellCalculation {
   return {
     ...result,
-    restrictions: [...result.restrictions.map((text) => applied.instrument && text === 'Bard singing and instrument modifiers are not included.' ? 'Supported instrument equipment scaling is included; AA and temporary singing bonuses are excluded.' : text), 'Mote scaling uses measured estimates. Efficiency uses client mana cost; duration and casting times are unchanged.',
-      ...(applied.rank === 1 && applied.rankSource === 'simulated' ? ['Simulated rank I extrapolates the measured model: +6% damage or +3% healing per effect before rounding. This is a model assumption, not an official server formula.'] : [])],
+    restrictions: [...result.restrictions.map((text) => applied.instrument && text === 'Bard singing and instrument modifiers are not included.' ? 'Supported instrument equipment scaling is included; AA and temporary singing bonuses are excluded.' : text), 'Community rank model: +6% per direct hit, +3% per damage tick and +5% DoT duration per rank. Healing uses the observed +3% model. Efficiency retains client mana cost; cycle estimates retain client cast times. Server-only effects are excluded.',
+      ...(applied.rank === 1 && applied.rankSource === 'simulated' ? ['Simulated rank I uses the category model assumption, not an official server formula.'] : [])],
     modifiers: {
       mode: options.context.preferences.mode, modelVersion: options.context.modelVersion, contextRevision: options.context.revision,
       baseline: { instant: baseline.instant, perTick: baseline.perTick, ticks: baseline.ticks, total: baseline.total, perMana: baseline.perMana }, ...applied
@@ -67,8 +67,14 @@ function instrumentWarnings(record: ClientSpellRecord, instrument: BardInstrumen
 function equippedProjection(record: ClientSpellRecord, options: SpellModifierEvaluation, inputs: { instrument: BardInstrumentEstimate | null; rank: number | null; pct: number }): Pick<SpellCalculation, 'instant' | 'perTick' | 'ticks' | 'total' | 'perMana'> | undefined {
   if (!inputs.instrument) return undefined
   const estimate = { ...inputs.instrument, bestMultiplier: inputs.instrument.equippedMultiplier }
-  const { instant, perTick, ticks, total, perMana } = calculateClientSpell(record, options.level, options.metric, transformFor(options.metric, inputs.rank, inputs.pct, { record, estimate }))
+  const { instant, perTick, ticks, total, perMana } = rankDotDuration(calculateClientSpell(record, options.level, options.metric, transformFor(options.metric, inputs.rank, inputs.pct, { record, estimate })), inputs.rank)
   return { instant, perTick, ticks, total, perMana }
+}
+function equipmentFor(record: ClientSpellRecord, options: SpellModifierEvaluation, catalog: SpellModifierCatalog, ticks: number) {
+  if (options.rankOnly) return { focus: { focus: null, warnings: [], simulated: false }, instrument: null, warnings: [] }
+  const focus = bestFocus(record, options, catalog, ticks)
+  const instrument = catalog.instruments.resolve(record, options.context, options.level)
+  return { focus, instrument, warnings: [...focus.warnings, ...instrumentWarnings(record, instrument)] }
 }
 
 /** One consistent context for Browse, details, comparison, and catalog ranking.
@@ -79,17 +85,17 @@ export function evaluateModifiedSpell(record: ClientSpellRecord, options: SpellM
   const baseline = calculateClientSpell(record, level, metric)
   if (context.preferences.mode === 'client') return baseline
   const rank = catalog.rank(record, context)
-  const focus = bestFocus(record, options, catalog, baseline.ticks ?? 0)
-  const instrument = catalog.instruments.resolve(record, context, level)
+  const { focus, instrument, warnings: equipmentWarnings } = equipmentFor(record, options, catalog, baseline.ticks ?? 0)
   const inputs = { record, estimate: instrument }
   const pct = focus.focus?.pct ?? 0
-  const warnings = [...new Set([...context.warnings, ...rank.warnings, ...focus.warnings, ...instrumentWarnings(record, instrument)])]
-  const result = calculateClientSpell(record, level, metric, transformFor(metric, rank.rank, pct, inputs))
+  const warnings = [...new Set([...context.warnings, ...rank.warnings, ...equipmentWarnings])]
+  const result = rankDotDuration(calculateClientSpell(record, level, metric, transformFor(metric, rank.rank, pct, inputs)), rank.rank)
   const range = focus.focus && baseline.total !== null ? {
-    min: calculateClientSpell(record, level, metric, transformFor(metric, rank.rank, focus.focus.minPct, inputs)).total ?? 0,
-    max: calculateClientSpell(record, level, metric, transformFor(metric, rank.rank, focus.focus.maxPct, inputs)).total ?? 0
+    min: rankDotDuration(calculateClientSpell(record, level, metric, transformFor(metric, rank.rank, focus.focus.minPct, inputs)), rank.rank).total ?? 0,
+    max: rankDotDuration(calculateClientSpell(record, level, metric, transformFor(metric, rank.rank, focus.focus.maxPct, inputs)), rank.rank).total ?? 0
   } : null
   return withMetadata(baseline, result, options, {
+    ...(options.rankOnly ? { rankOnly: true } : {}),
     rank: rank.rank, rankSource: rank.source, focus: focus.focus, range,
     ...(instrument ? { instrument } : {}),
     equippedInstrument: equippedProjection(record, options, { instrument, rank: rank.rank, pct }),

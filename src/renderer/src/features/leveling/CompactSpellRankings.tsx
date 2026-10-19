@@ -2,7 +2,7 @@ import { type JSX, useState } from 'react'
 import { Alert, Box, Button, Stack, Table, TableBody, TableCell, TableHead, TableRow, TableSortLabel, Typography } from '@mui/material'
 import type { SpellAnalysisSort, SpellLibraryFocus, SpellRankingRow, SpellRankingsResult } from '@shared/spellAnalysis'
 import type { SpellCalculation, SpellSortDirection } from '@shared/spellLibrary'
-import { amount, EstimateAmount, EstimateExplanation } from '../spells/SpellEstimate'
+import { amount, wholeAmount, EstimateAmount, EstimateExplanation } from '../spells/SpellEstimate'
 import { openLevelingSpells } from './useLevelingSpellAnalysis'
 
 type Group = 'ranked' | 'zero-mana' | 'excluded'
@@ -46,7 +46,7 @@ function CompactSpellRow({ row, focus }: { row: SpellRankingRow; focus: SpellLib
       <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>#{row.id} · L{row.learnedLevel ?? '?'}</Typography>
     </TableCell></TableRow>
     <TableRow data-testid="best-spells-row" data-id={row.id}>
-      <TableCell align="right" title={calculation.analysis?.timing.reason ?? undefined}>{calculation.analysis?.timing.rate === null || !calculation.analysis ? 'N/A' : amount(calculation.analysis.timing.rate)}</TableCell>
+      <TableCell align="right" title={calculation.analysis?.timing.reason ?? undefined}>{calculation.analysis?.timing.rate === null || !calculation.analysis ? 'N/A' : wholeAmount(calculation.analysis.timing.rate)}</TableCell>
       <TableCell align="right" sx={{ '& .MuiTypography-root': { fontSize: 11 }, '& .MuiStack-root': { alignItems: 'flex-end' } }}><EstimateAmount calculation={calculation} /></TableCell>
       <TableCell align="right">{calculation.mana}</TableCell>
       <TableCell align="right">{calculation.mana === 0 ? 'Zero mana' : amount(calculation.perMana)}</TableCell>

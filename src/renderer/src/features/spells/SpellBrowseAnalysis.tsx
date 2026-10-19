@@ -1,7 +1,7 @@
 import type { JSX } from 'react'
 import { Button, Checkbox, FormControl, InputLabel, ListItemText, MenuItem, Select, Stack, Tab, Tabs } from '@mui/material'
 import type { SpellBrowseSort, SpellMetric, SpellSearchQuery, SpellSearchResult } from '@shared/spellLibrary'
-import { amount } from './SpellEstimate'
+import { amount, wholeAmount } from './SpellEstimate'
 import { selectableBrowseColumns } from './spellBrowseColumns'
 export function BrowseColumnPicker({ metric, columns, setColumns }: {
   metric: SpellMetric; columns: SpellBrowseSort[]; setColumns: (columns: SpellBrowseSort[]) => void
@@ -29,7 +29,8 @@ export function BrowseHighlights({ highlights = [], onSelect }: {
   return <Stack direction="row" gap={1} flexWrap="wrap" data-testid="spells-highlights">{highlights.map(({ kind, record }) => {
     const value = kind === 'efficiency' ? record?.calculation.perMana : kind === 'amount' ? record?.calculation.total : record?.calculation.analysis?.timing.rate
     return <Button key={kind} variant="outlined" size="small" disabled={!record} data-testid={`spells-highlight-${kind}`} onClick={() => onSelect(kind, record?.mana === 0 ? 'zero-mana' : 'ranked')} sx={{ flex: '1 1 220px', textTransform: 'none', justifyContent: 'flex-start', textAlign: 'left' }}>
-      {kind === 'efficiency' ? 'Best efficiency' : kind === 'amount' ? 'Largest cast' : 'Highest modeled rate'} · {record ? `${record.name} (${amount(value ?? null)})` : 'Unavailable'}
+      {kind === 'efficiency' ? 'Best efficiency' : kind === 'amount' ? 'Largest cast' : 'Highest modeled rate'} · {record ? `${record.name} (${highlightValue(kind, value ?? null)})` : 'Unavailable'}
     </Button>
   })}</Stack>
 }
+function highlightValue(kind: string, value: number | null): string { return kind === 'efficiency' ? amount(value) : wholeAmount(value) }

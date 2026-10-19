@@ -1,7 +1,11 @@
 import type { SpellCalculation, SpellSearchQuery, SpellSearchResult, SpellSummary } from './spellLibrary'
 
-export const SPELL_ANALYSIS_MODEL_VERSION = '5'
+export const SPELL_ANALYSIS_MODEL_VERSION = '6'
 export type SpellTargetCount = number | 'maximum'
+/** UI scenarios stay within an eight-enemy pack, including older saved preferences. */
+export function spellPreviewTargets(value: SpellTargetCount | undefined): number {
+  return value === 'maximum' ? 8 : Math.max(1, Math.min(8, Math.trunc(value ?? 4)))
+}
 export interface SpellAnalysisOptions { scope: 'single' | 'pack'; targets: SpellTargetCount }
 export const DEFAULT_SPELL_ANALYSIS: SpellAnalysisOptions = { scope: 'single', targets: 4 }
 export type SpellRankingCategory = 'dd' | 'dot' | 'aoe' | 'heal' | 'hot'

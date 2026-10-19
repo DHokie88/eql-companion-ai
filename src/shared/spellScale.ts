@@ -1,12 +1,13 @@
 // spellScale.ts — what a spell's DAMAGE reads at a mote upgrade level (JOS-447).
 //
 // ============================================================================
-// SOURCE: MEASURED, BECAUSE NOTHING PUBLISHES IT
+// HISTORICAL SOURCE: MEASURED LEGACY CARD MODEL
 // ============================================================================
 // The gear engine could be ported (`itemUpgrade.ts` is the wiki's own ItemLevelSlider module, read
-// line by line). No such source exists for spells: the wiki has no per-rank spell stats and no
-// spell slider, and the client's `spells_us.txt` carries the CLASSIC rank lines (`Yaulp II`) rather
-// than the Legends mote ranks, which are server side. So every number below was FITTED to the
+// line by line). This original fit did not identify a comparable published spell source.
+// The later client-library category model is in clientSpellRankRules.ts; its source and
+// the limits of the client-file audit are recorded in docs/verification/spell-ranks-and-browse-2026-10-19.md.
+// The historical numbers below were FITTED to the
 // owner's own combat log (2.4M lines, eqlog_Primitive_freeport.txt), and the fit is recorded as
 // fixtures in `tests/spellScale.test.mts` so it can be re-argued rather than trusted.
 //

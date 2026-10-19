@@ -27,9 +27,9 @@ function addTypes(row: SpellSummary, types: Set<string>): void {
   if (row.spellType) types.add(row.spellType)
   if (row.typeLabel && /^AOE[1-9]\d*$/.test(row.typeLabel)) types.add(row.typeLabel.toLowerCase())
 }
-function addCandidate(record: ClientSpellRecord, candidates: Map<number, SpellLineCandidate>, options: SearchOptions): void {
+function addCandidate(record: ClientSpellRecord, row: SpellSummary, candidates: Map<number, SpellLineCandidate>, options: SearchOptions): void {
   if (!options.bestInLine) return
-  const candidate = spellLineCandidate(record, options.level ?? 50)
+  const candidate = spellLineCandidate(record, options.level ?? 50, row.calculations?.[0]?.modifiers?.rank ?? null)
   if (candidate) candidates.set(record.id, candidate)
 }
 function collect(storage: SpellLibraryStorage, dataset: SpellDataset | null, options: SearchOptions, input: { evaluateRow: (record: ClientSpellRecord, row: SpellSummary) => void; mechanics?: SpellMechanicsCatalog }) {
@@ -43,7 +43,7 @@ function collect(storage: SpellLibraryStorage, dataset: SpellDataset | null, opt
     addTypes(row, types)
     if (options.type && !matchesSpellSearch(record, options, input.mechanics)) continue
     input.evaluateRow(record, row)
-    addCandidate(record, candidates, options)
+    addCandidate(record, row, candidates, options)
     matches.push(row)
   }
   const typeOptions = [...types].sort().map((value) => ({ value: value as NonNullable<SpellSummary['spellType']>, label: spellTypeLabel(value as NonNullable<SpellSummary['spellType']>) }))

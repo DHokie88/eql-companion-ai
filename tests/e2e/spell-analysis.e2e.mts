@@ -54,7 +54,7 @@ async function areaAndCompare(page: Page): Promise<void> {
   assert.equal(await page.getByTestId('spells-amount-302-damage').innerText(), '80', 'rain uses the four-hit cast budget')
   await choose(page, 'spells-target-count', '2 targets')
   await settle(() => page.getByTestId('spells-amount-301-damage').innerText(), (text) => text === '50')
-  await choose(page, 'spells-target-count', 'Spell maximum')
+  await choose(page, 'spells-target-count', '8 targets')
   assert.equal(await settle(() => page.getByTestId('spells-amount-301-damage').innerText(), (text) => text === '200'), '200')
   await choose(page, 'spells-target-count', '4 targets')
   await page.getByTestId('spells-compare-301').click(); await page.getByTestId('spells-compare-302').click()

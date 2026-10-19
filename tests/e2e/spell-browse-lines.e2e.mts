@@ -27,6 +27,10 @@ async function expectRows(page: Page, expected: number[]): Promise<void> {
   assert.equal(result.loading, 0)
 }
 async function columnChecks(page: Page): Promise<void> {
+  await page.getByTestId('spells-target-count').click()
+  assert.equal(await page.getByRole('option').count(), 8)
+  assert.equal(await page.getByRole('option', { name: '8 targets', exact: true }).count(), 1)
+  await page.keyboard.press('Escape')
   assert.equal(await page.getByTestId('spells-level').getAttribute('type'), 'text', 'level has no spinner control')
   assert.match(await page.getByTestId('spells-sort-efficiency').innerText(), /Damage\/\s*\nMana/)
   await page.getByTestId('spells-type-other').click()

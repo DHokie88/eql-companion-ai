@@ -4,11 +4,12 @@ import type { SpellEvaluationOptions } from '../../shared/spellModifiers'
 
 export function evaluationArg(input: unknown): SpellEvaluationOptions | undefined {
   if (input === undefined) return undefined
-  const value = queryObject(input, ['mode', 'contextRevision', 'classes'])
+  const value = queryObject(input, ['mode', 'contextRevision', 'classes', 'rankOnly'])
+  if (value.rankOnly !== undefined && typeof value.rankOnly !== 'boolean') throw new Error('Invalid rank-only option')
   if (!['client', 'mine', 'emulate'].includes(String(value.mode))) throw new Error('Invalid spell value mode')
   const revision = stringArg(value.contextRevision, 'contextRevision')
   if (revision.length > 256) throw new Error('Invalid context revision')
-  return { mode: value.mode as SpellEvaluationOptions['mode'], contextRevision: revision, classes: classesArg(value.classes) }
+  return { mode: value.mode as SpellEvaluationOptions['mode'], contextRevision: revision, classes: classesArg(value.classes), ...(value.rankOnly === undefined ? {} : { rankOnly: value.rankOnly }) }
 }
 
 export function queryObject(input: unknown, allowed: string[]): Record<string, unknown> {

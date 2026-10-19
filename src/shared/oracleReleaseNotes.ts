@@ -21,6 +21,16 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.4.0',
+    date: '2026-10-19',
+    entries: [
+      { kind: 'fixed', text: 'Browse uses compact column widths, hides repeated Direct Damage and Damage Over Time categories when their type is selected, and rounds damage and modeled DPS to whole points.', fromReport: true },
+      { kind: 'changed', text: 'Browse damage uses the client base and selected or observed mote rank without equipment focus. Spell details retain equipment estimates. Rank rules are identified as a community model, with separate direct-hit, DoT-tick and DoT-duration scaling.' },
+      { kind: 'new', text: 'Best in line now supports captured poison and other compatible DoT lines, including separate initial-hit and periodic effects. Area DoTs show their captured target cap, such as AoE4 DoT.' },
+      { kind: 'changed', text: 'Removed the separate AOE cap filter. Targets selects a scenario from one to eight enemies and respects each spell\'s own cap. Older oversized or maximum previews open at eight.' }
+    ]
+  },
+  {
     version: '0.3.0',
     date: '2026-10-19',
     entries: [

@@ -2,6 +2,7 @@ import { type JSX, useMemo, type ReactNode } from 'react'
 import { Alert, Box, Button, CircularProgress, Dialog, Stack, Tab, Tabs, Tooltip, Typography } from '@mui/material'
 import { type SpellClass, type SpellLibraryStatus } from '@shared/spellLibrary'
 import type { SpellEvaluationOptions } from '@shared/spellModifiers'
+import { spellPreviewTargets } from '@shared/spellAnalysis'
 import type { ProgressionSnap } from '@shared/types'
 import type { AppRouting } from '../../appRouting'
 import { useModule } from '../../lib/useModule'
@@ -43,7 +44,7 @@ function SpellsWorkspace({ routing, status, modifiers }: { routing: AppRouting; 
   const evaluation = useMemo<SpellEvaluationOptions | undefined>(() => context ? {
     mode: context.preferences.mode, contextRevision: context.revision, classes: classKey ? classKey.split(',') as SpellClass[] : []
   } : undefined, [context, classKey])
-  const targets = state.browseTargets ?? modifiers.context?.preferences.targets ?? 4
+  const targets = spellPreviewTargets(state.browseTargets ?? modifiers.context?.preferences.targets)
   const analysis = useMemo(() => ({ scope: 'pack' as const, targets }), [targets])
   const busy = ['checking', 'importing', 'activating'].includes(status.phase)
   return (

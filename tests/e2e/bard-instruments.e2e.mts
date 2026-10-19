@@ -86,7 +86,7 @@ async function refreshAndSinging(page: Page, staged: FixtureLog): Promise<void> 
   await page.getByTestId('spells-tab-browse').click()
   await page.getByTestId('spells-type-hot').click()
   await page.getByTestId('spells-group-ranked').click()
-  await settle(() => page.getByTestId('spells-amount-101-healing').innerText(), (text) => text.includes('8 → 16'))
+  assert.equal(await settle(() => page.getByTestId('spells-amount-101-healing').innerText(), (text) => text === '8'), '8', 'Browse shows rank-only song HP; instrument projections remain in details')
   await page.getByTestId('nav-leveling').click()
   await page.locator('[data-testid="best-spells-tab"][data-tab="hot"]').click()
   await settle(() => page.getByTestId('spells-amount-101-healing').innerText(), (text) => text.includes('8 → 16'))

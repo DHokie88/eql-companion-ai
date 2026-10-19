@@ -1,7 +1,7 @@
 import type { JSX } from 'react'
 import { Accordion, AccordionSummary, AccordionDetails, Alert, Box, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
 import type { SpellCalculation } from '@shared/spellLibrary'
-import { amount, EstimateExplanation } from './SpellEstimate'
+import { amount, wholeAmount, EstimateExplanation } from './SpellEstimate'
 
 export function SpellAnalysisBreakdown({ calculation }: { calculation: SpellCalculation }): JSX.Element {
   const analysis = calculation.analysis
@@ -36,5 +36,5 @@ function Timing({ calculation }: { calculation: SpellCalculation }): JSX.Element
   const timing = calculation.analysis?.timing
   if (!timing) return null
   return <Stack spacing={0.5}><Typography variant="caption">Cycle = cast {timing.castMs / 1000}s + max(recovery {timing.recoveryMs / 1000}s, recast {timing.recastMs / 1000}s, delivery {timing.deliveryMs === null ? '?' : timing.deliveryMs / 1000}s) = {timing.cycleMs === null ? '?' : timing.cycleMs / 1000}s.</Typography>
-    <Typography variant="caption">Modeled cycle {calculation.metric === 'damage' ? 'DPS' : 'HPS'}: {amount(timing.rate)}. {timing.reason} These are modeled casting cycles, not measured combat output or a rotation simulation.</Typography></Stack>
+    <Typography variant="caption">Modeled cycle {calculation.metric === 'damage' ? 'DPS' : 'HPS'}: {wholeAmount(timing.rate)}. {timing.reason} These are modeled casting cycles, not measured combat output or a rotation simulation.</Typography></Stack>
 }

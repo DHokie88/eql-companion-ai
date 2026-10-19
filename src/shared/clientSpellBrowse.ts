@@ -42,6 +42,11 @@ export function spellTypeLabel(type: SpellBrowseType): string { return SPELL_TYP
 
 /** Delivery geometry is separate from HP type: an area mez remains Buffs / utility. */
 export function clientSpellTypeLabel(record: ClientSpellRecord, mechanics?: SpellMechanicsCatalog): string {
+  const hpType = clientSpellType(record, mechanics)
+  if (hpType === 'dot' && AREA_TARGETS.has(record.target)) {
+    const cap = clientSpellTargetCap(record)
+    return `${cap === null ? 'AoE' : `AoE${cap}`} DoT`
+  }
   const type = AREA_TARGETS.has(record.target) ? directAreaType(record, mechanics) : clientSpellType(record, mechanics)
   return type === 'aoe' ? 'AOE ?' : spellTypeLabel(type)
 }
