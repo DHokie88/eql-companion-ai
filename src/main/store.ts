@@ -3,6 +3,7 @@ import { join } from 'path'
 import { STORE_NAME, USER_DATA } from './channel'
 import { logError, logInfo } from './errorLog'
 import { CURRENT_SCHEMA_VERSION } from './storeMigrations'
+import { resolveOracleNotesSeen } from '../shared/oracleReleaseNotes'
 import { migrateStoreFile } from './storeFile'
 import type {
   AlertDef,
@@ -891,24 +892,22 @@ export function setBuffTrustPrefs(next: unknown): BuffTrustPrefs {
 // every accessor here follows and pays it — read through `normalizeRespawnPrefs`, write back
 // through the same one.
 
-// ----- What's new (JOS-73; shared/releaseNotes.ts) -----
+// ----- Oracle What's new (shared/oracleReleaseNotes.ts) -----
 //
 // ONE STRING, and it is the only durable state the whole feature has: which releases are marked,
 // whether the teaser strip appears and what it names are all DERIVED from it by a pure function
 // over the committed notes list (`whatsNewState`). Nothing here is a preferences blob, so there
 // is no normalizer beside it — the shape is a version, and the setter is where that is enforced.
 
-/** The newest release this install has been shown notes for, or null when it never has
- *  (a fresh install — see StoreShape.lastSeenNotesVersion for what that means). */
+/** Oracle's own stamp, or the pre-Oracle baseline for an existing upstream reader.
+ * The old upstream stamp remains untouched and never becomes an Oracle version. */
 export function getLastSeenNotesVersion(): string | null {
-  const v = store.get('lastSeenNotesVersion')
-  return typeof v === 'string' && v.trim() !== '' ? v : null
+  return resolveOracleNotesSeen(store.get('oracleLastSeenNotesVersion'), store.get('lastSeenNotesVersion'))
 }
 
 /**
- * Stamp it, or CLEAR it with null — and clearing is not a tidy-up, it is the "pretend fresh
- * install" state the DEV variant control drives (JOS-73). Returns what is now stored, so no
- * caller has to assume its write landed.
+ * Stamp Oracle, or store explicit null for the fresh/reset state. Deleting the key
+ * would reimport a legacy upstream stamp on the next read. Returns the stored result.
  *
  * VALIDATED HERE because the renderer supplies the string (the `sounds:getData` rule): a plain
  * MAJOR.MINOR.PATCH, or nothing at all. A junk value would not be dangerous — `parseVersion`
@@ -916,7 +915,7 @@ export function getLastSeenNotesVersion(): string | null {
  * app writes should only ever hold shapes this app can read.
  */
 export function setLastSeenNotesVersion(version: string | null): string | null {
-  if (version !== null && /^\d+\.\d+\.\d+$/.test(version)) store.set('lastSeenNotesVersion', version)
-  else store.delete('lastSeenNotesVersion')
+  if (version !== null && /^\d+\.\d+\.\d+$/.test(version)) store.set('oracleLastSeenNotesVersion', version)
+  else store.set('oracleLastSeenNotesVersion', null)
   return getLastSeenNotesVersion()
 }

@@ -31,16 +31,19 @@
 // how "new" is computed, or that anything is stored — the two chips are the whole disclosure.
 
 import { type JSX, useEffect, useMemo } from 'react'
-import { Box, Chip, Divider, Link, Stack, Typography } from '@mui/material'
+import { Accordion, AccordionDetails, AccordionSummary, Box, Chip, Divider, Link, Stack, Typography } from '@mui/material'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import NewReleasesIcon from '@mui/icons-material/NewReleases'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import {
   RELEASE_NOTES,
+  UPSTREAM_BASE,
   hasReportedEntry,
   type ReleaseEntry,
   type ReleaseEntryKind,
   type ReleaseNote
-} from '@shared/releaseNotes'
+} from '@shared/oracleReleaseNotes'
+import { RELEASE_NOTES as UPSTREAM_RELEASE_NOTES } from '@shared/releaseNotes'
 import { DEV_TOOLS } from '../../devFlags'
 import { formatCalendarDate } from '../../lib/formatDate'
 import type { PrefSection } from '../preferences/PreferencesView'
@@ -134,13 +137,13 @@ function EntryGroup({ label, entries }: { label: string | null; entries: readonl
  * and its bullets grouped by kind. Per-bullet "player report" chips carry the attribution; the
  * collective thanks line lives ONCE at the top of the panel (owner, 2026-08-07), not here.
  */
-function ReleaseBlock({ note, isNew }: { note: ReleaseNote; isNew: boolean }): JSX.Element {
+function ReleaseBlock({ note, isNew, upstream = false }: { note: ReleaseNote; isNew: boolean; upstream?: boolean }): JSX.Element {
   const unkinded = note.entries.filter((e) => e.kind === undefined)
   return (
-    <Stack spacing={0.75} data-testid={`whats-new-release-${note.version}`} data-new={isNew ? 'true' : undefined}>
+    <Stack spacing={0.75} data-testid={`${upstream ? 'upstream' : 'whats-new'}-release-${note.version}`} data-new={isNew ? 'true' : undefined}>
       <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap">
         <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-          v{note.version}
+          {upstream ? 'EQ-Zera' : 'EQ Oracle'} v{note.version}
         </Typography>
         <Typography variant="caption" color="text.secondary">
           {formatCalendarDate(note.date)}
@@ -211,6 +214,12 @@ export function WhatsNewPanel(): JSX.Element {
     // default `min-height: auto` refuses to shrink below its content, so without it the box would
     // grow past the pane and the PAGE would scroll instead of the list (the combat-log lesson).
     <Stack spacing={1.5} data-testid="whats-new-panel" sx={{ flexGrow: 1, minHeight: 0 }}>
+      <Stack spacing={0.5}>
+        <Typography variant="subtitle1" fontWeight={700}>EQ Oracle release notes</Typography>
+        <Typography variant="caption" color="text.secondary" data-testid="oracle-upstream-base">
+          Upstream base: {UPSTREAM_BASE.project} {UPSTREAM_BASE.version}
+        </Typography>
+      </Stack>
       {/* ONE collective thanks for the whole panel, not one per release (owner, 2026-08-07 —
           repeating it under six releases read as boilerplate; said once, it reads as meant).
           Rendered whenever any release carries a player-report bullet, which the chips below
@@ -243,6 +252,21 @@ export function WhatsNewPanel(): JSX.Element {
             <ReleaseBlock note={note} isNew={isNew.has(note.version)} />
           </Box>
         ))}
+        <Accordion disableGutters elevation={0} slotProps={{ transition: { unmountOnExit: true } }}
+          sx={{ bgcolor: 'transparent', border: 1, borderColor: 'divider', borderRadius: 1 }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />} data-testid="upstream-history-toggle">
+            <Typography variant="body2">EQ-Zera upstream history</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Stack spacing={2} data-testid="upstream-history">
+              <Typography variant="body2" color="text.secondary">
+                Original EQ-Zera notes, retained for reference. These describe upstream releases;
+                features mentioned here may differ from Oracle.
+              </Typography>
+              {UPSTREAM_RELEASE_NOTES.map((note) => <ReleaseBlock key={note.version} note={note} isNew={false} upstream />)}
+            </Stack>
+          </AccordionDetails>
+        </Accordion>
       </Box>
       {/* The way OUT, under the history rather than in it (JOS-254 — see GITHUB_RELEASES_URL).
           One line, no explanation: the label says where it goes and the icon says it leaves. */}

@@ -297,6 +297,9 @@ export interface StoreShape {
    * here still opens in a build that predates the feature.
    */
   lastSeenNotesVersion?: string
+  /** Oracle's independent news stamp. Explicit null preserves a fresh/reset state
+   * without reimporting the optional upstream stamp. */
+  oracleLastSeenNotesVersion?: string | null
   /**
    * The MAIN window's zoom factor (JOS-123; shared/uiScale.ts) — the "text size" control in
    * Preferences. A factor, not a percentage: 1.25 is what the card labels "125%".

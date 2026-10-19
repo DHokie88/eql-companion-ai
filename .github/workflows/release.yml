@@ -13,9 +13,8 @@
 # a reusable workflow would re-introduce a shared surface across the boundary
 # and buy nothing at this size. KEEP THE TWO PRELUDES IN SYNC.
 #
-# THE VERSION COMES FROM THE TAG. package.json stays at 0.1.0 forever; the
-# stamp below rewrites it in the runner only (never committed), so a `v1.2.3`
-# push builds 1.2.3 regardless of what the file says and the two cannot drift.
+# ORACLE VERSIONING: package.json and oracleReleaseNotes.ts carry our version.
+# The release gate requires a matching tag; inherited publishing remains disabled.
 #
 # A TAG MAY NOT SHIP WITHOUT RELEASE NOTES (JOS-73). The What's-new panel reads
 # committed source (src/shared/releaseNotes.ts), so a missing entry is not a

@@ -34,6 +34,9 @@
  * Run: `npm run test:e2e -- whats-new`
  */
 import type { ElectronApplication, Page } from 'playwright-core'
+import { readFileSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { makeUserData, removeUserData } from './appWindow.mjs'
 import {
   buildIfStale,
   check,
@@ -47,7 +50,8 @@ import {
 } from './appHarness.mjs'
 import { mainWindow } from './appWindow.mjs'
 import { launchOnFixture } from './logFixture.mjs'
-import { RELEASE_NOTES, variantLastSeen } from '../../src/shared/releaseNotes'
+import { RELEASE_NOTES, UPSTREAM_BASE, variantLastSeen } from '../../src/shared/oracleReleaseNotes'
+import { RELEASE_NOTES as UPSTREAM_NOTES } from '../../src/shared/releaseNotes'
 // Main's own link boundary, as a pure function (no Electron — that is the point of security.ts).
 import { allowedExternalUrl } from '../../src/main/security'
 
@@ -72,7 +76,7 @@ const EXPECTED_BULLETS = RELEASE_NOTES.reduce((n, r) => n + r.entries.length, 0)
  * same list, with no marker of its own, so its own count in the RENDERED panel is the only place
  * "the extra bullets actually reached the screen" is observable.
  */
-const INTRO_RELEASE = '0.9.0'
+const INTRO_RELEASE = '0.2.0'
 const INTRO_RELEASE_BULLETS =
   RELEASE_NOTES.find((r) => r.version === INTRO_RELEASE)?.entries.length ?? 0
 const EXPECTED_TAGGED = RELEASE_NOTES.reduce(
@@ -408,6 +412,21 @@ async function main(): Promise<void> {
     await checkFillsPane(page, launched.app)
     await checkBulletsAndThanks(page)
     await checkGitHubLink(page)
+    const base = await page.locator('[data-testid="oracle-upstream-base"]').innerText()
+    check('Oracle names its upstream base separately', base.includes(`EQ-Zera ${UPSTREAM_BASE.version}`), base)
+    check('upstream history starts collapsed', (await countOf(page, '[data-testid="upstream-history"]')) === 0)
+    await page.click('[data-testid="upstream-history-toggle"]')
+    await page.waitForSelector('[data-testid="upstream-history"]')
+    check('original upstream notes remain available and explicitly labeled',
+      (await countOf(page, '[data-testid^="upstream-release-"]')) === UPSTREAM_NOTES.length &&
+      (await page.locator('[data-testid="upstream-history"]').innerText()).includes('Original EQ-Zera notes'))
+    check('upstream notes never receive Oracle new markers',
+      (await countOf(page, '[data-testid^="upstream-release-"][data-new="true"]')) === 0)
+    await page.click('[data-testid="upstream-history-toggle"]')
+    await page.locator('[data-testid="upstream-history"]').waitFor({ state: 'detached' })
+    const appVersion = await page.evaluate(() =>
+      (window as unknown as { eq: { getAppVersion: () => Promise<string> } }).eq.getAppVersion())
+    check('the running app version agrees with the newest Oracle notes', appVersion === NEWEST, appVersion)
 
     // ---- 2. an upgraded install -------------------------------------------
     // The state is read ONCE per launch, so the reload is not a shortcut around anything: it is
@@ -444,6 +463,33 @@ async function main(): Promise<void> {
     await launched.close()
   }
 
+  // An existing upstream 1.x stamp must not hide Oracle's independent 0.x news.
+  const legacyData = makeUserData()
+  const settings = join(legacyData, 'everquest-companion-progress.json')
+  writeFileSync(settings, JSON.stringify({ lastSeenNotesVersion: '1.26.1' }))
+  try {
+    const legacy = await launchOnFixture('e2e-overview.log', { userData: legacyData })
+    try {
+      const migratedPage = await mainWindow(legacy.app)
+      await migratedPage.waitForSelector('[data-testid="nav-overview"]', { timeout: 60_000 })
+      const news = await settleCount(migratedPage, TEASER, 1)
+      check('an old upstream 1.x stamp still announces the Oracle upgrade', news === 1)
+      await openPanel(migratedPage)
+      const stored = await settle(() => JSON.parse(readFileSync(settings, 'utf8')),
+        (value) => value.oracleLastSeenNotesVersion === NEWEST)
+      check('reading Oracle notes preserves the upstream stamp and writes an independent Oracle stamp',
+        stored.lastSeenNotesVersion === '1.26.1' && stored.oracleLastSeenNotesVersion === NEWEST)
+      await setSeen(migratedPage, null)
+      await migratedPage.reload({ timeout: 60_000 })
+      await migratedPage.waitForSelector('[data-testid="nav-overview"]', { timeout: 60_000 })
+      check('explicit reset does not reimport the legacy stamp',
+        (await settleStable(() => countOf(migratedPage, TEASER))) === 0)
+    } finally {
+      await legacy.close()
+    }
+  } finally {
+    await removeUserData(legacyData)
+  }
   reportRun()
 }
 

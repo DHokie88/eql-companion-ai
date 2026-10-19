@@ -24,7 +24,7 @@
 
 import { type JSX, useCallback, useState } from 'react'
 import { Button, Chip, Stack, Typography } from '@mui/material'
-import { RELEASE_NOTES, variantLastSeen, type WhatsNewVariant } from '@shared/releaseNotes'
+import { RELEASE_NOTES, variantLastSeen, type WhatsNewVariant } from '@shared/oracleReleaseNotes'
 import { realLastSeenVersion, resetToRealLastSeen, simulateLastSeen } from './session'
 
 /** The three simulated states, in the order somebody hand-testing walks them: the state the app

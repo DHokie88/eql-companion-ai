@@ -25,7 +25,7 @@
 // frame on a fresh install and then vanishes is worse than one that appears a frame late.
 
 import { useSyncExternalStore } from 'react'
-import { latestReleaseVersion, whatsNewState, type WhatsNewState } from '@shared/releaseNotes'
+import { latestReleaseVersion, whatsNewState, type WhatsNewState } from '@shared/oracleReleaseNotes'
 
 let snapshot: WhatsNewState | null = null
 /** What the store held when this launch STARTED — what "reset to real" restores. Captured before

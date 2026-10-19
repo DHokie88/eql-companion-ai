@@ -5,7 +5,7 @@
 // to that is a split, not a widened threshold. On `window.eq` these two are indistinguishable
 // from the methods written out there.
 //
-// THE NOTES DO NOT CROSS THIS BRIDGE. `src/shared/releaseNotes.ts` is committed source the
+// THE NOTES DO NOT CROSS THIS BRIDGE. `src/shared/oracleReleaseNotes.ts` is committed source the
 // renderer imports directly (the bundler inlines it, like the spell DB), so what travels here is
 // exactly one string: the release this install has already been shown.
 

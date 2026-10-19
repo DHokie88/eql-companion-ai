@@ -8,6 +8,12 @@ when engine code changes; a successful compile alone does not prove the app load
 Finish `npm run build` before starting `npm test`: the symbolication round-trip tests read emitted
 bundles and maps from `out/`, so a concurrent rebuild can remove a map between their reads.
 
+Oracle release policy: maintain our version in `package.json` and the root lockfile entries;
+add player-facing notes to `src/shared/oracleReleaseNotes.ts` for each delivered release.
+Use minor bumps for features and patch bumps for fixes while pre-1.0. Run `npm run check:release`.
+Keep imported `src/shared/releaseNotes.ts` as attributed upstream history, with its base version
+tracked separately. Version changes do not authorize tagging, publishing, or enabling updates.
+
 Distilled operating manual. Per-task history lives in `git log` and Linear;
 this file holds only repeatable rules and load-bearing design. Long-form war
 stories were MOVED verbatim to `docs/agents-archive.md` (JOS-252) — a cut

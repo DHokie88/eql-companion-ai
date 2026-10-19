@@ -1,12 +1,13 @@
 {
   "name": "eq-oracle",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "FSL-1.1-MIT",
   "description": "EQ Oracle - the EverQuest Legends desktop toolkit. Live log parsing, overlays, quests, gear and crafting.",
   "main": "./out/main/index.js",
   "author": "Jack Thomas",
   "private": true,
   "scripts": {
+    "check:release": "node --import tsx scripts/check-release-notes.mjs",
     "deps:electron": "node node_modules/electron/install.js",
     "dev": "electron-vite dev --watch",
     "build": "electron-vite build",

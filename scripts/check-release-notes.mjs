@@ -15,15 +15,27 @@
 //   With no argument it checks the notes' SHAPE only, which is what a local run wants.
 //   Exit 0 = fine, exit 1 = the reason, on stderr.
 
-import { hasReleaseNote, releaseNotesProblems } from '../src/shared/releaseNotes.ts'
+import { readFileSync } from 'node:fs'
+import { hasReleaseNote, latestReleaseVersion, releaseNotesProblems } from '../src/shared/oracleReleaseNotes.ts'
+import { parseVersion } from '../src/shared/releaseNotes.ts'
 
 const ref = process.argv[2] ?? ''
 const problems = releaseNotesProblems()
+const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'))
+if (pkg.version !== latestReleaseVersion()) {
+  problems.push(`package.json version ${pkg.version} must match the newest Oracle release note ${latestReleaseVersion()}`)
+}
 
 if (ref !== '' && !hasReleaseNote(ref)) {
   problems.push(
-    `${ref} has no entry in src/shared/releaseNotes.ts — add one before tagging, or the app ships with nothing to say about this release`
+    `${ref} has no entry in src/shared/oracleReleaseNotes.ts — add an Oracle release note before tagging`
   )
+}
+if (ref !== '') {
+  const tag = parseVersion(ref)
+  if (`${tag.major}.${tag.minor}.${tag.patch}` !== pkg.version) {
+    problems.push(`${ref} does not match package.json version ${pkg.version}`)
+  }
 }
 
 if (problems.length > 0) {

@@ -150,6 +150,7 @@
 // backoff).
 
 import { app, ipcMain, powerMonitor, type BrowserWindow } from 'electron'
+import packageInfo from '../../package.json'
 import electronUpdater from 'electron-updater'
 import { IPC } from '../shared/ipc'
 import type { UpdateChannel, UpdateStatus } from '../shared/types'
@@ -709,7 +710,9 @@ export function initUpdater(
   lastStatus = lastCheckedAt ? { state: 'idle', checkedAt: lastCheckedAt } : { state: 'idle' }
 
   // Registered in dev too: Preferences shows the version + a (benign) status there.
-  ipcMain.handle(IPC.getAppVersion, () => app.getVersion())
+  // Direct entry-point launches can report Electron's own version. Oracle's
+  // development version comes from its package; packaged builds retain their stamped version.
+  ipcMain.handle(IPC.getAppVersion, () => app.isPackaged ? app.getVersion() : packageInfo.version)
   ipcMain.handle(IPC.getUpdateStatus, () => lastStatus)
 
   if (AUTO_UPDATE_DISABLED || !app.isPackaged) {
