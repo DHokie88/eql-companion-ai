@@ -26,7 +26,10 @@ export const RELEASE_NOTES: readonly ReleaseNote[] = [
     entries: [
       { kind: 'changed', text: 'Spell controls share one row: Classes, Level, Show mine, Rank, and Targets. Choosing a rank resets every spell preview and turns off Show mine; the toggle restores detected inputs.', fromReport: true },
       { kind: 'changed', text: 'Spell lists show one damage or healing number, with a short per-hit calculation for rains. Equipment inputs, ranges, and calculation limits remain available in tooltips and spell details.' },
-      { kind: 'fixed', text: 'Type buttons now hide repeated category labels consistently with the category dropdown, using every matching spell rather than only the current page.' }
+      { kind: 'fixed', text: 'Type buttons now hide repeated category labels consistently with the category dropdown, using every matching spell rather than only the current page.' },
+      { kind: 'new', text: 'Best in line: browse folds replacement spells into the line your game keeps — for example AC buffs or one-per-playstyle damage and DoTs — showing only the best at the current level. Its arrow expands the line, best to worst, and unverified stacking or shared timers stay separate. The result count shows the uncollapsed match count beside the visible rows.' },
+      { kind: 'changed', text: 'The filter rows are smaller: All damage and All heals sit on the type row beside a narrow AOE target cap and the Columns picker. Every column is selectable except Spell and Class/Level, including a new Description column, and the Type column hides itself when the whole list shares one type.' },
+      { kind: 'changed', text: 'Damage and Mana headers wrap to two lines so the table uses less width, the separate Level column is gone (Class/Level covers it), Helpful / harmful replaces Polarity, and the level picker uses left/right only.' }
     ]
   },
   {
