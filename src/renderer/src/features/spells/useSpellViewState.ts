@@ -35,9 +35,10 @@ export function useSpellViewState(routing: AppRouting, ready = true) {
     routing.clearLibraryFocus()
   }, [routing, ready, setTab, setLevel, setClasses, setMode, setSelected])
   const toggle = (id: number): void => setSelected((ids) => ids.includes(id) ? ids.filter((n) => n !== id) : ids.length < 4 ? [...ids, id] : ids)
+  const clearComparison = (): void => setSelected([])
   const open = (id: number, scope: 'single' | 'pack' = 'single'): void => { setPreviewLevel(null); setPreviewScope(scope); routing.openLibrarySpell(id) }
   const preview = (id: number, level: number): void => { setPreviewLevel(level); setPreviewScope('single'); routing.openLibrarySpell(id) }
-  return { mode, setMode, pickedClasses, setClasses, pickedLevel, setLevel, tab, setTab, selected, toggle, timelineId, setTimelineId,
+  return { mode, setMode, pickedClasses, setClasses, pickedLevel, setLevel, tab, setTab, selected, toggle, clearComparison, timelineId, setTimelineId,
     previewLevel, previewScope, focusCategory, setFocusCategory, focusScope, setFocusScope, browseTargets, setBrowseTargets, bestInLine, setBestInLine, open, preview }
 }
 
