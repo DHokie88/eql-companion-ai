@@ -95,7 +95,14 @@ test('the fork desktop launcher loads the built UI, preload and matching release
       return { pid, status: killed.status, error: killed.error?.message }
     })
     await Promise.race([browser?.close().catch(() => undefined), delay(2_000, undefined, { ref: false })])
-    assert.deepEqual(ownedPids(userData), [], `owned app survived teardown: ${JSON.stringify(results)}`)
+    // taskkill can return before Windows removes the process from its inventory.
+    const teardownDeadline = Date.now() + 10_000
+    let remaining = ownedPids(userData)
+    while (remaining.length && Date.now() < teardownDeadline) {
+      await delay(100)
+      remaining = ownedPids(userData)
+    }
+    assert.deepEqual(remaining, [], `owned app survived teardown: ${JSON.stringify(results)}`)
     rmSync(root, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 })
   }
 })
