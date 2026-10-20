@@ -1,5 +1,6 @@
 import type { JSX } from 'react'
-import { Box, Button, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
+import { Box, IconButton, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography } from '@mui/material'
+import CloseIcon from '@mui/icons-material/Close'
 import type { SpellCalculation } from '@shared/spellLibrary'
 import { sortSpellCalculations, type SpellCalculationSort } from '@shared/clientSpellBrowse'
 import { amount, efficiencyAmount, wholeAmount, EstimateAmount } from './SpellEstimate'
@@ -22,21 +23,28 @@ export function SpellCalculationTable({ rows, onOpen, onRemove, referenceId, ran
   const sorted = sortSpellCalculations(rows, sort.field, sort.direction)
   const metric = rows.every((row) => row.metric === 'healing') ? 'Healing' : 'Damage'
   return <Box sx={{ overflowX: 'auto' }}><Table size="small" sx={{ '& .MuiTableCell-root': { px: 1 } }}><TableHead><TableRow>
-    {COLUMNS.map((column) => <SpellSortHeader key={column.field} {...column} label={column.field === 'total' ? metric : column.field === 'perMana' ? `${metric}/Mana` : column.label} sort={sort} />)}{onRemove && <TableCell />}
+    {COLUMNS.map((column) => <SpellSortHeader key={column.field} {...column} label={column.field === 'total' ? metric : column.field === 'perMana' ? `${metric}/Mana` : column.label} sort={sort} />)}
   </TableRow></TableHead><TableBody>{sorted.map((row) => <CalculationRow key={row.id} row={row} evidence={rankEvidence?.[String(row.id)]} onOpen={onOpen} onRemove={onRemove} reference={rows.find((r) => r.id === referenceId)} />)}</TableBody></Table></Box>
 }
 function CalculationRow({ row, onOpen, onRemove, reference, evidence }: { row: SpellCalculation; onOpen: (id: number) => void; onRemove?: (id: number) => void; reference?: SpellCalculation; evidence?: SpellRankEvidence | null }): JSX.Element {
   const differences = spellComparisonDifferences(row, reference)
   const showDifference = reference !== undefined && row.id !== reference.id
   return <TableRow data-testid="spells-calculation">
-    <TableCell sx={{ minWidth: 190 }}><SpellNameButton id={row.id} onOpen={onOpen}>{row.name}</SpellNameButton><SpellRowRank id={row.id} name={row.name} evidence={evidence} /><Typography variant="caption" display="block">ID {row.id} · target {row.target}</Typography></TableCell>
+    <SpellIdentityCell row={row} evidence={evidence} onOpen={onOpen} onRemove={onRemove} />
     <TableCell align="right">{amount(row.instant)}</TableCell><PeriodicCell row={row} />
     <TableCell align="right"><EstimateAmount calculation={row} compact /><SpellCastSummary calculation={row} compact />{showDifference && <Delta value={differences.amount} />}</TableCell><TableCell align="right">{row.mana}{showDifference && <Delta value={differences.mana} />}</TableCell>
     <TableCell align="right">{row.mana === 0 ? 'Zero mana' : efficiencyAmount(row.perMana)}{showDifference && <Delta value={differences.efficiency} />}</TableCell>
     <TableCell align="right">{wholeAmount(row.analysis?.timing.rate ?? null)}{showDifference && <Delta value={differences.rate} />}</TableCell>
     <TableCell sx={{ minWidth: 180 }}><Typography variant="caption">{row.analysis?.scope ?? 'One target'}</Typography><SpellAnalysisBreakdown calculation={row} /></TableCell>
-    {onRemove && <TableCell><Button size="small" onClick={() => onRemove(row.id)}>Remove</Button></TableCell>}
   </TableRow>
+}
+function SpellIdentityCell({ row, onOpen, onRemove, evidence }: { row: SpellCalculation; onOpen: (id: number) => void; onRemove?: (id: number) => void; evidence?: SpellRankEvidence | null }): JSX.Element {
+  return <TableCell sx={{ minWidth: 190 }}><Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+    {onRemove && <Tooltip title="Remove from comparison"><IconButton size="small" aria-label={`Remove ${row.name} from comparison`} data-testid={`spells-remove-${row.id}`} onClick={() => onRemove(row.id)} sx={{ flexShrink: 0 }}><CloseIcon fontSize="small" /></IconButton></Tooltip>}
+    <SpellNameButton id={row.id} onOpen={onOpen}>{row.name}</SpellNameButton>
+  </Box><SpellRowRank id={row.id} name={row.name} evidence={evidence} /><Typography variant="caption" display="block">ID {row.id} · target {row.target}</Typography>
+    {row.effectSummary && <Typography variant="body2" data-testid={`compare-effects-${row.id}`} sx={{ whiteSpace: 'normal', maxWidth: 260 }}>Base: {row.effectSummary}</Typography>}
+  </TableCell>
 }
 function PeriodicCell({ row }: { row: SpellCalculation }): JSX.Element {
   return <TableCell align="right">{row.perTick === null ? '-' : `${amount(row.perTick)} × ${row.ticks ?? '?'}`}</TableCell>
