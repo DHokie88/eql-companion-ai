@@ -21,6 +21,14 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.7.0',
+    date: '2026-10-20',
+    entries: [
+      { kind: 'new', text: 'Compare has a remove button beside each spell name and a Clear all button above the list.', fromReport: true },
+      { kind: 'changed', text: 'Bard and other slow spells show attack and movement slow percentages in their descriptions and comparison rows at the selected level.', fromReport: true }
+    ]
+  },
+  {
     version: '0.6.0',
     date: '2026-10-19',
     entries: [

@@ -31,6 +31,15 @@ async function compareControls(page: Page): Promise<void> {
   const summary = page.getByTestId('compare-effects-738')
   assert.match(await summary.innerText(), /Slows attacks by 30%/)
   assert.match(await summary.innerText(), /Slows movement by 80%/)
+  await page.getByTestId('spells-level').fill('40')
+  await settle(() => summary.innerText(), (text) => text.includes('Slows attacks by 25%'))
+  assert.match(await summary.innerText(), /Slows movement by 70%/)
+  await page.getByTestId('spells-level').fill('50')
+  await settle(() => summary.innerText(), (text) => text.includes('Slows attacks by 30%'))
+  await page.getByTestId('spells-open-738').click()
+  assert.match(await page.getByTestId('spell-description').innerText(), /Slows attacks by 30%/)
+  assert.match(await page.getByTestId('spell-description').innerText(), /Slows movement by 80%/)
+  await page.getByTestId('spells-detail-back').click()
   const positions = await page.getByTestId('spells-compare').locator('[data-testid^="spells-remove-"]').evaluateAll((buttons) => buttons.map((button) => {
     const bounds = button.getBoundingClientRect()
     const container = button.closest('table')!.parentElement!
