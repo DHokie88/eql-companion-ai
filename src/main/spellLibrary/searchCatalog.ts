@@ -13,9 +13,9 @@ const CALCULATED_SORTS = new Set(['amount', 'efficiency', 'rate', 'cast', 'recov
 type SearchOptions = ReturnType<typeof spellSearchOptions>
 interface EvaluationDependencies { calculate: SpellCalculator; mechanics?: SpellMechanicsCatalog }
 
-export function catalogSummary(record: ClientSpellRecord, classes: SearchOptions['classes'], mechanics?: SpellMechanicsCatalog): SpellSummary {
+export function catalogSummary(record: ClientSpellRecord, classes: SearchOptions['classes'], mechanics?: SpellMechanicsCatalog, level?: number): SpellSummary {
   const { id, name, rank, mana, category, subcategory, beneficial, target, castMs, recoveryMs, recastMs } = record
-  return { id, name, rank, classes: record.classes, mana, category, subcategory, beneficial, target, castMs, recoveryMs, recastMs, description: clientSpellDescription(record),
+  return { id, name, rank, classes: record.classes, mana, category, subcategory, beneficial, target, castMs, recoveryMs, recastMs, description: clientSpellDescription(record, level),
     learnedLevel: minimumSpellLevel(record.classes, classes), spellType: clientSpellType(record, mechanics), typeLabel: clientSpellTypeLabel(record, mechanics) }
 }
 function evaluate(record: ClientSpellRecord, row: SpellSummary, level: number, input: { calculate: SpellCalculator; metric?: SpellMetric }): void {
@@ -39,7 +39,7 @@ function collect(storage: SpellLibraryStorage, dataset: SpellDataset | null, opt
     if (record.category) categories.add(record.category)
     if (record.subcategory && (!options.category || record.category === options.category)) subcategories.add(record.subcategory)
     if (!matchesSpellSearch(record, { ...options, type: undefined }, input.mechanics)) continue
-    const row = catalogSummary(record, options.classes, input.mechanics)
+    const row = catalogSummary(record, options.classes, input.mechanics, options.level)
     addTypes(row, types)
     if (options.type && !matchesSpellSearch(record, options, input.mechanics)) continue
     input.evaluateRow(record, row)

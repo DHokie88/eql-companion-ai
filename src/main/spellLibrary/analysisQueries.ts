@@ -9,7 +9,6 @@ import { levelArg, pageArgs, queryObject } from './queryValidation'
 import type { SpellModifierContext } from '../../shared/spellModifiers'
 import type { SpellLibraryStorage } from './storage'
 import type { SpellCalculator, WorkerSpellEvaluation } from './workerEvaluation'
-import { clientSpellDescription } from '../../shared/clientSpellDescriptions'
 
 interface RankingGroups { ranked: SpellRankingRow[]; zeroMana: SpellRankingRow[]; excluded: SpellRankingRow[] }
 
@@ -107,7 +106,7 @@ export class SpellAnalysisQueries {
       countCategories(record, result.counts, mechanics)
       if (!matchesSpellType(record, options.category, mechanics)) continue
       const calculation = calculate(record, options.level, record.beneficial ? 'healing' : 'damage')
-      addRow(groups, { ...catalogSummary(record, options.filters.classes, mechanics), rankEvidence: this.evaluation.rankEvidence(dataset, record, context), calculation, calculations: [calculation] })
+      addRow(groups, { ...catalogSummary(record, options.filters.classes, mechanics, options.level), rankEvidence: this.evaluation.rankEvidence(dataset, record, context), calculation, calculations: [calculation] })
     }
     return result
   }
@@ -122,7 +121,7 @@ export class SpellAnalysisQueries {
       if (!matchesSpellSearch(record, options.filters, mechanics)) continue
       const learned = minimumSpellLevel(record.classes, options.filters.classes)
       if (learned === null) continue
-      rows.push({ ...catalogSummary(record, options.filters.classes, mechanics), description: clientSpellDescription(record),
+      rows.push({ ...catalogSummary(record, options.filters.classes, mechanics, learned),
         detectedRank: this.evaluation.detectedRank(dataset, record, context), rankEvidence: this.evaluation.rankEvidence(dataset, record, context),
         calculations: this.byLevelCalculations(record, learned, options.query, calculate) })
     }

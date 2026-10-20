@@ -5,10 +5,12 @@ import { clientSpellEffectLabel } from './clientSpellParser'
 export interface SpellEffectDescription { slot: number; spa: number; label: string; text: string; neutral: boolean }
 export interface SpellPresentation { description: string; level: number; duration: string; target: string; range: string; resist: string; effects: SpellEffectDescription[]; bard?: import('./bardInstruments').BardSongPresentation }
 /** Resolve display tokens against this captured record without rewriting source history. */
-export function clientSpellDescription(record: ClientSpellRecord): string {
+export function clientSpellDescription(record: ClientSpellRecord, level?: number): string {
   const cap = record.fields.aeMaxTargets
   const targets = typeof cap === 'number' && Number.isSafeInteger(cap) && cap > 0 ? String(cap) : 'an unspecified number of'
-  return record.description.replace(/%T\b/g, targets)
+  const description = record.description.replace(/%T\b/g, targets)
+  const slow = level === undefined ? '' : clientSpellSlowSummary(record, level)
+  return [description, slow].filter(Boolean).join(' ')
 }
 function number(value: number): string { return value.toLocaleString('en-US', { maximumFractionDigits: 3 }) }
 function duration(record: ClientSpellRecord, level: number): string {
@@ -60,6 +62,22 @@ export function describeClientSpellEffect(effect: ClientSpellEffect, record: Cli
   if (effect.spa === 0 || effect.spa === 79) return healthText(effect, value, record)
   return simpleEffectText(effect, value, record)
 }
+function isAttackSlow(effect: ClientSpellEffect, value: number | null): boolean {
+  if (effect.spa === 11 || effect.spa === 98) return (value ?? effect.base) < 100
+  return effect.spa === 119 && effect.base < 0
+}
+/** Base client slows at this level; rank and instruments do not modify this summary. */
+export function clientSpellSlowSummary(record: ClientSpellRecord, level: number): string {
+  const summaries = record.effects.flatMap((effect) => {
+    if (effect.base === 0 && effect.max === 0 && effect.limit === 0 && effect.calc === 100) return []
+    const value = clientSpellEffectAmount(effect, level)
+    const movement = effect.spa === 3 && effect.base < 0
+    if (!movement && !isAttackSlow(effect, value)) return []
+    if (value === null) return [`${movement ? 'Movement' : 'Attack'} slow percentage unavailable (unsupported client formula).`]
+    return [describeClientSpellEffect(effect, record, level).split(/(?<=\.)\s/)[0]]
+  })
+  return [...new Set(summaries)].join(' ')
+}
 function capturedDescription(effect: ClientSpellEffect, record: ClientSpellRecord): string {
   const captured = record.fields[`effect${effect.slot}`]
   return typeof captured === 'string' ? captured.replace(/([a-z])([A-Z])/g, '$1 $2') : `${clientSpellEffectLabel(effect.spa)}. Client base ${effect.base}, formula ${effect.calc}, limit ${effect.limit}, maximum ${effect.max}.`
@@ -67,7 +85,7 @@ function capturedDescription(effect: ClientSpellEffect, record: ClientSpellRecor
 /** Client-only, level-evaluated explanations. It never simulates non-HP buff statistics. */
 export function describeClientSpell(record: ClientSpellRecord, level: number): SpellPresentation {
   return {
-    description: clientSpellDescription(record), level, duration: duration(record, level), target: String(record.fields.targetName ?? `Client target type ${record.target}`),
+    description: clientSpellDescription(record, level), level, duration: duration(record, level), target: String(record.fields.targetName ?? `Client target type ${record.target}`),
     range: `Casting range ${number(record.range)} game units${record.aeRange > 0 ? `; area radius ${number(record.aeRange)} game units` : '; no area radius'}.`,
     resist: String(record.fields.resistName ?? 'Unspecified'),
     effects: record.effects.map((effect) => ({ slot: effect.slot, spa: effect.spa, label: effectLabel(effect.spa), text: describeClientSpellEffect(effect, record, level),
