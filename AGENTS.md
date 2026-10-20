@@ -129,8 +129,9 @@ docs/agents-archive.md.
   sighting, and a flake at 3+ occurrences must have a fix ticket or chip —
   "green on re-run" is a report line, never a resolution. Known rows:
   - `forkStartup.mts` teardown · `owned app survived teardown` after successful taskkill,
-    while Windows still listed the exiting owned process · 1 sighting (2026-10-20, concurrent
-    spell verification) · teardown now waits up to 10 seconds for the owned process to disappear.
+    while Windows still listed the exiting owned process · 2 sightings (2026-10-20, concurrent
+    spell and Sky verification) · teardown waits up to 10 seconds using OS process liveness
+    rather than repeatedly spawning WMI queries that can still report an exited process.
   - `symbolicate.test` emitted-map round trip · `out/preload/index.js.map is missing` during
     a concurrent `npm run build` · 1 sighting (2026-10-18, Oracle Spells verification) · resolved
     by sequencing build before unit verification; the ordering is now documented in the fork gate.

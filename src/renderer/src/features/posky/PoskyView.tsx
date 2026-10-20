@@ -2,6 +2,7 @@ import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
 import { Alert, Box, Checkbox, FormControlLabel, Stack, Tab, Tabs, Typography } from '@mui/material'
 import type { CountSource, ItemCountOverride } from '@shared/types'
 import { OverrideSummaryChip } from './ItemOverrides'
+import type { InventoryRow } from '../inventory/reconcile'
 import { useProgress, type QuestProgress } from './useProgress'
 import { IgnoredList } from './IgnoredList'
 import QuestFilterBar, { InventorySource } from './QuestFilterBar'
@@ -43,13 +44,17 @@ function CountsLine({
   totalQuests,
   filteredCount,
   countSource,
-  overrides
+  overrides,
+  inventoryRows,
+  onClearOverride
 }: {
   questCount: number
   totalQuests: number
   filteredCount: number
   countSource: CountSource
   overrides: readonly ItemCountOverride[]
+  inventoryRows: readonly InventoryRow[]
+  onClearOverride: (name: string) => Promise<void>
 }): JSX.Element {
   if (questCount === 0) {
     return (
@@ -71,7 +76,7 @@ function CountsLine({
     // VISIBLE, so it is what an e2e reads to prove a facet pick actually removed rows.
     <Typography variant="body2" color="text.secondary" data-testid="posky-counts">
       {filteredCount} of {totalQuests} quests · counting from {countSourcePhrase(countSource)}
-      <OverrideSummaryChip overrides={overrides} />
+      <OverrideSummaryChip overrides={overrides} inventoryRows={inventoryRows} onClear={onClearOverride} />
     </Typography>
   )
 }
@@ -319,6 +324,8 @@ interface PoskyBodyProps {
   /** an item name → the Loot tab's drill-down, for the pane that draws names without quest rows */
   onOpenLoot?: (item: string) => void
   itemOverrides: readonly ItemCountOverride[]
+  inventoryRows: readonly InventoryRow[]
+  onClearOverride: (name: string) => Promise<void>
 }
 
 /**
@@ -409,6 +416,8 @@ function PoskyBody(x: PoskyBodyProps): JSX.Element {
         filteredCount={list.filtered.length}
         countSource={countSource}
         overrides={x.itemOverrides}
+        inventoryRows={x.inventoryRows}
+        onClearOverride={x.onClearOverride}
       />
       {/* THE SECOND `/outputfile` LINE (JOS-429), and deliberately the SAME line component the
           inventory dump gets — `OutputKindLine quiet`, which inherits the command string, the
@@ -471,6 +480,7 @@ export default function PoskyView({
     undoTurnIn,
     setItemOverride,
     itemOverrides,
+    inventoryRows,
     inventoryInfo,
     achievementsInfo,
     sharedItems,
@@ -525,6 +535,8 @@ export default function PoskyView({
         achievementsLoadedAt={achievementsInfo?.readAt ?? null}
         onOpenLoot={onOpenLoot}
         itemOverrides={itemOverrides}
+        inventoryRows={inventoryRows}
+        onClearOverride={(name) => setItemOverride(name, null)}
       />
     </Stack>
   )

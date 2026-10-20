@@ -21,6 +21,14 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.7.1',
+    date: '2026-10-20',
+    entries: [
+      { kind: 'fixed', text: 'Sky inventory refresh now confirms what loaded and reports failures instead of silently doing nothing.', fromReport: true },
+      { kind: 'changed', text: 'Click counts set by hand in Plane of Sky to compare each correction with your export and restore automatic counting for individual items. Manual corrections continue to take priority until you release them.', fromReport: true }
+    ]
+  },
+  {
     version: '0.7.0',
     date: '2026-10-20',
     entries: [

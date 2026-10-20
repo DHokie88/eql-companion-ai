@@ -22,6 +22,17 @@ function ownedPids(token: string): number[] {
   return Array.isArray(pids) ? pids : [pids]
 }
 
+/** WMI may briefly retain an exited process; signal 0 checks the OS's live process state. */
+function isRunning(pid: number): boolean {
+  try {
+    process.kill(pid, 0)
+    return true
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ESRCH') return false
+    throw error
+  }
+}
+
 function isolatedEnv(root: string): NodeJS.ProcessEnv {
   // Do not inherit game paths, engine overrides, Chromium flags or the caller's proxies.
   const env = Object.fromEntries(Object.entries(process.env).filter(([key]) =>
@@ -95,12 +106,13 @@ test('the fork desktop launcher loads the built UI, preload and matching release
       return { pid, status: killed.status, error: killed.error?.message }
     })
     await Promise.race([browser?.close().catch(() => undefined), delay(2_000, undefined, { ref: false })])
-    // taskkill can return before Windows removes the process from its inventory.
+    // taskkill can return before Windows removes the process from WMI's inventory. Poll the
+    // actual owned processes without repeatedly spawning PowerShell under concurrent test load.
     const teardownDeadline = Date.now() + 10_000
-    let remaining = ownedPids(userData)
+    let remaining = results.map(({ pid }) => pid).filter(isRunning)
     while (remaining.length && Date.now() < teardownDeadline) {
       await delay(100)
-      remaining = ownedPids(userData)
+      remaining = remaining.filter(isRunning)
     }
     assert.deepEqual(remaining, [], `owned app survived teardown: ${JSON.stringify(results)}`)
     rmSync(root, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 })
