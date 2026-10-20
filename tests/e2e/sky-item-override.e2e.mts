@@ -46,7 +46,7 @@
 import type { Page } from 'playwright-core'
 import { buildIfStale, check, dumpArtifacts, failures, reportRun, settle } from './appHarness.mjs'
 import { mainWindow } from './appWindow.mjs'
-import { launchOnFixture, type FixtureLog } from './logFixture.mjs'
+import { launchOnFixture, writeInventoryDump, type FixtureLog } from './logFixture.mjs'
 
 const NAV_SKY = '[data-testid="nav-posky"]'
 const NAV_OVERVIEW = '[data-testid="nav-overview"]'
@@ -66,7 +66,6 @@ const EDIT = `${ITEM_ROW} [data-testid="posky-item-count-edit"]`
 const INPUT = `${ITEM_ROW} [data-testid="posky-item-count-input"] input`
 const SAVE = `${ITEM_ROW} [data-testid="posky-item-count-save"]`
 const CHIP = '[data-testid="posky-item-override"]'
-const CHIP_CLEAR = `${CHIP} .MuiChip-deleteIcon`
 const SUMMARY_CHIP = '[data-testid="posky-overrides-active"]'
 
 const QUEST = 'Beastlord Test of Azarack'
@@ -192,7 +191,8 @@ async function stepLootAfterCounts(page: Page, log: FixtureLog): Promise<void> {
 
 /** STEP 4 — the take-back, off the chip that made the statement visible. */
 async function stepTakeItBack(page: Page): Promise<void> {
-  await page.click(CHIP_CLEAR, { timeout: 15_000 })
+  await page.click(SUMMARY_CHIP, { timeout: 15_000 })
+  await page.click('[data-testid="posky-override-use-automatic"]', { timeout: 15_000 })
   const gone = await settle(() => chipCount(page, CHIP), (v) => v === null, { timeoutMs: 20_000 })
   check('CLEARING THE STATEMENT REMOVES IT FROM THE ROW', gone === null, String(gone))
   check('…and from the tab`s counts line', (await chipCount(page, SUMMARY_CHIP)) === null)
@@ -201,6 +201,24 @@ async function stepTakeItBack(page: Page): Promise<void> {
   // statement stood (tests/skyItemOverrides.test.mts pins that as a whole-result deep equality).
   const have = await haveText(page, ITEM)
   check('…and the count is the log`s again', have === '1/1', String(have))
+}
+
+/** Reproduce the report: refreshing an export must expose, rather than erase, a manual zero. */
+async function stepReviewImportedCount(page: Page, log: FixtureLog): Promise<void> {
+  writeInventoryDump(log.installDir, 'Primitive_freeport-Inventory.txt')
+  await page.waitForFunction(async () => (await window.eq.getProgress()).inventory['azarack skin'] === 1)
+  const held = await settle(() => haveText(page, ITEM), (v) => v === '0/1')
+  check('a refreshed export preserves the explicit manual zero', held === '0/1')
+  await page.click(SUMMARY_CHIP)
+  const row = page.locator('[data-testid="posky-override-review-row"][data-item="azarack skin"]')
+  await row.waitFor()
+  check('review shows the item, manual baseline, held count and positive export',
+    await row.locator('td').allTextContents().then((cells) =>
+      cells[0].includes(ITEM) && cells[1] === '0' && cells[2] === '0' && cells[3] === '1'))
+  check('review explains why refreshing did not replace the count',
+    await page.locator('[data-testid="posky-override-review"]').innerText().then((s) => s.includes('take priority even after refreshing')))
+  await dumpArtifacts(page, 'sky-manual-count-review-pass')
+  await page.getByRole('button', { name: 'Done', exact: true }).click()
 }
 
 async function main(): Promise<void> {
@@ -216,6 +234,7 @@ async function main(): Promise<void> {
     }
     if (await stepLootedOnce(page, launched.log)) {
       if (await stepStateZero(page)) {
+        await stepReviewImportedCount(page, launched.log)
         await stepLootAfterCounts(page, launched.log)
         await stepTakeItBack(page)
       }

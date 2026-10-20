@@ -130,6 +130,7 @@ import {
   REFRESH,
   slot,
   stepRefreshRereads,
+  stepRefreshFailure,
   stepReplacedNotOverwritten,
   type Slot
 } from './inventoryRewriteSteps.mjs'
@@ -695,6 +696,7 @@ async function main(): Promise<void> {
         // …and the affordance the second report asked for, pressed for real (JOS-431). It goes
         // last because it needs the app to have been up a while — see the step's own header.
         await stepRefreshRereads(page, await slot(page, LOADED))
+        await stepRefreshFailure(page, log.installDir)
       })
     }
   } finally {

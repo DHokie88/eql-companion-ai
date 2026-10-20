@@ -142,4 +142,24 @@ export async function stepRefreshRereads(page: Page, before: Slot): Promise<void
     `was read at ${before.title} · now ${loaded.title}`
   )
   check('…in the same quiet words, not a control that grew', loaded.text === 'loaded just now', loaded.text)
+  const result = page.locator('[data-testid="posky-inventory-refresh-result"]')
+  await result.waitFor()
+  check('refresh explicitly confirms the loaded item count',
+    /Inventory refreshed: \d+ item types/.test(await result.innerText()))
+}
+
+/** A missing dump used to make Refresh silently do nothing. Keep the old counts and show why. */
+export async function stepRefreshFailure(page: Page, installDir: string): Promise<void> {
+  const before = await page.evaluate(() => window.eq.getProgress())
+  unlinkSync(join(installDir, DUMP))
+  try {
+    await page.click(REFRESH)
+    const result = page.locator('[data-testid="posky-inventory-refresh-result"]')
+    await settle(() => result.innerText(), (s) => s.includes('No *-Inventory.txt found'))
+    check('refresh failure is visible and actionable', (await result.innerText()).includes('No *-Inventory.txt found'))
+    const after = await page.evaluate(() => window.eq.getProgress())
+    check('failed refresh preserves previously loaded inventory', JSON.stringify(before.inventory) === JSON.stringify(after.inventory))
+  } finally {
+    writeInventoryDump(installDir, DUMP)
+  }
 }

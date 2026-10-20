@@ -28,6 +28,8 @@ import EditIcon from '@mui/icons-material/Edit'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import type { ItemCountOverride } from '@shared/types'
 import type { ItemProgress } from './useProgress'
+import type { InventoryRow } from '../inventory/reconcile'
+import OverrideReview from './OverrideReview'
 // The one caveat that belongs in this cell without being about a statement (JOS-409) — see below.
 import { DUMP_BLIND_ITEM_NOTE, isDumpBlindItem } from './dumpBlindItems'
 
@@ -204,21 +206,34 @@ export function ItemHaveCell({
  * Nothing at all when nothing is stated, which is every user who has never used the control.
  */
 export function OverrideSummaryChip({
-  overrides
+  overrides,
+  inventoryRows = [],
+  onClear
 }: {
   overrides: readonly ItemCountOverride[]
+  inventoryRows?: readonly InventoryRow[]
+  onClear?: (name: string) => Promise<void>
 }): JSX.Element | null {
+  const [reviewing, setReviewing] = useState(false)
   if (overrides.length === 0) return null
   return (
+    <>
     <Chip
       size="small"
       color="warning"
       variant="outlined"
       data-testid="posky-overrides-active"
       data-count={overrides.length}
-      title={`Counts you stated by hand: ${overrides.map((o) => `${o.name} = ${String(o.count)}`).join(', ')}. Expand the quest that needs one and use the pencil beside its Have column to change or remove it.`}
+      title={`Manual counts override refreshed exports. ${overrides.map((o) => `${o.name} = ${String(o.count)}`).join(', ')}. Click to review or restore automatic counting.`}
       label={`${String(overrides.length)} count${overrides.length === 1 ? '' : 's'} set by hand`}
+      onClick={onClear ? () => setReviewing(true) : undefined}
       sx={{ height: 18, fontSize: 11, ml: 1 }}
     />
+    {reviewing && onClear && <OverrideReview overrides={overrides} inventoryRows={inventoryRows}
+      onClear={async (name) => {
+        await onClear(name)
+        if (overrides.length === 1) setReviewing(false)
+      }} onClose={() => setReviewing(false)} />}
+    </>
   )
 }

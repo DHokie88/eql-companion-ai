@@ -43,13 +43,15 @@
 // was the same: the poppers go, here and in every file that draws this tab. Hover text that
 // survives is a native `title` — an OS tooltip is not in the DOM and has no hit area at all.
 
-import { type JSX, memo, useCallback, useState } from 'react'
+import { type JSX, memo, useCallback, useRef, useState } from 'react'
 import {
   Box,
+  Alert,
   Checkbox,
   FormControlLabel,
   MenuItem,
   Stack,
+  Snackbar,
   TextField,
   Typography
 } from '@mui/material'
@@ -381,14 +383,36 @@ export const InventorySource = memo(function InventorySource({
    * model beside `preferredOutputFile`, and JOS-431 is a robustness ticket: the watcher fix is
    * what makes the app find the right file, and this is the door for the day it still does not.
    */
-  const refresh = useCallback(() => {
-    // Fire and forget, and a rejection is not news: main never throws here (it answers a missing
-    // dump with `ok: false`), and the two stamps on the line beside this button are what tell the
-    // player whether anything moved.
-    void window.eq.reloadInventory().catch(() => undefined)
+  const [feedback, setFeedback] = useState<{ severity: 'success' | 'error'; text: string } | null>(null)
+  const refreshing = useRef(false)
+  const refresh = useCallback(async () => {
+    if (refreshing.current) return
+    refreshing.current = true
+    try {
+      const result = await window.eq.reloadInventory()
+      if (!result.ok) {
+        setFeedback({ severity: 'error', text: result.error ?? 'Could not refresh inventory.' })
+      } else {
+        const manual = result.progress?.itemOverrides?.length ?? 0
+        setFeedback({ severity: 'success', text:
+          `Inventory refreshed: ${String(Object.keys(result.progress?.inventory ?? {}).length)} item types.` +
+          (manual ? ` ${String(manual)} manual counts still take priority; click the counts set by hand to review.` : '') })
+      }
+    } catch {
+      setFeedback({ severity: 'error', text: 'Could not read inventory. Check the EQ folder and try again.' })
+    } finally {
+      refreshing.current = false
+    }
   }, [])
   return (
     <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+      <Snackbar open={feedback !== null} autoHideDuration={feedback?.severity === 'error' ? null : 8000}
+        onClose={() => setFeedback(null)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert severity={feedback?.severity ?? 'success'} onClose={() => setFeedback(null)}
+          data-testid="posky-inventory-refresh-result" sx={{ maxWidth: 640 }}>
+          {feedback?.text}
+        </Alert>
+      </Snackbar>
       {/* This one carried a three-sentence popper explaining what each source counted, and it
           was the WORST anchor on the row: the widest control, at the wrapping end of the bar,
           directly over the accordion. It is gone rather than restated, and deliberately not
@@ -453,7 +477,7 @@ export const InventorySource = memo(function InventorySource({
               quiet
               kind="inventory"
               loadedAt={inventoryLoadedAt}
-              onRefresh={refresh}
+              onRefresh={() => void refresh()}
               testId="posky-inventory-fresh"
             />
           ) : (
