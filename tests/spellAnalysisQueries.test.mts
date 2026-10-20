@@ -40,6 +40,29 @@ test('detail and By level resolve maximum targets while preserving captured sour
   } finally { f.close() }
 })
 
+test('slow descriptions follow selected levels across Browse, detail and Compare, and learned level in progression', () => {
+  const row = spellRow(1, 'Synthetic Binding Song'); row[47] = '40'
+  row[172] = '1|3|-30|0|102|0$2|11|95|0|101|65'
+  const f = fixture([row], 'Binds enemies.')
+  try {
+    for (const level of [40, 50]) {
+      const attacks = level === 40 ? '25%' : '30%', movement = level === 40 ? '70%' : '80%'
+      const detail = f.call<SpellDetailResult>('detail', { id: 1, level })
+      const browse = f.call<SpellSearchResult>('search', { level, classes: ['WIZ'] })
+      const compare = f.call<SpellComparisonResult>('compare', { ids: [1], level, metric: 'damage' })
+      assert.ok(detail.presentation?.description.includes(`Slows attacks by ${attacks}`))
+      assert.ok(detail.presentation?.description.includes(`Slows movement by ${movement}`))
+      assert.equal(browse.records[0].description, detail.presentation?.description)
+      assert.equal(`Binds enemies. ${compare.results[0].effectSummary}`, detail.presentation?.description)
+      assert.equal(compare.results[0].total, null, 'slow visibility does not invent an HP damage amount')
+      assert.equal(detail.record?.description, 'Binds enemies.')
+    }
+    const progression = f.call<SpellByLevelResult>('byLevel', { level: 39, throughLevel: 50, classes: ['WIZ'], view: 'upcoming' })
+    assert.ok(progression.records[0].description?.includes('Slows attacks by 25%'))
+    assert.equal(f.storage.observations(f.dataset.installId).total, 1)
+  } finally { f.close() }
+})
+
 test('rankings sort the entire eligible catalog before paging and default to paid efficiency', () => {
   const rows = Array.from({ length: 45 }, (_, i) => spellRow(i + 1, `Bolt ${i + 1}`, 10, 10 + i))
   const free = spellRow(90, 'Free Bolt', 0, 1000), excluded = spellRow(91, 'Unsupported Bolt')

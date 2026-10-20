@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { clientSpellDescription, describeClientSpell } from '../src/shared/clientSpellDescriptions'
+import { clientSpellDescription, clientSpellSlowSummary, describeClientSpell } from '../src/shared/clientSpellDescriptions'
 import { clientSpellEffectLabel } from '../src/shared/clientSpellParser'
 import { spellRow, syntheticCatalog } from './spellLibrarySynthetic.mts'
 import { spellFields, spellBundle } from './fixtures/spell-library/synthetic'
@@ -52,6 +52,44 @@ test('haste is a speed increase and unknown formulas keep descriptions without i
   assert.match(detail.effects[2].label, /Unknown client effect \(SPA 999\)/)
   assert.equal(clientSpellEffectLabel(3), 'Movement speed')
   assert.equal(clientSpellEffectLabel(79), 'Direct health change')
+})
+
+test('base slow summaries expose captured bard and nonbard effect shapes at the selected level', () => {
+  const shapes = [
+    { name: 'Synthetic Binding Song', effects: '1|11|95|0|101|65', at50: 'Slows attacks by 30%', at60: 'Slows attacks by 35%' },
+    { name: 'Synthetic Chain Song', effects: '1|3|-30|0|102|0$2|11|95|0|101|60', at50: 'Slows movement by 80%. Slows attacks by 30%', at60: 'Slows movement by 90%. Slows attacks by 35%' },
+    { name: 'Synthetic Deeds', effects: '1|11|95|0|102|35', at50: 'Slows attacks by 55%', at60: 'Slows attacks by 65%' },
+    { name: 'Synthetic Insects', effects: '1|11|85|0|102|25', at50: 'Slows attacks by 65%', at60: 'Slows attacks by 75%' }
+  ]
+  for (const shape of shapes) {
+    const row = spellFields(101, shape.name, 174); row[173] = shape.effects
+    const record = parseClientSpellBundle(spellBundle([row.join('^')]))[0], before = JSON.stringify(record)
+    assert.ok(clientSpellSlowSummary(record, 50).startsWith(shape.at50))
+    assert.ok(clientSpellSlowSummary(record, 60).startsWith(shape.at60))
+    assert.ok(describeClientSpell(record, 50).description.endsWith(clientSpellSlowSummary(record, 50)))
+    assert.equal(clientSpellDescription(record), record.description)
+    assert.equal(JSON.stringify(record), before, 'source descriptions and history stay unchanged')
+  }
+})
+
+test('slow summaries preserve fractional percentages, exclude haste and report unknown slow formulas', () => {
+  const row = spellRow(44, 'Synthetic Slow Effects')
+  row[172] = '1|11|87.5|0|100|87.5$2|3|-12.5|0|100|0$3|11|110|0|100|0$4|11|100|0|100|0$5|3|30|0|100|0$6|11|0|0|100|0'
+  const record = syntheticCatalog([row]).records[0]
+  assert.equal(clientSpellSlowSummary(record, 50), 'Slows attacks by 12.5% (87.5% of normal attack speed). Slows movement by 12.5%.')
+  row[172] = '1|11|95|0|999|65$2|3|-30|0|999|0'
+  const unknown = syntheticCatalog([row]).records[0]
+  assert.equal(clientSpellSlowSummary(unknown, 50), 'Attack slow percentage unavailable (unsupported client formula). Movement slow percentage unavailable (unsupported client formula).')
+  assert.ok(!/\d+%/.test(clientSpellSlowSummary(unknown, 50)))
+})
+
+test('supplemental attack slows keep their existing percentage-point semantics in summaries', () => {
+  const row = spellRow(45, 'Synthetic Supplemental Effects')
+  row[172] = '1|98|90|0|100|90$2|119|-15|0|100|-15$3|98|105|0|100|105$4|119|25|0|100|25'
+  const summary = clientSpellSlowSummary(syntheticCatalog([row]).records[0], 50)
+  assert.match(summary, /10 percentage points \(type II slow, before slow mitigation\)/)
+  assert.match(summary, /15 percentage points \(type III slow, before slow mitigation\)/)
+  assert.ok(!summary.includes('haste'))
 })
 
 test('SPA 98 explains supplemental haste and its ordinary cap for arbitrary spell identities', () => {

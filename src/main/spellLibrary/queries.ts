@@ -14,6 +14,7 @@ import { integerArg, objectArgs, stringArg } from './workerProtocol'
 import { classesArg, levelArg, metricArg, optionalText, pageArgs, queryObject, requiredSnapshotArg, snapshotArg, spellId } from './queryValidation'
 import type { SpellModifierContext } from '../../shared/spellModifiers'
 import type { SpellByLevelResult, SpellRankingsResult } from '../../shared/spellAnalysis'
+import { clientSpellSlowSummary } from '../../shared/clientSpellDescriptions'
 
 /** Cached arithmetic survives identical exports; displayed evidence still follows the latest export. */
 function refreshInstrumentProvenance<T extends SpellSearchResult>(result: T, context?: SpellModifierContext): T {
@@ -143,7 +144,11 @@ export class SpellLibraryQueries {
     const rankEvidence: NonNullable<SpellComparisonResult['rankEvidence']> = {}
     if (dataset) for (const id of ids) {
       const record = this.storage.record(dataset.snapshotId, id)
-      if (record) { results.push(calculate(record, level, metric)); rankEvidence[String(id)] = this.evaluation.rankEvidence(dataset, record, context) }
+      if (record) {
+        const effectSummary = clientSpellSlowSummary(record, level)
+        results.push({ ...calculate(record, level, metric), ...(effectSummary ? { effectSummary } : {}) })
+        rankEvidence[String(id)] = this.evaluation.rankEvidence(dataset, record, context)
+      }
     }
     return { dataset, level, scope: spellEvaluationScope(query), results, rankEvidence }
   }
