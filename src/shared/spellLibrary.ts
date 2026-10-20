@@ -110,6 +110,8 @@ export type SpellMetric = 'damage' | 'healing'
 export interface SpellCalculation {
   analysis?: SpellAnalysis
   modifiers?: SpellModifierApplied
+  /** Level-evaluated base slow effects, separate from HP metrics and modifiers. */
+  effectSummary?: string
   id: number
   name: string
   metric: SpellMetric
