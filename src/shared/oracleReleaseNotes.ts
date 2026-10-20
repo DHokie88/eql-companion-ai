@@ -21,6 +21,13 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.6.0',
+    date: '2026-10-19',
+    entries: [
+      { kind: 'new', text: 'Copy fight log copies the rows shown in the Combat log, including timestamps and categories. It follows the show unparsed toggle.', fromReport: true }
+    ]
+  },
+  {
     version: '0.5.0',
     date: '2026-10-19',
     entries: [
