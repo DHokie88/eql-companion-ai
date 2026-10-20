@@ -1,10 +1,13 @@
 // The Combat tab's classification-ring readout — the append-only "Combat log" card at the
 // bottom of the view. Split out of CombatView.tsx.
 
-import { memo, useEffect, useRef } from 'react'
-import { Box, FormControlLabel, Switch, Typography } from '@mui/material'
+import { memo, useEffect, useRef, useState } from 'react'
+import { Box, Button, FormControlLabel, Switch, Typography } from '@mui/material'
+import CheckIcon from '@mui/icons-material/Check'
+import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import { DashCard, QuietNote } from './combatShared'
 import { formatTime } from '../../lib/formatDate'
+import { copyText } from '../../lib/clipboard'
 import { isAtBottom } from './followScroll'
 import type { ClassifiedLine } from '@shared/combat'
 import { PALETTE } from '../../../../shared/palette'
@@ -42,6 +45,17 @@ export function ProcessingLog({
   setShowUnparsed: (v: boolean) => void
 }): React.JSX.Element {
   const ref = useRef<HTMLDivElement>(null)
+  const [copied, setCopied] = useState(false)
+  useEffect(() => {
+    if (!copied) return
+    const timer = setTimeout(() => setCopied(false), 1500)
+    return () => clearTimeout(timer)
+  }, [copied])
+  const copy = async (): Promise<void> => {
+    if (!lines.length) return
+    const text = lines.map((l) => `${formatTime(l.ts)} ${l.cat} ${l.text}`).join('\n')
+    if (await copyText(text)) setCopied(true)
+  }
   // FOLLOW ONLY FROM THE BOTTOM (JOS-95). This used to scroll unconditionally on every append,
   // so during a live tail a reader could never scroll up — the next line yanked them back. The
   // reader's position is measured BEFORE the append moved anything (scroll events), and an
@@ -59,11 +73,23 @@ export function ProcessingLog({
     <DashCard
       title="Combat log"
       right={
-        <FormControlLabel
-          control={<Switch size="small" checked={showUnparsed} onChange={(e) => setShowUnparsed(e.target.checked)} />}
-          label={<Typography variant="caption">show unparsed</Typography>}
-          sx={{ m: 0 }}
-        />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Button
+            size="small"
+            data-testid="copy-fight-log"
+            disabled={lines.length === 0}
+            onClick={() => { void copy() }}
+            startIcon={copied ? <CheckIcon /> : <ContentCopyIcon />}
+            sx={{ textTransform: 'none' }}
+          >
+            {copied ? 'Copied' : 'Copy fight log'}
+          </Button>
+          <FormControlLabel
+            control={<Switch size="small" checked={showUnparsed} onChange={(e) => setShowUnparsed(e.target.checked)} />}
+            label={<Typography variant="caption">show unparsed</Typography>}
+            sx={{ m: 0 }}
+          />
+        </Box>
       }
       height={220}
     >
