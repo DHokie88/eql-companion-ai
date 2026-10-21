@@ -64,7 +64,6 @@ import {
   MAX_DERIVED_COLUMNS,
   PICKABLE_COLUMNS,
   columnLabel,
-  numericWidth,
   statText,
   visibleColumns
 } from '../src/renderer/src/features/gear/gearColumns'
@@ -508,7 +507,7 @@ test('the columns are the core, plus whatever is being SORTED on', () => {
   assert.deepEqual(visibleColumns({ key: 'name', dir: 'asc' }).map((c) => c.key), [...CORE_COLUMNS])
 })
 
-test('the derivation can add at most ONE column, and the widths always fit the pane', () => {
+test('the derivation can add at most ONE column', () => {
   // The cap became a CONSTANT with the thresholds (gearColumns.ts): a list whose only source is the
   // sort key cannot exceed core+1, so there is nothing left to cap. This asserts the new ceiling
   // over the WHOLE vocabulary rather than over one example — no sort key can widen it past five.
@@ -522,13 +521,7 @@ test('the derivation can add at most ONE column, and the widths always fit the p
   assert.equal(visibleColumns({ key: 'STR', dir: 'desc' }).length, CORE_COLUMNS.length + MAX_DERIVED_COLUMNS)
   assert.equal(MAX_DERIVED_COLUMNS, 1, 'the derivation adds the sort key and nothing else')
 
-  const widest = CORE_COLUMNS.length + MAX_DERIVED_COLUMNS
-  const pct = Number(numericWidth(widest).replace('%', ''))
-  assert.ok(pct * widest <= 60, `${String(widest)} columns at ${String(pct)}% overflow the table`)
-  // The ceiling: a small set never fattens its numeric columns - the item name takes the slack.
-  assert.equal(numericWidth(4), '8%')
-  assert.equal(numericWidth(1), '8%')
-  assert.equal(numericWidth(10), '5.2%')
+
 })
 
 test('a cell states what the item states - blank is "states none", never a zero', () => {

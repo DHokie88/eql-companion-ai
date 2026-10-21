@@ -5,7 +5,7 @@
 // exactly `ROW_HEIGHT`, so a row that wraps to two lines desyncs the whole window and the drift
 // compounds with every row above the viewport. `height` alone is only a MINIMUM for a table row,
 // so the row states a maximum too and every cell is one clipped, ellipsised line — and the table
-// is `tableLayout: fixed` with PERCENTAGE widths, so the columns are taken from the header alone
+// is `tableLayout: fixed` with explicit pixel widths, so the columns are taken from the header alone
 // (a windowed table can only ever SEE a screenful, and an auto layout would re-measure its columns
 // every time scrolling swapped the rows underneath).
 //
@@ -37,10 +37,9 @@
 // AND SINCE JOS-297 THE COLUMN SET CAN BE WIDER THAN THE PANE. Nothing above changes: the table is
 // still `tableLayout: fixed`, the row is still exactly `ROW_HEIGHT` tall with one clipped line per
 // cell, and the windowing hook's contract does not know that widths exist. What changes is where
-// the widths come from — `gearTableLayout` states percentages while they fit and stated pixels plus
-// a table `minWidth` once they do not, so a thirty-column set overflows the table's OWN scroller
-// (GearView's `gear-list` box, already `overflow: auto`) and never the page. Both halves are
-// measured in `tests/e2e/gearColumnSteps.mts`, container-scroll and page-no-scroll in one step.
+// the widths come from: compact pixel defaults keep stats from consuming the name column.
+// `useGearColumnWidths` gives spare space to Item and remembers draggable widths by column key.
+// The summed width overflows only GearView's `gear-list` box, preserving fixed row heights.
 //
 // AND SINCE JOS-335 A SEARCH ROW HAS A GESTURE AGAIN: it goes on the wish list. The tombstone in
 // the name cell below records that JOS-325 took the sets `+` away and left the table with no
@@ -71,7 +70,7 @@ import { Box, Stack, Table, TableBody, TableCell, TableHead, TableRow, TableSort
 import type { GearRow } from '@shared/planner/gear'
 import type { WindowedRows } from '../../lib/useWindowedRows'
 import { EraChip, DonorName } from '../planner/PlannerChips'
-import { gearTableLayout, statText, type GearColumn } from './gearColumns'
+import { statText, type GearColumn } from './gearColumns'
 // JOS-338 — the ONE door a card may reach these rows through (its header states the three
 // guarantees that make it safe over this tab's dropdown toolbar).
 import { GearRowCompare } from './GearCompareCard'
@@ -83,6 +82,8 @@ import WishToggle from '../wishlist/WishToggle'
 // EQ Zera — the THIRD per-row action: see it on your character. It is handed `row.slots`, so it
 // answers "can the model wear this" out of the row already in hand rather than out of a lookup.
 import PreviewButton from '../character/PreviewButton'
+import GearColumnResize from './GearColumnResize'
+import { useGearColumnWidths } from './useGearColumnWidths'
 import type { ClassAbbr } from '@shared/classCombo'
 
 /** Dense row height (px), MUI `size="small"` — the number the windowing hook is handed. */
@@ -101,10 +102,9 @@ const FIXED_ROW = {
 } as const
 
 /**
- * The numeric columns' halved side padding — the other half of `MAX_NUMERIC_WIDTH`'s bargain
- * (gearColumns.ts). The ceiling only holds if a sortable header (label + arrow, ~60px for
- * `Ratio`) fits the cell it states: a label wider than its sticky cell slides under the NEXT
- * header, which then intercepts the click aimed at it — gear.e2e.mts measured exactly that.
+ * Compact padding leaves room for the label and arrow (~60px for `Ratio`). A label wider than
+ * its sticky cell slides under the next header, which then intercepts clicks aimed at it.
+ * gear.e2e.mts measured exactly that.
  * MUI's default 16px a side spends 32px of a ~60px cell on air; 8px keeps the header its own.
  */
 const NUMERIC_PAD = { px: 1 } as const
@@ -332,17 +332,19 @@ function SortHeader({
   sort,
   width,
   align,
-  onSort
+  onSort,
+  onResize
 }: {
   column: { key: GearSortKey; label: string }
   sort: GearSort
-  width?: string
+  width: number
   align?: 'right'
   onSort: (key: GearSortKey) => void
+  onResize: (key: string, width: number | null) => void
 }): JSX.Element {
   const active = sort.key === column.key
   return (
-    <TableCell align={align} sx={{ ...(width === undefined ? {} : { width }), ...(align === 'right' ? NUMERIC_PAD : {}) }}>
+    <TableCell align={align} sx={{ position: 'sticky', ...(align === 'right' ? NUMERIC_PAD : {}) }}>
       <TableSortLabel
         active={active}
         direction={active ? sort.dir : 'desc'}
@@ -351,6 +353,7 @@ function SortHeader({
       >
         {column.label}
       </TableSortLabel>
+      <GearColumnResize column={column.key} label={column.label} width={width} onResize={onResize} />
     </TableCell>
   )
 }
@@ -370,7 +373,7 @@ export default function GearTable({
   compare
 }: GearTableProps): JSX.Element {
   const span = columns.length + (ownership === null ? 3 : 4)
-  const layout = gearTableLayout(columns.length, ownership !== null)
+  const { tableRef, widths, total, resize } = useGearColumnWidths(columns, ownership !== null)
   // ONE object for the row's callbacks, memoized on the callbacks themselves: `GearLine` is
   // `memo`'d and a fresh literal per render would defeat it on every keystroke. It held two until
   // JOS-325 retired the `+`, and holds two again since JOS-335 — which is exactly why it stayed an
@@ -384,29 +387,29 @@ export default function GearTable({
       size="small"
       stickyHeader
       data-testid="gear-table"
-      data-layout={layout.mode}
-      // `minWidth`, never `width`: a pane wider than the set still fills it, a narrower one scrolls
-      // the table sideways inside its own box. 0 in percentage mode means the table IS the pane.
-      sx={{ tableLayout: 'fixed', minWidth: layout.minWidth === 0 ? undefined : layout.minWidth }}
+      data-layout="pixel"
+      ref={tableRef}
+      sx={{ tableLayout: 'fixed', width: total }}
     >
+      <colgroup>
+        {Object.entries(widths).map(([key, width]) => <col key={key} style={{ width }} />)}
+      </colgroup>
       <TableHead>
         <TableRow>
-          {/* In percentage mode the item NAME states no width and takes whatever the stated columns
-              leave (LootTables.tsx); in pixel mode every column is stated, because the SUM is what
-              makes the table wider than the pane. */}
-          <SortHeader column={{ key: 'name', label: 'Item' }} sort={sort} width={layout.name} onSort={onSort} />
-          <TableCell sx={{ width: layout.slot }}>Slot</TableCell>
-          <TableCell sx={{ width: layout.classes }}>Classes</TableCell>
+          <SortHeader column={{ key: 'name', label: 'Item' }} sort={sort} width={widths.name} onSort={onSort} onResize={resize} />
+          <TableCell sx={{ position: 'sticky' }}>Slot<GearColumnResize column="slot" label="Slot" width={widths.slot} onResize={resize} /></TableCell>
+          <TableCell sx={{ position: 'sticky' }}>Classes<GearColumnResize column="classes" label="Classes" width={widths.classes} onResize={resize} /></TableCell>
           {columns.map((c) => (
-            <SortHeader key={c.key} column={c} sort={sort} width={layout.numeric} align="right" onSort={onSort} />
+            <SortHeader key={c.key} column={c} sort={sort} width={widths[c.key]} align="right" onSort={onSort} onResize={resize} />
           ))}
           {/* The one column that is not a number and not sortable: it reports a live file, and the
               header carries the two things a reader has to know about it — that a `+N` is its own
               copy, and which key rings the fold left out. It stays LAST whatever the picker shows
               (JOS-297): the numerics are what an item reads, this is what you have. */}
           {ownership !== null && (
-            <TableCell sx={{ width: layout.owned }} title={ownedHint} data-testid="gear-owned-header">
+            <TableCell sx={{ position: 'sticky' }} title={ownedHint} data-testid="gear-owned-header">
               Owned
+              <GearColumnResize column="owned" label="Owned" width={widths.owned} onResize={resize} />
             </TableCell>
           )}
         </TableRow>

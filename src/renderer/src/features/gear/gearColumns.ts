@@ -30,20 +30,9 @@
 // column had no header to click. The picker closes it by construction, so there is no second list
 // of "sortable keys" here to drift from the drawn ones.
 //
-// WIDTHS: PERCENTAGES WHILE THEY FIT, PIXELS WHEN THEY DO NOT — and both halves are JOS-260's law
-// rather than a preference. The table is `tableLayout: fixed` (a windowed table whose columns
-// re-measure per slice moves its row heights under a hook whose every index assumes they cannot —
-// LootTables.tsx states the full argument). Under percentages the numeric columns SHARE a fixed
-// budget: N columns each take `NUMERIC_BUDGET / N`, the identity columns take a constant, and the
-// NAME column states no width at all so it absorbs the slack. Each share is CLAMPED both ways —
-// a CEILING (`MAX_NUMERIC_WIDTH`) because a stat cell holds at most `-12345` and handing four
-// columns 13% apiece starves the one column that actually ellipsises, the item name; and a FLOOR
-// (`MIN_NUMERIC_WIDTH`), which is what used to cap the derived count — past ten numeric
-// columns a percentage can only be bought by making every column illegible, because percentages
-// cannot make a fixed table wider than its box. So past ten the layout switches to STATED PIXELS
-// plus a `minWidth` on the table: the table becomes wider than the pane and the pane, which is
-// already `overflow: auto`, scrolls it SIDEWAYS INSIDE ITSELF. The page never scrolls sideways —
-// that is the whole point of the switch, and `tests/e2e/gearColumnSteps.mts` measures both.
+// WIDTHS: compact pixel defaults keep stats readable without giving them a percentage of a
+// wide window. Item receives spare space; users can resize every column. The table scrolls
+// inside its own list when these widths exceed the pane, preserving fixed-height rows.
 //
 // PURE AND NODE-TESTABLE (relative value imports, the house law): this file decides the shape of
 // the table, so `tests/gearFilter.test.mts` can assert that a sort key brings its column with it
@@ -60,74 +49,11 @@ import type { GearSort, GearSortKey } from './gearFilter'
  */
 export const CORE_COLUMNS: readonly GearSortKey[] = ['AC', 'HP', 'MP', 'RATIO']
 
-/**
- * THE MOST THE DERIVATION CAN ADD: one column, for the stat being sorted by (and zero when that is
- * already a core column, or the item name).
- *
- * IT IS A CONSTANT RATHER THAN A CAP NOW (JOS-302). It used to be `MAX_DERIVED_COLUMNS = 6`, a real
- * ceiling on a list that grew with every stat threshold typed — past six the extra thresholds still
- * filtered, they just stopped drawing columns. With the thresholds gone the only derived source is
- * the sort key, so the list cannot exceed core+1 and there is nothing left to cap. The number stays
- * exported because the width law below is stated against it, and because it is what makes
- * `MAX_PERCENT_COLUMNS` a fact about the derivation rather than a coincidence.
- */
+/** A sort can add one column to the core. */
 export const MAX_DERIVED_COLUMNS = 1
 
-/** Percent of the table the numeric columns share between them. */
-const NUMERIC_BUDGET = 52
-/** …and the floor one column may shrink to, which is what caps the derived count above. */
-const MIN_NUMERIC_WIDTH = 5
-/**
- * …and the CEILING one column may grow to. A numeric cell holds at most `-12345` or `41%`; every
- * point of budget a small set does not need belongs to the item name, the only column whose
- * content actually runs out of room. The number is bounded from BELOW by the header, not the
- * cell: a sortable header is its label plus the arrow (~60px for `Ratio`), and a label wider
- * than its sticky cell slides under the NEXT header, which then eats the click aimed at it —
- * measured in gear.e2e.mts at 6.5%. 8% of the narrowest pane the 900px window minimum can
- * produce clears that with the tightened numeric padding GearTable pairs with this ceiling.
- */
-const MAX_NUMERIC_WIDTH = 8
-
-/**
- * The widest numeric set percentages can still serve at that floor — ten.
- *
- * IT USED TO BE EXACTLY THE CORE PLUS `MAX_DERIVED_COLUMNS`, and that was the point: the derived
- * cap WAS this floor, so nothing the tab could derive could ever cross into pixel mode. JOS-302 cut
- * the derivation to core+1 and the two numbers stopped meeting — which is a WIDENING of the same
- * guarantee rather than a break in it: the derived set is now five at its very widest, half of what
- * percentages can serve, so it is further inside the budget than it has ever been. Only a PICKED
- * set can cross the line, exactly as before.
- */
-export const MAX_PERCENT_COLUMNS = Math.floor(NUMERIC_BUDGET / MIN_NUMERIC_WIDTH)
-
-/**
- * The pixel widths the table states once percentages cannot serve the set. Each is a legible
- * minimum rather than a taste: a numeric cell holds at most `-12345` or `41%`, an identity cell
- * holds a name that ellipsises. Their SUM is what makes the table wider than the pane, which is
- * what makes the pane scroll it.
- */
-const PX = { name: 340, slot: 120, classes: 110, numeric: 78, owned: 150 } as const
-
-export const SLOT_COLUMN_WIDTH = '13%'
-export const CLASS_COLUMN_WIDTH = '11%'
-
-/**
- * THE OWNERSHIP COLUMN (JOS-285, phase 4) — appended AFTER `visibleColumns`' numerics, and only
- * when the character has a dump to answer from.
- *
- * IT IS ONE COLUMN, not three. "Do you own it", "where" and "at what +N" are one sentence about
- * one item (`ownedCellText`: `Equipped · Bank +2`), and splitting them into three columns would
- * put three blank cells on every one of the ~6,700 rows a player does not own. It is also NOT a
- * `GearColumn`: those keys are `GearSortKey`s and every one of them is a number the plus-state
- * scaler moves. Ownership is text off a live file, so it lives beside the numeric list rather than
- * inside it — which is exactly why it needs no entry in the shared numeric budget below.
- *
- * NOTHING TO ANSWER FROM ⇒ NO COLUMN. On a machine with no dump AND no loot history, an empty
- * ownership cell would be indistinguishable from "you do not own this" — and the app cannot tell
- * the difference either. So the column is absent and the `/outputfile` freshness line beside the
- * count says why (GearView). Either witness alone is enough to draw it.
- */
-export const OWNED_COLUMN_WIDTH = '15%'
+/** Readable defaults before user resizing. Item includes preview and wish-list actions. */
+const PX = { name: 440, slot: 150, classes: 220, numeric: 88, owned: 180 } as const
 
 export interface GearColumn {
   key: GearSortKey
@@ -231,28 +157,13 @@ export function sortWithin(sort: GearSort, columns: readonly GearColumn[]): Gear
   return first === undefined ? { key: 'name', dir: 'asc' } : { key: first.key, dir: 'desc' }
 }
 
-/** One numeric column's width, as the percentage string the header cell states. */
-export function numericWidth(count: number): string {
-  const each = count > 0 ? NUMERIC_BUDGET / count : NUMERIC_BUDGET
-  const clamped = Math.min(MAX_NUMERIC_WIDTH, Math.max(MIN_NUMERIC_WIDTH, each))
-  return `${String(Math.round(clamped * 10) / 10)}%`
-}
-
-/**
- * WHAT EVERY COLUMN STATES AS ITS WIDTH, and whether the table has a floor of its own.
- *
- * `minWidth` is 0 in percentage mode — the table IS the pane, and nothing can overflow it. Past
- * `MAX_PERCENT_COLUMNS` it is the summed pixel width, which the table states as a MINIMUM (never a
- * width): a pane wider than the set still fills, a pane narrower than it scrolls horizontally
- * INSIDE its own box. `tableLayout: fixed` and the fixed row height are untouched by either mode —
- * the windowing hook's contract does not know widths exist.
- */
+/** Default pixel widths and their minimum table width; spare room belongs to Item. */
 export interface GearTableLayout {
-  mode: 'percent' | 'pixel'
-  /** the table's own floor in px, or 0 when percentages are doing the work */
+  mode: 'pixel'
+  /** The default table width before spare room and user resizing. */
   minWidth: number
-  /** `undefined` in percentage mode: the item column takes whatever the stated ones leave */
-  name: string | undefined
+  /** Minimum space for the name and row actions. */
+  name: string
   slot: string
   classes: string
   numeric: string
@@ -260,17 +171,6 @@ export interface GearTableLayout {
 }
 
 export function gearTableLayout(count: number, hasOwned: boolean): GearTableLayout {
-  if (count <= MAX_PERCENT_COLUMNS) {
-    return {
-      mode: 'percent',
-      minWidth: 0,
-      name: undefined,
-      slot: SLOT_COLUMN_WIDTH,
-      classes: CLASS_COLUMN_WIDTH,
-      numeric: numericWidth(count),
-      owned: OWNED_COLUMN_WIDTH
-    }
-  }
   return {
     mode: 'pixel',
     minWidth: PX.name + PX.slot + PX.classes + count * PX.numeric + (hasOwned ? PX.owned : 0),

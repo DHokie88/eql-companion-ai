@@ -21,6 +21,14 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.8.0',
+    date: '2026-10-21',
+    entries: [
+      { kind: 'fixed', text: 'Gear gives item names more room and keeps stat columns compact.', fromReport: true },
+      { kind: 'new', text: 'Drag Gear column dividers to resize them. Widths are remembered across tab changes and app restarts.', fromReport: true }
+    ]
+  },
+  {
     version: '0.7.1',
     date: '2026-10-20',
     entries: [

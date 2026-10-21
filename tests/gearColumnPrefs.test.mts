@@ -11,9 +11,9 @@
 //   2. EVERY EXPOSED KEY SORTS. The picker offers thirty-three keys and every one of them is a
 //      working sort axis in BOTH directions, with an absent value LAST either way — which is the
 //      property that makes "expose it on every header" safe rather than a promise.
-//   3. THE WIDTHS FIT OR THE TABLE SCROLLS. Percentages while they can serve the set at a legible
-//      floor, stated pixels plus a table minimum past that — and the pixel total is what the pane
-//      scrolls sideways INSIDE itself. The e2e measures the scrolling; this measures the numbers.
+//   3. THE WIDTHS FIT OR THE TABLE SCROLLS. Readable pixel defaults keep the name and controls
+//      visible and short stats compact. Extra columns scroll inside the pane. Saved widths follow
+//      column identity and invalid stored sizes degrade safely.
 //   4. A HIDDEN CONTROL IS NOT FILTERING. `inertFilters` is asserted field by field, including the
 //      one whose inert value is NOT its default (era ships ON).
 //
@@ -21,12 +21,12 @@
 // number the corpus states, only that the model treats every key in the vocabulary alike. Using
 // two real items would have meant hand-writing thirty-three stats twice for no extra proof.
 
+import { gearWidths, sanitizeGearWidths } from '../src/renderer/src/features/gear/gearColumnWidths'
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { GEAR_STAT_KEYS, type GearRow, type GearStats } from '../src/shared/planner/gear'
 import {
   CORE_COLUMNS,
-  MAX_PERCENT_COLUMNS,
   PICKABLE_COLUMNS,
   columnsFor,
   gearTableLayout,
@@ -215,57 +215,37 @@ test('the sort is confined to what is DRAWN - removing the sorted column moves t
 })
 
 // =================================================================================
-// 3. THE WIDTHS: PERCENTAGES WHILE THEY FIT, PIXELS WHEN THEY DO NOT
+// 3. THE WIDTHS: COMPACT PIXEL DEFAULTS AND SAVED USER SIZES
 // =================================================================================
 
-test('NOTHING THE DERIVATION CAN PRODUCE crosses into pixel mode - over the whole vocabulary', () => {
-  // The two numbers used to be equal on purpose: the derived cap WAS the percentage floor, so no
-  // derived set could overflow. JOS-302 cut the derivation to core+1, which WIDENS that guarantee
-  // rather than breaking it - so the claim is asserted over every sort key there is, not over one
-  // hand-built worst case that no longer exists.
-  for (const key of PICKABLE_COLUMNS) {
-    const derived = columnsFor(null, { key, dir: 'desc' })
-    assert.ok(derived.length <= MAX_PERCENT_COLUMNS, `sorting by ${key} draws ${String(derived.length)} columns`)
-    assert.equal(gearTableLayout(derived.length, true).mode, 'percent', `sorting by ${key} left percentage mode`)
-  }
+test('defaults reserve readable item space and keep stat widths compact at every window size', () => {
+  const columns = columnsFor(null, { key: 'AC', dir: 'desc' })
+  const narrow = gearWidths(columns, true, 700, {})
+  const wide = gearWidths(columns, true, 2400, {})
+  assert.ok(narrow.widths.name >= 440)
+  assert.ok(wide.widths.name > narrow.widths.name)
+  assert.equal(wide.widths.AC, narrow.widths.AC, 'stats do not expand with the window')
+  assert.ok(narrow.total > 700, 'narrow windows scroll instead of crushing text')
+  assert.equal(wide.total, 2400)
+  assert.ok(gearTableLayout(PICKABLE_COLUMNS.length, true).minWidth > 2500)
 })
 
-test('percentage mode states percentages that FIT the pane, with the item column absorbing the slack', () => {
-  for (const count of [1, 4, 7, MAX_PERCENT_COLUMNS]) {
-    const layout = gearTableLayout(count, true)
-    assert.equal(layout.mode, 'percent')
-    assert.equal(layout.minWidth, 0, 'nothing can overflow a table that IS the pane')
-    assert.equal(layout.name, undefined, 'the item column states no width - it takes what is left')
-    const stated =
-      count * Number(layout.numeric.replace('%', '')) +
-      Number(layout.slot.replace('%', '')) +
-      Number(layout.classes.replace('%', '')) +
-      Number(layout.owned.replace('%', ''))
-    assert.ok(stated <= 100, `${String(count)} columns state ${String(stated)}% - the name column needs the rest`)
-    assert.ok(stated < 100, 'and there is always something left for the name')
-  }
+test('custom widths follow column identity through hiding and changing the column set', () => {
+  const saved = { name: 560, AC: 128, HP: 96, owned: 190 }
+  const first = gearWidths(columnsFor(['HP', 'AC'], { key: 'AC', dir: 'desc' }), true, 2000, saved)
+  const hidden = gearWidths(columnsFor(['AC'], { key: 'AC', dir: 'desc' }), false, 2000, saved)
+  assert.equal(first.widths.HP, 96)
+  assert.equal(first.widths.AC, 128)
+  assert.equal(hidden.widths.AC, 128)
+  assert.equal(hidden.widths.name, 560)
+  assert.equal(hidden.widths.owned, undefined)
 })
 
-test('past the floor the layout switches to PIXELS and states a table minimum - which is what scrolls', () => {
-  const narrow = gearTableLayout(MAX_PERCENT_COLUMNS, false)
-  const wide = gearTableLayout(MAX_PERCENT_COLUMNS + 1, false)
-  assert.equal(narrow.mode, 'percent')
-  assert.equal(wide.mode, 'pixel')
-  assert.ok(wide.minWidth > 0, 'the table now has a floor of its own')
-  assert.notEqual(wide.name, undefined, 'and every column states a width, because the SUM is the point')
-
-  // The floor GROWS with the set: that is the whole mechanism by which a wide choice overflows.
-  const wider = gearTableLayout(MAX_PERCENT_COLUMNS + 10, false)
-  assert.ok(wider.minWidth > wide.minWidth)
-  // …and the Owned column, which is not a numeric and not in the shared budget, pays its own way.
-  assert.ok(gearTableLayout(20, true).minWidth > gearTableLayout(20, false).minWidth)
-
-  // A full-vocabulary pick is wider than any window this app runs in - the case the ticket names.
-  // The count is read off `PICKABLE_COLUMNS` rather than typed, so a key added to the vocabulary
-  // (JOS-336 added the thirty-fourth) widens this claim instead of stale-ing it.
-  const everything = gearTableLayout(PICKABLE_COLUMNS.length, true)
-  assert.equal(everything.mode, 'pixel')
-  assert.ok(everything.minWidth > 2500, `all ${String(PICKABLE_COLUMNS.length)} columns state ${String(everything.minWidth)}px`)
+test('malformed stored widths degrade safely and preserve valid recognized columns', () => {
+  for (const value of [null, [], 'bad', 42]) assert.deepEqual(sanitizeGearWidths(value), {})
+  assert.deepEqual(sanitizeGearWidths({
+    name: 520, AC: 88, slot: '120', classes: -1, HP: Infinity, MP: NaN, owned: 2401, bogus: 100
+  }), { name: 520, AC: 88 })
 })
 
 // =================================================================================

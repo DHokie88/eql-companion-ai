@@ -6,7 +6,7 @@
  *
  * WHAT NEEDS A REAL APP HERE, given `tests/gearColumnPrefs.test.mts` owns the model without a DOM:
  *
- *   * THE WIDTH. `gearTableLayout` states pixels past ten columns and the table states a minimum —
+ *   * THE WIDTH. Explicit pixel defaults give the table a readable minimum -
  *     but whether that produces a scrollbar INSIDE the list box or a page that slides sideways is a
  *     fact about `tableLayout: fixed`, a flex row with `minWidth: 0`, and a real Chromium. No unit
  *     test can see it. This spec measures all three boxes in one breath: the list overflows, the
@@ -21,6 +21,7 @@
  *     agreeing with it: it asserts a column the derivation would always draw (AC, a core column) is
  *     ABSENT, and one it would never draw (CHA) is present.
  */
+import { stepGearResize, stepGearResizeRelaunched } from './gearResizeSteps.mjs'
 import type { Page } from 'playwright-core'
 import { check, countOf, note, settle } from './appHarness.mjs'
 import { scaleGearRow, gearRatio } from '../../src/shared/planner/gearScale'
@@ -42,7 +43,7 @@ const ROW_HEIGHT = 37
 
 /**
  * What the picker is asked for. Fourteen keys on top of the core four, which is eighteen numeric
- * columns — comfortably past the ten a percentage budget can serve at a legible floor, and that is
+ * columns - comfortably wider than a normal pane at readable defaults, and that is
  * the whole point of the list.
  *
  * The seven attributes lead it because they are what the owner named: *ALL stats should be there
@@ -185,7 +186,7 @@ export async function resetColumns(page: Page): Promise<void> {
   await page.click(COLUMNS_TOGGLE, { timeout: 15_000 })
   await page.click(COLUMNS_RESET, { timeout: 15_000 })
   await page.keyboard.press('Escape')
-  await until(async () => (await page.getAttribute(TABLE, 'data-layout')) === 'percent', 15_000)
+  await until(() => page.evaluate(() => localStorage.getItem('eq.gear.columns') === null), 15_000)
 }
 
 // =================================================================================
@@ -229,14 +230,12 @@ async function stepPick(page: Page): Promise<boolean> {
 /**
  * 2. A SET WIDER THAN THE PANE SCROLLS INSIDE THE TABLE'S OWN BOX — never sideways on the page.
  *
- * This is JOS-260's law at width. The percentage budget cannot make a `tableLayout: fixed` table
- * wider than its container, so past ten numeric columns the layout states PIXELS and a table
- * minimum; the list box, which was already `overflow: auto` for the vertical case, is what absorbs
- * it. Both halves are measured, because either one alone would pass while the feature was broken.
+ * Explicit pixel widths make large column sets wider than their container. The list absorbs
+ * that overflow, while the page stays fixed. Both sides are measured.
  */
 async function stepWidth(page: Page): Promise<void> {
   const mode = await page.getAttribute(TABLE, 'data-layout', { timeout: 15_000 })
-  check('a column set past the percentage floor switches the table to stated pixel widths', mode === 'pixel', String(mode))
+  check('a wide column set keeps explicit pixel widths', mode === 'pixel', String(mode))
 
   const over = await overflowX(page)
   check(
@@ -332,14 +331,13 @@ async function stepNumbersUnmoved(page: Page, fixture: GearColumnFixture): Promi
 /**
  * 5. RESET GOES BACK TO THE DERIVED SEED — the state that has no stored key, made reachable.
  *
- * And with it the width law reverses: the derived set has always fitted the percentage budget, so
- * the list stops overflowing. That is the continuity claim in `gearColumns.ts`, measured.
+ * The table keeps readable pixel defaults. Narrow panes can still scroll inside the list.
  */
 async function stepReset(page: Page): Promise<void> {
   await typeAndSettle(page, '')
   await resetColumns(page)
 
-  const back = (await page.getAttribute(TABLE, 'data-layout')) === 'percent'
+  const back = await page.evaluate(() => localStorage.getItem('eq.gear.columns') === null)
   check('resetting the picker returns the columns to following the sort', back)
   const gone = await until(async () => (await countOf(page, '[data-testid="gear-sort-CHA"]')) === 0, 10_000)
   check('…so a stat nothing is sorting on stops drawing a column', gone)
@@ -353,8 +351,8 @@ async function stepReset(page: Page): Promise<void> {
   )
   const over = await overflowX(page)
   check(
-    '…and the derived set fits the pane again, with no sideways scroll anywhere',
-    over.list <= 1 && over.doc === 0 && over.content === 0,
+    '…and readable defaults scroll only inside the gear list on narrow windows',
+    over.list >= 0 && over.doc === 0 && over.content === 0,
     `list +${String(over.list)}px · document +${String(over.doc)}px`
   )
 }
@@ -422,6 +420,7 @@ export async function stepGearColumns(page: Page, fixture: GearColumnFixture): P
   await stepSortPicked(page)
   await stepNumbersUnmoved(page, fixture)
   await stepReset(page)
+  await stepGearResize(page)
   await pick(page, FILTERS_TOGGLE, 'gear-filters', ['slot'])
 
   // The choice the second launch has to find. CHA is never derived here and AC is always derived,
@@ -440,6 +439,7 @@ export async function stepGearColumns(page: Page, fixture: GearColumnFixture): P
 export async function stepGearColumnsRelaunched(page: Page): Promise<void> {
   const mounted = await until(async () => (await countOf(page, TABLE)) === 1, 30_000)
   if (!check('the table mounts on the second launch', mounted)) return
+  await stepGearResizeRelaunched(page)
 
   const cha = await until(async () => (await countOf(page, '[data-testid="gear-sort-CHA"]')) === 1, 15_000)
   check('a picked column comes back after a relaunch, sortable header and all', cha)
