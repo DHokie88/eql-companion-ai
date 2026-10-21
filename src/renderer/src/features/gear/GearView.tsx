@@ -128,6 +128,7 @@ import { ITEM_UPGRADE_BASE, type ItemUpgradeState } from '@shared/itemUpgrade'
 import type { GearRow } from '@shared/planner/gear'
 import OutputKindLine from '../../components/OutputKindLine'
 import { useWindowedRows } from '../../lib/useWindowedRows'
+import { scoreGear, type GearPriorities, type PriorityKey } from './gearPriorities'
 import GearFilterBar from './GearFilterBar'
 import GearPicker from './GearPickers'
 import GearTable, { ROW_HEIGHT } from './GearTable'
@@ -154,7 +155,7 @@ import {
   useOwnedOrLooted,
   useUpgradeState
 } from './gearData'
-import { uncountedNote, type GearOwnershipMap } from './gearOwnership'
+import { ownedCellText, ownershipFor, uncountedNote, type GearOwnershipMap } from './gearOwnership'
 import {
   DEFAULT_GEAR_FILTERS,
   filterGearRows,
@@ -182,7 +183,7 @@ function nextSort(sort: GearSort, key: GearSortKey): GearSort {
   // Names read A→Z; every number reads best-first, which for WEIGHT and DELAY is still "most" —
   // this table states what an item HAS, and inverting two columns' defaults would be a preference
   // the user can express in one click anyway.
-  return { key, dir: key === 'name' ? 'asc' : 'desc' }
+  return { key, dir: ['name', 'slot', 'classes', 'owned'].includes(key) ? 'asc' : 'desc' }
 }
 
 interface TableState {
@@ -213,14 +214,15 @@ function useTableRows(
   rows: readonly GearRow[],
   state: ItemUpgradeState,
   filters: GearFilters,
-  opts: { sort: GearSort; deps: GearFilterDeps; chosen: GearSortKey[] | null }
+  opts: { sort: GearSort; deps: GearFilterDeps; chosen: GearSortKey[] | null; priorities: GearPriorities; extras: PriorityKey[]; hasOwned: boolean }
 ): TableState {
-  const { sort, deps, chosen } = opts
+  const { sort, deps, chosen, priorities, extras, hasOwned } = opts
   const scaled = useMemo(() => scaleAll(rows, state), [rows, state])
   const filtered = useMemo(() => filterGearRows(scaled, filters, deps), [scaled, filters, deps])
-  const columns = useMemo(() => columnsFor(chosen, sort), [chosen, sort])
-  const inForce = useMemo(() => sortWithin(sort, columns), [sort, columns])
-  const sorted = useMemo(() => sortGearRows(filtered, inForce), [filtered, inForce])
+  const columns = useMemo(() => [{ key: 'SCORE' as const, label: 'Score', percent: false }, ...columnsFor(chosen, sort)], [chosen, sort])
+  const scored = useMemo(() => scoreGear(filtered, priorities, extras), [filtered, priorities, extras])
+  const inForce = useMemo(() => sortWithin(sort, columns, hasOwned), [sort, columns, hasOwned])
+  const sorted = useMemo(() => sortGearRows(scored, inForce, deps), [scored, inForce, deps])
   // WHY THE LIST IS EMPTY, when it is (the JOS-67 law: a filter that can hide everything must be
   // able to admit it). THREE filters can do it without the user having chosen them in the moment:
   // the era one, which is on by DEFAULT rather than by choice; the Owned one, which is one click
@@ -287,7 +289,7 @@ function ownedHint(map: GearOwnershipMap | null, uncounted: string | null): stri
  * list rather than replacing it.
  */
 function ShapePickers({ prefs, columns }: { prefs: GearPrefs; columns: readonly GearColumn[] }): JSX.Element {
-  const seed = useMemo(() => columns.map((c) => c.key), [columns])
+  const seed = useMemo(() => columns.filter((c) => c.key !== 'SCORE').map((c) => c.key), [columns])
   return (
     <>
       <GearPicker
@@ -486,8 +488,8 @@ export default function GearView({ onOpenLoot, onPreview }: GearViewProps = {}):
   // object so `filterGearRows`' memo re-runs when either MOVES and never merely because it rendered.
   const era = useEraHidden()
   const owned = useOwnedOrLooted(ownership.map)
-  const deps = useMemo(() => ({ ...era, ...owned }), [era, owned])
-  const table = useTableRows(rows, state, filters, { sort, deps, chosen: prefs.columns })
+  const deps = useMemo(() => ({ ...era, ...owned, ownedText: (row: GearRow) => ownership.map === null ? '' : ownedCellText(ownershipFor(ownership.map, row)) }), [era, owned, ownership.map])
+  const table = useTableRows(rows, state, filters, { sort, deps, chosen: prefs.columns, priorities: prefs.priorities, extras: prefs.priorityExtras, hasOwned: ownership.map !== null })
   // JOS-338. The hover card's data, and it is deliberately OUTSIDE the three-memo pipeline above:
   // what you are wearing is not a filter, not a sort and not a scale, so no keystroke and no slider
   // tick can reach it. It takes the UNSCALED corpus (the card joins an equipped item by key and
@@ -502,11 +504,11 @@ export default function GearView({ onOpenLoot, onPreview }: GearViewProps = {}):
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }} data-testid="gear-view">
-      <GearFilterBar
+      <GearFilterBar extras={prefs.priorityExtras} onExtras={(next) => { prefs.setPriorityExtras(next); setSort({ key: 'SCORE', dir: 'desc' }) }}
+        priorities={prefs.priorities} onPriorities={(next) => { prefs.setPriorities(next); setSort({ key: 'SCORE', dir: 'desc' }) }}
         filters={filters}
         setFilters={setOwn}
-        text={text}
-        setText={setText}
+        text={text} setText={setText}
         classes={classes}
         upgrade={upgrade}
         visible={visible}

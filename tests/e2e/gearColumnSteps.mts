@@ -21,6 +21,7 @@
  *     agreeing with it: it asserts a column the derivation would always draw (AC, a core column) is
  *     ABSENT, and one it would never draw (CHA) is present.
  */
+import { stepGearFeedback, stepGearFeedbackRelaunched } from './gearFeedbackSteps.mjs'
 import { stepGearResize, stepGearResizeRelaunched } from './gearResizeSteps.mjs'
 import type { Page } from 'playwright-core'
 import { check, countOf, note, settle } from './appHarness.mjs'
@@ -221,7 +222,7 @@ async function stepPick(page: Page): Promise<boolean> {
   // The chip says the choice is now the user's, not the app's.
   check(
     'the Columns chip counts what is drawn',
-    (await textOf(page, COLUMNS_TOGGLE)).includes(String(after - 1)),
+    (await textOf(page, COLUMNS_TOGGLE)).includes(String(after - 5)),
     (await textOf(page, COLUMNS_TOGGLE)).replace(/\s+/g, ' ').trim()
   )
   return missing.length === 0
@@ -433,6 +434,7 @@ export async function stepGearColumns(page: Page, fixture: GearColumnFixture): P
     (await countOf(page, EFFECT_SELECT)) === 0
   check('the tab is left holding a choice no derivation could have produced', parked)
   if (!parked) note('the relaunch step below cannot prove anything the first launch did not park')
+  await stepGearFeedback(page)
 }
 
 /** AND IT ALL COMES BACK — a second launch over the same userData, reading the same localStorage. */
@@ -440,6 +442,7 @@ export async function stepGearColumnsRelaunched(page: Page): Promise<void> {
   const mounted = await until(async () => (await countOf(page, TABLE)) === 1, 30_000)
   if (!check('the table mounts on the second launch', mounted)) return
   await stepGearResizeRelaunched(page)
+  await stepGearFeedbackRelaunched(page)
 
   const cha = await until(async () => (await countOf(page, '[data-testid="gear-sort-CHA"]')) === 1, 15_000)
   check('a picked column comes back after a relaunch, sortable header and all', cha)

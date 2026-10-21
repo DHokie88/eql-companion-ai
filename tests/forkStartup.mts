@@ -1,7 +1,8 @@
 /** Launch the desktop entry point itself, never a substitute electron.launch() command. */
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync } from 'node:fs'
+import { rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { test } from 'node:test'
@@ -14,7 +15,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 /** START detaches. Identify only this launch, including the pre-CDP failure path. */
 function ownedPids(token: string): number[] {
   const found = spawnSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command',
-    'Get-CimInstance Win32_Process -Filter "Name = \'electron.exe\'" | Where-Object { $_.CommandLine -and $_.CommandLine.Contains($env:EQL_SMOKE_TOKEN) -and -not $_.CommandLine.Contains("--type=") } | Select-Object -ExpandProperty ProcessId | ConvertTo-Json -Compress'
+    'Get-CimInstance Win32_Process -Filter "Name = \'electron.exe\'" | Where-Object { $_.CommandLine -and $_.CommandLine.Contains($env:EQL_SMOKE_TOKEN) } | Select-Object -ExpandProperty ProcessId | ConvertTo-Json -Compress'
   ], { env: { ...process.env, EQL_SMOKE_TOKEN: token }, encoding: 'utf8', windowsHide: true, timeout: 5_000 })
   assert.equal(found.status, 0, `could not identify owned smoke processes: ${found.stderr}`)
   if (!found.stdout.trim()) return []
@@ -115,6 +116,7 @@ test('the fork desktop launcher loads the built UI, preload and matching release
       remaining = remaining.filter(isRunning)
     }
     assert.deepEqual(remaining, [], `owned app survived teardown: ${JSON.stringify(results)}`)
-    rmSync(root, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 })
+    // Chromium children and Windows scanners may release profile handles after taskkill returns.
+    await rm(root, { recursive: true, force: true, maxRetries: 20, retryDelay: 100 })
   }
 })

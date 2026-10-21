@@ -18,6 +18,7 @@
 // key rather than writing `[]`, because `[]` is a different statement (gearPrefs.ts's header).
 
 import { useCallback, useState } from 'react'
+import { sanitizePriorities, sanitizePriorityExtras, type PriorityKey, type GearPriorities } from './gearPriorities'
 import type { GearSortKey } from './gearFilter'
 import { GEAR_CONTROLS, sanitizeColumns, sanitizeControls, type GearControl } from './gearPrefs'
 
@@ -49,6 +50,10 @@ function writeJson(key: string, value: unknown): void {
 }
 
 export interface GearPrefs {
+  priorityExtras: PriorityKey[]
+  setPriorityExtras: (next: PriorityKey[]) => void
+  priorities: GearPriorities
+  setPriorities: (next: GearPriorities) => void
   /** the chosen numeric columns, or `null` to derive them from the filters and the sort */
   columns: GearSortKey[] | null
   setColumns: (next: GearSortKey[] | null) => void
@@ -58,6 +63,16 @@ export interface GearPrefs {
 }
 
 export function useGearPrefs(): GearPrefs {
+  const [priorityExtras, setExtrasState] = useState(() => sanitizePriorityExtras(readJson('eq.gear.priorityExtras')))
+  const setPriorityExtras = useCallback((next: PriorityKey[]) => {
+    setExtrasState(next)
+    writeJson('eq.gear.priorityExtras', next)
+  }, [])
+  const [priorities, setPriorityState] = useState(() => sanitizePriorities(readJson('eq.gear.priorities')))
+  const setPriorities = useCallback((next: GearPriorities) => {
+    setPriorityState(next)
+    writeJson('eq.gear.priorities', next)
+  }, [])
   const [columns, setColumnsState] = useState<GearSortKey[] | null>(() => sanitizeColumns(readJson(COLUMNS_KEY)))
   const [controls, setControlsState] = useState<GearControl[] | null>(() => sanitizeControls(readJson(CONTROLS_KEY)))
 
@@ -85,5 +100,5 @@ export function useGearPrefs(): GearPrefs {
     writeJson(CONTROLS_KEY, next === null ? null : { shown: next, vocab: [...GEAR_CONTROLS] })
   }, [])
 
-  return { columns, setColumns, controls, setControls }
+  return { columns, setColumns, controls, setControls, priorities, setPriorities, priorityExtras, setPriorityExtras }
 }

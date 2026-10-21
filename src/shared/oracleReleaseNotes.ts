@@ -21,6 +21,14 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.9.0',
+    date: '2026-10-21',
+    entries: [
+      { kind: 'changed', text: 'Gear preview and wish-list actions have their own compact icon column. Data columns use tighter, centered cells and sortable headers.', fromReport: true },
+      { kind: 'new', text: 'Set priorities for individual stats and resists from Off to Top. Add Poison, Disease, CHA or AGI through More stats. Sort by Score for a weighted ranking or click any data column to sort it directly.', fromReport: true }
+    ]
+  },
+  {
     version: '0.8.0',
     date: '2026-10-21',
     entries: [

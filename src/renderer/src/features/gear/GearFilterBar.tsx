@@ -56,6 +56,8 @@ import { classDisplayName } from '@shared/spellLevels'
 import ChipMultiSelect from '../../components/ChipMultiSelect'
 import { CURRENT_ERA_LABEL } from '../planner/plannerData'
 import { SOCKET_LABEL } from '../planner/plannerGroups'
+import GearPriorityBar from './GearPriorityBar'
+import type { GearPriorities as Priorities, PriorityKey } from './gearPriorities'
 import UpgradeSlider from './UpgradeSlider'
 import type { EffectFilter, GearFilters } from './gearFilter'
 import type { GearControl } from './gearPrefs'
@@ -100,6 +102,10 @@ function ToggleChip({
 }
 
 export interface GearFilterBarProps {
+  extras: PriorityKey[]
+  onExtras: (value: PriorityKey[]) => void
+  priorities: Priorities
+  onPriorities: (value: Priorities) => void
   filters: GearFilters
   setFilters: (f: GearFilters) => void
   /** the RAW search text (the view defers it before filtering — the standing search law) */
@@ -170,7 +176,7 @@ function SelectRow({ filters, setFilters, visible }: Pick<GearFilterBarProps, 'f
 }
 
 /** WHICH ITEMS: name, slot, classes, effect kind, era. Search is always drawn — see the header. */
-function IdentityRow({ filters, setFilters, text, setText, classes, visible }: Omit<GearFilterBarProps, 'upgrade'>): JSX.Element {
+function IdentityRow({ filters, setFilters, text, setText, classes, visible }: Omit<GearFilterBarProps, 'upgrade' | 'priorities' | 'onPriorities' | 'extras' | 'onExtras'>): JSX.Element {
   return (
     <Stack direction="row" spacing={1} alignItems="center" sx={{ flexWrap: 'nowrap' }}>
       <TextField
@@ -261,7 +267,7 @@ function NumbersRow({ upgrade }: Pick<GearFilterBarProps, 'upgrade'>): JSX.Eleme
 const NUMBERS_CONTROLS: readonly GearControl[] = ['upgrade']
 
 export default function GearFilterBar(props: GearFilterBarProps): JSX.Element {
-  const { filters, setFilters, text, setText, classes, upgrade, visible } = props
+  const { filters, setFilters, text, setText, classes, upgrade, visible, priorities, onPriorities, extras, onExtras } = props
   return (
     <Stack spacing={1} sx={{ mb: 1, flexShrink: 0 }}>
       <IdentityRow
@@ -272,6 +278,7 @@ export default function GearFilterBar(props: GearFilterBarProps): JSX.Element {
         classes={classes}
         visible={visible}
       />
+      <GearPriorityBar value={priorities} onChange={onPriorities} extras={extras} onExtras={onExtras} />
       {NUMBERS_CONTROLS.some((c) => visible.has(c)) && <NumbersRow upgrade={upgrade} />}
     </Stack>
   )

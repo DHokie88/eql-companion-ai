@@ -53,7 +53,7 @@ export const CORE_COLUMNS: readonly GearSortKey[] = ['AC', 'HP', 'MP', 'RATIO']
 export const MAX_DERIVED_COLUMNS = 1
 
 /** Readable defaults before user resizing. Item includes preview and wish-list actions. */
-const PX = { name: 440, slot: 150, classes: 220, numeric: 88, owned: 180 } as const
+const PX = { name: 280, actions: 80, slot: 100, classes: 170, numeric: 64, owned: 140 } as const
 
 export interface GearColumn {
   key: GearSortKey
@@ -76,6 +76,7 @@ const PERCENT_KEYS: ReadonlySet<string> = new Set<string>(GEAR_PERCENT_STAT_KEYS
  * this table has drawn since JOS-297, and the 8% ceiling was measured against a header that fits.
  */
 export function columnLabel(key: GearSortKey): string {
+  if (key === 'SCORE') return 'Score'
   if (key === 'RATIO') return 'Ratio'
   if (key === 'name') return 'Item'
   return key.replace(/_/g, ' ')
@@ -126,7 +127,7 @@ export const PICKABLE_COLUMNS: readonly GearSortKey[] = GEAR_STAT_KEYS.flatMap<G
  */
 export function visibleColumns(sort: GearSort): GearColumn[] {
   const keys: GearSortKey[] = [...CORE_COLUMNS]
-  if (sort.key !== 'name' && !keys.includes(sort.key)) keys.push(sort.key)
+  if (PICKABLE_COLUMNS.includes(sort.key) && !keys.includes(sort.key)) keys.push(sort.key)
   return keys.map(column)
 }
 
@@ -151,8 +152,9 @@ export function columnsFor(chosen: readonly GearSortKey[] | null, sort: GearSort
  * IDENTITY-PRESERVING when the sort is already on a drawn column, so the memo chain downstream
  * re-runs when the sort MOVES and never merely because it rendered.
  */
-export function sortWithin(sort: GearSort, columns: readonly GearColumn[]): GearSort {
-  if (sort.key === 'name' || columns.some((c) => c.key === sort.key)) return sort
+export function sortWithin(sort: GearSort, columns: readonly GearColumn[], hasOwned = true): GearSort {
+  if (sort.key === 'owned' && !hasOwned) return { key: 'name', dir: 'asc' }
+  if (['name', 'slot', 'classes', 'owned', 'SCORE'].includes(sort.key) || columns.some((c) => c.key === sort.key)) return sort
   const first = columns[0]
   return first === undefined ? { key: 'name', dir: 'asc' } : { key: first.key, dir: 'desc' }
 }
@@ -164,6 +166,7 @@ export interface GearTableLayout {
   minWidth: number
   /** Minimum space for the name and row actions. */
   name: string
+  actions: string
   slot: string
   classes: string
   numeric: string
@@ -173,8 +176,9 @@ export interface GearTableLayout {
 export function gearTableLayout(count: number, hasOwned: boolean): GearTableLayout {
   return {
     mode: 'pixel',
-    minWidth: PX.name + PX.slot + PX.classes + count * PX.numeric + (hasOwned ? PX.owned : 0),
+    minWidth: PX.name + PX.actions + PX.slot + PX.classes + count * PX.numeric + (hasOwned ? PX.owned : 0),
     name: `${String(PX.name)}px`,
+    actions: `${String(PX.actions)}px`,
     slot: `${String(PX.slot)}px`,
     classes: `${String(PX.classes)}px`,
     numeric: `${String(PX.numeric)}px`,
@@ -195,6 +199,7 @@ export function gearTableLayout(count: number, hasOwned: boolean): GearTableLayo
  */
 export function statText(value: number | undefined, key: GearSortKey): string {
   if (value === undefined) return ''
+  if (key === 'SCORE') return value.toFixed(1)
   if (key === 'RATIO') return value.toFixed(2)
   if (key === 'WEIGHT') return value.toFixed(1)
   if (PERCENT_KEYS.has(key)) return `${String(value)}%`
@@ -210,5 +215,5 @@ export function statText(value: number | undefined, key: GearSortKey): string {
  * fails to typecheck rather than quietly asking the vector for a field it does not have.
  */
 export function statKeysOf(columns: readonly GearColumn[]): GearStatKey[] {
-  return columns.flatMap((c) => (c.key === 'name' || c.key === 'RATIO' || c.key === 'EFF_HP' ? [] : [c.key]))
+  return columns.flatMap((c) => (GEAR_STAT_KEYS.includes(c.key as GearStatKey) ? [c.key as GearStatKey] : []))
 }

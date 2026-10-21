@@ -222,7 +222,7 @@ test('defaults reserve readable item space and keep stat widths compact at every
   const columns = columnsFor(null, { key: 'AC', dir: 'desc' })
   const narrow = gearWidths(columns, true, 700, {})
   const wide = gearWidths(columns, true, 2400, {})
-  assert.ok(narrow.widths.name >= 440)
+  assert.ok(narrow.widths.name >= 280)
   assert.ok(wide.widths.name > narrow.widths.name)
   assert.equal(wide.widths.AC, narrow.widths.AC, 'stats do not expand with the window')
   assert.ok(narrow.total > 700, 'narrow windows scroll instead of crushing text')
@@ -402,4 +402,10 @@ test('HIDING A CONTROL CANNOT MOVE A COLUMN any more - the two choices stopped b
     void inertFilters(busy, shown)
     assert.deepEqual(columnsFor(null, sort).map((c) => c.key), whole)
   }
+})
+
+// Owned disappears when this character has neither inventory nor loot evidence.
+test('an unavailable Owned column cannot retain an invisible active sort', () => {
+  assert.deepEqual(sortWithin({ key: 'owned', dir: 'desc' }, [], false), { key: 'name', dir: 'asc' })
+  assert.deepEqual(sortWithin({ key: 'owned', dir: 'desc' }, [], true), { key: 'owned', dir: 'desc' })
 })

@@ -117,13 +117,13 @@ function measureWishCell(page: Page, key: string): Promise<CellWidths | null> {
   return page.evaluate((sel) => {
     const control = document.querySelector(sel)
     const cell = control?.closest('td') ?? null
-    const name = cell?.querySelector('[data-testid="planner-donor-name"]') ?? null
+    const name = control?.closest('tr')?.querySelector('[data-testid="planner-donor-name"]') ?? null
     if (control === null || cell === null || name === null) return null
     return {
       cell: Math.round(cell.getBoundingClientRect().width),
       control: Math.round(control.getBoundingClientRect().width),
       name: Math.round(name.getBoundingClientRect().width),
-      label: (control as HTMLElement).innerText.replace(/\s+/g, ' ').trim()
+      label: control.getAttribute('aria-label') ?? ''
     }
   }, wishOf(key))
 }
@@ -137,7 +137,7 @@ function measureWishCell(page: Page, key: string): Promise<CellWidths | null> {
  * belongs — visible on every run, failing none of them.
  */
 function stepGearWishWidth(w: CellWidths | null): void {
-  if (!check('the wish control shares the Item cell with the name, so both can be measured', w !== null) || w === null) {
+  if (!check('the icon Actions cell and separate Item name are present', w !== null) || w === null) {
     return
   }
   note(`wish control "${w.label}" — ${String(w.control)}px of a ${String(w.cell)}px Item column · name ${String(w.name)}px`)

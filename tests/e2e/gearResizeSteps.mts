@@ -41,7 +41,7 @@ export async function stepGearResize(page: Page): Promise<void> {
     const ac = document.querySelector('[data-testid="gear-resize-AC"]')?.closest('th')
     return { name: name?.getBoundingClientRect().width ?? 0, ac: ac?.getBoundingClientRect().width ?? 0 }
   })
-  check('defaults give Item readable space and keep short stats compact', defaults.name >= 439 && defaults.ac >= 87 && defaults.ac <= 100, JSON.stringify(defaults))
+  check('defaults give Item readable space and keep short stats compact', defaults.name >= 279 && defaults.ac >= 71 && defaults.ac <= 80, JSON.stringify(defaults))
   const sortBefore = await page.locator('[data-testid="gear-sort-STR"]').getAttribute('class')
   for (const [key, delta] of [['name', 80], ['slot', 48], ['STR', 40]] as const) {
     const before = await dimensions(page, key)
@@ -55,10 +55,10 @@ export async function stepGearResize(page: Page): Promise<void> {
   // Native pointer double-click and keyboard resizing use the same preference path.
   const slot = page.locator(`${HANDLE}slot"]`)
   await slot.dblclick()
-  check('double-click restores a column default', Math.abs((await dimensions(page, 'slot')).header - 150) <= 1)
+  check('double-click restores a column default', Math.abs((await dimensions(page, 'slot')).header - 100) <= 1)
   await slot.focus()
   await page.keyboard.press('ArrowRight')
-  parked.slot = 166
+  parked.slot = 116
   await assertParked(page, 'keyboard resizing')
 
   await page.click('[data-testid="nav-overview"]')
