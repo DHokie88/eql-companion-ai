@@ -33,6 +33,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import type { GearRow } from '../src/shared/planner/gear'
+import { CLASS_ABBRS } from '../src/shared/classCombo'
 import { scaleGearRow } from '../src/shared/planner/gearScale'
 import type { ItemUpgradeState } from '../src/shared/itemUpgrade'
 import {
@@ -414,6 +415,51 @@ test('ratio is a sort key of its own, and it is gearRatio - never a second opini
   assert.equal(sortValue(CROWN, 'RATIO'), undefined, 'a crown has no damage ratio')
   assert.equal(sortValue(THELVORN, 'BACKSTAB'), undefined)
   assert.equal(sortValue(THELVORN, 'name'), undefined, 'the name is not a number')
+})
+
+test('slot text sorts in both directions, with missing slots last and item names breaking ties', () => {
+  const rows = [row({ key: 'z head', name: 'Z Head', slots: ['HEAD'] }), row({ key: 'missing', name: 'Missing' }),
+    row({ key: 'a head', name: 'A Head', slots: ['HEAD'] }), row({ key: 'arms', name: 'Arms', slots: ['ARMS'] }),
+    row({ key: 'weapon', name: 'Weapon', slots: ['PRIMARY', 'SECONDARY'] })]
+  assert.deepEqual(names(sortGearRows(rows, { key: 'slot', dir: 'asc' })), ['Arms', 'A Head', 'Z Head', 'Weapon', 'Missing'])
+  assert.deepEqual(names(sortGearRows(rows, { key: 'slot', dir: 'desc' })), ['Weapon', 'A Head', 'Z Head', 'Arms', 'Missing'])
+  assert.equal(rows[0].name, 'Z Head', 'sorting does not mutate the caller array')
+})
+
+test('classes sort by the displayed ALL label, with missing classes last and names breaking ties', () => {
+  const rows = [row({ key: 'wizard', name: 'Wizard', classes: ['WIZ'] }), row({ key: 'z all', name: 'Z All', classes: [...CLASS_ABBRS] }),
+    row({ key: 'missing', name: 'Missing' }), row({ key: 'cleric', name: 'Cleric', classes: ['CLR', 'PAL'] }),
+    row({ key: 'a all', name: 'A All', classes: [...CLASS_ABBRS, 'PAL'] })]
+  assert.deepEqual(names(sortGearRows(rows, { key: 'classes', dir: 'asc' })), ['A All', 'Z All', 'Cleric', 'Wizard', 'Missing'])
+  assert.deepEqual(names(sortGearRows(rows, { key: 'classes', dir: 'desc' })), ['Wizard', 'Cleric', 'A All', 'Z All', 'Missing'])
+})
+
+test('owned sorting reads injected displayed text, keeps missing entries last, and flows through gearTableRows', () => {
+  const rows = [row({ key: 'z bank', name: 'Z Bank' }), row({ key: 'missing', name: 'Missing' }),
+    row({ key: 'equipped', name: 'Equipped' }), row({ key: 'a bank', name: 'A Bank' }), row({ key: 'blank', name: 'Blank' })]
+  const cells: Record<string, string> = { 'z bank': 'Bank +2', equipped: 'Equipped +5', 'a bank': 'Bank +2', blank: '   ' }
+  const deps = { ownedText: (row: GearRow) => cells[row.key] ?? '' }
+  assert.deepEqual(names(sortGearRows(rows, { key: 'owned', dir: 'asc' }, deps)), ['A Bank', 'Z Bank', 'Equipped', 'Blank', 'Missing'])
+  assert.deepEqual(names(gearTableRows(rows, BASE, { filters: filters(), sort: { key: 'owned', dir: 'desc' }, deps })),
+    ['Equipped', 'A Bank', 'Z Bank', 'Blank', 'Missing'])
+  assert.deepEqual(names(sortGearRows(rows, { key: 'owned', dir: 'desc' })), ['A Bank', 'Blank', 'Equipped', 'Missing', 'Z Bank'],
+    'without the injected ownership witness, every cell is absent and names break the tie')
+})
+
+test('SCORE sorts attached numeric priorities, preserving zero and putting absent scores last in both directions', () => {
+  const rows = [
+    { ...row({ key: 'z priority', name: 'Z Priority' }), priorityScore: 25 },
+    row({ key: 'missing', name: 'Missing' }),
+    { ...row({ key: 'zero', name: 'Zero' }), priorityScore: 0 },
+    { ...row({ key: 'a priority', name: 'A Priority' }), priorityScore: 25 },
+    { ...row({ key: 'medium', name: 'Medium' }), priorityScore: 4 }
+  ]
+  assert.equal(sortValue(rows[0], 'SCORE'), 25)
+  assert.equal(sortValue(rows[1], 'SCORE'), undefined)
+  assert.deepEqual(names(sortGearRows(rows, { key: 'SCORE', dir: 'asc' })), ['Zero', 'Medium', 'A Priority', 'Z Priority', 'Missing'])
+  assert.deepEqual(names(sortGearRows(rows, { key: 'SCORE', dir: 'desc' })), ['A Priority', 'Z Priority', 'Medium', 'Zero', 'Missing'])
+  for (const key of ['name', 'slot', 'classes', 'owned'] as const) assert.equal(sortValue(rows[0], key), undefined)
+  assert.equal(gearTableRows(rows, CHECKPOINT, { filters: filters(), sort: { key: 'SCORE', dir: 'desc' } })[0].name, 'A Priority')
 })
 
 // =================================================================================

@@ -149,6 +149,8 @@ export interface GearFilterDeps {
    * a control that lies about being on.
    */
   ownedOrLooted?: (row: GearRow) => boolean
+  /** The displayed Owned cell, injected so sorting agrees with the live ownership join. */
+  ownedText?: (row: GearRow) => string
 }
 
 // ---- the predicates ------------------------------------------------------------------------
@@ -236,13 +238,14 @@ export function filterGearRows<T extends GearRow>(
 /**
  * Any numeric column, plus the DERIVED ones. `RATIO` is `gearRatio` (never a second opinion on
  * DMG/DELAY), `EFF_HP` is `gearEffectiveHp` (JOS-336 — raw HP plus raw STA, likewise never a second
- * opinion), and `name` is the only non-numeric axis.
+ * opinion). Name, slot, classes and ownership sort by their displayed text; `SCORE` reads the
+ * priority score attached by the caller.
  *
  * A DERIVED KEY IS NOT A VECTOR KEY, and the union says so: `GearStats` has no `EFF_HP` field and
  * never will. Nothing indexes it, nothing scales it, and nothing stores it — it is computed from the
  * vector at the moment somebody asks, which is exactly why the plus-state moves it for free.
  */
-export type GearSortKey = 'name' | 'RATIO' | 'EFF_HP' | GearStatKey
+export type GearSortKey = 'name' | 'slot' | 'classes' | 'owned' | 'SCORE' | 'RATIO' | 'EFF_HP' | GearStatKey
 
 export interface GearSort {
   key: GearSortKey
@@ -261,11 +264,28 @@ export const DEFAULT_GEAR_SORT: GearSort = { key: 'AC', dir: 'desc' }
  * property that lets `GearTable` render every column with `statText(sortValue(row, key), key)` and
  * never learn that two of the keys are not vector fields.
  */
-export function sortValue(row: GearRow, key: GearSortKey): number | undefined {
-  if (key === 'name') return undefined
+export function sortValue(row: GearRow & { priorityScore?: number }, key: GearSortKey): number | undefined {
+  if (key === 'name' || key === 'slot' || key === 'classes' || key === 'owned') return undefined
+  if (key === 'SCORE') return row.priorityScore
   if (key === 'RATIO') return gearRatio(row.stats)
   if (key === 'EFF_HP') return gearEffectiveHp(row.stats)
   return row.stats[key]
+}
+
+function sortText(row: GearRow, key: 'slot' | 'classes' | 'owned', deps: GearFilterDeps): string {
+  if (key === 'slot') return row.slots.join(' ')
+  if (key === 'classes') return row.classes.length >= 16 ? 'ALL' : row.classes.join(' ')
+  return deps.ownedText?.(row).trim() ?? ''
+}
+
+function compareText(a: GearRow, b: GearRow, key: 'slot' | 'classes' | 'owned', { deps, sign }: { deps: GearFilterDeps; sign: number }): number {
+  const av = sortText(a, key, deps)
+  const bv = sortText(b, key, deps)
+  if (av === '' || bv === '') {
+    if (av === bv) return a.name.localeCompare(b.name)
+    return av === '' ? 1 : -1
+  }
+  return av === bv ? a.name.localeCompare(b.name) : sign * av.localeCompare(bv)
 }
 
 /**
@@ -277,10 +297,13 @@ export function sortValue(row: GearRow, key: GearSortKey): number | undefined {
  * it is a fresh filter each time), and a windowed list whose rows swap under the scrollbar is the
  * bug that looks like a rendering fault.
  */
-export function sortGearRows<T extends GearRow>(rows: readonly T[], sort: GearSort): T[] {
+export function sortGearRows<T extends GearRow>(rows: readonly T[], sort: GearSort, deps: GearFilterDeps = {}): T[] {
   const sign = sort.dir === 'asc' ? 1 : -1
   return [...rows].sort((a, b) => {
     if (sort.key === 'name') return sign * a.name.localeCompare(b.name)
+    if (sort.key === 'slot' || sort.key === 'classes' || sort.key === 'owned') {
+      return compareText(a, b, sort.key, { deps, sign })
+    }
     const av = sortValue(a, sort.key)
     const bv = sortValue(b, sort.key)
     if (av === undefined || bv === undefined) {
@@ -317,5 +340,5 @@ export function gearTableRows<T extends GearRow>(
   opts: { filters: GearFilters; sort?: GearSort; deps?: GearFilterDeps }
 ): T[] {
   const scaled = scaleAll(rows, state)
-  return sortGearRows(filterGearRows(scaled, opts.filters, opts.deps), opts.sort ?? DEFAULT_GEAR_SORT)
+  return sortGearRows(filterGearRows(scaled, opts.filters, opts.deps), opts.sort ?? DEFAULT_GEAR_SORT, opts.deps)
 }
