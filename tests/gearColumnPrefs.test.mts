@@ -222,7 +222,7 @@ test('defaults reserve readable item space and keep stat widths compact at every
   const columns = columnsFor(null, { key: 'AC', dir: 'desc' })
   const narrow = gearWidths(columns, true, 700, {})
   const wide = gearWidths(columns, true, 2400, {})
-  assert.ok(narrow.widths.name >= 280)
+  assert.ok(narrow.widths.name >= 264)
   assert.ok(wide.widths.name > narrow.widths.name)
   assert.equal(wide.widths.AC, narrow.widths.AC, 'stats do not expand with the window')
   assert.ok(narrow.total > 700, 'narrow windows scroll instead of crushing text')
@@ -408,4 +408,9 @@ test('HIDING A CONTROL CANNOT MOVE A COLUMN any more - the two choices stopped b
 test('an unavailable Owned column cannot retain an invisible active sort', () => {
   assert.deepEqual(sortWithin({ key: 'owned', dir: 'desc' }, [], false), { key: 'name', dir: 'asc' })
   assert.deepEqual(sortWithin({ key: 'owned', dir: 'desc' }, [], true), { key: 'owned', dir: 'desc' })
+})
+
+test('resist headers use short consistent labels', () => {
+  const columns = columnsFor(['SV_MAGIC', 'SV_FIRE', 'SV_COLD', 'SV_POISON', 'SV_DISEASE'], { key: 'AC', dir: 'desc' })
+  assert.deepEqual(columns.map((column) => column.label), ['MAG', 'FIRE', 'COLD', 'POIS', 'DIS'])
 })

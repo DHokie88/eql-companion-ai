@@ -21,6 +21,14 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.9.1',
+    date: '2026-10-21',
+    entries: [
+      { kind: 'changed', text: 'Gear uses tighter default widths, centered headers and short resist labels. Long class lists fit two compact lines; complete tank and caster groups use Tanks and Casters.', fromReport: true },
+      { kind: 'changed', text: 'Haste, STR, STA, Fire and Cold priorities are optional in More stats.', fromReport: true }
+    ]
+  },
+  {
     version: '0.9.0',
     date: '2026-10-21',
     entries: [

@@ -1,6 +1,7 @@
 import { buildIfStale, check, dumpArtifacts, failures, reportRun } from './appHarness.mjs'
 import { mainWindow, makeUserData, removeUserData } from './appWindow.mjs'
 import { launchOnFixture, stageFixture } from './logFixture.mjs'
+import { stepGearRefinement } from './gearRefinementSteps.mjs'
 import { stepGearFeedback, stepGearFeedbackRelaunched } from './gearFeedbackSteps.mjs'
 
 async function main(): Promise<void> {
@@ -14,6 +15,7 @@ async function main(): Promise<void> {
       await page.locator('[data-testid="nav-gear"]').click()
       await page.locator('[data-testid="gear-row"]').first().waitFor()
       await page.locator('[data-testid="gear-owned-header"]').waitFor()
+      await stepGearRefinement(page)
       await stepGearFeedback(page)
       await dumpArtifacts(page, failures.length ? 'gear-priorities-FAIL' : 'gear-priorities-pass')
     } finally { await first.close() }

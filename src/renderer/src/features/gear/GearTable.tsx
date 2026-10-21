@@ -4,7 +4,7 @@
 // Native titles avoid poppers over toolbar controls; the noninteractive comparison card opens below.
 
 import { type JSX, memo, useMemo } from 'react'
-import { IconButton, Stack, Table, TableBody, TableCell, TableHead, TableRow, TableSortLabel } from '@mui/material'
+import { Box, IconButton, Stack, Table, TableBody, TableCell, TableHead, TableRow, TableSortLabel } from '@mui/material'
 import type { GearRow } from '@shared/planner/gear'
 import type { WindowedRows } from '../../lib/useWindowedRows'
 import { EraChip, DonorName } from '../planner/PlannerChips'
@@ -23,6 +23,7 @@ import StarIcon from '@mui/icons-material/Star'
 import PreviewButton from '../character/PreviewButton'
 import GearColumnResize from './GearColumnResize'
 import { useGearColumnWidths } from './useGearColumnWidths'
+import { gearClassText } from './gearClassText'
 import type { ClassAbbr } from '@shared/classCombo'
 
 /** Dense row height (px), MUI `size="small"` — the number the windowing hook is handed. */
@@ -49,11 +50,20 @@ const FIXED_ROW = {
  */
 const NUMERIC_PAD = { px: 0.75 } as const
 
-/** Sixteen classes is `Class: ALL`, and sixteen chips would be the widest cell in the table. */
-function classText(classes: readonly ClassAbbr[]): string {
-  if (classes.length === 0) return ''
-  if (classes.length >= 16) return 'ALL'
-  return classes.join(' ')
+/** Long class lists use two 10px lines inside the same fixed-height row. */
+function ClassCell({ classes }: { classes: readonly ClassAbbr[] }): JSX.Element {
+  const display = gearClassText(classes)
+  return (
+    <TableCell align="center" title={classes.join(' ')} data-testid="gear-cell-classes">
+      <Box data-compact={display.compact ? 'true' : undefined} sx={{
+        display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
+        height: ROW_HEIGHT - 2, maxHeight: ROW_HEIGHT - 2, overflow: 'hidden',
+        fontSize: display.compact ? '8px' : 'inherit', lineHeight: display.compact ? '10px' : 'inherit'
+      }}>
+        {display.lines.map((line, index) => <Box key={index} component="span" sx={{ whiteSpace: 'nowrap' }}>{line}</Box>)}
+      </Box>
+    </TableCell>
+  )
 }
 
 export interface GearTableProps {
@@ -203,7 +213,7 @@ const GearLine = memo(function GearLine({
         </Stack>
       </TableCell>
       <TableCell align="center" title={row.slots.join(' ')}>{row.slots.join(' ')}</TableCell>
-      <TableCell align="center" title={row.classes.join(' ')}>{classText(row.classes)}</TableCell>
+      <ClassCell classes={row.classes} />
       {columns.map((c) => (
         <TableCell key={c.key} align="center" data-testid={`gear-cell-${c.key}`} sx={NUMERIC_PAD}>
           {statText(sortValue(row, c.key), c.key)}
@@ -238,7 +248,7 @@ function SortHeader({
   column,
   sort,
   width,
-  align,
+  align = 'center',
   onSort,
   onResize,
   title,
@@ -258,7 +268,7 @@ function SortHeader({
     <TableCell align={align} sortDirection={active ? sort.dir : false} title={title} data-testid={testId} sx={{ px: 0.75, position: 'sticky', ...(align === 'center' ? NUMERIC_PAD : {}) }}>
       <TableSortLabel
         active={active}
-        sx={{ maxWidth: 'calc(100% - 8px)', overflow: 'hidden', whiteSpace: 'nowrap', mr: 0 }}
+        sx={{ width: '100%', maxWidth: '100%', display: 'flex', justifyContent: 'center', position: 'relative', overflow: 'hidden', whiteSpace: 'nowrap', mx: 0, '& .MuiTableSortLabel-icon': { position: 'absolute', right: 4, m: 0, fontSize: 12 } }}
         direction={active ? sort.dir : 'desc'}
         data-testid={`gear-sort-${column.key}`}
         onClick={() => onSort(column.key)}

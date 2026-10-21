@@ -40,6 +40,7 @@
 // is a set membership rather than a number, which is why none of them needs the plus-state to mean
 // anything and why the whole filter is now cheaper than the scale that precedes it.
 
+import { gearClassText } from './gearClassText'
 import type { ClassAbbr } from '../../../../shared/classCombo'
 import type { ItemUpgradeState } from '../../../../shared/itemUpgrade'
 import type { GearRow, GearStatKey } from '../../../../shared/planner/gear'
@@ -274,7 +275,7 @@ export function sortValue(row: GearRow & { priorityScore?: number }, key: GearSo
 
 function sortText(row: GearRow, key: 'slot' | 'classes' | 'owned', deps: GearFilterDeps): string {
   if (key === 'slot') return row.slots.join(' ')
-  if (key === 'classes') return row.classes.length >= 16 ? 'ALL' : row.classes.join(' ')
+  if (key === 'classes') return gearClassText(row.classes).tokens.join(' ')
   return deps.ownedText?.(row).trim() ?? ''
 }
 

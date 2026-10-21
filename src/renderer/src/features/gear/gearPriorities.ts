@@ -1,14 +1,15 @@
+import { RESIST_LABELS } from './gearColumns'
 import type { GearRow } from '../../../../shared/planner/gear'
 
 export const BASE_PRIORITY_STATS = [
-  { key: 'AC', label: 'AC' }, { key: 'HP', label: 'HP' },
-  { key: 'MP', label: 'Mana' }, { key: 'HASTE', label: 'Haste' },
-  { key: 'STR', label: 'STR' }, { key: 'STA', label: 'STA' },
+  { key: 'AC', label: 'AC' }, { key: 'HP', label: 'HP' }, { key: 'MP', label: 'Mana' },
   { key: 'INT', label: 'INT' }, { key: 'WIS', label: 'WIS' }, { key: 'DEX', label: 'DEX' },
-  { key: 'SV_MAGIC', label: 'Magic' }, { key: 'SV_FIRE', label: 'Fire' }, { key: 'SV_COLD', label: 'Cold' }
+  { key: 'SV_MAGIC', label: RESIST_LABELS.SV_MAGIC ?? 'MAG' }
 ] as const
 export const EXTRA_PRIORITY_STATS = [
-  { key: 'SV_POISON', label: 'Poison' }, { key: 'SV_DISEASE', label: 'Disease' },
+  { key: 'HASTE', label: 'Haste' }, { key: 'STR', label: 'STR' }, { key: 'STA', label: 'STA' },
+  { key: 'SV_FIRE', label: RESIST_LABELS.SV_FIRE ?? 'FIRE' }, { key: 'SV_COLD', label: RESIST_LABELS.SV_COLD ?? 'COLD' },
+  { key: 'SV_POISON', label: RESIST_LABELS.SV_POISON ?? 'POIS' }, { key: 'SV_DISEASE', label: RESIST_LABELS.SV_DISEASE ?? 'DIS' },
   { key: 'CHA', label: 'CHA' }, { key: 'AGI', label: 'AGI' }
 ] as const
 export const PRIORITY_STATS = [...BASE_PRIORITY_STATS, ...EXTRA_PRIORITY_STATS]

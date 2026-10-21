@@ -21,13 +21,14 @@ export async function stepGearFeedback(page: Page): Promise<void> {
   })
   check('wish is an accessible icon in the separate Actions column', layout.icon && layout.separate && layout.preview, JSON.stringify(layout))
   check('all cells to the right of Actions are centered', layout.centered)
-  check('twelve individual stat priorities appear above the table', await countOf(page, '[data-testid="gear-priorities"] [role="combobox"]') === 13)
+  check('seven core priorities fit above the table', await countOf(page, '[data-testid="gear-priorities"] [role="combobox"]') === 8)
+  check('Haste, STR, STA, Fire and Cold start in More stats', await countOf(page, '[data-testid="gear-priority-HASTE"], [data-testid="gear-priority-STR"], [data-testid="gear-priority-STA"], [data-testid="gear-priority-SV_FIRE"], [data-testid="gear-priority-SV_COLD"]') === 0)
   for (const key of ['slot', 'classes', 'owned']) {
     const header = page.locator(`[data-testid="gear-sort-${key}"]`)
     await header.click()
     check(`${key} header activates its sort`, (await header.getAttribute('class'))?.includes('Mui-active') === true)
   }
-  for (const key of ['AC', 'MP', 'HASTE', 'STR', 'STA', 'INT', 'WIS', 'DEX', 'SV_MAGIC', 'SV_FIRE', 'SV_COLD']) await priority(page, key, 'Off')
+  for (const key of ['AC', 'MP', 'INT', 'WIS', 'DEX', 'SV_MAGIC']) await priority(page, key, 'Off')
   await page.locator('[data-testid="gear-priority-extras"] [role="combobox"]').click()
   await page.getByRole('option', { name: 'CHA', exact: true }).click()
   await page.keyboard.press('Escape')

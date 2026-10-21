@@ -24,9 +24,9 @@ test('each attribute and resistance has an independent weight; optional stats co
   const rows = [{ stats: { STR: 10 } }, { stats: { INT: 20 } }, { stats: { SV_FIRE: 30 } }, { stats: { SV_POISON: 40 } }]
   const allOff = Object.fromEntries(Object.keys(DEFAULT_PRIORITIES).map((key) => [key, 1])) as GearPriorities
   assert.deepEqual(scoreGear(rows, allOff).map((row) => row.priorityScore), [0, 0, 0, 0])
-  assert.deepEqual(scoreGear(rows, { ...allOff, STR: 5 }).map((row) => row.priorityScore), [100, 0, 0, 0])
+  assert.deepEqual(scoreGear(rows, { ...allOff, STR: 5 }, ['STR']).map((row) => row.priorityScore), [100, 0, 0, 0])
   assert.deepEqual(scoreGear(rows, { ...allOff, INT: 5 }).map((row) => row.priorityScore), [0, 100, 0, 0])
-  assert.deepEqual(scoreGear(rows, { ...allOff, SV_FIRE: 5 }).map((row) => row.priorityScore), [0, 0, 100, 0])
+  assert.deepEqual(scoreGear(rows, { ...allOff, SV_FIRE: 5 }, ['SV_FIRE']).map((row) => row.priorityScore), [0, 0, 100, 0])
   assert.deepEqual(scoreGear(rows, { ...allOff, SV_POISON: 5 }).map((row) => row.priorityScore), [0, 0, 0, 0])
   assert.deepEqual(scoreGear(rows, { ...allOff, SV_POISON: 5 }, ['SV_POISON']).map((row) => row.priorityScore), [0, 0, 0, 100])
   assert.deepEqual(sanitizePriorityExtras(['CHA', 'nope', 'CHA', 'SV_DISEASE']), ['SV_DISEASE', 'CHA'])

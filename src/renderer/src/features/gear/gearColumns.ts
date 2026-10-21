@@ -53,7 +53,7 @@ export const CORE_COLUMNS: readonly GearSortKey[] = ['AC', 'HP', 'MP', 'RATIO']
 export const MAX_DERIVED_COLUMNS = 1
 
 /** Readable defaults before user resizing. Item includes preview and wish-list actions. */
-const PX = { name: 280, actions: 80, slot: 100, classes: 170, numeric: 64, owned: 140 } as const
+const PX = { name: 264, actions: 80, slot: 92, classes: 152, numeric: 64, owned: 128 } as const
 
 export interface GearColumn {
   key: GearSortKey
@@ -65,17 +65,15 @@ export interface GearColumn {
 
 const PERCENT_KEYS: ReadonlySet<string> = new Set<string>(GEAR_PERCENT_STAT_KEYS)
 
-/**
- * `HP_REGEN` → `HP REGEN`, `RATIO` → `Ratio`. The underscore is a key's spelling, not a word.
- *
- * `EFF_HP` DELIBERATELY HAS NO ARM OF ITS OWN (JOS-336): the underscore rule already spells it
- * `EFF HP`, which is the label the ticket asked for and the same shouted-abbreviation voice
- * `SV MAGIC` and `HP REGEN` already speak. Adding a special case to produce a string the default
- * already produces would be a second place to keep the same word. Six characters also clears the
- * `MAX_NUMERIC_WIDTH` ceiling by a wide margin — it is shorter than the ten-character `SV DISEASE`
- * this table has drawn since JOS-297, and the 8% ceiling was measured against a header that fits.
- */
+/** Short resist labels share one vocabulary across headers and priority controls. */
+export const RESIST_LABELS: Partial<Record<GearSortKey, string>> = {
+  SV_MAGIC: 'MAG', SV_FIRE: 'FIRE', SV_COLD: 'COLD', SV_POISON: 'POIS', SV_DISEASE: 'DIS',
+  SV_VOID: 'VOID', SV_CORRUPTION: 'CORR', SV_CHROMATIC: 'CHRM', SV_PRISMATIC: 'PRSM', SV_ALL: 'ALL'
+}
+
 export function columnLabel(key: GearSortKey): string {
+  const resist = RESIST_LABELS[key]
+  if (resist !== undefined) return resist
   if (key === 'SCORE') return 'Score'
   if (key === 'RATIO') return 'Ratio'
   if (key === 'name') return 'Item'
