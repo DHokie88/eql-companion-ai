@@ -1,4 +1,5 @@
 import { clientSpellTargetCap, type SpellMechanicsCatalog } from './clientSpellMechanics'
+import { hasRepeatedWaveTiming } from './clientSpellDelivery'
 import type { ClientSpellClass, ClientSpellRecord, SpellBrowseSort, SpellBrowseType, SpellCalculation, SpellClass, SpellSortDirection, SpellSummary } from './spellLibrary'
 
 export const SPELL_TYPE_LABELS: Record<SpellBrowseType, string> = { dd: 'DD', dot: 'DoT', aoe: 'AOE', rain: 'RAIN', aoe4: 'AOE4', aoe8: 'AOE8', heal: 'Heal', hot: 'HoT', other: 'Buffs / utility' }
@@ -25,7 +26,7 @@ export function clientSpellType(record: ClientSpellRecord, mechanics?: SpellMech
 function directAreaType(record: ClientSpellRecord, catalog?: SpellMechanicsCatalog): SpellBrowseType {
   const mechanics = catalog?.resolve(record)
   if (mechanics && !mechanics.reason && mechanics.waves > 1) return 'rain'
-  if (record.aoeDurationMs > 0 || mechanics?.reason) return 'aoe'
+  if (hasRepeatedWaveTiming(record) || mechanics?.reason) return 'aoe'
   const cap = clientSpellTargetCap(record)
   return cap === null || cap > 2147483647 ? 'aoe' : `aoe${cap}`
 }

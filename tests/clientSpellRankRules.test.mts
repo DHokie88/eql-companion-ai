@@ -16,7 +16,7 @@ test('rank 0-X uses separate direct, tick and duration rules without equipment',
   for (let rank = 0; rank <= 10; rank++) {
     const preferences = defaultSpellModifierPreferences()
     preferences.mode = 'emulate'; preferences.emulation.rank = rank; preferences.emulation.focus = 'none'
-    const context: SpellModifierContext = { revision: 'test', modelVersion: '7', character: null, preferences,
+    const context: SpellModifierContext = { revision: 'test', modelVersion: '8', character: null, preferences,
       ranks: {}, inventory: { state: 'ready', exportedAt: null, candidates: [], warnings: [] }, warnings: [] }
     const options = { context, rankOnly: true, level: 10, classes: ['WIZ'] as const, metric: 'damage' as const }
     const input = { ...options, classes: [...options.classes] }

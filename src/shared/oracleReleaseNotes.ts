@@ -21,6 +21,13 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.9.2',
+    date: '2026-10-22',
+    entries: [
+      { kind: 'fixed', text: 'Ordinary four- and eight-target area damage spells, including Pillar of Fire, now show damage per mana in comparisons and efficiency rankings. Full-duration area damage and captured target caps are included.', fromReport: true }
+    ]
+  },
+  {
     version: '0.9.1',
     date: '2026-10-21',
     entries: [

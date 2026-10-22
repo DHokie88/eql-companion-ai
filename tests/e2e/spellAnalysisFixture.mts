@@ -14,7 +14,7 @@ function row(id: number, name: string, level = 12, damage = 40): string[] {
 export function stageAnalysisSources(staged: FixtureLog): number {
   const rows = Array.from({ length: 45 }, (_, i) => row(101 + i, `Test Ranked ${i + 1}`, 12, 40 + i))
   rows.push(row(201, 'Test New Fifty', 50, 80), row(202, 'Test New Sibling', 50, 70), row(401, 'Test Upcoming', 51, 100), row(402, 'Test Later', 60, 120))
-  const area = row(301, 'Test Area', 30, 25); area[30] = '8'; area[143] = '8'
+  const area = row(301, 'Test Area', 30, 25); area[30] = '8'; area[143] = '8'; area[13] = '5'
   const rain = row(302, 'Lava Storm', 30, 20); rain[30] = '8'; rain[13] = '7500'; rain[143] = '4'
   const slow = row(738, 'Test Binding Song', 23); slow[11] = '5'; slow[12] = '2'; slow[4] = '150'; slow[29] = '1'; slow[172] = '1|3|-30|0|102|0$2|11|95|0|101|60'
   const free = row(501, 'Test Free', 12, 200); free[14] = '0'

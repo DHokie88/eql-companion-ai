@@ -6,6 +6,7 @@ import type { SpellByLevelResult, SpellRankingsQuery, SpellRankingsResult } from
 import type { SpellComparisonResult, SpellDetailResult, SpellSearchResult } from '../src/shared/spellLibrary'
 import { defaultSpellModifierPreferences, type SpellModifierContext } from '../src/shared/spellModifiers'
 import { spellRow, storageFixture, syntheticCatalog } from './spellLibrarySynthetic.mts'
+import { ordinaryAoeRows } from './helpers/ordinaryAoeFixtures.mts'
 
 const single = { scope: 'single', targets: 4 } as const
 function observedContext(): SpellModifierContext {
@@ -26,6 +27,26 @@ function fixture(rows: string[][], description?: string) {
   } }
 }
 const ids = (result: { records: { id: number }[] }): number[] => result.records.map((r) => r.id)
+
+test('paid ordinary four/eight-target client spells rank by damage per mana instead of being excluded', () => {
+  const f = fixture(ordinaryAoeRows())
+  try {
+    const options = { level: 60, classes: [], categoryTab: 'aoe' as const, analysis: { scope: 'pack' as const, targets: 'maximum' as const } }
+    const ranked = f.rankings(options)
+    assert.deepEqual(ids(ranked), [122, 365, 433, 386])
+    assert.deepEqual(ranked.groupCounts, { ranked: 4, zeroMana: 0, excluded: 0 })
+    assert.equal(f.rankings({ ...options, group: 'excluded' }).total, 0)
+    for (const row of ranked.records) {
+      assert.ok(Number.isFinite(row.calculation.perMana))
+      assert.deepEqual(row.calculation.reasons, [])
+    }
+    assert.deepEqual(new Set(ids(f.call<SpellSearchResult>('search', { level: 60, type: 'aoe4' }))), new Set([365, 433, 386]))
+    assert.deepEqual(ids(f.call<SpellSearchResult>('search', { level: 60, type: 'aoe8' })), [122])
+    const compared = f.call<SpellComparisonResult>('compare', { ids: [386, 122], level: 60, metric: 'damage', analysis: options.analysis })
+    assert.deepEqual(compared.results.map((row) => row.total), [304, 1448])
+    assert.equal(f.storage.observations(f.dataset.installId).total, 1)
+  } finally { f.close() }
+})
 
 test('detail and By level resolve maximum targets while preserving captured source history', () => {
   const row = spellRow(1, 'Synthetic Area Song'); row[143] = '8'

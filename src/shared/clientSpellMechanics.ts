@@ -1,13 +1,11 @@
 import { RAIN_PAGES } from './rainSpellResearch'
 import type { ClientSpellRecord } from './spellLibrary'
+import { clientSpellTargetCap, hasRepeatedWaveTiming } from './clientSpellDelivery'
 
-// Numeric target vocabulary from the complete client parser, not wiki spellings.
-const AREA_TARGETS = new Set([2, 4, 8, 20, 24, 25, 32, 36, 37, 40, 42, 44, 45, 50])
+export { clientSpellTargetCap, isAreaTarget } from './clientSpellDelivery'
 const RESEARCH_WINDOW_MS = 7500
 const RESEARCH_HIT_CAP = 4
 const RESEARCHED_RAIN = new Map(RAIN_PAGES.map((page) => [page.name, page]))
-
-export function isAreaTarget(target: number): boolean { return AREA_TARGETS.has(target) }
 
 export interface ClientSpellMechanics {
   waves: number
@@ -15,12 +13,6 @@ export interface ClientSpellMechanics {
   deliveryMs: number
   capSource: string
   reason: string | null
-}
-
-/** A positive client cap is evidence; zero, missing and negative are unknown. */
-export function clientSpellTargetCap(record: ClientSpellRecord): number | null {
-  const value = record.fields.aeMaxTargets
-  return typeof value === 'number' && Number.isSafeInteger(value) && value > 0 ? value : null
 }
 
 function compatibleRain(record: ClientSpellRecord): boolean {
@@ -78,7 +70,7 @@ export class SpellMechanicsCatalog {
     if (RESEARCHED_RAIN.has(record.name)) {
       return unsupportedRain('Researched rain name has no unique compatible player record in this snapshot. Expected targeted-area direct damage, no buff duration, a 7500 ms wave window and a captured 4-hit budget.')
     }
-    if (record.aoeDurationMs > 0) {
+    if (hasRepeatedWaveTiming(record)) {
       return unsupportedRain('Repeated-wave behavior is unverified. Repeated DoT applications are not multiplied by their full duration.')
     }
     return { waves: 1, hitCap: clientSpellTargetCap(record), deliveryMs: 0, capSource: 'Captured client target cap.', reason: null }
