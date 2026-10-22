@@ -7,7 +7,8 @@ import { levelArg, pageArgs } from './queryValidation'
 import type { SpellLibraryStorage } from './storage'
 import type { SpellCalculator } from './workerEvaluation'
 import { clientSpellDescription } from '../../shared/clientSpellDescriptions'
-import { bestSpellLines, spellLineCandidate, type SpellLineCandidate } from '../../shared/clientSpellLines'
+import { spellLineCandidate, type SpellLineCandidate } from '../../shared/clientSpellLines'
+import { bestCatalogSpellLines } from './bestSpellLines'
 
 const CALCULATED_SORTS = new Set(['amount', 'efficiency', 'rate', 'cast', 'recovery', 'recast', 'duration', 'ticks', 'waves', 'targets', 'hits'])
 type SearchOptions = ReturnType<typeof spellSearchOptions>
@@ -35,6 +36,7 @@ function addCandidate(record: ClientSpellRecord, row: SpellSummary, candidates: 
 function collect(storage: SpellLibraryStorage, dataset: SpellDataset | null, options: SearchOptions, input: { evaluateRow: (record: ClientSpellRecord, row: SpellSummary) => void; mechanics?: SpellMechanicsCatalog }) {
   const matches: SpellSummary[] = [], categories = new Set<string>(), subcategories = new Set<string>(), types = new Set<string>()
   const candidates = new Map<number, SpellLineCandidate>()
+  const sourceRecords = new Map<number, ClientSpellRecord>()
   if (dataset) for (const record of storage.records(dataset.snapshotId)) {
     if (record.category) categories.add(record.category)
     if (record.subcategory && (!options.category || record.category === options.category)) subcategories.add(record.subcategory)
@@ -44,10 +46,11 @@ function collect(storage: SpellLibraryStorage, dataset: SpellDataset | null, opt
     if (options.type && !matchesSpellSearch(record, options, input.mechanics)) continue
     input.evaluateRow(record, row)
     addCandidate(record, row, candidates, options)
+    if (options.bestInLine) sourceRecords.set(record.id, record)
     matches.push(row)
   }
   const typeOptions = [...types].sort().map((value) => ({ value: value as NonNullable<SpellSummary['spellType']>, label: spellTypeLabel(value as NonNullable<SpellSummary['spellType']>) }))
-  return { matches, candidates, categories: [...categories].sort(), subcategories: [...subcategories].sort(), typeOptions }
+  return { matches, candidates, sourceRecords, categories: [...categories].sort(), subcategories: [...subcategories].sort(), typeOptions }
 }
 
 function resultGroup(row: SpellSummary, metric: SpellMetric): 'ranked' | 'zeroMana' | 'excluded' {
@@ -82,8 +85,10 @@ function summaryGroups(rows: SpellSummary[], options: SearchOptions) {
 }
 
 function evaluationOptions(query: Record<string, unknown>, options: SearchOptions, calculate: SpellCalculator) {
-  const all = CALCULATED_SORTS.has(options.sortBy) || query.group !== undefined || options.includeHighlights
-  const level = all || query.evaluation !== undefined || query.analysis !== undefined ? levelArg(query.level) : undefined
+  const requested = CALCULATED_SORTS.has(options.sortBy) || query.group !== undefined || options.includeHighlights
+    || query.evaluation !== undefined || query.analysis !== undefined
+  const all = options.bestInLine || CALCULATED_SORTS.has(options.sortBy) || query.group !== undefined || options.includeHighlights
+  const level = requested ? levelArg(query.level) : options.bestInLine ? levelArg(query.level ?? 50) : undefined
   return { all, level, calculate, metric: query.metric === undefined ? undefined : options.metric }
 }
 function evaluatePage(storage: SpellLibraryStorage, dataset: SpellDataset | null, rows: SpellSummary[], evaluation: ReturnType<typeof evaluationOptions>): void {
@@ -98,13 +103,14 @@ export function searchCatalog(storage: SpellLibraryStorage, dataset: SpellDatase
   const { calculate, mechanics } = dependencies, options = spellSearchOptions(query)
   const { page, pageSize } = pageArgs(query)
   const evaluation = evaluationOptions(query, options, calculate)
-  const { matches, candidates, ...facets } = collect(storage, dataset, options, { mechanics, evaluateRow: (record, row) => {
+  const { matches, candidates, sourceRecords, ...facets } = collect(storage, dataset, options, { mechanics, evaluateRow: (record, row) => {
     if (evaluation.all && evaluation.level !== undefined) evaluate(record, row, evaluation.level, evaluation)
   } })
-  const summary = evaluation.all ? summaryGroups(matches, options) : undefined
+  const choices = options.bestInLine ? bestCatalogSpellLines(matches, sourceRecords, candidates, options) : matches
+  const summary = evaluation.all ? summaryGroups(choices, options) : undefined
   const group = options.group === 'zero-mana' ? 'zeroMana' : options.group
-  const matching = !summary || group === 'all' ? matches : summary.groups[group]
-  const rows = options.bestInLine ? bestSpellLines(matching, candidates) : matching
+  const rows = !summary || group === 'all' ? choices : summary.groups[group]
+  const matching = group === 'all' ? matches : matches.filter((row) => resultGroup(row, options.metric) === group)
   rows.sort((a, b) => compareSpellValues(spellBrowseSortValue(a, options.sortBy, options.selected),
     spellBrowseSortValue(b, options.sortBy, options.selected), options.direction) || a.id - b.id)
   const records = rows.slice((page - 1) * pageSize, page * pageSize)

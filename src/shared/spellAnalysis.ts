@@ -1,6 +1,6 @@
 import type { SpellCalculation, SpellSearchQuery, SpellSearchResult, SpellSummary } from './spellLibrary'
 
-export const SPELL_ANALYSIS_MODEL_VERSION = '8'
+export const SPELL_ANALYSIS_MODEL_VERSION = '9'
 export type SpellTargetCount = number | 'maximum'
 /** UI scenarios stay within an eight-enemy pack, including older saved preferences. */
 export function spellPreviewTargets(value: SpellTargetCount | undefined): number {

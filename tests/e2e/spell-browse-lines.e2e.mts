@@ -1,5 +1,5 @@
 /** Best-in-line grouping through the real query worker and renderer, using synthetic client records. */
-/** Three buffs share one captured EQEmu line (same line, target, stat-effect slot); the bolt is not a line candidate. */
+/** Captured stat lines, existing replacement ladders and exact shared timers retain expandable alternatives. */
 import assert from 'node:assert/strict'
 import { writeFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -58,6 +58,13 @@ const rows = [
 ]
 const bolt = spellFields(909, 'Test Bolt'); bolt[14] = '10'; bolt[47] = '10'; bolt[172] = '1|0|-50|0|100|0'
 rows.push(bolt)
+const column = spellFields(910, 'Column of Frost'), pillar = spellFields(911, 'Pillar of Fire'), timed = spellFields(912, 'Test Shared Cooldown')
+for (const [index, fields] of [column, pillar, timed].entries()) {
+  fields[14] = '10'; fields[47] = index === 0 ? '8' : '15'; fields[30] = '8'; fields[13] = '5'; fields[143] = '4'
+  fields[172] = `1|0|-${[80, 150, 100][index]}|0|100|0`
+}
+pillar[97] = '12'; timed[97] = '12'
+rows.push(column, pillar, timed)
 
 buildIfStale()
 const staged = stageFixture('e2e-combat.log'), profile = makeUserData()
@@ -75,23 +82,27 @@ try {
   await page.getByTestId('spells-level').fill('50')
   await page.getByTestId('spells-max-level').fill('')
   await page.getByTestId('spells-sort-id').click()
-  await expectRows(page, [906, 907, 908, 909])
+  await expectRows(page, [906, 907, 908, 909, 910, 911, 912])
 
-  // Best in line ON: one line (906/907/908) collapses to its strongest member; the non-candidate bolt is untouched.
+  // Stat strength and the replacement/timer family each select one best choice.
   await page.getByTestId('spells-best-in-line').click()
-  await expectRows(page, [907, 909])
+  await expectRows(page, [907, 909, 911])
   const count = await settle(() => page.getByTestId('spells-browse').getByText(/matching spells/).first().innerText(), (t) => t.includes('matching spells'))
-  assert.match(count, /4 matching spells · 2 rows with Best in line/, 'uncollapsed count is reported next to the collapsed row count')
+  assert.match(count, /7 matching spells · 3 rows with Best in line/, 'uncollapsed count is reported next to the collapsed row count')
 
   // The carrot on the best row expands its alternatives, best to worst.
   await page.getByTestId('spells-expand-907').click()
-  await expectRows(page, [907, 908, 906, 909])
+  await expectRows(page, [907, 908, 906, 909, 911])
   const alternatives = await page.locator('[data-testid="spells-record"][data-alternative]').count()
   assert.equal(alternatives, 2, 'alternatives render under their best row')
+  await page.getByTestId('spells-expand-907').click()
+  await page.getByTestId('spells-expand-911').click()
+  await expectRows(page, [907, 909, 911, 912, 910])
+  assert.equal(await page.locator('[data-testid="spells-record"][data-alternative]').count(), 2, 'replaced and shared-timer spells are expandable together')
 
   // Best in line OFF: every match is visible again.
   await page.getByTestId('spells-best-in-line').click()
-  await expectRows(page, [906, 907, 908, 909])
+  await expectRows(page, [906, 907, 908, 909, 910, 911, 912])
   await dumpArtifacts(page, 'browse-lines-ready')
   await columnChecks(page)
   console.log('PASS spell Browse lines: grouping, strength order, counts, uniform Type, optional columns, Description and compact controls.')

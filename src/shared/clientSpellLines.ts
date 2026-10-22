@@ -39,7 +39,7 @@ export function spellLineCandidate(record: ClientSpellRecord, level: number, ran
 /** Complete filtered result, before sorting/pagination. Oversized or ambiguous lines
  * stay visible; no connected-component inference from partial conflicts.
  */
-export function bestSpellLines(rows: SpellSummary[], candidates: ReadonlyMap<number, SpellLineCandidate>): SpellSummary[] {
+export function bestSpellLines(rows: SpellSummary[], candidates: ReadonlyMap<number, SpellLineCandidate>, damageOrder?: { compare: (a: SpellSummary, b: SpellSummary) => number; reason: string }): SpellSummary[] {
   const buckets = new Map<string, SpellSummary[]>(), output: SpellSummary[] = []
   for (const row of rows) {
     const candidate = candidates.get(row.id)
@@ -50,13 +50,14 @@ export function bestSpellLines(rows: SpellSummary[], candidates: ReadonlyMap<num
   for (const [key, bucket] of buckets) {
     if (bucket.length < 2 || bucket.length > 32) { output.push(...bucket); continue }
     bucket.sort((a, b) => {
+      if (key.startsWith('dot:') && damageOrder) return damageOrder.compare(a, b)
       const ca = candidates.get(a.id), cb = candidates.get(b.id)
       if (!ca || !cb) return a.id - b.id
       return cb.value - ca.value || cb.duration - ca.duration || a.mana - b.mana || a.id - b.id
     })
     const [best, ...alternatives] = bucket
     const reason = key.startsWith('dot:')
-      ? 'Same captured damage-over-time line, target, resist and effect slots. Ordered by full-cast damage at this level and mote rank, then duration and mana.'
+      ? `Same captured damage-over-time line, target, resist and effect slots. ${damageOrder?.reason ?? 'Ordered by full-cast damage at this level and mote rank, then duration and mana.'}`
       : 'Same captured spell line, target and stat-effect slot. Ordered by base effect strength at this level, then duration and mana. Reference stacking rules; server exceptions may differ.'
     output.push({ ...best, line: { key, reason, alternatives } })
   }
