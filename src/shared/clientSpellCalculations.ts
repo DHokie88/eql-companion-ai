@@ -2,6 +2,7 @@
  * Oracle's existing wiki/focus/rank overlays. Unsupported cases stay unknown.
  */
 import type { ClientSpellEffect, ClientSpellRecord, SpellCalculation, SpellMetric } from './spellLibrary'
+import { hasRepeatedWaveTiming } from './clientSpellDelivery'
 
 export const CLIENT_SPELL_CALCULATION_SCOPE = 'Unmodified client values, one target, full duration. Excludes resists, critical hits, focus, upgrades, AA, singing/instruments, invocations, server-only modifiers and recourse/triggered effects. Client eligibility does not confirm scroll availability. These values are not a ceiling on actual combat damage.'
 
@@ -70,7 +71,7 @@ function calculationProblems(record: ClientSpellRecord, effects: ClientSpellEffe
   const ticks = clientSpellDurationTicks(record, level)
   if (ticks === null) reasons.push(`Unsupported or untimed duration formula: ${record.durationFormula}.`)
   else if (!Number.isInteger(ticks) || ticks < 0) reasons.push(`Fractional or negative client duration (${ticks} ticks) is not modeled.`)
-  if (record.aoeDurationMs > 0) reasons.push(`Repeated-wave timing is not modeled (${record.aoeDurationMs} ms).`)
+  if (hasRepeatedWaveTiming(record)) reasons.push(`Repeated-wave timing is not modeled (${record.aoeDurationMs} ms).`)
   return reasons
 }
 
