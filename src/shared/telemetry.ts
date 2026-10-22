@@ -87,6 +87,8 @@ export type TelemetryPlatform = (typeof TELEMETRY_PLATFORMS)[number]
  */
 export const TELEMETRY_VIEWS = [
   'overview',
+  // Oracle-only reference tabs. Telemetry remains disabled in this fork.
+  'community', 'oracle',
   'combat',
   'mobs',
   'maps',

@@ -1,6 +1,6 @@
 {
   "name": "eq-oracle",
-  "version": "0.9.3",
+  "version": "0.10.0",
   "license": "FSL-1.1-MIT",
   "description": "EQ Oracle - the EverQuest Legends desktop toolkit. Live log parsing, overlays, quests, gear and crafting.",
   "main": "./out/main/index.js",
@@ -56,7 +56,9 @@
     "dist:dir": "npm run build && npm run build:engine && npm run test:startup && electron-builder --win --dir",
     "share:dev": "wrangler dev --config share-server/wrangler.toml",
     "share:deploy": "wrangler deploy --config share-server/wrangler.toml",
-    "typecheck:share": "tsc --noEmit -p share-server/tsconfig.json"
+    "typecheck:share": "tsc --noEmit -p share-server/tsconfig.json",
+    "import:discord": "tsx scripts/import-discord-reference.mts",
+    "verify:oracle": "tsx scripts/verify-oracle-local.mts"
   },
   "dependencies": {
     "@emotion/react": "^11.13.3",

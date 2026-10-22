@@ -46,6 +46,8 @@ import AlertsView from './features/alerts/AlertsView'
 import BuffsView from './features/buffs/BuffsView'
 import TimersView from './features/timers/TimersView'
 import PreferencesView from './features/preferences/PreferencesView'
+import CommunityView from './features/community/CommunityView'
+import OracleView from './features/oracle/OracleView'
 // TWO FACTS THE PREFERENCES SNAPSHOT CANNOT LEARN FROM A CARD: what the X does (JOS-139 — the tray
 // menu carries the same checkbox) and WHICH OVERLAYS ARE OPEN (JOS-408 — the title bar's Overlay
 // menu opens them, and the Appearance rows tag a closed one). Both are recorded HERE, at the root.
@@ -82,6 +84,13 @@ import { TelemetryNotice } from './features/preferences/TelemetryNotice'
 import { WhatsNewTeaser } from './features/whatsnew/WhatsNewTeaser'
 import { setCurrentView } from './lib/currentView'
 import { dwellView, useViewDwell } from './lib/telemetry'
+
+// These views read reference data rather than a character log. Dev tools still strip at build time.
+const OFFLINE_VIEWS: Partial<Record<View, JSX.Element>> = {
+  community: <CommunityView />,
+  oracle: <OracleView />,
+  ...(OWNER_TOOLS ? { triage: <DevTriageView /> } : {})
+}
 
 /**
  * The views the router reaches with at most ONE callback — split out of `ViewContent` purely as
@@ -245,7 +254,8 @@ function ViewContent({
   // OWNER-ONLY (`OWNER_TOOLS` = DEV **and** `EQ_OWNER_TOOLS=1`, JOS-72), and ABOVE the
   // no-characters gate on purpose: the triage tab reads the cloud backlog, not the game log, so
   // a machine with no EverQuest install must still reach it.
-  if (OWNER_TOOLS && view === 'triage') return <DevTriageView />
+  const offline = OFFLINE_VIEWS[view]
+  if (offline) return offline
   if (['spells', 'spell'].includes(view)) return <SpellRoutes view={view} viewKey={viewKey} routing={routing} />
   if (!hasCharacters) return <NoLogsEmptyState onOpenPreferences={onOpenPreferences} />
   // EVERY SPELL NAME BELOW THIS LINE IS A LINK (JOS-508) — one provider rather than a prop threaded

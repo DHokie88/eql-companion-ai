@@ -5,6 +5,8 @@
 import { OWNER_TOOLS } from './devFlags'
 
 export type View =
+  | 'community'
+  | 'oracle'
   | 'overview'
   | 'combat'
   | 'mobs'
@@ -81,6 +83,8 @@ export const DEFAULT_VIEW: View = 'overview'
  * without naming it is a type error here, which is the only moment anyone would remember to.
  */
 export const VIEW_LABELS: Record<View, string> = {
+  community: 'What’s New',
+  oracle: 'Ask EQ Oracle',
   overview: 'Overview',
   combat: 'Combat',
   mobs: 'Mobs',
@@ -124,6 +128,8 @@ export const VIEW_LABELS: Record<View, string> = {
 // Every member of `View` this BUILD can actually render. A view missing here is silently
 // bounced to the default on the next launch, so the two lists are edited together — always.
 const KNOWN_VIEWS: View[] = [
+  'community',
+  'oracle',
   'overview',
   'combat',
   'mobs',

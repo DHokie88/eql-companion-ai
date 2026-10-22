@@ -177,7 +177,11 @@ test('NO SHIPPED CODE CAN NAME POWERSHELL — the watcher launches nothing at al
  *     never a path from a config file or the wire.
  *   * IT JOINS THE CODE-SIGNING SET like any other shipped executable (phase 3).
  */
-const SPAWNERS = new Set(['main/triage/store.ts', 'main/dataServer/engineHost.ts'])
+// Oracle's explicit local-model connection (owner, 2026-10-22) needs existing SSH access to
+// aw's loopback-only model. This ONE adapter starts only `ssh`, with no local shell, strict
+// known-host checks, closed connection arguments, stdin JSON and bounded timeout/cancellation.
+// It never discovers processes or changes networking. tests/oracle.test.mts pins those bounds.
+const SPAWNERS = new Set(['main/triage/store.ts', 'main/dataServer/engineHost.ts', 'main/oracle/provider.ts'])
 
 /** Every module specifier a file imports or re-exports. */
 function importSpecifiers(file: string): string[] {
@@ -197,7 +201,7 @@ function importSpecifiers(file: string): string[] {
   return out
 }
 
-test('NOTHING UNDER src/ CAN START A PROCESS — two exemptions, each argued above', () => {
+test('only named adapters may start a process; each exemption is argued above', () => {
   const files = sourceFiles(SRC_ROOT)
   const offenders: string[] = []
   let exempted = 0

@@ -10,6 +10,8 @@ import {
   ListItemText,
 } from '@mui/material'
 import SettingsIcon from '@mui/icons-material/Settings'
+import NewspaperIcon from '@mui/icons-material/Newspaper'
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 import ShieldMoonIcon from '@mui/icons-material/ShieldMoon'
 import BarChartIcon from '@mui/icons-material/BarChart'
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong'
@@ -93,6 +95,8 @@ const BETA = (
 // DESTINATION, and clicking it takes you somewhere real.
 const ROWS: NavRow[] = [
   { view: 'overview', icon: <SpaceDashboardIcon /> },
+  { view: 'community', icon: <NewspaperIcon /> },
+  { view: 'oracle', icon: <AutoAwesomeIcon /> },
   { view: 'combat', icon: <BarChartIcon /> },
   { view: 'mobs', icon: <PetsIcon /> },
   { view: 'loot', icon: <ReceiptLongIcon /> },
