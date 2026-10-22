@@ -21,6 +21,13 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.9.3',
+    date: '2026-10-22',
+    entries: [
+      { kind: 'fixed', text: 'Best in line now uses the existing Companion replacement families and captured shared cooldown timers, including area damage and rain spells. The strongest choice follows your selected values, targets and modifiers; expand its alternatives to see the older spells. Counts and highlights follow the collapsed choices.', fromReport: true }
+    ]
+  },
+  {
     version: '0.9.2',
     date: '2026-10-22',
     entries: [
