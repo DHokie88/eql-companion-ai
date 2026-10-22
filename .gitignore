@@ -109,3 +109,5 @@ crash.*.log
 # game log; they are read locally and never enter git or a public issue.
 .triage/
 scripts/sources/cache/sodeq-items.txt.gz
+src/main/data/discord.previous-*/
+src/main/data/discord.stage-*/

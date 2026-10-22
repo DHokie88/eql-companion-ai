@@ -21,6 +21,14 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.10.0',
+    date: '2026-10-22',
+    entries: [
+      { kind: 'new', text: 'What’s New brings saved EQL Discord patch notes, highlights, bug reports, class discussions, guides and guild events into the sidebar, with dates, filters and links to original posts.' },
+      { kind: 'new', text: 'Ask EQ Oracle searches items, spells, quests, mobs, classes and Discord through one shared local AI connection. Answers include source excerpts and dates. The reference search remains usable when the model is offline; live character state is not included yet.' }
+    ]
+  },
+  {
     version: '0.9.3',
     date: '2026-10-22',
     entries: [

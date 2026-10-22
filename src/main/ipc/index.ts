@@ -14,6 +14,7 @@
 // Every channel name lives in `src/shared/ipc.ts`; nothing here invents one.
 
 import { registerAlertsIpc } from './alerts'
+import { registerOracleIpc } from './oracle'
 import { registerBuffAllowIpc } from './buffAllow'
 import { registerBuffTrustIpc } from './buffTrust'
 import { registerResistIpc } from './resist'
@@ -110,6 +111,7 @@ import { registerEngineLaunchIpc } from './engine'
 // deleting the flag beside it leaves the gate strictly more honest rather than weaker.
 
 export function registerIpc(): void {
+  registerOracleIpc()
   registerCharacterIpc()
   // UNGATED SINCE JOS-327. This line read `if (UNRELEASED) …` from JOS-45 until the owner released
   // the Character tab as the gear area's last face; the channel is an ordinary one now. The flag

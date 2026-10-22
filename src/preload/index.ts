@@ -40,6 +40,7 @@ import { awayAlertsApi } from './awayAlerts'
 // The quest tracker's read/write pair (EQ Zera), split out for the same file-mass reason.
 import { questsApi } from './questsApi'
 import { craftApi } from './craftApi'
+import { oracleApi } from './oracleApi'
 import { feedbackApi } from './feedbackApi'
 // The `/outputfile` registry's one IPC shape (JOS-44) — command, why-clause, and the dump's own
 // mtime, per kind. Every surface fed by an export command reads this and nothing else.
@@ -456,6 +457,7 @@ const api = {
   ...questsApi,
   // ---- the Crafting tab's recipe index (src/preload/craftApi.ts) ----
   ...craftApi,
+  ...oracleApi,
 
   // ---- character sheet (JOS-45) ----
   /** The armory grid, the gear sum and the carry-all ledger for the active character, from their

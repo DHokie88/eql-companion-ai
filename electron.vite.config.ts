@@ -71,6 +71,7 @@ export default defineConfig({
         //     unmeasurable, which is the strongest form of "this needs its own entry".
         input: {
           index: resolve(__dirname, 'src/main/index.ts'),
+          oracleWorker: resolve(__dirname, 'src/main/oracle/worker.ts'),
           speechWorker: resolve(__dirname, 'src/main/speech/worker.ts'),
           presenceWorker: resolve(__dirname, 'src/main/presenceWorker.ts'),
           perfProbeWorker: resolve(__dirname, 'src/main/perfProbeWorker.ts'),
