@@ -140,7 +140,7 @@
     "codeweaver": {
       "workspace": "/home/andrew/codeweave-eqo-community-20261022",
       "spec": "composition.toml",
-      "evidence_spec": "docs/upgrades/community-20261022-codeweave.toml",
+      "evidence_spec": "docs/upgrades/community-20261022-wave2-codeweave.toml",
       "primary_base": "467a03af866ab64d00f93976d38475c258475ea1",
       "automatic_execution": false,
       "windows_qualification_required": true,
@@ -148,7 +148,12 @@
       "integrated_commit": "def15972a27be3222bde77b59fcaafca25fa68be",
       "watch_evidence": "docs/upgrades/community-20261022-watch.json",
       "operator_support_plan": "docs/plans/multi-upstream-operator-support.md (Codeweaver repository)",
-      "remote": null
+      "remote": null,
+      "operator_lessons_commit": "4e4c34acd0686abcd897813e6231bb8d1fc3a46e",
+      "operator_lessons_head": "cc764a75f077a95f54e478d54fe0df9d673531ef",
+      "analysis_candidate_ref": "codeweave/community-review-20261022",
+      "analysis_candidate_commit": "6824656bc4898d98616d03120464e5caa2455270",
+      "candidate_accepted": false
     },
     "protected_behaviors": [
       "Oracle identity and local profiles",
@@ -183,6 +188,41 @@
       "Bazaar compatibility with Oracle engine checkpoints"
     ],
     "future_hold": "Live log monitoring latency/page-refresh redesign: explicitly deferred by Andrew until current integration completes",
-    "council": "Hermes executes routine final tests; Codex reviews failures and integration. Managed council repo policy currently registers hermes-custom only."
+    "council": "Hermes executes routine final tests; Codex reviews failures and integration. Managed council repo policy currently registers hermes-custom only.",
+    "implementation_commit": "6824656bc4898d98616d03120464e5caa2455270",
+    "verification": {
+      "candidate_commit": "6824656bc4898d98616d03120464e5caa2455270",
+      "typescript_units": {
+        "passed": 5365,
+        "skipped": 24,
+        "failed": 0
+      },
+      "rust": {
+        "passed": 491,
+        "ignored": 1
+      },
+      "codeweaver": {
+        "passed": 369,
+        "supported_toolchain": "system Node/npm",
+        "profile_toolchain_gap": "relative npm shim inside hidden home sandbox"
+      },
+      "windows_feature_gates": {
+        "startup": "PASS in normal desktop worktree with rebuilt engine/UI",
+        "bazaar": {
+          "status": "PASS",
+          "checks": 19
+        },
+        "sky_overlay": {
+          "status": "PASS",
+          "checks": 23
+        },
+        "combat_dashboard": {
+          "status": "PASS",
+          "checks": 241
+        },
+        "hermes_build_static_release_factoring": "PASS",
+        "execution_boundary": "SSH cursor/ACL/GPU failures retained separately; interactive desktop qualification passed without suppressing assertions."
+      }
+    }
   }
 }
