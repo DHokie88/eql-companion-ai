@@ -183,7 +183,7 @@
       "file": "crates/fold/src/lib.rs",
       "metric": "file-lines",
       "name": "",
-      "value": 1443
+      "value": 1418
     },
     {
       "file": "crates/fold/src/message_overlay.rs",
@@ -309,7 +309,7 @@
       "file": "crates/knowledge/src/lib.rs",
       "metric": "file-lines",
       "name": "",
-      "value": 509
+      "value": 450
     },
     {
       "file": "crates/parity/src/main.rs",

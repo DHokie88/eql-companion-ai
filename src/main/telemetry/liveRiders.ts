@@ -26,6 +26,7 @@ import { statSync } from 'fs'
 import { presenceNeeded } from '../../shared/presencePrefs'
 import type { RawProcessMetric } from '../../shared/perf'
 import { OVERLAY_KINDS } from '../../shared/types'
+import { isTelemetryOverlayKind } from '../../shared/telemetryOverlays'
 import type { EvSessionHeartbeat } from '../../shared/telemetry'
 import { peekTailIoTimeline, takeTailIoSummary } from '../log/tailIoStats'
 import { resolveActiveCharacter } from '../log/config'
@@ -114,7 +115,7 @@ function logBytes(): number {
 function stateGroup(): LiveRiders['state'] {
   const open = safely(overlayStateMap, null)
   if (open === null) return undefined
-  const kinds = OVERLAY_KINDS.filter((kind) => open[kind])
+  const kinds = OVERLAY_KINDS.filter(isTelemetryOverlayKind).filter((kind) => open[kind])
   return sessionStateStats({
     overlaysOpen: kinds.length,
     overlaysLocked: safely(() => kinds.filter((k) => getOverlayConfig(k).locked).length, 0),

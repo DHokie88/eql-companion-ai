@@ -1,5 +1,7 @@
 # EQ Oracle: three-upstream comparison and first safe port
 
+Subsequent implementation wave: see [Oracle 0.10.0 results and current capability states](community-20261022-wave2.md). The prepared labels below describe the first-wave audit and are superseded there where implemented.
+
 Comparison date: 2026-10-22. EQO base: [`467a03af866ab64d00f93976d38475c258475ea1`](https://github.com/DHokie88/eql-companion-ai/commit/467a03af866ab64d00f93976d38475c258475ea1).
 
 ## Implemented in this branch

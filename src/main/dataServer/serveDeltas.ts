@@ -76,7 +76,7 @@
 
 import { IPC } from '../../shared/ipc'
 import { MODULE_WORLD_CHANGED, type ModuleChanged } from '../../shared/types'
-import { sendToModuleOverlays } from '../worldRebuilt'
+import { sendToCombatResetOverlays, sendToModuleOverlays } from '../worldRebuilt'
 import { sendToMain } from '../windows'
 import { noteTailLine } from '../switchNudge'
 import { noteEventKind } from '../telemetry/breadcrumbs'
@@ -94,6 +94,9 @@ const SERVE_ASKED = true
 function push(frame: ModuleChanged): void {
   sendToMain(IPC.onModuleChanged, frame)
   sendToModuleOverlays(IPC.onModuleChanged, frame)
+  // Meters hold polled snapshots, not module cursors. A world replacement must clear their
+  // retained answer, while ordinary module traffic stays confined to module-reading windows.
+  if (frame.moduleId === MODULE_WORLD_CHANGED) sendToCombatResetOverlays(IPC.onModuleChanged, frame)
 }
 
 /**

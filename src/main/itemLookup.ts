@@ -42,6 +42,7 @@ import { writeFileDurableAsync } from './telemetry/durableWrite'
 import { normalizeItemName, parseItemWikitext } from './itemLookupParse'
 import { buildQuestItemIndex } from './questItemIndex'
 import { buildItemDbIndex, itemKey, knowledgeFromDb, type ItemDbEntry, type ItemDbFile } from './itemsDb'
+import { marksOf, type ItemMarks } from '../shared/itemKnowledge'
 import { heldClickySpells as clickySpells } from './itemClickies'
 import type { HeldCounts, ItemKnowledge, ItemQuestUse, PoskyData, QuestData } from '../shared/types'
 
@@ -505,4 +506,16 @@ export function prefetchItem(name: string): void {
   void lookupItem(name).catch(() => {
     /* prefetch errors are silent — the interactive lookup will retry + surface state */
   })
+}
+
+/** The list-row marks for many names in one call: the committed DB plus the local quest sources,
+ *  exactly what `lookupItem`'s DB path answers, minus the record. No cache read, no request. A
+ *  name the DB lacks is absent (the row shows nothing rather than asking the wiki). */
+export function itemMarks(names: readonly string[]): Record<string, ItemMarks> {
+  const out: Record<string, ItemMarks> = {}
+  for (const name of names) {
+    const fromDb = dbKnowledge(cacheKey(name), normalizeItemName(name))
+    if (fromDb) out[name] = marksOf(mergeLocal(fromDb, localKnowledge(name)))
+  }
+  return out
 }

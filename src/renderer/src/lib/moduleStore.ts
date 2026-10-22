@@ -219,9 +219,9 @@ function watched(entries: Map<string, Entry>): boolean {
   return false
 }
 
-/** Everything held stops describing the world (a character switch). */
-function resetEntry(entry: Entry): void {
-  entry.snapshot = null
+/** A new world has a new cursor space. A same-character engine reset may keep its last display. */
+function resetEntry(entry: Entry, keepSnapshot = false): void {
+  if (!keepSnapshot) entry.snapshot = null
   entry.seq = -1
   entry.pendingSeq = -1
   entry.hydrated = false
@@ -286,9 +286,14 @@ export function createModuleStore(deps: {
     // The world that answers reads changed hands (the engine went live, or went away). There is
     // no cursor to compare and nothing held is trustworthy: ask again, for everything watched.
     if (c.moduleId === MODULE_WORLD_CHANGED) {
+      generation += 1
+      dirty.clear()
       for (const [id, entry] of entries) {
+        // Reject every pending pre-reset reply, including dormant entries. Keep the display
+        // snapshot, but never its old cursor/fetch bookkeeping when the new engine starts at 0.
+        resetEntry(entry, true)
+        entry.stale = true
         if (entry.subs.size > 0) markDirty(id)
-        else entry.stale = true
       }
       return
     }

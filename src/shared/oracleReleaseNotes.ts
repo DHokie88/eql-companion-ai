@@ -21,6 +21,16 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.10.0',
+    date: '2026-10-22',
+    entries: [
+      { kind: 'new', text: 'Bazaar tracks trade-chat asking and offered prices, item tiers, price history, named quotes, tradeskill and quest filters, outliers and a persistent watchlist with alerts. Export offers to CSV.' },
+      { kind: 'new', text: 'Open the optional Sky quests overlay to follow starred quests while playing. It follows the Sky tab\'s inventory, log and combined count setting, and keeps updating when the tab is closed.' },
+      { kind: 'fixed', text: 'Combat and damage/healing overlays keep their last valid numbers during slow reads and show Updating. Character, selection and world changes clear old results; overlapping reads no longer pile up.' },
+      { kind: 'fixed', text: 'Vanished or unreadable export files and Logs folders no longer interrupt discovery. Existing folder overrides and character-selection rules are preserved.' }
+    ]
+  },
+  {
     version: '0.9.4',
     date: '2026-10-22',
     entries: [

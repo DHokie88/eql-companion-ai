@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import type { CombatSnapshot } from '@shared/combat'
 import { LIVE_SELECTION, type CombatScope } from './dashboardData'
 import { useGlobalFight } from './useGlobalFight'
 import type { CombatFocus } from './combatFocus'
+import { createCombatFeed, subscribeCombatFeed, type CombatFeed, type CombatFeedView } from './combatFeed'
 
 /** Re-export: the sentinel lives with the scope helpers (dashboardData) so the overlay entry —
  *  which never imports this hook — can share one definition. */
@@ -23,6 +24,7 @@ const DEFAULT_MAX_SEGMENTS = 100
 
 export interface UseCombat {
   snap: CombatSnapshot | null
+  updating: boolean
   showUnparsed: boolean
   setShowUnparsed: (v: boolean) => void
   selection: string
@@ -85,7 +87,8 @@ export function useCombat(): UseCombat {
   const [zoneSelection, setZoneSelection] = useState<string>('zone')
   const [maxSegments, setMaxSegments] = useState(DEFAULT_MAX_SEGMENTS)
   const [wantTimeline, setWantTimeline] = useState(true)
-  const [snap, setSnap] = useState<CombatSnapshot | null>(null)
+  const [{ snap, updating }, setView] = useState<CombatFeedView>({ snap: null, updating: false })
+  const feed = useRef<CombatFeed | null>(null)
 
   /** What this surface is showing — the scope picks which of the two selections is in force. */
   const selection = scope === 'fight' ? fightId : zoneSelection
@@ -95,28 +98,22 @@ export function useCombat(): UseCombat {
     else setZoneSelection(id)
   }
 
-  useEffect(() => {
-    let alive = true
-    const tick = async (): Promise<void> => {
-      // The engine-side pet fold is GONE (not "off"): pet presentation is the renderer's nesting
-      // pref (eq.combat.petRow) applied by petRows.meterPanel, and the snapshot always carries
-      // the separate, authoritative sources — for this view and for the overlays alike.
-      const s = await window.eq.getCombatSnapshot({
-        selectedId: selection === LIVE ? undefined : selection,
-        showUnparsed,
-        maxSegments,
-        timeline: wantTimeline
-      })
-      if (alive) setSnap(s)
-    }
-    void tick()
-    const off = window.eq.onCombatActivity(() => void tick())
-    const iv = setInterval(() => void tick(), 1000)
-    return () => {
-      alive = false
-      off()
-      clearInterval(iv)
-    }
+  useLayoutEffect(() => {
+    const current = createCombatFeed((opts) => window.eq.getCombatSnapshot(opts), setView)
+    feed.current = current
+    const stop = subscribeCombatFeed(window.eq, current)
+    return () => { feed.current = null; stop() }
+  }, [])
+
+  // Layout timing clears the prior selection before paint. The controller survives option
+  // changes so an older in-flight IPC call cannot overlap its replacement or repaint its result.
+  useLayoutEffect(() => {
+    feed.current?.configure({
+      selectedId: selection === LIVE ? undefined : selection,
+      showUnparsed,
+      maxSegments,
+      timeline: wantTimeline
+    })
   }, [selection, showUnparsed, maxSegments, wantTimeline])
 
   const loadMore = (): void => setMaxSegments((n) => n + DEFAULT_MAX_SEGMENTS)
@@ -145,6 +142,7 @@ export function useCombat(): UseCombat {
 
   return {
     snap,
+    updating,
     showUnparsed,
     setShowUnparsed,
     selection,

@@ -124,4 +124,9 @@ pub trait Knowledge: Send + Sync {
     /// loot burst probes one name many times and the app must not be asked to fetch it many times.
     /// A `knowledge.define` makes the next lookup a hit, so nothing has to un-remember anything.
     fn take_misses(&self) -> Vec<Miss>;
+
+    /// Committed item page names used to identify trade offers, without network lookups.
+    fn item_names(&self) -> Vec<String> {
+        Vec::new()
+    }
 }

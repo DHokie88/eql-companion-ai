@@ -194,11 +194,11 @@ docs/agents-archive.md.
     combat suite locally) · **RESOLVED in the JOS-531 CI follow-up** — start
     the engine before stamping the live fixture, so startup is outside the
     world-time precondition.
-  - `presenceWorker.test` first-tick dedup · watches the REAL machine; fails
-    while EverQuest runs with a player at the keyboard · 3 sightings
-    (2026-08-10 ×2, 2026-08-12 JOS-239 worker mid-session, green on final
-    run) · needs hermetics without weakening the once-then-heartbeat pin;
-    chip filed — satisfies the 3+ rule via the chip.
+  - `presenceWorker.test` first-tick dedup · watches the REAL desktop · 4 sightings
+    (2026-08-10 x2, 2026-08-12, 2026-10-22) · resolved 2026-10-22: assert suppression
+    against the previous reading of EACH channel, preserving first-tick and heartbeat checks.
+    A valid C|0 -> C|1 -> C|0 return is a new transition; whole-run uniqueness incorrectly
+    rejected it. Runtime unchanged.
   - `perf.e2e` heartbeat boundary · the probe asked about the WRONG window
     (5 sightings, full-sweep only) · **RESOLVED 0523dd90 (JOS-279)** — now
     `probeWindowMs`, plus a three-valued verdict so the naive fix's mirror

@@ -30,6 +30,7 @@ import type { CombatFocus } from './features/combat/combatFocus'
 import { useBackFallback } from './appBack'
 import PoskyView from './features/posky/PoskyView'
 import LootView from './features/loot/LootView'
+import BazaarView from './features/bazaar/BazaarView'
 import LevelingView from './features/leveling/LevelingView'
 import PlannerView from './features/planner/PlannerView'
 import GearView from './features/gear/GearView'
@@ -131,6 +132,7 @@ function PlainView({
       {/* Maps remounts per character rebuild like the rest: the zone it auto-opens comes from
           the character module, which re-hydrates under the new character anyway. */}
       {view === 'maps' && <MapsView key={viewKey} />}
+      {view === 'bazaar' && <BazaarView key={viewKey} onOpenLoot={routing.openLoot} />}
       {/* Leveling stays MOUNTED across a deep link like Loot and Mobs: the level a toast asked
           for arrives through the nonce, not through a remount. */}
       {view === 'leveling' && (
