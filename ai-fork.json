@@ -97,5 +97,59 @@
         "Upstream promotional website changes"
       ]
     }
-  ]
+  ],
+  "tertiary": {
+    "repository": "https://github.com/kaltinril/everquest-companion",
+    "tag": "community-0.1.0-test.30",
+    "commit": "ab9d6279e7beb029cecffa319d166ead9961c1cf",
+    "merge_status": "Selected output-loader safeguards only; all other community changes remain candidates."
+  },
+  "upstream_tracking": {
+    "policy": "Fetch and compare; adapt bounded capabilities on branches. Never automatically merge or replace Oracle custom behavior.",
+    "sources": [
+      {
+        "name": "EQ-Zera",
+        "repository": "https://github.com/Zeratfule/EQ-Zera",
+        "remote": "upstream",
+        "branch": "main",
+        "commit": "780c7afb3fe71f65db2cd8ae9d8c191b8ecc9db4",
+        "tag": "v1.26.1"
+      },
+      {
+        "name": "brianmontanaweb",
+        "repository": "https://github.com/brianmontanaweb/everquest-companion",
+        "remote": "brianmontanaweb",
+        "branch": "main",
+        "commit": "ad6857f2d5286291d23ed6975b46212805cb0d78",
+        "tag": "v1.17.0",
+        "release_commit": "5e301216fdd1eed692230d9c29677d21b2703db9",
+        "revision_note": "Tracked main head is newer than v1.17.0; tag and selected head are distinct."
+      },
+      {
+        "name": "kaltinril",
+        "repository": "https://github.com/kaltinril/everquest-companion",
+        "remote": "community",
+        "branch": "main_community",
+        "commit": "ab9d6279e7beb029cecffa319d166ead9961c1cf",
+        "tag": "community-0.1.0-test.30"
+      }
+    ],
+    "codeweaver": {
+      "workspace": "/home/andrew/codeweave-eqo-community-20261022",
+      "spec": "composition.toml",
+      "evidence_spec": "docs/upgrades/community-20261022-codeweave.toml",
+      "primary_base": "467a03af866ab64d00f93976d38475c258475ea1",
+      "automatic_execution": false,
+      "windows_qualification_required": true
+    },
+    "protected_behaviors": [
+      "Oracle identity and local profiles",
+      "Versioned Spells and deterministic modifier/instrument calculations",
+      "Gear priorities and column preferences",
+      "Sky inventory and progress behavior",
+      "Disabled telemetry and updater",
+      "Live game files and running sessions"
+    ],
+    "refresh": "Fetch the three named remotes, inspect new commits and releases, deliberately advance pins in an external spec, then regenerate Codeweaver evidence. No watcher or scheduler is enabled."
+  }
 }

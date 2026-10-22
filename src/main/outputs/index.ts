@@ -24,7 +24,8 @@ import {
   type AchievementsSource,
   type ClassUnlockClaim
 } from '../../shared/outputs/achievements'
-import type { OutputKindId } from '../../shared/outputs/kinds'
+import { outputKind, ownsOutputFile, type OutputKindId } from '../../shared/outputs/kinds'
+import { logWarn } from '../errorLog'
 import { parseOutput, type OutputParseResult } from './kinds'
 import { outputStatus, type OutputCharacter } from './registry'
 
@@ -78,11 +79,20 @@ export function loadOutput(
   const character: OutputCharacter = { name: characterName, server }
   const status = outputStatus(id, character)
   if (status.path === null || status.updatedAt === null) return null
+  let text: string
+  try {
+    text = readFileSync(status.path, 'utf8')
+  } catch (err) {
+    // EQ can replace or lock the dump after discovery. Treat that race as a missing dump so a
+    // startup read cannot prevent the character's engine from attaching.
+    logWarn(`[everquest-companion] Could not read ${id} dump: ${status.path}`, err)
+    return null
+  }
   return {
     kind: id,
     path: status.path,
     loadedAt: status.updatedAt,
-    result: parseOutput(id, readFileSync(status.path, 'utf8'))
+    result: parseOutput(id, text)
   }
 }
 
@@ -109,7 +119,9 @@ export function loadInventoryDump(
   server?: string
 ): LoadedInventoryDump | null {
   const loaded = loadOutput('inventory', characterName, server)
-  if (!loaded) return null
+  // Discovery's newest-anybody fallback is useful for status, but cannot become this character's
+  // inventory. Keep the ownership check at the loader boundary, beside the achievements check.
+  if (!loaded || !ownsOutputFile(outputKind('inventory'), loaded.path, characterName, server)) return null
   const { result } = loaded
   // The registry types this narrowing honestly: an unsupported kind never yields data.
   if (!result.ok || result.data.kind !== 'inventory') return null
@@ -143,7 +155,7 @@ export function loadAchievements(
   now: () => number = Date.now
 ): LoadedAchievements | null {
   const loaded = loadOutput('achievements', characterName, server)
-  if (!loaded) return null
+  if (!loaded || !ownsOutputFile(outputKind('achievements'), loaded.path, characterName, server)) return null
   const { result } = loaded
   if (!result.ok || result.data.kind !== 'achievements') return null
   return {

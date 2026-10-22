@@ -21,6 +21,13 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.9.4',
+    date: '2026-10-22',
+    entries: [
+      { kind: 'fixed', text: 'Inventory and Sky achievement imports now refuse another character or server\'s export. A dump that becomes unreadable during loading no longer interrupts startup. Gear ownership and worn-focus caches also refuse another character\'s export when switching characters.' }
+    ]
+  },
+  {
     version: '0.9.3',
     date: '2026-10-22',
     entries: [
