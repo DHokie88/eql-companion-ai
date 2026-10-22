@@ -1,3 +1,5 @@
+import BazaarWatcher from '../features/bazaar/BazaarWatcher'
+import { useSkyOverlayFeed } from '../features/posky/useSkyOverlayFeed'
 // components/AppCelebrations.tsx — the app's EIGHT always-mounted celebration watches, and the two
 // snackbars they open, in one component that renders nothing else.
 //
@@ -163,7 +165,7 @@ function useAppCelebrations(
     }
   })
 
-  useProgress({
+  const sky = useProgress({
     onQuestComplete: (q, count) => {
       onQuestComplete(q.name)
       fireAppSignal('questComplete', q.name)
@@ -192,6 +194,7 @@ function useAppCelebrations(
       })
     }
   })
+  useSkyOverlayFeed(sky.quests, sky.progress !== null, sky.world)
 }
 
 /**
@@ -218,6 +221,7 @@ export default function AppCelebrations(): JSX.Element {
     <>
       {/* Always-mounted: plays fired alert sounds regardless of the active tab. */}
       <AlertPlayer />
+      <BazaarWatcher />
       <CelebrationToasts
         defeatToast={defeatToast}
         questToast={questToast}

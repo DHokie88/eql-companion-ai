@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useProgressState } from './useProgressState'
 import type {
   CountSource,
   ItemCountOverride,
@@ -20,7 +21,8 @@ import {
 } from './heldCounts'
 import { useModule } from '../../lib/useModule'
 import { reconcile, type InventoryRow } from '../inventory/reconcile'
-import { COUNT_SOURCE_KEY, rebaselineInstant, resolveCountSource } from '../inventory/countSource'
+import { rebaselineInstant } from '../inventory/countSource'
+import { setCountSource, useCountSource } from './useCountSource'
 import { questKey } from './keys'
 import { ambiguousQuestNames, computeSharedItems, type SharedItemsMap } from './sharedItems'
 import { skyDroppersFor, type DropperMob } from './poskyDroppers'
@@ -61,18 +63,6 @@ const ambiguousNames = ambiguousQuestNames(posky.quests)
 const questByKey = new Map<string, PoskyQuest>(posky.quests.map((q) => [questKey(q), q]))
 
 export { questKey }
-
-/**
- * The stored pick, or the default for somebody who has never made one (JOS-294).
- *
- * BOTH HALVES LIVE IN `countSource.ts` NOW, and the default there is `both` rather than `log`. The
- * argument, the reports behind it and the proof that it changes nothing for an install with no dump
- * are all in that file's header; this is the one line of storage it needs. An explicit stored choice
- * is returned verbatim — the flip reaches only an absent key.
- */
-function loadCountSource(): CountSource {
-  return resolveCountSource(localStorage.getItem(COUNT_SOURCE_KEY))
-}
 
 /**
  * Display names keyed by the SAME normalized counting key logCounts uses, so the
@@ -257,6 +247,8 @@ export function computeQuestProgress(
 }
 
 export interface UseProgress {
+  /** Mutates synchronously on resets, before React commits the replacement world's progress. */
+  world: Readonly<{ current: number }>
   character: string | null
   quests: QuestProgress[]
   classes: string[]
@@ -574,40 +566,15 @@ function useTurnInLedger(
 }
 
 export function useProgress(opts?: UseProgressOptions): UseProgress {
-  const [progress, setProgress] = useState<ProgressState | null>(null)
-  const [character, setCharacter] = useState<string | null>(null)
-  const [countSource, setCountSourceState] = useState<CountSource>(loadCountSource)
-
+  const { progress, character, world, setProgress } = useProgressState()
+  const countSource = useCountSource()
   const lootHistory = useModule<LootSnap>('loot') ?? EMPTY_LOOT
-
-  useEffect(() => {
-    void window.eq.getProgress().then(setProgress)
-    void window.eq.getCharacter().then((c) => setCharacter(c?.name ?? null))
-    // Progress can change in main (auto-complete from a turn-in, inventory
-    // auto-reload) — stay consistent with those pushes instead of a refetch race.
-    const offProgress = window.eq.onProgress(setProgress)
-    const offInv = window.eq.onInventoryReload(() => void window.eq.getProgress().then(setProgress))
-    const offChar = window.eq.onCharacter((c) => {
-      setCharacter(c?.name ?? null)
-      void window.eq.getProgress().then(setProgress)
-    })
-    return () => {
-      offProgress()
-      offInv()
-      offChar()
-    }
-  }, [])
 
   const { turnIns, detected, logCounts, recordTurnIn, undoTurnIn } = useTurnInLedger(
     progress,
     setProgress,
     opts?.onQuestComplete
   )
-
-  const setCountSource = useCallback((s: CountSource) => {
-    localStorage.setItem(COUNT_SOURCE_KEY, s)
-    setCountSourceState(s)
-  }, [])
 
   const reloadInventory = useCallback(async (): Promise<string> => {
     const res = await window.eq.reloadInventory()
@@ -616,7 +583,7 @@ export function useProgress(opts?: UseProgressOptions): UseProgress {
       return `Loaded ${res.path}`
     }
     return res.error ?? 'Failed to load inventory'
-  }, [])
+  }, [setProgress])
 
   // The statements in force, cleaned on the way out of the store the same way main cleans them on
   // the way in. Memoized on the stored array so the two folds below (and the reconcile memo they
@@ -635,7 +602,7 @@ export function useProgress(opts?: UseProgressOptions): UseProgress {
     async (name: string, count: number | null): Promise<void> => {
       setProgress(await window.eq.setItemOverride(itemCountKey(name), name, count))
     },
-    []
+    [setProgress]
   )
 
   const { net, inventoryRows, lastLootedAt } = useHeldItems({
@@ -662,6 +629,7 @@ export function useProgress(opts?: UseProgressOptions): UseProgress {
   const classes = useMemo(() => [...new Set(posky.quests.map((q) => q.className))].sort(), [])
 
   return {
+    world,
     character,
     quests,
     classes,

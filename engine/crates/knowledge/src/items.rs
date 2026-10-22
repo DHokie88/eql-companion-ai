@@ -53,6 +53,16 @@ pub fn load_item_db() -> ItemDb {
 
 /// item key → the quests that use it, from both local catalogs: posky FIRST (it carries the
 /// island/giver detail), then the quest catalog, deduped by quest identity.
+/// Every item page's title: the names trade chat is matched against.
+#[must_use]
+pub fn item_names(db: &ItemDb) -> Vec<String> {
+    let pages = db.values().filter_map(|e| e["page"].as_str());
+    let mut names: Vec<String> = pages.map(str::to_string).collect();
+    names.sort();
+    names.dedup();
+    names
+}
+
 pub type QuestUseIndex = std::collections::HashMap<String, Vec<Value>>;
 
 /// Index the Plane of Sky dataset by item key → the quests that require it.

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Box, CircularProgress, Paper, Skeleton, Stack, Typography } from '@mui/material'
 import { useCombat } from './useCombat'
+import UpdatingBadge from './UpdatingBadge'
 import { CombatTimeline } from './CombatTimeline'
 import { CombatHeader } from './CombatHeader'
 import { ProcessingLog } from './ProcessingLog'
@@ -316,7 +317,7 @@ export default function CombatView({
   /** The way to Preferences, Sharing - handed down from App.tsx, like the character card's. */
   onOpenSharingPrefs: () => void
 }): React.JSX.Element {
-  const { snap, showUnparsed, setShowUnparsed, selection, scope, maxSegments, loadMore, ...combat } =
+  const { snap, updating, showUnparsed, setShowUnparsed, selection, scope, maxSegments, loadMore, ...combat } =
     useCombat()
   const [mode, setModeState] = useState<MeterMode>('out')
   const [view, setView] = useState<'dash' | 'timeline'>('dash')
@@ -391,6 +392,8 @@ export default function CombatView({
     // after the header and the FIXED-height combat log, and nothing here may spill into the
     // app's scrolling content area. Before Task #56 the unbounded log below did exactly that —
     // it grew past the viewport and pushed the dashboard to 0px, leaving "just a combat log".
+    <Box sx={{ height: '100%', minHeight: 0, position: 'relative' }}>
+      <UpdatingBadge show={updating} />
     <Stack spacing={1.5} sx={{ height: '100%', minHeight: 0, overflow: 'hidden' }}>
       <CombatHeader
         seg={seg}
@@ -446,6 +449,7 @@ export default function CombatView({
         onOpenSharingPrefs={onOpenSharingPrefs}
       />
     </Stack>
+    </Box>
   )
 }
 

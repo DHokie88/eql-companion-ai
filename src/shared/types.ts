@@ -125,9 +125,9 @@ export type { LootDisposition, LootSourceKind, ItemStatBlock }
  * the four facts the engine does not emit that it therefore does not claim.
  */
 // prettier-ignore
-export type OverlayKind = 'fight' | 'overall' | 'events' | 'heal-fight' | 'heal-overall' | 'toast' | 'buffs' | 'debuffs' | 'xp' | 'respawn' | 'farm' | 'run' | 'alertBanner' | 'conCard'
+export type OverlayKind = 'fight' | 'overall' | 'events' | 'heal-fight' | 'heal-overall' | 'toast' | 'buffs' | 'debuffs' | 'xp' | 'respawn' | 'farm' | 'run' | 'skyQuests' | 'alertBanner' | 'conCard'
 // prettier-ignore
-export const OVERLAY_KINDS: OverlayKind[] = ['fight', 'overall', 'events', 'heal-fight', 'heal-overall', 'toast', 'buffs', 'debuffs', 'xp', 'respawn', 'farm', 'run', 'alertBanner', 'conCard']
+export const OVERLAY_KINDS: OverlayKind[] = ['fight', 'overall', 'events', 'heal-fight', 'heal-overall', 'toast', 'buffs', 'debuffs', 'xp', 'respawn', 'farm', 'run', 'skyQuests', 'alertBanner', 'conCard']
 
 /** True for the two HEALING overlay kinds (they render HealMeter, not OverlayMeter). */
 export function isHealOverlayKind(kind: OverlayKind): boolean {
@@ -226,6 +226,8 @@ export interface OverlayConfig {
    * fills (and clamps) it on the way out, exactly as it does the toast blob above.
    */
   textScale?: number
+  /** Show item icons in the optional Sky quest overlay; absent means on. */
+  skyIcons?: boolean
   /**
    * HOW THE TWO TIMER WINDOWS ARRANGE THEIR ROWS (JOS-140) — 'none' for one flat
    * soonest-to-expire list, 'target' for per-target blocks. Present only on the 'buffs' and

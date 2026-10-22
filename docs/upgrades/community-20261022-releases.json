@@ -1,0 +1,68 @@
+[
+  {
+    "tag": "community-0.1.0-test.30",
+    "commit_or_target": "ab9d6279e7beb029cecffa319d166ead9961c1cf",
+    "published": "2026-10-22T09:24:39Z",
+    "url": "https://github.com/kaltinril/everquest-companion/releases/tag/community-0.1.0-test.30"
+  },
+  {
+    "tag": "community-0.1.0-test.29",
+    "commit_or_target": "cd9946b84ad94b44c9ee5651c18d632eab0c92f9",
+    "published": "2026-10-21T11:10:46Z",
+    "url": "https://github.com/kaltinril/everquest-companion/releases/tag/community-0.1.0-test.29"
+  },
+  {
+    "tag": "community-0.1.0-test.28",
+    "commit_or_target": "9b631a3ce16a08c464c5c6f48b1313c8a55dec9a",
+    "published": "2026-10-20T10:54:42Z",
+    "url": "https://github.com/kaltinril/everquest-companion/releases/tag/community-0.1.0-test.28"
+  },
+  {
+    "tag": "community-0.1.0-test.27",
+    "commit_or_target": "d52e6cdc82adfa1d9bdc9c3f9828a8d421a27b8e",
+    "published": "2026-10-19T08:32:24Z",
+    "url": "https://github.com/kaltinril/everquest-companion/releases/tag/community-0.1.0-test.27"
+  },
+  {
+    "tag": "community-0.1.0-test.26",
+    "commit_or_target": "c94ddaab8898f5e30d2b83bc37b2723b4e93210b",
+    "published": "2026-10-17T08:43:48Z",
+    "url": "https://github.com/kaltinril/everquest-companion/releases/tag/community-0.1.0-test.26"
+  },
+  {
+    "tag": "community-0.1.0-test.25",
+    "commit_or_target": "f28ca0b657cdf991aa62a84a57d0e33e81c7b40c",
+    "published": "2026-10-14T08:09:46Z",
+    "url": "https://github.com/kaltinril/everquest-companion/releases/tag/community-0.1.0-test.25"
+  },
+  {
+    "tag": "community-0.1.0-test.24",
+    "commit_or_target": "22fb3ea8ea81a6f9857b5bccb6cf39eff52c25ef",
+    "published": "2026-10-13T10:35:42Z",
+    "url": "https://github.com/kaltinril/everquest-companion/releases/tag/community-0.1.0-test.24"
+  },
+  {
+    "tag": "community-0.1.0-test.23",
+    "commit_or_target": "b0ec4c0c3b7ca0b682dd5cd6050b80ea070a9b22",
+    "published": "2026-10-12T09:56:21Z",
+    "url": "https://github.com/kaltinril/everquest-companion/releases/tag/community-0.1.0-test.23"
+  },
+  {
+    "tag": "community-0.1.0-test.22",
+    "commit_or_target": "dcc46579190bd0e23d4e2459449ffe41842e84f7",
+    "published": "2026-10-10T08:45:50Z",
+    "url": "https://github.com/kaltinril/everquest-companion/releases/tag/community-0.1.0-test.22"
+  },
+  {
+    "tag": "community-0.1.0-test.21",
+    "commit_or_target": "e6e9f5aa479fb1c1e6c6b52a27a22f05524b0d31",
+    "published": "2026-10-09T07:55:07Z",
+    "url": "https://github.com/kaltinril/everquest-companion/releases/tag/community-0.1.0-test.21"
+  },
+  {
+    "tag": "community-0.1.0-test.20",
+    "commit_or_target": "40d8cd648a793b8e9d50b536d449edde6c174b38",
+    "published": "2026-10-08T23:00:29Z",
+    "url": "https://github.com/kaltinril/everquest-companion/releases/tag/community-0.1.0-test.20"
+  }
+]

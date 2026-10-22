@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-22",
+  "host": "Windows AORUS",
+  "oracle_base": "467a03af866ab64d00f93976d38475c258475ea1",
+  "branch": "integration/community-safe-20261022",
+  "version": "0.9.4",
+  "patch_sha256": "eab919b6354c8b9f872765277c1ebd6b5d1d2913734bf1199f4dd8c9bed5bf14",
+  "checks": {
+    "build": "passed",
+    "typecheck": "passed",
+    "lint": "passed",
+    "release_notes": "passed",
+    "startup": "passed",
+    "units": {
+      "total": 5281,
+      "passed": 5257,
+      "skipped": 24,
+      "failed": 0,
+      "new_regressions": 19
+    },
+    "inventory_e2e": "passed",
+    "achievement_e2e": "passed",
+    "whitespace": "passed",
+    "isolated_primary_patch_applicability": "passed"
+  },
+  "limitations": [
+    "Optional E2E screenshot artifact timeouts; HTML and assertions passed",
+    "No full E2E sweep or Rust test suite; Rust source is unchanged",
+    "No historical stored-state repair or discovery-time I/O hardening",
+    "No default-branch integration, release or live-profile migration"
+  ],
+  "engine_sha256": "e3d12b10f22f4e6b6860e145d4366aec909cc05a5fd64dc93bd95878d88eef39",
+  "source_file_sha256": {
+    "src/main/outputs/index.ts": "e5cdec0dbd1c5d24944de7b59bda275559c996cecd34866bcae7d07bd8a0476e",
+    "src/shared/outputs/kinds.ts": "1906b98a9cffe4a7aa1cae735103882ad5c5cd534515625956f0e83eb6098785",
+    "src/main/ipc/planner.ts": "65959534e41c8c2a16c6a3a26254897a25179991c2e8fa38fc0d6b9d171fd288",
+    "src/main/planner/wornFocusCurrent.ts": "999194f79c17b1ec73ad47841ce70fdf5efd6db4152dc4a6151c8ddad14eb1d3",
+    "src/shared/oracleReleaseNotes.ts": "3394e2978cb99ad7a6cf0784afdad85395516ca55a927c54aa18b2cf70007835",
+    "tests/outputsIsolation.test.mts": "c4630f0b22f0cd23f7b361515df3ff93ff8be81987527293ab475dd543f8b140",
+    "tests/inventoryCacheIsolation.test.mts": "0677152031991509dc897d0af08655691f90e5b99d83e1b798a595ab1c40ffe5"
+  }
+}

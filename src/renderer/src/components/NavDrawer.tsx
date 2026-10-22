@@ -96,6 +96,7 @@ const ROWS: NavRow[] = [
   { view: 'combat', icon: <BarChartIcon /> },
   { view: 'mobs', icon: <PetsIcon /> },
   { view: 'loot', icon: <ReceiptLongIcon /> },
+  { view: 'bazaar', icon: <TrendingUpIcon /> },
   { view: 'quests', icon: <AssignmentIcon /> },
   { view: 'zoneloot', icon: <TravelExploreIcon /> },
   // THE GEAR AREA follows Loot for the same reason Loot follows Mobs: it is the far side of one

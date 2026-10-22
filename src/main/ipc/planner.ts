@@ -22,6 +22,7 @@ import type { GearIndexPayload } from '../../shared/planner/gear'
 import { NO_OWNERSHIP, ownershipPayload, type OwnershipPayload } from '../../shared/planner/ownership'
 import { sanitizeExaltPlans, sanitizeGearSets, sanitizeWishlist } from '../planner/validate'
 import { loadInventoryDump, outputStatus } from '../outputs'
+import { outputKind, ownsOutputFile } from '../../shared/outputs/kinds'
 import { activeCharId, getActiveCharacter } from '../session'
 // The two planner documents' store accessors live in their own module since JOS-286 — store.ts
 // was at its 400-code-line ceiling, and this repo splits rather than ratchets.
@@ -64,8 +65,10 @@ function gearIndex(): GearIndexPayload {
  *
  * SO THE CACHE KEY IS THE FILE, NOT A FLAG. `outputStatus` is one readdir + one stat (the
  * registry caches nothing, deliberately — see its header), and path + mtime identify the dump
- * completely: a rewrite moves the mtime, a character switch moves the path, and a deleted dump
- * moves both to null. Nothing has to remember to invalidate this, which is the failure mode an
+ * completely: a rewrite moves the mtime and a deleted dump moves both to null. Discovery can
+ * retain the same fallback path across a character switch, so ownership is checked BEFORE a
+ * cache hit, and an unowned fallback clears the cache. Nothing has to remember to invalidate
+ * this, which is the failure mode an
  * explicit `invalidateOwnership()` called from the auto-load path would have been one refactor
  * away from at all times. The renderer re-asks on `inventory:autoReloaded`; that push is what
  * makes the answer TIMELY, and this key is what makes it CORRECT.
@@ -73,18 +76,19 @@ function gearIndex(): GearIndexPayload {
 let owned: { path: string; loadedAt: string; payload: OwnershipPayload } | null = null
 
 function gearOwnership(): OwnershipPayload {
-  const character = getActiveCharacter()
-  const status = outputStatus('inventory', { name: character?.name, server: character?.server })
-  if (status.path === null || status.updatedAt === null) {
+  const { name, server } = getActiveCharacter() ?? {}
+  const status = outputStatus('inventory', { name, server })
+  if (status.path === null || status.updatedAt === null ||
+    !ownsOutputFile(outputKind('inventory'), status.path, name, server)) {
     owned = null
     return NO_OWNERSHIP
   }
   if (owned !== null && owned.path === status.path && owned.loadedAt === status.updatedAt) {
     return owned.payload
   }
-  // `loadInventoryDump` re-resolves the same status, so the two can never disagree about WHICH
-  // file was folded — and a dump that vanished between the stat and the read is simply no dump.
-  const payload = ownershipPayload(loadInventoryDump(character?.name, character?.server))
+  // The loader resolves again and checks ownership itself; a dump that vanished or became
+  // unavailable between the status check and the read is simply no dump.
+  const payload = ownershipPayload(loadInventoryDump(name, server))
   owned = payload.path === null ? null : { path: payload.path, loadedAt: payload.loadedAt ?? '', payload }
   return payload
 }

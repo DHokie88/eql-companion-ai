@@ -13,7 +13,7 @@
 // shared/outputs/kinds.ts, where they are pure and unit-testable. This module is only the part
 // that needs a disk: list, stat, sort newest-first, hand the names to the rule.
 
-import { existsSync, readdirSync, statSync } from 'fs'
+import { readdirSync, statSync } from 'fs'
 import { join } from 'path'
 import {
   isOutputFileName,
@@ -33,10 +33,26 @@ interface Candidate {
 function candidates(id: OutputKindId): Candidate[] {
   const def = outputKind(id)
   const eqRoot = effectiveEqRoot()
-  if (!existsSync(eqRoot)) return []
-  return readdirSync(eqRoot)
+  let files: string[]
+  try {
+    files = readdirSync(eqRoot)
+  } catch {
+    // A missing or unreadable install root has no discoverable dumps. Keep the resolver outside
+    // this catch: only a failed filesystem listing is an ordinary miss.
+    return []
+  }
+  return files
     .filter((f) => isOutputFileName(def, f))
-    .map((f) => ({ file: f, full: join(eqRoot, f), mtime: statSync(join(eqRoot, f)).mtimeMs }))
+    .flatMap((file) => {
+      const full = join(eqRoot, file)
+      try {
+        return [{ file, full, mtime: statSync(full).mtimeMs }]
+      } catch {
+        // EQ can replace a dump after the listing. An inaccessible or vanished file is skipped
+        // without losing the remaining candidates or throwing into startup and watcher callers.
+        return []
+      }
+    })
     .sort((a, b) => b.mtime - a.mtime)
 }
 

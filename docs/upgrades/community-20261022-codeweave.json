@@ -1,0 +1,204 @@
+{
+  "tool": "Codeweaver",
+  "tool_commit": "e0d4a9ba01622a608d2ab1958e024696af9cc72c",
+  "date": "2026-10-22",
+  "workspace": "/home/andrew/codeweave-eqo-community-20261022",
+  "mode": "External Codex lead; pinned multi-source acquisition, inventory, comparison and bounded source brief",
+  "candidate_execution": false,
+  "model_calls": 0,
+  "paid_calls": 0,
+  "fork_attachment": {
+    "attached_head": "467a03af866ab64d00f93976d38475c258475ea1",
+    "branch": "refs/heads/integration/community-safe-20261022",
+    "created_at": "2026-10-22T14:11:04.463650+00:00",
+    "fork_id": "fork-20261022T141104.463622Z",
+    "goals": [
+      "Selectively integrate safe improvements from three EQC upstreams into EQ Oracle"
+    ],
+    "kind": "maintained-fork",
+    "product": "eq-oracle-three-upstreams",
+    "protected_behaviors": [
+      "Oracle identity, profiles, versioned spells and custom calculations, Gear priorities, Sky progress, disabled telemetry and updater, live game sessions"
+    ],
+    "relationships": {
+      "EQ-Zera": "upstream",
+      "brianmontanaweb": "upstream",
+      "kaltinril": "upstream",
+      "oracle": "fork"
+    },
+    "repository": "/home/andrew/codeweave-eqo-community-20261022/sources/oracle",
+    "schema_version": 1,
+    "sources": [
+      {
+        "attached_commit": "467a03af866ab64d00f93976d38475c258475ea1",
+        "location": "/home/andrew/codeweave-eqo-community-20261022/sources/oracle",
+        "name": "oracle",
+        "relationship": "fork",
+        "requested_ref": "467a03af866ab64d00f93976d38475c258475ea1"
+      },
+      {
+        "attached_commit": "780c7afb3fe71f65db2cd8ae9d8c191b8ecc9db4",
+        "location": "https://github.com/Zeratfule/EQ-Zera.git",
+        "name": "EQ-Zera",
+        "relationship": "upstream",
+        "requested_ref": "780c7afb3fe71f65db2cd8ae9d8c191b8ecc9db4"
+      },
+      {
+        "attached_commit": "ad6857f2d5286291d23ed6975b46212805cb0d78",
+        "location": "https://github.com/brianmontanaweb/everquest-companion.git",
+        "name": "brianmontanaweb",
+        "relationship": "upstream",
+        "requested_ref": "ad6857f2d5286291d23ed6975b46212805cb0d78"
+      },
+      {
+        "attached_commit": "ab9d6279e7beb029cecffa319d166ead9961c1cf",
+        "location": "https://github.com/kaltinril/everquest-companion.git",
+        "name": "kaltinril",
+        "relationship": "upstream",
+        "requested_ref": "ab9d6279e7beb029cecffa319d166ead9961c1cf"
+      }
+    ]
+  },
+  "artifacts": {
+    "brief": {
+      "name": "brief-ownsOutputFile.json",
+      "sha256": "099885e8fc7ea3e12ce4b7c633cea9410933bf231dfa09bff90eeda1ff6b2d0c"
+    },
+    "comparison": {
+      "name": "comparison.json",
+      "sha256": "5cdb72f587456ab2493d45cc504e7fad8630f94a8aefd577aea683d0c212d348",
+      "spec_sha256": "a4a3240d41efcf1d30343449e96f80900652f5a7fb93c20cab03abb3fa0e7738"
+    }
+  },
+  "brief": {
+    "status": "COMPLETED",
+    "query": "ownsOutputFile",
+    "sources": [
+      {
+        "contribution_role": "idea",
+        "license_status": "PASS",
+        "name": "kaltinril",
+        "relationship": "upstream",
+        "requested_ref": "ab9d6279e7beb029cecffa319d166ead9961c1cf",
+        "resolved_commit": "ab9d6279e7beb029cecffa319d166ead9961c1cf",
+        "role": "idea",
+        "tree_id": "63bef7638b8b4b44b802b2d10a06df823c4999af"
+      }
+    ],
+    "citations": {
+      "artifact_sha256": {
+        "comparison_report": "74db2870f916b71938f96e6406df1a74d5668bbea77204c851413e8437f3ebd8",
+        "inventory:kaltinril": "b1ffe2bf72f836483e611a02e749a619760572c82d29a0477e42045155f41473"
+      },
+      "comparison_report": "/home/andrew/codeweave-eqo-community-20261022/.codeweave/comparisons/comparison-20261022T141358.916956Z.json",
+      "forest_report": "/home/andrew/codeweave-eqo-community-20261022/.codeweave/forests/f48438063494af9979e8e3f828e996b2c9b6aa2bf7b668d4177a23d87d7ad51b/783c575023639e71668afa8c905b98bfe08c55bbf2f855ccfebcbc64a16061b4/forest.json",
+      "inventory_reports": {
+        "EQ-Zera": "/home/andrew/codeweave-eqo-community-20261022/.codeweave/inventories/EQ-Zera/780c7afb3fe71f65db2cd8ae9d8c191b8ecc9db4.json",
+        "brianmontanaweb": "/home/andrew/codeweave-eqo-community-20261022/.codeweave/inventories/brianmontanaweb/ad6857f2d5286291d23ed6975b46212805cb0d78.json",
+        "kaltinril": "/home/andrew/codeweave-eqo-community-20261022/.codeweave/inventories/kaltinril/ab9d6279e7beb029cecffa319d166ead9961c1cf.json",
+        "oracle": "/home/andrew/codeweave-eqo-community-20261022/.codeweave/inventories/oracle/467a03af866ab64d00f93976d38475c258475ea1.json"
+      },
+      "manifest_sha256": "5668dcd190619cd80c8e3458159a1085d975d1b5cde544b29e354a49134c7f3f",
+      "retrieval_manifest": "/home/andrew/codeweave-eqo-community-20261022/.codeweave/briefs/5668dcd190619cd80c8e3458159a1085d975d1b5cde544b29e354a49134c7f3f.json"
+    },
+    "evidence_sha256": "87cb9ef37aff13bb7860849bd4ef7ebe4fd1bd87333fc6cb30de6951ee6307c1",
+    "coverage": {
+      "budget_omitted_excerpts": 0,
+      "excerpt_offset": 0,
+      "exhaustive": false,
+      "graph": {
+        "complete": false,
+        "mode": "lexical-fallback",
+        "status": "unavailable"
+      },
+      "manifest_excerpts": 9,
+      "matched_terms_returned": [
+        "ownsoutputfile"
+      ],
+      "query_identity": "f2d99bb2d512d197d91682e0e47877df81458fb286414494aacdc4b2e67cb362",
+      "returned_excerpts": 9,
+      "selection": {
+        "kaltinril": {
+          "eligible_files": 7,
+          "matched_files": 14,
+          "read_file_limit": 64
+        }
+      },
+      "source_reads": {
+        "kaltinril": {
+          "blob_bytes": 55671,
+          "blobs": 7
+        }
+      },
+      "status": "selective"
+    },
+    "limitations": [
+      "Locked Git evidence only. Selective retrieval is not exhaustive review or runtime verification.",
+      "Source excerpt reads: at most 64 eligible files and 8 MiB per source; 256 KiB per blob. Git grep and comparison reads are separate.",
+      "Declaration windows use bounded Python indentation or JS/TS/Rust brace heuristics, not a complete language parser.",
+      "Graph neighborhoods are bounded extracted/inferred leads; no dependency-completeness claim.",
+      "Forest intelligence graph could not be parsed: forest exceeds the 512 MiB streaming read bound"
+    ],
+    "omitted_evidence": [
+      {
+        "by_reason": {},
+        "omitted_count": 0,
+        "path": "retrieval_manifest",
+        "reason": "selective-retrieval",
+        "sha256": "5668dcd190619cd80c8e3458159a1085d975d1b5cde544b29e354a49134c7f3f"
+      }
+    ]
+  },
+  "integration": "Selected output-loader behavior adapted directly into the Windows EQO branch and qualified there. No Codeweaver candidate was accepted, incorporated or promoted.",
+  "windows_engine": {
+    "initial_startup": "Reused existing matching Oracle release engine; engine inputs unchanged.",
+    "later_e2e": "The E2E harness builds its own matching release engine when no worktree build stamp exists."
+  },
+  "dashboard_registration": {
+    "project_id": "eq-oracle-three-upstreams",
+    "registry": "/home/andrew/codeweave/.codeweave/dashboard/projects.json"
+  },
+  "prepared_plan": {
+    "proposal_id": "proposal-20261022T142443.901656Z",
+    "report_path": "/home/andrew/codeweave-eqo-community-20261022/.codeweave/proposals/proposal-20261022T142443.901656Z.draft.json",
+    "materialization_authorized": false,
+    "external_change": {
+      "base_commit": "467a03af866ab64d00f93976d38475c258475ea1",
+      "fork_id": "fork-20261022T141104.463622Z",
+      "fork_sha256": "c6bbfe4248e9da3f64544eaeda9a68c51668b9a71ea77b3de5941bc319cf849e",
+      "max_changed_bytes": 16777216,
+      "max_changed_files": 200,
+      "patch_sha256": "eab919b6354c8b9f872765277c1ebd6b5d1d2913734bf1199f4dd8c9bed5bf14",
+      "release_note": {
+        "path": "src/shared/oracleReleaseNotes.ts",
+        "text": "Inventory and Sky achievement imports now refuse another character"
+      },
+      "request_id": "eqo-community-safe-port-20261022",
+      "schema_version": 1,
+      "source_selections": [
+        {
+          "commit": "ab9d6279e7beb029cecffa319d166ead9961c1cf",
+          "paths": [
+            "src/main/outputs/index.ts",
+            "src/shared/outputs/kinds.ts"
+          ],
+          "source": "kaltinril",
+          "transformation": "adapted"
+        }
+      ],
+      "summary": "Prevent foreign inventory and achievement imports and cached cross-character inventory; tolerate post-status dump read failures",
+      "upgrade_review_sha256": null,
+      "write_paths": [
+        "package.json",
+        "package-lock.json",
+        "src/main/outputs/index.ts",
+        "src/shared/outputs/kinds.ts",
+        "src/main/ipc/planner.ts",
+        "src/main/planner/wornFocusCurrent.ts",
+        "src/shared/oracleReleaseNotes.ts",
+        "tests/outputsIsolation.test.mts",
+        "tests/inventoryCacheIsolation.test.mts"
+      ]
+    }
+  }
+}

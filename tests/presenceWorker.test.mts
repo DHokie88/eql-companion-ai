@@ -161,14 +161,14 @@ test('THE WATCHER LOOKS AT THE WORLD ON ITS FIRST TICK, then keeps beating', {
   assert.ok(kinds.includes('run'), 'the running scan reported')
   assert.ok(kinds.includes('beat'), 'and the heartbeat is beating')
 
-  // NOTHING IS SAID TWICE. The steady state of a healthy watcher is silence plus a heartbeat, and
-  // that is the entire reason this design can poll at 69 Hz without costing anything downstream.
-  const changes = lines.filter((l) => l !== 'H')
-  assert.equal(
-    new Set(changes).size,
-    changes.length,
-    `a record was repeated rather than suppressed:\n${changes.join('\n')}`
-  )
+  // Each channel suppresses its unchanged reading. A real desktop may change and return to
+  // an earlier value (C|0 -> C|1 -> C|0); that return must be reported, too.
+  const previous = new Map<string, string>()
+  for (const line of lines.filter((line) => line !== 'H')) {
+    const channel = line.split('|', 1)[0]
+    assert.notEqual(line, previous.get(channel), 'an unchanged reading was repeated')
+    previous.set(channel, line)
+  }
   assert.equal(lines.some((l) => l.startsWith('X|')), false, 'no exit line from a healthy watcher')
 })
 

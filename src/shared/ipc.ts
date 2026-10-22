@@ -566,6 +566,10 @@ export const IPC = {
   // renderer -> main: look up an item's lore/quest knowledge (local posky-first, then a
   // cached, politely-throttled wiki lookup). Returns ItemKnowledge.
   itemsLookup: 'items:lookup',
+  itemsMarks: 'items:marks',
+  bazaarWatchGet: 'bazaar:watch:get',
+  bazaarWatchSet: 'bazaar:watch:set',
+  bazaarSaveCsv: 'bazaar:saveCsv',
 
   // ---- mob knowledge ("what does this thing drop", Task #63) ----
   // renderer -> main: look up a mob's drop knowledge (own loot history + local quest catalog

@@ -54,6 +54,8 @@ import { ALERT_TRIGGER_MIGRATION_VERSION, migrateAlertTriggers } from './data/al
 // in ./storeSoundPacks.ts, which imports `settingsStore` from HERE, so an import in that
 // direction would make the settings store an import cycle.
 import { SEED_ALERTS, seedAlertsWith } from './alertSeeds'
+import { seedBazaarAlertOnce, withBazaarAlert } from './alertBazaarSeed'
+import { applySkyQuestsKnob } from './storeSkyQuestsKnob'
 // The persisted SHAPE lives in ./storeShape.ts (this file is at its factoring ceiling). Nothing
 // moved but the declaration; every accessor below is still written against it.
 import type { StoreShape } from './storeShape'
@@ -447,6 +449,7 @@ const DEFAULT_OVERLAY_CONFIG: Record<OverlayKind, OverlayConfig> = {
   // migration, on exactly the terms the row above states: `overlays.run` has never been written by
   // any build, so every existing store reads this default and gets the window off for free.
   run: { open: false, locked: false, bgAlpha: 0.72, bounds: undefined, drill: null },
+  skyQuests: { open: false, locked: false, bgAlpha: 0.72, bounds: undefined, drill: null },
   // THE ALERT BANNER (JOS-378). `locked: true` is the resting state that makes it a notifier
   // rather than a window — the celebration toast's arrangement, and for the same reason: locked
   // is click-through, and the overlay flips capture on only while a line is actually on screen.
@@ -494,6 +497,7 @@ export function getOverlayConfig(kind: OverlayKind): OverlayConfig {
   // The con card's one knob, on the same terms (JOS-383) — in its own file, beside the kind's own
   // vocabulary, because this one is at the 400-code-line ceiling (`applyTimerOverlayKnobs`' rule).
   applyConCardKnob(kind, cfg)
+  applySkyQuestsKnob(kind, cfg)
   // Text scale postdates every other field, so it is ABSENT in most stores and out of range in a
   // hand-edited one — both answered here rather than repeated six times above, because the
   // default (1) does not differ per kind. Clamped on the way out as well as in: see
@@ -585,6 +589,7 @@ export function setOverlayConfig(kind: OverlayKind, patch: Partial<OverlayConfig
   // carry this knob" is a fact about.
   applyTimerOverlayKnobs(kind, next)
   applyXpOverlayKnobs(kind, next)
+  applySkyQuestsKnob(kind, next)
   const all = store.get('overlays') ?? {}
   all[kind] = next
   store.set('overlays', all)
@@ -680,9 +685,9 @@ export function getAlerts(): AlertDef[] {
     // migration ever re-runs against a store that was born current.
     store.set('alertSoundMigration', ALERT_SOUND_MIGRATION_VERSION)
     store.set('alertTriggerMigration', ALERT_TRIGGER_MIGRATION_VERSION)
-    return seeded
+    return seedBazaarAlertOnce(seeded, store)
   }
-  return migrateStoredAlertTriggers(migrateStoredAlertSounds(existing))
+  return seedBazaarAlertOnce(migrateStoredAlertTriggers(migrateStoredAlertSounds(existing)), store)
 }
 
 /**
@@ -713,7 +718,7 @@ export function deleteAlert(id: string): AlertDef[] {
 
 /** Restore the seeded built-in alert set, discarding any user edits (Task #22). */
 export function resetAlerts(): AlertDef[] {
-  const next = seedAlertsWith(SEED_ALERTS, store.get('soundPacks'))
+  const next = withBazaarAlert(seedAlertsWith(SEED_ALERTS, store.get('soundPacks')), store.get('soundPacks'))
   store.set('alerts', next)
   return next
 }

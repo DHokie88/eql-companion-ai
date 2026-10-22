@@ -18,6 +18,7 @@ import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { OVERLAY_KINDS } from '../src/shared/types'
+import { isTelemetryOverlayKind, UNREPORTED_OVERLAY_KINDS } from '../src/shared/telemetryOverlays'
 import {
   ALERT_COUNT_EDGES,
   allFunnelStepMarks,
@@ -240,11 +241,10 @@ test('overlaysEnabled is a SET of closed kinds — deduped, canonically ordered'
   invalid({ ...SAMPLES[7], overlaysEnabled: 'fight' }, 'overlaysEnabled')
 })
 
-test('the overlay-kind list is the SAME set the app uses (the duplication cannot rot)', () => {
-  // telemetry.ts may import nothing at all, so it re-declares the kinds. This is the tripwire
-  // that keeps the copy honest: adding a sixth overlay to the app fails here until the schema
-  // (and therefore TELEMETRY.md) learns about it.
-  assert.deepEqual([...TELEMETRY_OVERLAY_KINDS].sort(), [...OVERLAY_KINDS].sort())
+test('every app overlay is reported or explicitly excluded from the unchanged telemetry schema', () => {
+  assert.deepEqual([...TELEMETRY_OVERLAY_KINDS, ...UNREPORTED_OVERLAY_KINDS].sort(), [...OVERLAY_KINDS].sort())
+  assert.deepEqual(OVERLAY_KINDS.filter(isTelemetryOverlayKind).sort(), [...TELEMETRY_OVERLAY_KINDS].sort())
+  assert.equal(isTelemetryOverlayKind('skyQuests'), false)
 })
 
 /**
@@ -333,9 +333,11 @@ test('the view list is the SAME set the app can render', () => {
   const drills = declared.filter((v) => !known.includes(v) && !unreleased.includes(v))
   // Oracle's local fork adds a tab without changing the upstream telemetry ingest contract.
   // The existing dwellView allowlist drops this view; no deployment or new telemetry is needed.
-  const localOnly = ['spells']
-  assert.ok(known.includes('spells'), 'the local spell library remains a restorable destination')
-  assert.ok(!(TELEMETRY_VIEWS as readonly string[]).includes('spells'))
+  const localOnly = ['spells', 'bazaar']
+  for (const view of localOnly) {
+    assert.ok(known.includes(view), `the local ${view} tab remains a restorable destination`)
+    assert.ok(!(TELEMETRY_VIEWS as readonly string[]).includes(view))
+  }
   const reportable = declared.filter((v) => !unreleased.includes(v) && !drills.includes(v) && !localOnly.includes(v))
   assert.deepEqual(reportable.sort(), [...TELEMETRY_VIEWS].sort())
 

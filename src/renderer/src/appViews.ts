@@ -15,6 +15,7 @@ export type View =
   | 'leveling'
   | 'spells'
   | 'loot'
+  | 'bazaar'
   | 'quests'
   // ZONE LOOT (EQ Zera, ROADMAP §2): pick a zone, see every mob in it and what each drops, with
   // your own observed counts and per-hour beside the wiki's list. It sits next to Quests because
@@ -91,6 +92,7 @@ export const VIEW_LABELS: Record<View, string> = {
   leveling: 'Leveling',
   spells: 'Spells',
   loot: 'Loot',
+  bazaar: 'Bazaar',
   quests: 'Quests',
   // Two words, as a player says it. The nav rail sets it uppercase itself.
   zoneloot: 'Zone Loot',
@@ -134,6 +136,7 @@ const KNOWN_VIEWS: View[] = [
   'leveling',
   'spells',
   'loot',
+  'bazaar',
   'quests',
   'zoneloot',
   'build',
