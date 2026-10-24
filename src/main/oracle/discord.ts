@@ -15,11 +15,11 @@ function sourceOrigin(p: import('../../shared/discordReference').DiscordProvenan
 function attribution(origin: string, p: import('../../shared/discordReference').DiscordProvenance, caveat?: string): string {
   return `${origin === 'official' ? 'Official server' : 'Guild server'}; ${p.author ?? 'author missing'}; unverified Discord claim. ${caveat ?? ''}`
 }
-export async function discordIndex(): Promise<DiscordIndex> {
-  const manifest = await loadManifest()
+export async function discordIndex(loader = { loadManifest, loadDataset }): Promise<DiscordIndex> {
+  const manifest = await loader.loadManifest()
   const result: DiscordIndex = { sources: [], feed: [], snapshot: { recordCount: 0, exportedAt: '', latestMessageDate: null, coverageGaps: [] } }
   for (const name of names) {
-    const envelope = await loadDataset(name)
+    const envelope = await loader.loadDataset(name)
     if (envelope.count !== manifest.files[name].count) throw new Error(`Discord manifest count mismatch: ${name}`)
     result.snapshot.recordCount += envelope.count
     if (envelope.scrapedAt > result.snapshot.exportedAt) result.snapshot.exportedAt = envelope.scrapedAt

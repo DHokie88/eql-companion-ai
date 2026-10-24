@@ -21,6 +21,14 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.13.0',
+    date: '2026-10-24',
+    entries: [
+      { kind: 'new', text: 'Discord references refresh at 7 a.m., 3 p.m. and 9 p.m. Eastern. What’s New and Ask EQ Oracle pick up completed refreshes automatically, without rebuilding or restarting.' },
+      { kind: 'fixed', text: 'What’s New shows the last successful Discord check separately from the latest saved message, warns when updates are overdue, and keeps the last usable snapshot if a refresh cannot be loaded.' }
+    ]
+  },
+  {
     version: '0.10.0',
     date: '2026-10-22',
     entries: [
