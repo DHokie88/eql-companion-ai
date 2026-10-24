@@ -1,14 +1,19 @@
 /** Built worker + IPC + UI. Real references; model failure is explicit, never simulated AI. */
 import assert from 'node:assert/strict'
-import { mkdirSync } from 'node:fs'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { buildIfStale, ROOT } from './appHarness.mjs'
 import { launchApp, mainWindow, makeUserData, removeUserData } from './appWindow.mjs'
+import { runtimeFixture, updateRuntimeCheck } from '../discordRuntimeFixture.mts'
 
 buildIfStale()
 const profile = makeUserData()
 const install = join(profile, 'empty-game')
 mkdirSync(join(install, 'Logs'), { recursive: true })
+// An empty install has no character log for auto-discovery; use the normal saved folder setting.
+writeFileSync(join(profile, 'everquest-companion-progress.json'), JSON.stringify({ eqInstallDir: install }))
+const reference = join(install, 'reference/discord')
+await runtimeFixture(reference)
 const launched = await launchApp({ userData: profile, installDir: install })
 try {
   const page = await mainWindow(launched.app)
@@ -17,6 +22,13 @@ try {
   await page.locator('[data-testid="nav-community"]').click()
   await page.locator('[data-testid="community-entry"]').first().waitFor({ timeout: 40_000 })
   assert.match(await page.locator('[data-testid="community-view"]').innerText(), /[\d,]+ saved Discord records/)
+  const initialSnapshot = await page.evaluate(() => window.eq.getCommunityFeed({}))
+  assert.equal(initialSnapshot.snapshot.lastCheckedAt, '2026-10-24T12:45:28Z', JSON.stringify(initialSnapshot.snapshot))
+  await page.getByText('Last checked: Oct 24, 8:45 AM EDT', { exact: true }).waitFor()
+  await page.getByText(/Discord checks: 7 a.m., 3 p.m. and 9 p.m. Eastern/).waitFor()
+  await updateRuntimeCheck(reference, '2026-10-24T19:00:00Z')
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')))
+  await page.getByText('Last checked: Oct 24, 3:00 PM EDT', { exact: true }).waitFor()
   await page.locator('[data-testid="community-search"]').fill('loadout')
   await page.waitForFunction(() => document.querySelector('[data-testid="community-count"]')?.textContent?.includes('updates') && !document.querySelector('[role="status"]'))
   assert.ok(await page.locator('[data-testid="community-entry"]').count() > 0)

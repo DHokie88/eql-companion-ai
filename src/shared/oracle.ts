@@ -63,7 +63,7 @@ export interface CommunityEntry {
 export interface CommunityFeed {
   entries: CommunityEntry[]
   total: number
-  snapshot: { recordCount: number; exportedAt: string; latestMessageDate: string | null; coverageGaps: string[] }
+  snapshot: { recordCount: number; exportedAt: string; latestMessageDate: string | null; coverageGaps: string[]; lastCheckedAt?: string | null; refreshWarning?: string }
 }
 
 export function oracleConnection(input: unknown): OracleConnection {

@@ -5,6 +5,16 @@ import type { CommunityCategory, CommunityFeed } from '@shared/oracle'
 import { AskOracle, sourceDate } from '../oracle/AskOracle'
 
 const categories: Record<CommunityCategory, string> = { all: 'All updates', patches: 'Patch notes', highlights: 'Highlights', issues: 'Bug reports', classes: 'Class discussions', guides: 'Guides', events: 'Guild events' }
+function checkedTime(value?: string | null): string {
+  if (!value || !Number.isFinite(Date.parse(value))) return 'Unavailable'
+  return new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }).format(new Date(value))
+}
+function RefreshNotices({ snapshot }: { snapshot?: CommunityFeed['snapshot'] }): JSX.Element {
+  return <>
+    {snapshot?.refreshWarning && <Alert severity="warning">{snapshot.refreshWarning}</Alert>}
+    {snapshot?.lastCheckedAt && Date.now() - Date.parse(snapshot.lastCheckedAt) > 12 * 60 * 60_000 && <Alert severity="warning">The last successful Discord check was over 12 hours ago. Updates may be delayed.</Alert>}
+  </>
+}
 export default function CommunityView(): JSX.Element {
   const [feed, setFeed] = useState<CommunityFeed | null>(null)
   const [scope, setScope] = useState<'all' | 'official' | 'guild'>('all')
@@ -16,18 +26,23 @@ export default function CommunityView(): JSX.Element {
   useEffect(() => {
     let alive = true
     setBusy(true); setError('')
-    const timer = setTimeout(() => {
+    const refresh = (): void => {
       void window.eq.getCommunityFeed({ scope, category, query, offset, limit: 25 }).then(result => {
         if (alive) setFeed(result)
       }).catch(() => { if (alive) { setFeed(null); setError('The Discord snapshot could not be loaded. Check the imported package and try again.') } })
         .finally(() => { if (alive) setBusy(false) })
-    }, query ? 250 : 0)
-    return () => { alive = false; clearTimeout(timer) }
+    }
+    const timer = setTimeout(refresh, query ? 250 : 0)
+    const interval = setInterval(refresh, 60_000)
+    window.addEventListener('focus', refresh)
+    return () => { alive = false; clearTimeout(timer); clearInterval(interval); window.removeEventListener('focus', refresh) }
   }, [scope, category, query, offset])
   return <Box sx={{ p: 3, height: '100%', overflow: 'auto' }} data-testid="community-view"><Stack spacing={2} sx={{ maxWidth: 1150, mx: 'auto' }}>
     <Box><Typography variant="h4">What’s New</Typography><Typography color="text.secondary" sx={{ mt: 1 }}>EQL updates and conversations, with a path back to the original post.</Typography></Box>
     <Paper variant="outlined" sx={{ p: 2 }}><AskOracle initialScope="discord" /></Paper>
-    {feed && <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap"><Chip size="small" variant="outlined" label={`${feed.snapshot.recordCount.toLocaleString()} saved Discord records`} /><Chip size="small" variant="outlined" label={`Latest saved message: ${sourceDate(feed.snapshot.latestMessageDate)}`} /><Chip size="small" variant="outlined" label={`Package assembled: ${sourceDate(feed.snapshot.exportedAt)}`} /></Stack>}
+    {feed && <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap"><Chip size="small" variant="outlined" label={`${feed.snapshot.recordCount.toLocaleString()} saved Discord records`} /><Chip size="small" variant="outlined" label={`Last checked: ${checkedTime(feed.snapshot.lastCheckedAt)}`} /><Chip size="small" variant="outlined" label={`Latest saved message: ${sourceDate(feed.snapshot.latestMessageDate)}`} /><Chip size="small" variant="outlined" label={`Package assembled: ${sourceDate(feed.snapshot.exportedAt)}`} /></Stack>}
+    <Typography variant="caption" color="text.secondary">Discord checks: 7 a.m., 3 p.m. and 9 p.m. Eastern. Updates appear automatically after each completed refresh.</Typography>
+    <RefreshNotices snapshot={feed?.snapshot} />
     <Alert severity="info">This is a saved Discord snapshot. “Official server” identifies where a post appeared; it does not verify a player’s claim. Guild shop prices are historical posts.</Alert>
     <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
       <TextField size="small" select label="Server" value={scope} onChange={e => { setScope(e.target.value as typeof scope); setOffset(0) }} sx={{ minWidth: 170 }}>

@@ -1,5 +1,6 @@
 import { Worker } from 'node:worker_threads'
 import { join } from 'node:path'
+import { effectiveEqRoot } from '../log/config'
 import type { CommunityFeed, CommunityQuery, OracleCitation, OracleScope } from '../../shared/oracle'
 
 /** Only this small broker lives on the log-tailing thread. JSON and ranking stay in the worker. */
@@ -39,7 +40,7 @@ function call(method: 'search' | 'feed', args: unknown): Promise<unknown> {
       if (!pending.size) { void current.terminate(); if (worker === current) worker = undefined }
     }, 30_000)
     pending.set(id, { resolve, reject, timer })
-    current.postMessage({ id, method, args })
+    current.postMessage({ id, method, args, referenceRoot: join(effectiveEqRoot(), 'reference', 'discord') })
   })
 }
 export async function searchReferences(question: string, scope: OracleScope): Promise<OracleCitation[]> {
