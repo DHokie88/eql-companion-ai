@@ -139,6 +139,10 @@ docs/agents-archive.md.
   - `symbolicate.test` emitted-map round trip · `out/preload/index.js.map is missing` during
     a concurrent `npm run build` · 1 sighting (2026-10-18, Oracle Spells verification) · resolved
     by sequencing build before unit verification; the ordering is now documented in the fork gate.
+  - `devFeedbackServer.test` inventory-only report and dump-policy cases · local `fetch failed` ·
+    1 full-suite sighting (2026-10-24, Discord runtime integration); all 19 feedback tests passed
+    in isolation and the subsequent full suite passed. No feedback code changed; cause unresolved,
+    watch for recurrence rather than treating the rerun as a fix.
   - `pointerWatch.test` registry cadence · expected two cursor reads after a 460 ms sleep,
     observed one under concurrent build/E2E load · 1 sighting (2026-10-18, Spells controls) · resolved
     with a controlled interval clock and exact read-count/cancellation assertions; runtime unchanged.
