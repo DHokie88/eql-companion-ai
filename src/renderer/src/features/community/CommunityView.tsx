@@ -1,8 +1,8 @@
 import { useEffect, useState, type JSX } from 'react'
-import { Accordion, AccordionDetails, AccordionSummary, Alert, Box, Button, Chip, CircularProgress, MenuItem, Paper, Stack, TextField, Typography } from '@mui/material'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import { Alert, Box, Button, Chip, CircularProgress, MenuItem, Paper, Stack, TextField, Typography } from '@mui/material'
 import type { CommunityCategory, CommunityFeed } from '@shared/oracle'
 import { AskOracle, sourceDate } from '../oracle/AskOracle'
+import { CommunityCoverage } from './CommunityCoverage'
 import { CommunityEntryCard } from './CommunityEntryCard'
 import { DiscordRefreshControls } from './DiscordRefreshControls'
 
@@ -64,6 +64,6 @@ export default function CommunityView(): JSX.Element {
       {feed.entries.map(entry => <CommunityEntryCard key={entry.id} entry={entry} category={categories[entry.category]} onError={() => setError('The source link could not be opened.')} />)}
       <Stack direction="row" spacing={1}><Button disabled={!offset} onClick={() => setOffset(Math.max(0, offset - 25))}>Previous</Button><Button disabled={offset + 25 >= feed.total} onClick={() => setOffset(offset + 25)}>Next</Button></Stack>
     </>}
-    {feed && <Accordion disableGutters variant="outlined"><AccordionSummary expandIcon={<ExpandMoreIcon />}><Typography variant="subtitle2">Coverage and missing data</Typography></AccordionSummary><AccordionDetails><Stack spacing={1}>{feed.snapshot.coverageGaps.map(gap => <Typography variant="body2" color="text.secondary" key={gap}>{gap}</Typography>)}</Stack></AccordionDetails></Accordion>}
+    {feed && <CommunityCoverage notes={feed.snapshot.coverageGaps} />}
   </Stack></Box>
 }
