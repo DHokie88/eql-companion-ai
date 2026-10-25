@@ -181,7 +181,11 @@ test('NO SHIPPED CODE CAN NAME POWERSHELL — the watcher launches nothing at al
 // aw's loopback-only model. This ONE adapter starts only `ssh`, with no local shell, strict
 // known-host checks, closed connection arguments, stdin JSON and bounded timeout/cancellation.
 // It never discovers processes or changes networking. tests/oracle.test.mts pins those bounds.
-const SPAWNERS = new Set(['main/triage/store.ts', 'main/dataServer/engineHost.ts', 'main/oracle/provider.ts'])
+// The owner-requested startup Discord check (2026-10-25) uses the same saved
+// SSH identity to call one fixed refresh-control program. It accepts only
+// request/status and a fixed force flag, never source text or renderer shell
+// arguments. oracleRefresh.test.mts verifies command closure and cancellation.
+const SPAWNERS = new Set(['main/triage/store.ts', 'main/dataServer/engineHost.ts', 'main/oracle/provider.ts', 'main/oracle/refreshTransport.ts'])
 
 /** Every module specifier a file imports or re-exports. */
 function importSpecifiers(file: string): string[] {

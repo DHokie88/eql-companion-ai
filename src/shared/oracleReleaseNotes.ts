@@ -21,6 +21,15 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.14.0',
+    date: '2026-10-25',
+    entries: [
+      { kind: 'changed', text: 'Highlights now focus on must-read rewards, major releases, unusual bonuses and useful community findings. Each explains what matters in plain language and links to the supporting posts instead of repeating the thread.' },
+      { kind: 'new', text: 'EQ Oracle checks Discord in the background shortly after opening. Keep using other pages while it works; a completion notice and taskbar flash let you know when the refreshed data is ready. Check now starts another check when needed.' },
+      { kind: 'fixed', text: 'Scheduled Discord checks at 7 a.m., 3 p.m. and 9 p.m. Eastern share an in-progress harvest instead of treating an overlapping check as a failure.' }
+    ]
+  },
+  {
     version: '0.13.0',
     date: '2026-10-24',
     entries: [

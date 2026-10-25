@@ -21,7 +21,7 @@ export function CommunityEntryCard({ entry, category, onError }: { entry: Commun
       <Typography variant="body2" sx={{ overflowWrap: 'anywhere' }}>{entry.body}</Typography>
       <Typography variant="body2" color="text.secondary"><strong>Why it matters:</strong> {highlight.whyItMatters}</Typography>
       {highlight.expiresAt && <Typography variant="caption" color="warning.main">Ends {new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }).format(new Date(highlight.expiresAt))}</Typography>}
-      {!highlight.expiresAt && ['limited-reward', 'sale', 'event'].includes(highlight.kind) && <Typography variant="caption" color="warning.main">End time not provided — check the original post.</Typography>}
+      {!highlight.expiresAt && ['limited-reward', 'sale', 'event'].includes(highlight.kind) && <Typography variant="caption" color="warning.main">End time not provided - check the original post.</Typography>}
       <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
         {highlight.sources.map((link, i) => <SourceButton key={link.url} url={link.url} label={i === 0 ? 'Open original post' : link.label} onError={onError} />)}
         {highlight.relatedLinks.map(link => <SourceButton key={link.url} {...link} onError={onError} />)}
