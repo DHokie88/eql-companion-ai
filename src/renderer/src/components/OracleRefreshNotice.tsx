@@ -23,7 +23,7 @@ export default function OracleRefreshNotice(): JSX.Element {
     return () => { alive = false; unsubscribe() }
   }, [])
   const busy = status?.state === 'running' || status?.state === 'queued'
-  return <Snackbar open={open} autoHideDuration={busy ? null : 10_000} onClose={() => setOpen(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+  return <Snackbar open={open} autoHideDuration={busy ? null : 10_000} onClose={(_event, reason) => { if (reason !== 'clickaway') setOpen(false) }} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
     <Alert severity={status?.state === 'failed' ? 'warning' : status?.state === 'complete' ? 'success' : 'info'}
       variant="filled" onClose={() => setOpen(false)} data-testid="oracle-refresh-notice"
       action={busy ? undefined : <Button color="inherit" size="small" onClick={() => { void window.eq.requestOracleRefresh().catch(() => { setStatus({ state: 'failed', lastCheckedAt: null, message: 'The Discord check could not start. Saved updates remain available.' }); setOpen(true) }) }}>Check now</Button>}>
