@@ -62,13 +62,12 @@ function groupsFor(text: string): CoverageSummary[] {
   return groups
 }
 
-function unknownId(text: string): string {
-  const slug = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
-  return `note-${slug || 'text'}`
+function isCurrentPermission(text: string): boolean {
+  return hasAny(text, PERMISSION_PATTERNS) && !hasAny(text, HISTORICAL_PATTERNS)
 }
 
 function unknownNote(text: string): CoverageSummary {
-  return { id: unknownId(text), title: text, detail: text }
+  return { id: `note:${normalize(text)}`, title: 'Other coverage note', detail: text }
 }
 
 function append(rows: CoverageSummary[], seen: Set<string>, row: CoverageSummary): void {
@@ -80,15 +79,14 @@ function append(rows: CoverageSummary[], seen: Set<string>, row: CoverageSummary
 function addNote(rows: CoverageSummary[], seen: Set<string>, note: string): void {
   const text = readable(note)
   if (!text) return
-  const groups = groupsFor(normalize(note))
-  if (groups.length > 0) {
-    for (const group of groups) append(rows, seen, group)
-    return
-  }
-  append(rows, seen, unknownNote(text))
+  const normalized = normalize(note)
+  const groups = groupsFor(normalized)
+  const pending = [...groups]
+  if (groups.length === 0 || isCurrentPermission(normalized)) pending.push(unknownNote(text))
+  for (const row of pending) append(rows, seen, row)
 }
 
-export function coverageSummary(notes: string[]): CoverageSummary[] {
+export function coverageSummary(notes: readonly string[]): CoverageSummary[] {
   const rows: CoverageSummary[] = []
   const seen = new Set<string>()
   for (const note of notes) addNote(rows, seen, note)

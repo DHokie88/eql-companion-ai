@@ -39,10 +39,32 @@ test('unknown warnings and current access denials stay visible', () => {
   const current = 'HTTP 403 permission denied for the live channel read.'
   const unknown = 'Saved note says <b>check the log</b>.'
   assert.deepEqual(coverageSummary([current, unknown]), [
-    { id: 'note-http-403-permission-denied-for-the-live-channel-read', title: current, detail: current },
-    { id: 'note-saved-note-says-b-check-the-log-b', title: unknown, detail: unknown },
+    { id: `note:${current.toLowerCase()}`, title: 'Other coverage note', detail: current },
+    { id: `note:${unknown.toLowerCase()}`, title: 'Other coverage note', detail: unknown },
   ])
   assert.equal(coverageSummary([current]).some(row => row.title === historical.title), false)
+})
+
+test('a current access warning combined with poll results stays visible', () => {
+  const currentAndPoll = 'HTTP 403 permission denied for the live channel read. Poll results not captured.'
+  assert.deepEqual(coverageSummary([currentAndPoll]), [
+    polls,
+    { id: `note:${currentAndPoll.toLowerCase()}`, title: 'Other coverage note', detail: currentAndPoll },
+  ])
+})
+
+test('punctuation differences stay distinct unknown notes', () => {
+  assert.deepEqual(coverageSummary(['Alpha+Beta', 'Alpha Beta']), [
+    { id: 'note:alpha+beta', title: 'Other coverage note', detail: 'Alpha+Beta' },
+    { id: 'note:alpha beta', title: 'Other coverage note', detail: 'Alpha Beta' },
+  ])
+})
+
+test('unicode warnings stay distinct unknown notes', () => {
+  assert.deepEqual(coverageSummary(['警告一', '警告二']), [
+    { id: 'note:警告一', title: 'Other coverage note', detail: '警告一' },
+    { id: 'note:警告二', title: 'Other coverage note', detail: '警告二' },
+  ])
 })
 
 test('whitespace and case variants deduplicate', () => {
@@ -56,7 +78,7 @@ test('whitespace and case variants deduplicate', () => {
   ]
   assert.deepEqual(coverageSummary(notes), [
     prices,
-    { id: 'note-custom-export-warning', title: 'Custom Export Warning', detail: 'Custom Export Warning' },
+    { id: 'note:custom export warning', title: 'Other coverage note', detail: 'Custom Export Warning' },
     historical,
   ])
 })
