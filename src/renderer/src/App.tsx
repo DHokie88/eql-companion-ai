@@ -14,6 +14,7 @@ import MainColumn from './components/MainColumn'
 // which meant every push to kills / loot / turnins / leveling / character re-rendered the entire
 // application tree to feed two snackbars. See its header.
 import AppCelebrations from './components/AppCelebrations'
+import OracleRefreshNotice from './components/OracleRefreshNotice'
 // "Another character's log is active — switch?" (JOS-432). Self-contained: it subscribes to its own
 // push and switches through the same `character:set` IPC the title bar uses, so the shell gains an
 // element and no state. Main guarantees it can ask at most once per candidate log per app session.
@@ -633,6 +634,7 @@ export default function App(): JSX.Element {
           player — all of it below this component rather than inside it, so a push to any of the
           four modules they read re-renders THEM and not the app. See AppCelebrations. */}
       <AppCelebrations />
+      <OracleRefreshNotice />
 
       <LogSwitchNudge />
 
