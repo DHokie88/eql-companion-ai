@@ -23,9 +23,10 @@ async function readGeneration(root: string, sums: Buffer): Promise<DiscordIndex>
   if (hashes.algorithm !== 'sha256' || !hashes.files) throw new Error('Invalid Discord checksums')
   const files: Record<string, unknown> = {}
   let totalBytes = 0
-  for (const name of ['manifest', 'refresh', ...datasetNames]) {
+  const names = ['manifest', 'refresh', ...datasetNames, ...(hashes.files['runtime/mustRead.json'] ? ['mustRead'] : [])]
+  for (const name of names) {
     const relative = `runtime/${name}.json`
-    const bytes = await boundedRead(join(root, relative), name === 'manifest' || name === 'refresh' ? 100_000 : 256 * 1024 * 1024)
+    const bytes = await boundedRead(join(root, relative), ['manifest', 'refresh', 'mustRead'].includes(name) ? 1_000_000 : 256 * 1024 * 1024)
     totalBytes += bytes.length
     if (totalBytes > 350 * 1024 * 1024) throw new Error('Discord runtime package is too large')
     if (sha(bytes) !== hashes.files[relative]) throw new Error('Discord reference checksum mismatch')
@@ -37,7 +38,7 @@ async function readGeneration(root: string, sums: Buffer): Promise<DiscordIndex>
   const readers = Object.fromEntries(datasetNames.map(name => [name, () => Promise.resolve(files[name])])) as Parameters<typeof createDiscordLoader>[0]
   const loader = createDiscordLoader(readers, () => Promise.resolve(files.manifest))
   if ((await loader.allProblems()).length) throw new Error('Invalid Discord runtime data')
-  const index = await discordIndex(loader)
+  const index = await discordIndex(loader, files.mustRead ?? { schemaVersion: 1, generatedAt: new Date().toISOString(), entries: [] })
   index.snapshot.lastCheckedAt = lastCheckedAt
   return index
 }

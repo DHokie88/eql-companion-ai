@@ -51,3 +51,31 @@ test('runtime snapshots replace bundled data, reload unchanged-content checks, a
     assert.equal(other.snapshot.lastCheckedAt, undefined, 'game-root changes cannot reuse another installation snapshot')
   } finally { await rm(root, { recursive: true, force: true }) }
 })
+
+test('curated sidecar is optional, checksummed, and cannot replace a valid digest with invented citations', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'oracle-highlights-'))
+  try {
+    await runtimeFixture(root)
+    const read = createRuntimeDiscord()
+    const legacy = await read(root)
+    assert.equal(legacy.feed.some(entry => entry.category === 'highlights'), false)
+    const source = legacy.sources.find(entry => entry.url)
+    assert.ok(source)
+    const digest = { schemaVersion: 1, generatedAt: '2026-10-25T12:00:00Z', entries: [{ id: 'test', title: 'Limited-time reward',
+      summary: 'Collect the seasonal reward.', whyItMatters: 'The event ends soon.', kind: 'limited-reward', confidence: 'community-report',
+      date: '2026-10-25T12:00:00Z', expiresAt: null, sources: [{ url: source.url, label: 'Original post' }], relatedLinks: [] }] }
+    const path = join(root, 'runtime/mustRead.json')
+    await writeFile(path, JSON.stringify(digest))
+    await updateRuntimeCheck(root, '2026-10-25T12:00:00Z')
+    const curated = await read(root)
+    assert.equal(curated.feed.filter(entry => entry.category === 'highlights').length, 1)
+    digest.entries[0].sources[0].url = 'https://discord.com/channels/1/2/999'
+    await writeFile(path, JSON.stringify(digest))
+    await updateRuntimeCheck(root, '2026-10-25T13:00:00Z')
+    const invalid = await read(root)
+    assert.equal(invalid.sources, curated.sources)
+    assert.match(invalid.snapshot.refreshWarning ?? '', /last usable/)
+    await writeFile(path, '{}')
+    assert.equal((await read(root)).sources, curated.sources, 'hash mismatch also retains valid generation')
+  } finally { await rm(root, { recursive: true, force: true }) }
+})

@@ -15,6 +15,8 @@ export interface OracleSource {
   url: string | null
   date: string | null
   attribution: string
+  /** Explicit reply URLs captured inside this source, for digest evidence links. */
+  evidenceUrls?: string[]
 }
 export interface OracleCitation extends OracleSource { number: number }
 export interface OracleQuestion {
@@ -59,6 +61,14 @@ export interface CommunityEntry {
   origin: 'official' | 'guild'
   category: Exclude<CommunityCategory, 'all'>
   caveat: string
+  highlight?: {
+    kind: 'limited-reward' | 'release' | 'bonus' | 'farming' | 'sale' | 'event' | 'server' | 'issue'
+    confidence: 'announcement' | 'community-report'
+    whyItMatters: string
+    expiresAt: string | null
+    sources: { url: string; label: string }[]
+    relatedLinks: { url: string; label: string }[]
+  }
 }
 export interface CommunityFeed {
   entries: CommunityEntry[]
@@ -91,6 +101,16 @@ export function oracleSourceUrl(value: unknown): string | null {
     if (url.protocol !== 'https:' || url.username || url.password || url.port) return null
     if (url.hostname === 'discord.com' && /^\/channels\/\d+\/\d+(?:\/\d+)?\/?$/.test(url.pathname)) return url.href
     if (url.hostname === 'eqlwiki.com' && url.pathname.startsWith('/wiki/')) return url.href
+    if (videoUrl(url)) return url.href
   } catch { return null }
   return null
+}
+
+function videoUrl(url: URL): boolean {
+  if (url.hash || [...url.searchParams.keys()].some(key => !['v', 't'].includes(key))) return false
+  const time = url.searchParams.get('t')
+  if (time !== null && !/^\d+[hms]?(?:\d+[ms])?(?:\d+s)?$/.test(time)) return false
+  if (url.hostname === 'youtu.be') return /^\/[A-Za-z0-9_-]{11}\/?$/.test(url.pathname) && !url.searchParams.has('v')
+  return ['youtube.com', 'www.youtube.com'].includes(url.hostname) && url.pathname === '/watch'
+    && /^[A-Za-z0-9_-]{11}$/.test(url.searchParams.get('v') ?? '')
 }

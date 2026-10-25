@@ -3,6 +3,8 @@ import { Accordion, AccordionDetails, AccordionSummary, Alert, Box, Button, Chip
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import type { CommunityCategory, CommunityFeed } from '@shared/oracle'
 import { AskOracle, sourceDate } from '../oracle/AskOracle'
+import { CommunityEntryCard } from './CommunityEntryCard'
+import { DiscordRefreshControls } from './DiscordRefreshControls'
 
 const categories: Record<CommunityCategory, string> = { all: 'All updates', patches: 'Patch notes', highlights: 'Highlights', issues: 'Bug reports', classes: 'Class discussions', guides: 'Guides', events: 'Guild events' }
 function checkedTime(value?: string | null): string {
@@ -18,7 +20,7 @@ function RefreshNotices({ snapshot }: { snapshot?: CommunityFeed['snapshot'] }):
 export default function CommunityView(): JSX.Element {
   const [feed, setFeed] = useState<CommunityFeed | null>(null)
   const [scope, setScope] = useState<'all' | 'official' | 'guild'>('all')
-  const [category, setCategory] = useState<CommunityCategory>('all')
+  const [category, setCategory] = useState<CommunityCategory>('highlights')
   const [query, setQuery] = useState('')
   const [offset, setOffset] = useState(0)
   const [busy, setBusy] = useState(true)
@@ -35,13 +37,14 @@ export default function CommunityView(): JSX.Element {
     const timer = setTimeout(refresh, query ? 250 : 0)
     const interval = setInterval(refresh, 60_000)
     window.addEventListener('focus', refresh)
-    return () => { alive = false; clearTimeout(timer); clearInterval(interval); window.removeEventListener('focus', refresh) }
+    window.addEventListener('oracle-refresh-complete', refresh)
+    return () => { alive = false; clearTimeout(timer); clearInterval(interval); window.removeEventListener('focus', refresh); window.removeEventListener('oracle-refresh-complete', refresh) }
   }, [scope, category, query, offset])
   return <Box sx={{ p: 3, height: '100%', overflow: 'auto' }} data-testid="community-view"><Stack spacing={2} sx={{ maxWidth: 1150, mx: 'auto' }}>
-    <Box><Typography variant="h4">What’s New</Typography><Typography color="text.secondary" sx={{ mt: 1 }}>EQL updates and conversations, with a path back to the original post.</Typography></Box>
+    <Box><Typography variant="h4">What’s New</Typography><Typography color="text.secondary" sx={{ mt: 1 }}>Must-read EQL news and opportunities, with the evidence one click away.</Typography></Box>
     <Paper variant="outlined" sx={{ p: 2 }}><AskOracle initialScope="discord" /></Paper>
     {feed && <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap"><Chip size="small" variant="outlined" label={`${feed.snapshot.recordCount.toLocaleString()} saved Discord records`} /><Chip size="small" variant="outlined" label={`Last checked: ${checkedTime(feed.snapshot.lastCheckedAt)}`} /><Chip size="small" variant="outlined" label={`Latest saved message: ${sourceDate(feed.snapshot.latestMessageDate)}`} /><Chip size="small" variant="outlined" label={`Package assembled: ${sourceDate(feed.snapshot.exportedAt)}`} /></Stack>}
-    <Typography variant="caption" color="text.secondary">Discord checks: 7 a.m., 3 p.m. and 9 p.m. Eastern. Updates appear automatically after each completed refresh.</Typography>
+    <DiscordRefreshControls onError={() => setError('The background check could not start. Try again in a moment.')} />
     <RefreshNotices snapshot={feed?.snapshot} />
     <Alert severity="info">This is a saved Discord snapshot. “Official server” identifies where a post appeared; it does not verify a player’s claim. Guild shop prices are historical posts.</Alert>
     <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
@@ -53,19 +56,12 @@ export default function CommunityView(): JSX.Element {
       </TextField>
       <TextField size="small" fullWidth label="Search updates" value={query} onChange={e => { setQuery(e.target.value); setOffset(0) }} slotProps={{ htmlInput: { maxLength: 200, 'data-testid': 'community-search' } }} />
     </Stack>
+    {category === 'highlights' && <Typography variant="body2" color="text.secondary">Highlights explain what changed and why you should care: limited rewards, major releases, unusual bonuses and useful opportunities. Routine questions and chat do not qualify. Quiet days may have no highlights.</Typography>}
     {busy && <Stack direction="row" spacing={1} role="status"><CircularProgress size={18} /><Typography>Loading saved updates…</Typography></Stack>}
     {error && <Alert severity="error">{error}</Alert>}
     {feed && !busy && <>
-      <Typography variant="body2" color="text.secondary" data-testid="community-count">{feed.total === 0 ? 'No matching updates.' : `${offset + 1} - ${Math.min(offset + 25, feed.total)} of ${feed.total.toLocaleString()} updates`}</Typography>
-      {feed.entries.map(entry => <Accordion key={entry.id} variant="outlined" disableGutters data-testid="community-entry">
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}><Stack spacing={0.5} sx={{ minWidth: 0 }}>
-          <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap"><Chip size="small" label={categories[entry.category]} /><Typography variant="caption" color="text.secondary">{sourceDate(entry.date)} · {entry.origin === 'official' ? 'Official server' : 'Guild server'} · {entry.author ?? 'Author unavailable'}</Typography></Stack>
-          <Typography variant="subtitle1" sx={{ overflowWrap: 'anywhere' }}>{entry.title}</Typography>
-        </Stack></AccordionSummary>
-        <AccordionDetails><Typography variant="caption" color="text.secondary">{entry.caveat}</Typography><Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', mt: 1 }}>{entry.body}</Typography>
-          {entry.url ? <Button sx={{ mt: 1 }} size="small" onClick={() => void window.eq.openOracleSource(entry.url ?? '').catch(() => setError('The source link could not be opened.'))}>Open original post</Button> : <Typography variant="caption">Source link unavailable</Typography>}
-        </AccordionDetails>
-      </Accordion>)}
+      <Typography variant="body2" color="text.secondary" data-testid="community-count">{feed.total === 0 ? (category === 'highlights' ? 'No must-read highlights in the current snapshot match these filters.' : 'No matching updates.') : `${offset + 1} - ${Math.min(offset + 25, feed.total)} of ${feed.total.toLocaleString()} ${category === 'highlights' ? 'highlights' : 'updates'}`}</Typography>
+      {feed.entries.map(entry => <CommunityEntryCard key={entry.id} entry={entry} category={categories[entry.category]} onError={() => setError('The source link could not be opened.')} />)}
       <Stack direction="row" spacing={1}><Button disabled={!offset} onClick={() => setOffset(Math.max(0, offset - 25))}>Previous</Button><Button disabled={offset + 25 >= feed.total} onClick={() => setOffset(offset + 25)}>Next</Button></Stack>
     </>}
     {feed && <Accordion disableGutters variant="outlined"><AccordionSummary expandIcon={<ExpandMoreIcon />}><Typography variant="subtitle2">Coverage and missing data</Typography></AccordionSummary><AccordionDetails><Stack spacing={1}>{feed.snapshot.coverageGaps.map(gap => <Typography variant="body2" color="text.secondary" key={gap}>{gap}</Typography>)}</Stack></AccordionDetails></Accordion>}
