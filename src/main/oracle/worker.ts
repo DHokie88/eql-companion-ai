@@ -3,6 +3,7 @@ import { catalogSources } from './catalog'
 import { createRuntimeDiscord } from './runtimeDiscord'
 import { OracleIndex } from './search'
 import type { CommunityFeed, CommunityQuery, OracleScope } from '../../shared/oracle'
+import { currentHighlight, highlightOrder } from './mustRead'
 
 const readDiscord = createRuntimeDiscord()
 let catalog: ReturnType<typeof catalogSources> | undefined
@@ -19,9 +20,10 @@ async function corpus(root: string): Promise<{ index: OracleIndex; feed: Communi
 }
 export function selectFeed(feed: CommunityFeed, query: CommunityQuery): CommunityFeed {
   const needle = (query.query ?? '').trim().toLowerCase().slice(0, 200)
-  const entries = feed.entries.filter(e => (!query.scope || query.scope === 'all' || query.scope === e.origin)
+  const entries = feed.entries.filter(e => currentHighlight(e) && (!query.scope || query.scope === 'all' || query.scope === e.origin)
     && (!query.category || query.category === 'all' || query.category === e.category)
-    && (!needle || `${e.title} ${e.body}`.toLowerCase().includes(needle)))
+    && (!needle || `${e.title} ${e.body} ${e.highlight?.whyItMatters ?? ''}`.toLowerCase().includes(needle)))
+  if (query.category === 'highlights') entries.sort(highlightOrder)
   const offset = Math.max(0, Math.floor(query.offset ?? 0))
   const limit = Math.min(50, Math.max(1, Math.floor(query.limit ?? 25)))
   return { entries: entries.slice(offset, offset + limit).map(e => ({ ...e, body: e.body.slice(0, 16000),

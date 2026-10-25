@@ -1,6 +1,8 @@
 import { loadDataset, loadManifest } from '../discordReferenceLoader'
 import type { CommunityEntry, CommunityFeed, OracleSource } from '../../shared/oracle'
 import type { DiscordDatasetName, DiscordRecord, DiscordReply } from '../../shared/discordReference'
+import bundledMustRead from '../data/discord/mustRead.json'
+import { mustReadEntries } from './mustRead'
 
 const names: DiscordDatasetName[] = ['patchNotes', 'knownIssues', 'classNotes', 'prices', 'events', 'guides', 'highlightsGuild', 'highlightsOfficial', 'qaAndFacts']
 export interface DiscordIndex { sources: OracleSource[]; feed: CommunityEntry[]; snapshot: CommunityFeed['snapshot'] }
@@ -15,7 +17,12 @@ function sourceOrigin(p: import('../../shared/discordReference').DiscordProvenan
 function attribution(origin: string, p: import('../../shared/discordReference').DiscordProvenance, caveat?: string): string {
   return `${origin === 'official' ? 'Official server' : 'Guild server'}; ${p.author ?? 'author missing'}; unverified Discord claim. ${caveat ?? ''}`
 }
-export async function discordIndex(loader = { loadManifest, loadDataset }): Promise<DiscordIndex> {
+function evidenceUrls(record: DiscordRecord): string[] {
+  const r = record as import('../../shared/discordReference').DiscordRecordTypes[DiscordDatasetName]
+  const replies = r.kind === 'thread' ? r.replies : r.kind === 'qa' ? [...r.answers, ...r.supportingEvidence] : []
+  return [...new Set(replies.map(reply => reply.provenance.url).filter((url): url is string => Boolean(url)))]
+}
+export async function discordIndex(loader = { loadManifest, loadDataset }, digest: unknown = bundledMustRead): Promise<DiscordIndex> {
   const manifest = await loader.loadManifest()
   const result: DiscordIndex = { sources: [], feed: [], snapshot: { recordCount: 0, exportedAt: '', latestMessageDate: null, coverageGaps: [] } }
   for (const name of names) {
@@ -27,6 +34,7 @@ export async function discordIndex(loader = { loadManifest, loadDataset }): Prom
     for (const [key, record] of Object.entries(envelope.records)) addRecord(result, { record, key, dataset: name })
   }
   result.snapshot.coverageGaps = [...new Set(result.snapshot.coverageGaps)]
+  result.feed.push(...mustReadEntries(digest, result.sources))
   result.feed.sort((a, b) => (b.date ?? '').localeCompare(a.date ?? '') || a.id.localeCompare(b.id))
   return result
 }
@@ -36,7 +44,7 @@ function describe(record: DiscordRecord): { title: string; text: string; categor
   switch (r.kind) {
     case 'patch-update': return { title: r.headline, text: [...r.notes, ...r.sections.flatMap(s => [s.name ?? '', ...s.items])].join('\n'), category: 'patches', date: r.date, caveat: `Update date ${r.date}; message date ${r.provenance.date ?? 'missing'}.` }
     case 'thread': return { title: r.title, text: threadText(r), category: 'issues', caveat: 'Community report and unverified replies; the text marks missing openers.' }
-    case 'highlight': return { title: highlightTitle(r.title, r.summary), text: r.sourceText, category: 'highlights' }
+    case 'highlight': return { title: highlightTitle(r.title, r.summary), text: r.sourceText }
     case 'guide': return { title: r.title, text: r.body, category: 'guides' }
     case 'guild-event': return { title: r.headline, text: r.body, category: 'events' }
     case 'price': return { title: r.item, text: `${r.amount} ${r.currency}${r.per ? ` per ${r.per}` : ''}. Market: ${r.market}. ${r.note ?? ''}. Historical guild post, NOT a current Bazaar price.` }
@@ -52,7 +60,7 @@ function addRecord(result: DiscordIndex, entry: { record: DiscordRecord; key: st
   const date = p.messageTimestamp ?? p.date
   if (date && date > (result.snapshot.latestMessageDate ?? '')) result.snapshot.latestMessageDate = date
   result.sources.push({ id: `discord:${dataset}:${key}`, kind: 'discord', title: d.title, text: d.text, url: p.url, date,
-    attribution: attribution(origin, p, d.caveat) })
+    attribution: attribution(origin, p, d.caveat), evidenceUrls: evidenceUrls(record) })
   if (!d.category) return
   result.feed.push({ id: `${dataset}:${key}`, title: d.title, body: d.text, date: d.date ?? date,
     url: p.url, author: p.author, origin, category: dataset === 'classNotes' ? 'classes' : d.category,

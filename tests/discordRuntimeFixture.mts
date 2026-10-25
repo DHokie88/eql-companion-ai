@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, stat, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { datasetNames } from '../src/main/discordReferenceLoader.ts'
 
@@ -16,6 +16,10 @@ export async function updateRuntimeCheck(root: string, lastCheckedAt: string | n
   for (const name of ['manifest', 'refresh', ...datasetNames]) {
     const relative = `runtime/${name}.json`
     files[relative] = createHash('sha256').update(await readFile(join(root, relative))).digest('hex')
+  }
+  const digestPath = join(root, 'runtime/mustRead.json')
+  if (await stat(digestPath).then(() => true, () => false)) {
+    files['runtime/mustRead.json'] = createHash('sha256').update(await readFile(digestPath)).digest('hex')
   }
   await writeFile(join(root, 'SHA256SUMS.json'), JSON.stringify({ algorithm: 'sha256', files }))
 }

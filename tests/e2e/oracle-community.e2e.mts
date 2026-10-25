@@ -1,6 +1,6 @@
 /** Built worker + IPC + UI. Real references; model failure is explicit, never simulated AI. */
 import assert from 'node:assert/strict'
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { buildIfStale, ROOT } from './appHarness.mjs'
 import { launchApp, mainWindow, makeUserData, removeUserData } from './appWindow.mjs'
@@ -14,6 +14,16 @@ mkdirSync(join(install, 'Logs'), { recursive: true })
 writeFileSync(join(profile, 'everquest-companion-progress.json'), JSON.stringify({ eqInstallDir: install }))
 const reference = join(install, 'reference/discord')
 await runtimeFixture(reference)
+// Synthetic editorial copy tests the digest UI without depending on a live event or the model.
+const savedHighlights = JSON.parse(readFileSync(join(reference, 'runtime/highlightsOfficial.json'), 'utf8'))
+const post = Object.values(savedHighlights.records)[0] as { provenance: { url: string } }
+const digest = { schemaVersion: 1, generatedAt: '2026-10-25T12:00:00Z', entries: [{ id: 'e2e-reward',
+  title: 'Seasonal quest — collect a limited-time illusion', summary: 'Complete the seasonal quest to collect the event reward.',
+  whyItMatters: 'The free reward is available for a limited time.', kind: 'limited-reward', confidence: 'community-report',
+  date: '2026-10-25T12:00:00Z', expiresAt: '2099-11-01T00:00:00Z',
+  sources: [{ url: post.provenance.url, label: 'Event post' }], relatedLinks: [] }] }
+writeFileSync(join(reference, 'runtime/mustRead.json'), JSON.stringify(digest))
+await updateRuntimeCheck(reference, '2026-10-24T12:45:28Z')
 const launched = await launchApp({ userData: profile, installDir: install })
 try {
   const page = await mainWindow(launched.app)
@@ -21,14 +31,23 @@ try {
   page.on('pageerror', error => errors.push(error.message))
   await page.locator('[data-testid="nav-community"]').click()
   await page.locator('[data-testid="community-entry"]').first().waitFor({ timeout: 40_000 })
+  await page.getByText('Seasonal quest — collect a limited-time illusion', { exact: true }).waitFor()
+  assert.equal(await page.locator('[data-testid="community-entry"]').count(), 1)
+  assert.match(await page.locator('[data-testid="community-entry"]').innerText(), /Why it matters:/)
+  assert.match(await page.locator('[data-testid="community-entry"]').innerText(), /Player reports · unverified/)
+  await page.getByRole('button', { name: 'Open original post', exact: true }).waitFor()
+  await page.getByRole('button', { name: 'Check now', exact: true }).waitFor()
+  assert.doesNotMatch(await page.locator('[data-testid="community-entry"]').innerText(), /paint job|Great Wolf|undead side/i)
   assert.match(await page.locator('[data-testid="community-view"]').innerText(), /[\d,]+ saved Discord records/)
   const initialSnapshot = await page.evaluate(() => window.eq.getCommunityFeed({}))
   assert.equal(initialSnapshot.snapshot.lastCheckedAt, '2026-10-24T12:45:28Z', JSON.stringify(initialSnapshot.snapshot))
   await page.getByText('Last checked: Oct 24, 8:45 AM EDT', { exact: true }).waitFor()
   await page.getByText(/Discord checks: 7 a.m., 3 p.m. and 9 p.m. Eastern/).waitFor()
   await updateRuntimeCheck(reference, '2026-10-24T19:00:00Z')
-  await page.evaluate(() => window.dispatchEvent(new Event('focus')))
+  await page.evaluate(() => window.dispatchEvent(new Event('oracle-refresh-complete')))
   await page.getByText('Last checked: Oct 24, 3:00 PM EDT', { exact: true }).waitFor()
+  await page.getByLabel('Show', { exact: true }).click()
+  await page.getByRole('option', { name: 'All updates', exact: true }).click()
   await page.locator('[data-testid="community-search"]').fill('loadout')
   await page.waitForFunction(() => document.querySelector('[data-testid="community-count"]')?.textContent?.includes('updates') && !document.querySelector('[role="status"]'))
   assert.ok(await page.locator('[data-testid="community-entry"]').count() > 0)
