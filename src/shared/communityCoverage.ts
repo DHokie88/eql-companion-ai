@@ -1,4 +1,4 @@
-export type CoverageSummary = {
+export interface CoverageSummary {
   id: string
   title: string
   detail: string

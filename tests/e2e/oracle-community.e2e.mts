@@ -45,6 +45,26 @@ try {
   assert.equal(initialSnapshot.snapshot.lastCheckedAt, '2026-10-24T12:45:28Z', JSON.stringify(initialSnapshot.snapshot))
   await page.getByText('Last checked: Oct 24, 8:45 AM EDT', { exact: true }).waitFor()
   await page.getByText(/Discord checks: 7 a.m., 3 p.m. and 9 p.m. Eastern/).waitFor()
+  // Answer the isolated profile's first-run notice before interacting with the footer.
+  const notice = page.getByTestId('telemetry-notice')
+  if (await notice.isVisible()) {
+    await page.getByTestId('telemetry-notice-off').click()
+    await notice.waitFor({ state: 'hidden' })
+  }
+  const coverage = page.getByTestId('community-coverage')
+  await coverage.getByRole('button', { name: 'Coverage notes', exact: true }).click()
+  await coverage.locator('.MuiCollapse-entered').waitFor()
+  for (const title of ['Historical channel access', 'Image-only prices', 'Poll results']) {
+    await coverage.getByText(title, { exact: true }).waitFor()
+    assert.equal(await coverage.getByText(title, { exact: true }).count(), 1)
+  }
+  assert.doesNotMatch(await coverage.innerText(), /HTTP 403|fifteen channels|user-token API/)
+  const coverageArtifacts = join(ROOT, 'tests/e2e/artifacts/oracle-community')
+  mkdirSync(coverageArtifacts, { recursive: true })
+  await coverage.evaluate(element => element.scrollIntoView({ block: 'end' }))
+  const coverageBounds = await coverage.boundingBox()
+  assert.ok(coverageBounds)
+  await page.screenshot({ path: join(coverageArtifacts, 'coverage.png'), clip: coverageBounds, timeout: 10_000 })
   await updateRuntimeCheck(reference, '2026-10-24T19:00:00Z')
   await page.evaluate(() => window.dispatchEvent(new Event('oracle-refresh-complete')))
   await page.getByText('Last checked: Oct 24, 3:00 PM EDT', { exact: true }).waitFor()

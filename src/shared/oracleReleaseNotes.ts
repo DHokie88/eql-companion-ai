@@ -21,6 +21,13 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.14.2',
+    date: '2026-10-25',
+    entries: [
+      { kind: 'fixed', text: 'Coverage notes now group repeated warnings into short explanations. Historical channel-access notes are clearly separated from current access, alongside the limits for image-only prices and poll results.' }
+    ]
+  },
+  {
     version: '0.14.1',
     date: '2026-10-25',
     entries: [
