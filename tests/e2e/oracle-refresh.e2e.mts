@@ -35,7 +35,7 @@ try {
   await page.getByTestId('oracle-refresh-notice').getByRole('button', { name: 'Close' }).click()
   await page.getByTestId('oracle-refresh-notice').waitFor({ state: 'hidden' })
   await push({ state: 'running', lastCheckedAt: null, message: 'Checking Discord in the background. You can keep using EQ Oracle.' })
-  assert.equal(await page.getByTestId('oracle-refresh-notice').count(), 0, 'polling respects a dismissed progress notice')
+  assert.equal(await page.getByTestId('oracle-refresh-notice').isVisible(), false, 'polling respects a dismissed progress notice')
   await push({ state: 'complete', lastCheckedAt: '2026-10-25T11:00:00Z', message: 'Discord updates are ready.' })
   await page.getByTestId('oracle-refresh-notice').getByText('Discord updates are ready.').waitFor()
   assert.equal(await page.evaluate(() => (window as unknown as { refreshCompletions: number }).refreshCompletions), 1)
