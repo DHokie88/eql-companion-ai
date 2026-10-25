@@ -4,6 +4,7 @@ import { DEFAULT_ORACLE_CONNECTION, ORACLE_IPC, oracleConnection, oracleQuestion
 import { closeOracleWorker, communityFeed, searchReferences } from '../oracle/client'
 import { completionText, requestLocalModel } from '../oracle/provider'
 import { groundedAnswer, oracleMessages, sourcesAnswer } from '../oracle/prompt'
+import { registerOracleRefresh } from '../oracle/refresh'
 
 let connectionStore: Store<{ connection: OracleConnection }> | undefined
 function settings(): Store<{ connection: OracleConnection }> {
@@ -60,6 +61,7 @@ async function testConnection(): Promise<OracleStatus> {
   } catch (error) { return { connection: c, available: false, message: error instanceof Error ? error.message : 'Could not reach the local model.' } }
 }
 export function registerOracleIpc(): void {
+  registerOracleRefresh(connection)
   ipcMain.handle(ORACLE_IPC.feed, (event, input: unknown) => { mainFrame(event); return communityFeed(feedQuery(input)) })
   ipcMain.handle(ORACLE_IPC.ask, ask)
   ipcMain.handle(ORACLE_IPC.cancel, (event, id: unknown) => {
