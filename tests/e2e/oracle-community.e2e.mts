@@ -29,7 +29,9 @@ try {
   const page = await mainWindow(launched.app)
   const errors: string[] = []
   page.on('pageerror', error => errors.push(error.message))
+  await page.locator('[data-testid="nav-community"]').getByText('New in EQL', { exact: true }).waitFor()
   await page.locator('[data-testid="nav-community"]').click()
+  await page.locator('[data-testid="community-view"]').getByRole('heading', { name: 'New in EQL', exact: true }).waitFor()
   await page.locator('[data-testid="community-entry"]').first().waitFor({ timeout: 40_000 })
   await page.getByText('Seasonal quest — collect a limited-time illusion', { exact: true }).waitFor()
   assert.equal(await page.locator('[data-testid="community-entry"]').count(), 1)

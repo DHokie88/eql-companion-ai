@@ -83,7 +83,7 @@ export const DEFAULT_VIEW: View = 'overview'
  * without naming it is a type error here, which is the only moment anyone would remember to.
  */
 export const VIEW_LABELS: Record<View, string> = {
-  community: 'What’s New',
+  community: 'New in EQL',
   oracle: 'Ask EQ Oracle',
   overview: 'Overview',
   combat: 'Combat',

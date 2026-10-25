@@ -41,7 +41,7 @@ export default function CommunityView(): JSX.Element {
     return () => { alive = false; clearTimeout(timer); clearInterval(interval); window.removeEventListener('focus', refresh); window.removeEventListener('oracle-refresh-complete', refresh) }
   }, [scope, category, query, offset])
   return <Box sx={{ p: 3, height: '100%', overflow: 'auto' }} data-testid="community-view"><Stack spacing={2} sx={{ maxWidth: 1150, mx: 'auto' }}>
-    <Box><Typography variant="h4">What’s New</Typography><Typography color="text.secondary" sx={{ mt: 1 }}>Must-read EQL news and opportunities, with the evidence one click away.</Typography></Box>
+    <Box><Typography variant="h4">New in EQL</Typography><Typography color="text.secondary" sx={{ mt: 1 }}>Must-read EQL news and opportunities, with the evidence one click away.</Typography></Box>
     <Paper variant="outlined" sx={{ p: 2 }}><AskOracle initialScope="discord" /></Paper>
     {feed && <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap"><Chip size="small" variant="outlined" label={`${feed.snapshot.recordCount.toLocaleString()} saved Discord records`} /><Chip size="small" variant="outlined" label={`Last checked: ${checkedTime(feed.snapshot.lastCheckedAt)}`} /><Chip size="small" variant="outlined" label={`Latest saved message: ${sourceDate(feed.snapshot.latestMessageDate)}`} /><Chip size="small" variant="outlined" label={`Package assembled: ${sourceDate(feed.snapshot.exportedAt)}`} /></Stack>}
     <DiscordRefreshControls onError={() => setError('The background check could not start. Try again in a moment.')} />
