@@ -190,24 +190,13 @@ jobs:
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          AZURE_SIGNING_ENDPOINT: ${{ vars.SIGNING_ENABLED == 'true' && secrets.AZURE_SIGNING_ENDPOINT || '' }}
-          AZURE_SIGNING_ACCOUNT: ${{ secrets.AZURE_SIGNING_ACCOUNT }}
-          AZURE_SIGNING_PROFILE: ${{ secrets.AZURE_SIGNING_PROFILE }}
-          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
         run: |
           # The sign hook calls Invoke-TrustedSigning, which lives in the TrustedSigning
           # PowerShell module and is NOT on the runner image. Install it only when signing
           # is actually on (v1.20.1's first build failed here with "not recognized").
-          if ($env:AZURE_SIGNING_ENDPOINT) {
-            Install-Module -Name TrustedSigning -Force -Scope CurrentUser -Repository PSGallery
-            Write-Host "Code signing: Azure Trusted Signing enabled."
-          } else {
-            Write-Host "Code signing: skipped (SIGNING_ENABLED is not true)."
-          }
+          Write-Host "Code signing: off. EQ Oracle does not use the EQ Zera certificate."
           npm run build
-          npx electron-builder --win --publish always
+          npx electron-builder --win --publish never
 
       # --- main-channel bridge, asset assertion, then the atomic flip ---------
       #

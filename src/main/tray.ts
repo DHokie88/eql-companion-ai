@@ -170,7 +170,7 @@ function requestQuit(): void {
  */
 function buildMenu(prefs: CloseToTrayPrefs): Menu {
   return Menu.buildFromTemplate([
-    { label: 'Open EQ Zera', click: restoreMainWindow },
+    { label: 'Open EQ Oracle', click: restoreMainWindow },
     {
       label: 'Keep running in the tray when the window closes',
       type: 'checkbox',
@@ -311,7 +311,7 @@ function createTrayNoticeWindow(): BrowserWindow {
     backgroundMaterial: 'none',
     // The app's own background, so the first frame is never a white rectangle beside the taskbar.
     backgroundColor: PALETTE.bg,
-    title: 'EQ Zera',
+    title: 'EQ Oracle',
     // ONE definition of the trust boundary, for every window in this app (windows.ts).
     webPreferences: WEB_PREFERENCES(join(__dirname, '../preload/tray.js'))
   })
@@ -372,7 +372,7 @@ export function installCloseToTray(): void {
   try {
     const icon = nativeImage.createFromPath(trayIconAsset)
     tray = new Tray(icon)
-    tray.setToolTip('EQ Zera')
+    tray.setToolTip('EQ Oracle')
     tray.on('click', restoreMainWindow)
     syncTrayMenu(getCloseToTray())
   } catch (err) {

@@ -1,6 +1,6 @@
-# EQ Zera
+# EQ Oracle
 
-**Website and download:** [eqzera.com](https://eqzera.com)
+Andrew's fork. Not published, and not signed. EQ Zera is the upstream project this fork started from (`github.com/Zeratfule/EQ-Zera`), not this project.
 
 A Windows desktop companion for **EverQuest Legends**. It reads the log file the game already
 writes and turns it into live views: a DPS meter, floating overlays, Plane of Sky quest tracking,
@@ -20,7 +20,7 @@ guide is [`AGENTS.md`](AGENTS.md) and is still the best map of the code.
 
 ## What changed in the fork
 
-- **Renamed** to EQ Zera (the upstream license reserves the original product name).
+- **Named EQ Oracle** on Andrew's fork. EQ Zera had already renamed away from everquest-companion because that upstream license reserves the original product name.
 - **The Z Engine.** The Rust log engine (`engine/`) is the fork's own line of development now: the
   process is `zengine.exe`, its cost on a real log is measured by `npm run engine:baseline` and
   recorded under `docs/zengine/`, and the program of work is in `docs/zengine/README.md`.

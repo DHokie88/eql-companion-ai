@@ -1,6 +1,6 @@
-appId: com.eqzera.app
-productName: EQ Zera
-copyright: Copyright © 2026 EQ Zera contributors. Based on everquest-companion, Copyright © 2026 Josh Moyers (FSL-1.1-MIT).
+appId: com.eqoracle.app
+productName: EQ Oracle
+copyright: Copyright © 2026 Andrew. Forked from EQ Zera, Copyright © 2026 Jack Thomas. Based on everquest-companion, Copyright © 2026 Josh Moyers (FSL-1.1-MIT).
 
 directories:
   buildResources: build
@@ -181,8 +181,8 @@ npmRebuild: false
 # SETUP.md, "Releasing" — all three say the same thing in the same words.
 publish:
   provider: github
-  owner: Zeratfule
-  repo: EQ-Zera
+  owner: DHokie88
+  repo: eql-companion-ai
 
 win:
   target:
@@ -191,13 +191,8 @@ win:
         - x64
   # Brand the exe + installer with our generated mark (scripts/gen-icon.mts).
   icon: build/icon.ico
-  # We sign+edit the exe so it carries the icon + version metadata (rcedit). This
-  # needs winCodeSign extracted into the electron-builder cache; on Windows that
-  # requires either Developer Mode (symlink privilege) OR the manual cache-seed
-  # workaround (see scripts/seed-wincodesign.ps1). CI builds are SIGNED via Azure
-  # Trusted Signing (account eqzera, profile eqzera-public; release.yml feeds the
-  # sign hook its endpoint only while the SIGNING_ENABLED repo variable is true);
-  # local `npm run dist` builds stay unsigned.
+  # signAndEditExecutable stamps the icon and version only. This fork does not
+  # sign. The EQ Zera Azure certificate is not ours.
   signAndEditExecutable: true
   # `sign` and `publisherName` MOVED UNDER signtoolOptions in electron-builder 26 —
   # they are no longer valid keys directly on `win` and the build refuses to start
@@ -208,44 +203,8 @@ win:
   #
   # NOTE the schema's one exclusion: signtoolOptions cannot be combined with
   # azureSignOptions. We were never going to — see the hook rationale below.
-  signtoolOptions:
-    # CUSTOM SIGN HOOK (not azureSignOptions): the built-in Azure path splices file
-    # paths into a pwsh -Command string UNQUOTED, so our space-bearing exe name
-    # ("EQ Legends Companion.exe") splits and signing fails with "File not found:
-    # ...\EQ" (upstream: @electron/windows-sign#45). The hook passes paths as real
-    # arguments instead. It self-skips when the AZURE_* env is absent, so local
-    # dist builds stay unsigned; CI injects the env and signs.
-    sign: scripts/azure-sign.cjs
-    # UPDATE SIGNATURE VERIFICATION - ON since 2026-09-09. The value is the subject CN of
-    # the Azure Trusted Signing certificate profile `eqzera-public` (account `eqzera`,
-    # individual public identity validation dabd72c6-44c7-4960-adea-f8abdba14ac4):
-    # "CN=Jack Thomas, O=Jack Thomas, L=Traverse City, S=mi, C=US". The certificates
-    # themselves rotate every few days; the CN does not, and the CN is what
-    # electron-updater compares. It was off from 2026-09-08 to 2026-09-09 (the history
-    # below is kept because it explains the shape of the release pipeline).
-    publisherName: Jack Thomas
-    #
-    # WHAT THE NAME DOES. app-builder-lib copies it into `app-update.yml`
-    # (PublishManager.getAppUpdatePublishConfiguration -> computedPublisherName),
-    # and electron-updater's NsisUpdater.verifySignature reads it from there:
-    # non-null means every downloaded update must carry a valid Authenticode
-    # signature from that exact publisher or the update is rejected with
-    # ERR_UPDATER_INVALID_SIGNATURE; NULL MEANS IT RETURNS IMMEDIATELY AND SKIPS
-    # ALL CHECKING (NsisUpdater.js:84-99).
-    #
-    # WHY IT WAS OFF, 2026-09-08 TO 2026-09-09. There was no certificate yet, so
-    # the hook self-skipped and every release was unsigned; with the name set, a
-    # live updater would have downloaded each build and refused it forever. The
-    # owner shipped self-update anyway on the sha512 check alone, with the GitHub
-    # account as the trust root, stated in SECURITY.md. Installs from that window
-    # carry no publisher name in app-update.yml, so they accept the first signed
-    # update; from v1.20.1 on every update must carry this publisher's signature.
-    #
-    # WHY THE NAME IS WRITTEN BY HAND. computedPublisherName falls through to a
-    # CSC_LINK certificate's subject CN when there is one; the Azure hook never
-    # gives app-builder-lib a certificate to inspect, so without this line no
-    # name would reach app-update.yml and verification would silently skip.
-
+  # EQ Oracle does not use the EQ Zera certificate. No sign hook and no publisherName,
+  # so a build is unsigned and the updater does not demand Jack Thomas's signature.
 # One-click installer (Discord model): double-click installs per-user under
 # %LOCALAPPDATA%\Programs (no UAC prompt), then launches. Friendly for friends
 # who don't want an install wizard. Uninstall keeps app data (settings/logs).
@@ -256,5 +215,5 @@ nsis:
   deleteAppDataOnUninstall: false
   createDesktopShortcut: true
   createStartMenuShortcut: true
-  shortcutName: EQ Zera
-  artifactName: eq-zera-Setup-${version}.${ext}
+  shortcutName: EQ Oracle
+  artifactName: eq-oracle-Setup-${version}.${ext}

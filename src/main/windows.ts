@@ -372,7 +372,7 @@ export function createMainWindow(): void {
     // native drag/double-click-maximize via -webkit-app-region on the bar. Keep
     // backgroundColor + min sizes + bounds so the rest of the window UX is intact.
     frame: false,
-    title: 'EQ Zera',
+    title: 'EQ Oracle',
     backgroundColor: PALETTE.bg,
     webPreferences: {
       ...WEB_PREFERENCES(join(__dirname, '../preload/index.js')),

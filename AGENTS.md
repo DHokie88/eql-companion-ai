@@ -1,4 +1,4 @@
-# AGENTS.md — EQ Legends Companion
+# AGENTS.md — EQ Oracle
 
 Distilled operating manual. Per-task history lives in `git log` and Linear;
 this file holds only repeatable rules and load-bearing design. Long-form war
@@ -29,7 +29,7 @@ archive. Layout: `src/main` (Node), `src/preload`, `src/renderer`,
 `src/shared`, `tests/`, `scripts/`. Per-surface detail:
 docs/agents-archive.md.
 
-- Repo: `C:\Users\jackt\EQ Zera\app` (public: github.com/Zeratfule/EQ-Zera).
+- Repo: `/home/andrew/eql-companion-ai` on aw, `Z:\eql-companion-ai` from AORUS. Origin: `github.com/DHokie88/eql-companion-ai`. This fork is EQ Oracle and is Andrew's. Upstream is EQ Zera at `github.com/Zeratfule/EQ-Zera`, which is not this project.
 - Game log: `C:\Users\Public\Daybreak Game Company\Installed Games\EverQuest
   Legends\Logs\eqlog_<Char>_<server>.txt` — but the path is auto-discovered +
   Settings-overridable now; NEVER hardcode, route through
