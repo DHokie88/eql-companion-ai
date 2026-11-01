@@ -1,6 +1,9 @@
 // Central registry of IPC channel names so main/preload/renderer stay in sync.
 
 export const IPC = {
+  loadoutsGet: 'loadouts:get',
+  loadoutsUpdate: 'loadouts:update',
+  loadoutsCapture: 'loadouts:capture',
   spellLibraryModifierContext: 'spellLibrary:modifierContext',
   spellLibraryUpdateModifiers: 'spellLibrary:updateModifiers',
   spellLibraryModifiersChanged: 'spellLibrary:modifiersChanged',

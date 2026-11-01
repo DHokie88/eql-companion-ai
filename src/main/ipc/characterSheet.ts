@@ -1,3 +1,5 @@
+import { activeWikiCache, ensureWikiDatasetLoaded } from '../wikiDataset'
+import { mergeWikiItems } from '../wikiDatasetCodec'
 // IPC: the CHARACTER SHEET's door (JOS-45) — the armory grid, the gear sum, and the carry-all.
 //
 // IT WAS GATED, AND SINCE JOS-327 IT IS NOT. This handler used to be registered only when
@@ -52,10 +54,15 @@ function itemModels(): ItemModelsFile {
 }
 
 let index: Map<string, ItemDbEntry> | null = null
+let cacheIdentity: ReturnType<typeof activeWikiCache> | undefined
 
 /** The name→record index, built on first use and kept for the process's life (planner precedent). */
 function itemIndex(): Map<string, ItemDbEntry> {
-  index ??= buildItemDbIndex(itemsJson as unknown as ItemDbFile)
+  const cache = activeWikiCache()
+  if (index === null || cacheIdentity !== cache) {
+    cacheIdentity = cache
+    index = buildItemDbIndex(mergeWikiItems(itemsJson as unknown as ItemDbFile, cache))
+  }
   return index
 }
 
@@ -144,5 +151,8 @@ export function buildCharacterSheet(): CharacterSheet | null {
 }
 
 export function registerCharacterSheetIpc(): void {
-  ipcMain.handle(IPC.characterSheet, (): CharacterSheet | null => buildCharacterSheet())
+  ipcMain.handle(IPC.characterSheet, async (): Promise<CharacterSheet | null> => {
+    await ensureWikiDatasetLoaded()
+    return buildCharacterSheet()
+  })
 }

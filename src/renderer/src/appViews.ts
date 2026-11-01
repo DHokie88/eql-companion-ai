@@ -47,7 +47,7 @@ export type View =
   // JOS-72), and `KNOWN_VIEWS` below drops the string itself in a build or a checkout without
   // it, so a persisted 'triage' can never leave anyone staring at an empty content area.
   | 'triage'
-  // The CHARACTER SHEET (src/renderer/src/features/character/**) — the gear area's LAST TAB: what
+  // The CHARACTER SHEET (src/renderer/src/features/character/**) — the gear area's actual-equipment tab: what
   // you are wearing right now, read out of the newest `/outputfile inventory` dump, plus the
   // searchable ledger of everything else that dump lists. It was UNRELEASED from JOS-45 (a
   // compile-time strip behind `UNRELEASED`, absent from every packaged build) until the owner
@@ -187,7 +187,7 @@ export function loadView(): View {
 // (appRouting.ts / navOrigin.ts / backTargets.ts) keeps its semantics to the letter — a tab click
 // is MANUAL navigation and clears the parked trail, which is what a nav-row click always did.
 //
-// THE ORDER IS THE TAB BAR'S ORDER, and Character is LAST on purpose: it is the only member that
+// THE ORDER IS THE TAB BAR'S ORDER. Andrew selected the search → actual gear → build → wishlist workflow on 2026-11-01. Earlier ordering rationale follows: it is the only member that
 // is not a shopping question. (It was also the one the review gate could still take away — JOS-327
 // released it, and the order is unchanged because the first reason was always the real one.)
 
@@ -198,7 +198,7 @@ export const GEAR_TAB_KEY = 'eq.gear.tab'
 export const DEFAULT_GEAR_TAB: View = 'gear'
 
 /**
- * The four faces, in tab order — FILTERED BY WHAT THIS BUILD CAN RENDER.
+ * The gear workflow, in tab order — FILTERED BY WHAT THIS BUILD CAN RENDER.
  *
  * Deriving the roster from `KNOWN_VIEWS` rather than re-spelling a per-view gate is what keeps the
  * two lists from disagreeing: a tab appears exactly when the build can draw the view behind it.
@@ -206,11 +206,8 @@ export const DEFAULT_GEAR_TAB: View = 'gear'
  * above, no edit down here, and no window in which the bar offered a tab that mounts nothing.
  */
 export const GEAR_AREA_VIEWS: readonly View[] = (
-  // Character sits LEFT of Wish list, in the run with everything else (owner ruling 2026-08-13:
-  // the right-pushed placement hid the tab well enough that the owner reported it missing).
-  // Crafting is LAST, after Wish list: it is the only face that reads the recipe corpus rather
-  // than the item one, and it is the one you open when the shopping questions already have answers.
-  ['gear', 'build', 'planner', 'character', 'wishlist', 'crafting'] as const
+  // Search, saved equipment, planning, farming, exaltations, then recipes.
+  ['gear', 'character', 'build', 'wishlist', 'planner', 'crafting'] as const
 ).filter((v) => (KNOWN_VIEWS as readonly View[]).includes(v))
 
 /** Is this view drawn inside the gear area? (⇒ the nav row reads selected, the tab bar is up.) */

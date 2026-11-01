@@ -17,6 +17,7 @@ import { equipSlotOf, PAIRED_SLOTS, type PlanSlotId } from '../planner/types'
 import { itemScore, type BuildWeights } from './profiles'
 
 export interface BuildContext {
+  score?: (row: GearRow) => number
   classes: readonly ClassAbbr[]
   weights: BuildWeights
   /** rows the current filters exclude (out of era, not owned, …) */
@@ -46,7 +47,7 @@ export function candidatesForCell(rows: readonly GearRow[], cell: PlanSlotId, ct
     if (slot !== null && !row.slots.includes(slot)) continue
     if (!wearable(row, ctx.classes)) continue
     if (ctx.excluded?.(row)) continue
-    out.push({ row, score: itemScore(row.stats, ctx.weights) })
+    out.push({ row, score: ctx.score ? ctx.score(row) : itemScore(row.stats, ctx.weights) })
   }
   out.sort((a, b) => b.score - a.score || a.row.name.localeCompare(b.row.name))
   return out
@@ -55,9 +56,9 @@ export function candidatesForCell(rows: readonly GearRow[], cell: PlanSlotId, ct
 export type BuildSet = ReadonlyMap<PlanSlotId, GearRow | null>
 
 /** The set's score under the weights: the sum over its filled cells. */
-export function buildScore(set: BuildSet, weights: BuildWeights): number {
+export function buildScore(set: BuildSet, weights: BuildWeights, score?: (row: GearRow) => number): number {
   let total = 0
-  for (const row of set.values()) if (row) total += itemScore(row.stats, weights)
+  for (const row of set.values()) if (row) total += score ? score(row) : itemScore(row.stats, weights)
   return total
 }
 
@@ -99,7 +100,7 @@ export function upgradesFor(rows: readonly GearRow[], set: BuildSet, cells: read
   for (const row of set.values()) if (row) worn.add(row.key)
   for (const cell of cells) {
     const current = set.get(cell) ?? null
-    const currentScore = current ? itemScore(current.stats, ctx.weights) : 0
+    const currentScore = current ? (ctx.score ? ctx.score(current) : itemScore(current.stats, ctx.weights)) : 0
     const options: CellUpgrade['options'] = []
     for (const c of candidatesForCell(rows, cell, ctx)) {
       if (options.length >= perCell) break

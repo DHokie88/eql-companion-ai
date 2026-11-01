@@ -1,3 +1,4 @@
+import { buildStrategiesSection } from '../preferences/BuildStrategiesSetting'
 // THE BUILD TAB (EQ Zera, 2026-09-06) — the character builder, in the gear area beside Gear.
 //
 // WHAT IT ANSWERS. "What am I wearing, what is it worth, and what should I swap in to be tankier,
@@ -19,8 +20,9 @@
 // SWAPS ARE A SANDBOX. "Swap in" replaces a cell in the set the meters read; nothing is written
 // anywhere, and Reset puts the dump back. Every item name links out to the Loot drill-down.
 
-import type { JSX } from 'react'
-import { Chip, FormControlLabel, Paper, Stack, Switch, Typography } from '@mui/material'
+import { useState, type JSX } from 'react'
+import { Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, Paper, Stack, Switch, Typography } from '@mui/material'
+import { LoadoutBar } from '../loadouts/LoadoutBar'
 import { BuildMeters } from './BuildMeters'
 import { BuildSetPanel, BuildUpgradesPanel } from './BuildPanels'
 import { FarmPanel } from './FarmPanel'
@@ -46,7 +48,7 @@ function Toolbar({ build }: { build: BuildState }): JSX.Element {
         label={<Typography variant="caption">Owned or looted only</Typography>}
       />
       <Typography variant="caption" color="text.disabled" sx={{ ml: 'auto' }}>
-        your inventory dump · {outputAgeLabel(build.exportedAt)}
+        saved equipment · {outputAgeLabel(build.exportedAt)}
       </Typography>
     </Stack>
   )
@@ -74,6 +76,7 @@ export default function BuildView({
   onOpenMob?: (t: { mob: string }) => void
 }): JSX.Element {
   const build = useBuild()
+  const [editingStrategies, setEditingStrategies] = useState(false)
   if (!build.ready) {
     return (
       <Typography variant="caption" color="text.disabled">
@@ -83,7 +86,12 @@ export default function BuildView({
   }
   return (
     <Stack spacing={1.5} sx={{ height: '100%', minHeight: 0 }} data-testid="build-view">
-      <Toolbar build={build} />
+      <LoadoutBar />
+      <Stack direction="row" spacing={1} alignItems="center"><Toolbar build={build} /><Button onClick={() => setEditingStrategies(true)} data-testid="build-edit-strategies">Edit strategies</Button></Stack>
+      <Dialog open={editingStrategies} onClose={() => setEditingStrategies(false)} maxWidth="md" fullWidth>
+        <DialogTitle>Build strategies</DialogTitle><DialogContent>{buildStrategiesSection().items[0].content}</DialogContent>
+        <DialogActions><Button onClick={() => setEditingStrategies(false)}>Close</Button></DialogActions>
+      </Dialog>
       {!build.hasDump && <NoDump />}
       <BuildMeters build={build} />
       <Stack direction="row" spacing={1.5} sx={{ flexGrow: 1, minHeight: 0 }}>

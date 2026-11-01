@@ -21,6 +21,15 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.17.0',
+    date: '2026-11-01',
+    entries: [
+      { kind: 'new', text: 'Five saved loadouts connect Character, Build and Wishlist. Follow your confirmed live classes or select a different loadout to plan; save actual equipment separately from Build experiments.' },
+      { kind: 'new', text: 'Configure five named build strategies with stat weights, candidate minimums and score caps. Each loadout remembers its chosen strategy and planned swaps; add missing upgrades to its wishlist.' },
+      { kind: 'changed', text: 'Gear tabs now follow your workflow: Gear, Character, Build, Wishlist, Exaltations, Crafting.' }
+    ]
+  },
+  {
     version: '0.16.0',
     date: '2026-11-01',
     entries: [

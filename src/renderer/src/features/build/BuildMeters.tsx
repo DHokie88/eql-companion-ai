@@ -3,8 +3,11 @@
 // three. Segmented bars, the console health-bar look the theme gives every LinearProgress.
 
 import type { JSX } from 'react'
-import { Box, LinearProgress, Paper, Stack, Tooltip, Typography } from '@mui/material'
-import { BUILD_PROFILES, PROFILE_LABEL, SOLO_AXES, SOLO_AXIS_LABEL, type BuildProfile } from '../../../../shared/build/profiles'
+import { LinearProgress, Paper, Stack, Typography } from '@mui/material'
+import { meterPercent } from '@shared/build/profiles'
+import { strategyItemScore, strategyWeights } from '@shared/build/strategies'
+import { buildScore } from '@shared/build/optimizer'
+import type { GearRow } from '@shared/planner/gear'
 import { FONTS, PALETTE } from '../../../../shared/palette'
 import type { BuildState } from './useBuild'
 
@@ -20,7 +23,7 @@ function Gauge({
   testId
 }: {
   label: string
-  value: number
+  value: number | null
   note: string
   color: string
   selected?: boolean
@@ -35,7 +38,7 @@ function Gauge({
       sx={{
         p: 1.25,
         flex: 1,
-        minWidth: 150,
+        minWidth: 120,
         cursor: onSelect ? 'pointer' : 'default',
         borderColor: selected ? color : undefined,
         boxShadow: selected ? `0 0 12px ${color}55` : 'none'
@@ -44,12 +47,12 @@ function Gauge({
       <Typography variant="caption" className="eq-display-label" sx={TILE_TITLE}>
         {label}
       </Typography>
-      <Typography sx={{ fontFamily: FONTS.mono, fontSize: 28, lineHeight: 1, color }}>{value}%</Typography>
-      <LinearProgress
+      <Typography sx={{ fontFamily: FONTS.mono, fontSize: 28, lineHeight: 1, color }}>{value === null ? '-' : `${value}%`}</Typography>
+      {value !== null && <LinearProgress
         variant="determinate"
         value={value}
         sx={{ mt: 0.75, '& .MuiLinearProgress-bar': { backgroundImage: 'none', backgroundColor: color } }}
-      />
+      />}
       <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mt: 0.5 }} noWrap>
         {note}
       </Typography>
@@ -57,35 +60,23 @@ function Gauge({
   )
 }
 
-const PROFILE_COLOR: Record<BuildProfile, string> = { tank: PALETTE.cyan, dps: PALETTE.red, heal: PALETTE.green }
+
 
 export function BuildMeters({ build }: { build: BuildState }): JSX.Element {
-  const kitLine = SOLO_AXES.map((a) => `${SOLO_AXIS_LABEL[a]} ${Math.round(build.kit[a] * 100)}`).join(' · ')
-  return (
-    <Stack direction="row" spacing={1.5} useFlexGap flexWrap="wrap" data-testid="build-meters">
-      {BUILD_PROFILES.map((p) => (
-        <Gauge
-          key={p}
-          testId={`build-meter-${p}`}
-          label={PROFILE_LABEL[p]}
-          value={build.meters[p]}
-          color={PROFILE_COLOR[p]}
-          selected={build.profile === p}
-          onSelect={() => build.setProfile(p)}
-          note={build.profile === p ? 'selected - upgrades below read this way' : 'click to optimize for this'}
-        />
-      ))}
-      <Tooltip title={`Class kit: ${kitLine}. Solo is 45% kit, 55% gear (tank, DPS, and healing as far as the kit can heal).`}>
-        <Box sx={{ flex: 1, minWidth: 150, display: 'flex' }}>
-          <Gauge
-            testId="build-meter-solo"
-            label="Solo capability"
-            value={build.solo.percent}
-            color={PALETTE.accent}
-            note={`kit ${build.solo.kitPercent} · gear ${build.solo.gearPercent}`}
-          />
-        </Box>
-      </Tooltip>
+  return <Stack spacing={0.5}>
+    <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" data-testid="build-meters">
+      {build.strategies.map((strategy) => {
+        const weights = strategyWeights(strategy, build.classes)
+        const score = (row: GearRow): number => strategyItemScore(row.stats, strategy, build.classes)
+        const current = buildScore(build.set, weights, score)
+        const base = strategy.base
+        const id = base === 'custom' ? 'custom' : base
+        return <Gauge key={strategy.id} label={strategy.name} value={strategy.id === build.strategy.id ? meterPercent(build.score.current, build.score.best) : null}
+          color={base === 'dps' ? PALETTE.red : base === 'heal' ? PALETTE.green : PALETTE.cyan}
+          selected={strategy.id === build.strategy.id} onSelect={() => build.setStrategy(strategy.id)}
+          note={strategy.id === build.strategy.id ? `Selected · score ${Math.round(current)}` : 'Choose these criteria'} testId={`build-meter-${id}`} />
+      })}
     </Stack>
-  )
+    <Typography variant="caption" color="text.secondary">Scores follow your criteria and available item data. Configure the five strategies in Preferences → Build strategies.</Typography>
+  </Stack>
 }

@@ -1,3 +1,4 @@
+import { useLoadouts } from '../../loadouts/useLoadouts'
 // character/share/useCharacterShare — everything the Share dialog needs, assembled once.
 //
 // It pulls four already-existing reads together and projects them into ONE wire value
@@ -48,7 +49,9 @@ export interface CharacterShareState {
 export function useCharacterShare(): CharacterShareState {
   const { sheet, ready } = useCharacterSheet()
   const build = useBuild()
-  const classes = useResolvedClasses()
+  const liveClasses = useResolvedClasses()
+  const loadouts = useLoadouts()
+  const classes = shareClasses(loadouts.selected, liveClasses)
   const prefs = useModelPrefs()
   const who = useModule<CharacterSnap>('character')
   const prog = useModule<ProgressionSnap>('progression')
@@ -66,7 +69,7 @@ export function useCharacterShare(): CharacterShareState {
   // dialog would encode a share string sixty times a second.
   const { tank, dps, heal } = build.meters
   const solo = build.solo.percent
-  const measurable = build.ready && build.hasDump && build.score.best > 0
+  const measurable = build.ready && build.hasDump && build.score.best > 0 && build.swaps.size === 0 && loadouts.selected === null
   const scores: ShareScores | undefined = useMemo(
     () => (measurable ? { tank, dps, heal, solo } : undefined),
     [measurable, tank, dps, heal, solo]
@@ -82,11 +85,11 @@ export function useCharacterShare(): CharacterShareState {
             look: { race: prefs.race, sex: prefs.sex, ...(prefs.face === undefined ? {} : { face: prefs.face }) },
             classes,
             name,
-            level: level?.level,
+            level: loadouts.selected ? undefined : level?.level,
             scores,
             capturedAt
           }),
-    [sheet, prefs.race, prefs.sex, prefs.face, classes, name, level?.level, scores, capturedAt]
+    [sheet, prefs.race, prefs.sex, prefs.face, classes, name, level?.level, scores, capturedAt, loadouts.selected]
   )
 
   const [text, setText] = useState('')
@@ -116,3 +119,5 @@ export function useCharacterShare(): CharacterShareState {
 
   return { profile, text, summary, image, ready }
 }
+
+function shareClasses(selected: ReturnType<typeof useLoadouts>['selected'], live: ReturnType<typeof useResolvedClasses>) { return selected?.capture?.classes ?? live }

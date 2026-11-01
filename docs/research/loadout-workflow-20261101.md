@@ -1,0 +1,13 @@
+# Five-loadout gear workflow - EQ Oracle 0.17.0
+
+Andrew-approved workflow: Gear > Character > Build > Wishlist > Exaltations > Crafting.
+
+- Gear remains general item search. Character has five per-character loadout slots, manual class mixes and explicit saved equipment snapshots. Save current equipment reads a fresh inventory export. It does not equip items in game. A snapshot retains its capture classes and date when a preset is edited.
+- Follow live matches a unique complete class set confirmed by the own-character /who or a manual class correction. Unknown and duplicate matches are left unselected. Clicking a slot pins planning until Follow live; restarting defaults to Follow live. The first confirmed mix initializes LO1 only when all five slots are empty.
+- Build uses the selected loadout's compatible saved equipment and independently persisted hypothetical swaps. Editing plans cannot overwrite actual equipment. Classes changed since capture require a new compatible capture or live inventory baseline.
+- Five character-wide strategies start as Tank, DPS, Healer, Solo and Custom. Rename them, set weights, per-item minimums and per-item score caps, or restore one strategy. Each loadout remembers its choice. Zero disables a weight, blank restores starter behavior, and a required unknown stat fails its minimum. These are preference scores, not measured DPS/healing. Solo starts as a weighted blend, not a validated game model.
+- Missing Build upgrades can be linked to multiple loadouts while the underlying wishlist remains one shared acquisition list. Wishlist can show all wishes or the selected slot's links; adding there also links the selected slot. Global removal removes an item from every visible list. Owned inventory and carry/bank remain shared across slots.
+
+Reference: https://eqlegendstools.com/char-sheet/ was inspected for public workflow ideas (class selection, weight controls, BiS and shopping list). No source code was copied. This feature extends Oracle's existing scorer, inventory transport and wishlist rather than replacing Oracle with another application. The earlier donor analysis remains in eoz-eqltools-20261101.md.
+
+Implementation baseline: 2a743ccb676296b6a630b882498cd4c9a9a91b14. Engine source is unchanged; the Windows release binary has a separate provenance receipt. Verification and Codeweaver candidate/acceptance records are retained under the dated review and composition workspaces. Two bounded Grok implementation attempts reached their turn limits without a delivered implementation; their failures and one unused partial helper were preserved, and Codex completed the work after the CLI processes stopped.

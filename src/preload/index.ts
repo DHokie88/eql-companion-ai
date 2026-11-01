@@ -1,3 +1,4 @@
+import { loadoutsApi } from './loadouts'
 import { contextBridge, ipcRenderer } from 'electron'
 import { IPC } from '../shared/ipc'
 import { windowsApi } from './windows'
@@ -296,6 +297,7 @@ export interface RendererErrorReport {
 }
 
 const api = {
+  ...loadoutsApi,
   // The performance HUD's five methods (./perf.ts). Spread rather than inlined for file size
   // alone; on `window.eq` they are indistinguishable from every method written out below.
   ...perfBridge,
