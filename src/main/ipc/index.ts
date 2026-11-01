@@ -1,3 +1,4 @@
+import { registerLoadoutsIpc } from './loadouts'
 // ============================================================================
 // ipc/ — the main process's IPC surface, one module per domain.
 // ============================================================================
@@ -112,6 +113,7 @@ import { registerEngineLaunchIpc } from './engine'
 // deleting the flag beside it leaves the gate strictly more honest rather than weaker.
 
 export function registerIpc(): void {
+  registerLoadoutsIpc()
   registerOracleIpc()
   registerCharacterIpc()
   // UNGATED SINCE JOS-327. This line read `if (UNRELEASED) …` from JOS-45 until the owner released

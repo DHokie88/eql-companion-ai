@@ -13,6 +13,7 @@
 // answer for "no dump" is already `null` has no business turning any of them into a red box.
 
 import { useCallback, useEffect, useState } from 'react'
+import { useLoadouts } from '../loadouts/useLoadouts'
 import type { CharacterSheet } from '@shared/characterSheet'
 
 export interface CharacterSheetState {
@@ -22,7 +23,7 @@ export interface CharacterSheetState {
   ready: boolean
 }
 
-export function useCharacterSheet(): CharacterSheetState {
+export function useLiveCharacterSheet(): CharacterSheetState {
   const [state, setState] = useState<CharacterSheetState>({ sheet: null, ready: false })
 
   const read = useCallback((alive: () => boolean) => {
@@ -50,4 +51,15 @@ export function useCharacterSheet(): CharacterSheetState {
   }, [read])
 
   return state
+}
+
+/** Saved actual equipment is independent of Build's hypothetical swaps. Carry/bank remains shared. */
+export function useCharacterSheet(): CharacterSheetState {
+  const live = useLiveCharacterSheet()
+  const loadouts = useLoadouts()
+  const selected = loadouts.selected
+  if (!selected) return live
+  const capture = selected.capture
+  return { ready: live.ready && loadouts.ready,
+    sheet: capture ? { ...capture.sheet, carry: live.sheet?.carry ?? { rows: [], lanes: [] } } : selected.id === loadouts.live?.id ? live.sheet : null }
 }

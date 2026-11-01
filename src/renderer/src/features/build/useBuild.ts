@@ -1,3 +1,5 @@
+import { useBuildLoadout } from './useBuildLoadout'
+import { strategyAllows, strategyItemScore, strategyWeights, type BuildStrategy } from '@shared/build/strategies'
 // THE BUILD TAB'S STATE (EQ Zera, 2026-09-06): the worn set read off the inventory dump, the
 // swaps the player is trying, and everything the three profiles say about both — computed here,
 // drawn by the panels.
@@ -34,11 +36,10 @@ import { bestBuild, buildScore, upgradesFor, type BuildSet, type CellUpgrade } f
 // from the Zone Loot rows and the item page, and two spellings of "what am I wearing" would be two
 // answers to it. `BUILD_CELLS` and `WornUnknown` are re-exported below for this tab's importers.
 import { BUILD_CELLS, wornSet, type WornUnknown } from '../../../../shared/build/wornSet'
-import { useEraHidden, useGearClasses, useGearIndex, useGearOwnership, useOwnedOrLooted } from '../gear/gearData'
+import { useEraHidden, useGearIndex, useGearOwnership, useOwnedOrLooted } from '../gear/gearData'
 import { useRemembered } from '../gear/useAreaMemory'
 import { sanitizeBuildProfile } from '../gear/areaMemory'
 import { useEraOnly } from '../planner/plannerData'
-import { usePlannerInventory } from '../planner/plannerInventory'
 import { outputUpdatedMillis } from '../../lib/outputFreshness'
 
 export { BUILD_CELLS }
@@ -53,6 +54,13 @@ export interface BuildState {
   hasDump: boolean
   exportedAt: number | undefined
   classes: ClassAbbr[]
+  strategy: BuildStrategy
+  strategies: BuildStrategy[]
+  setStrategy: (id: string) => void
+  rowScore: (row: GearRow) => number
+  wished: ReadonlySet<string>
+  owned: (row: GearRow) => boolean
+  addWish: (row: GearRow) => void
   profile: BuildProfile
   setProfile: (p: BuildProfile) => void
   eraOnly: boolean
@@ -80,16 +88,13 @@ export interface BuildState {
 
 export function useBuild(): BuildState {
   const index = useGearIndex()
-  const { inventory, ready: inventoryReady } = usePlannerInventory()
-  const { classes } = useGearClasses()
+  const { classes, inventory, inventoryReady, strategy, strategies, swaps, setStrategy, swap, unswap, reset, wished, owned, addWish } = useBuildLoadout(index.rows)
   const { eraHidden } = useEraHidden()
   const [eraOnly, setEraOnly] = useEraOnly()
   const ownership = useGearOwnership()
   const { ownedOrLooted } = useOwnedOrLooted(ownership.map)
   const [ownedOnly, setOwnedOnly] = useState(false)
   const [profile, setProfile] = useRemembered<BuildProfile>('eq.build.profile', sanitizeBuildProfile)
-  const [swaps, setSwaps] = useState<ReadonlyMap<PlanSlotId, GearRow>>(() => new Map())
-
   const byKey = useMemo(() => new Map(index.rows.map((r) => [r.key, r])), [index.rows])
   const { worn, unknown } = useMemo(() => wornSet(inventory?.hosts ?? [], byKey), [inventory, byKey])
   const set = useMemo(() => {
@@ -99,8 +104,8 @@ export function useBuild(): BuildState {
   }, [worn, swaps])
 
   const excluded = useCallback(
-    (row: GearRow) => (eraOnly && eraHidden(row)) || (ownedOnly && !ownedOrLooted(row)),
-    [eraOnly, eraHidden, ownedOnly, ownedOrLooted]
+    (row: GearRow) => (eraOnly && eraHidden(row)) || (ownedOnly && !ownedOrLooted(row)) || !strategyAllows(row, strategy),
+    [eraOnly, eraHidden, ownedOnly, ownedOrLooted, strategy]
   )
 
   // Every profile's weights, current score and best reachable score — the three meters.
@@ -123,27 +128,16 @@ export function useBuild(): BuildState {
   const kit = useMemo(() => soloKit(classes), [classes])
   const solo = useMemo(() => soloReading(kit, meters), [kit, meters])
 
-  const weights = readings[profile].weights
+  const weights = strategyWeights(strategy, classes)
+  const rowScore = useCallback((row: GearRow) => strategyItemScore(row.stats, strategy, classes), [strategy, classes])
   const upgrades = useMemo(
-    () => upgradesFor(index.rows, set, BUILD_CELLS, { classes, weights, excluded, perCell: UPGRADES_PER_CELL }),
-    [index.rows, set, classes, weights, excluded]
+    () => upgradesFor(index.rows, set, BUILD_CELLS, { classes, weights, excluded, score: rowScore, perCell: UPGRADES_PER_CELL }),
+    [index.rows, set, classes, weights, excluded, rowScore]
   )
 
-  const swap = useCallback((cell: PlanSlotId, row: GearRow) => {
-    setSwaps((prev) => new Map(prev).set(cell, row))
-  }, [])
-  const unswap = useCallback((cell: PlanSlotId) => {
-    setSwaps((prev) => {
-      const next = new Map(prev)
-      next.delete(cell)
-      return next
-    })
-  }, [])
-  const reset = useCallback(() => {
-    setSwaps(new Map())
-  }, [])
 
   return {
+    strategy, strategies, setStrategy, rowScore, wished, owned, addWish,
     ready: index.ready && inventoryReady,
     hasDump: inventory !== null,
     exportedAt: outputUpdatedMillis(inventory?.loadedAt),
@@ -163,7 +157,7 @@ export function useBuild(): BuildState {
     reset,
     weights,
     meters,
-    score: { current: readings[profile].current, best: readings[profile].best },
+    score: { current: buildScore(set, weights, rowScore), best: buildScore(bestBuild(index.rows, BUILD_CELLS, { classes, weights, excluded, score: rowScore }), weights, rowScore) },
     kit,
     solo,
     upgrades

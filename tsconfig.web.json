@@ -72,6 +72,7 @@
     "src/preload/craftApi.ts",
     "src/preload/oracleApi.ts",
     "src/preload/wikiDataset.ts",
+    "src/preload/loadouts.ts",
     // …and `feedbackApi.ts` (the dark build's mail door), likewise.
     "src/preload/feedbackApi.ts",
     // …and `knowledge.ts` (the spell/item/mob lookups, JOS-293), likewise.

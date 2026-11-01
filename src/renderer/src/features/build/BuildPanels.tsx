@@ -7,9 +7,7 @@ import { Box, Button, Chip, IconButton, Paper, Stack, Typography } from '@mui/ma
 import CloseIcon from '@mui/icons-material/Close'
 import type { GearRow } from '@shared/planner/gear'
 import { planSlotLabel, type PlanSlotId } from '@shared/planner/types'
-import { itemScore } from '../../../../shared/build/profiles'
 import type { CellUpgrade } from '../../../../shared/build/optimizer'
-import { PROFILE_LABEL } from '../../../../shared/build/profiles'
 import { FONTS } from '../../../../shared/palette'
 import { itemIconUrl } from '../../lib/ItemWindow'
 // The item hover card, in this tab's one safe mode - see BuildItemName.tsx's header.
@@ -82,7 +80,7 @@ function SetRow({ cell, build, onOpenLoot }: { cell: PlanSlotId; build: BuildSta
       {swapped && <Chip size="small" label="trying" color="primary" variant="outlined" sx={{ height: 18, fontSize: 9 }} />}
       {row && (
         <Typography variant="caption" sx={{ ...SCORE_SX, color: 'text.secondary' }}>
-          {fmt(itemScore(row.stats, build.weights))}
+          {fmt(build.rowScore(row))}
         </Typography>
       )}
       {swapped && (
@@ -99,7 +97,7 @@ export function BuildSetPanel({ build, onOpenLoot }: { build: BuildState; onOpen
     <Paper variant="outlined" sx={{ p: 1.25, display: 'flex', flexDirection: 'column', minHeight: 0 }} data-testid="build-set">
       <Stack direction="row" alignItems="baseline" spacing={1} className="eq-card-rule" sx={{ pb: 0.5, mb: 0.75 }}>
         <Typography variant="caption" className="eq-display-label" sx={{ color: 'text.secondary', flexGrow: 1 }}>
-          Your set · {PROFILE_LABEL[build.profile]} score
+          Your set · {build.strategy.name} score
         </Typography>
         <Typography variant="caption" sx={{ ...SCORE_SX, color: 'primary.main' }} data-testid="build-score">
           {fmt(build.score.current)} / {fmt(build.score.best)} best
@@ -152,7 +150,10 @@ function UpgradeCell({ up, build, onOpenLoot }: { up: CellUpgrade; build: BuildS
             +{fmt(o.delta)}
           </Typography>
           <Button size="small" variant="outlined" onClick={() => build.swap(up.cell, o.row)} sx={{ flexShrink: 0 }}>
-            Swap in
+            Try in plan
+          </Button>
+          <Button size="small" onClick={() => build.addWish(o.row)} disabled={build.owned(o.row) || build.wished.has(o.row.key)} data-testid={`build-wish-${o.row.key}`}>
+            {build.owned(o.row) ? 'Owned' : build.wished.has(o.row.key) ? 'On wishlist' : 'Wishlist'}
           </Button>
         </Stack>
       ))}
@@ -166,7 +167,7 @@ export function BuildUpgradesPanel({ build, onOpenLoot }: { build: BuildState; o
   return (
     <Paper variant="outlined" sx={{ p: 1.25, display: 'flex', flexDirection: 'column', minHeight: 0 }} data-testid="build-upgrades">
       <Typography variant="caption" className="eq-display-label eq-card-rule" sx={{ display: 'block', color: 'text.secondary', pb: 0.5, mb: 0.75 }}>
-        Upgrades for {PROFILE_LABEL[build.profile]} · {withOptions.length} {withOptions.length === 1 ? 'slot' : 'slots'}
+        Upgrades for {build.strategy.name} · {withOptions.length} {withOptions.length === 1 ? 'slot' : 'slots'}
       </Typography>
       <Box sx={{ overflow: 'auto', minHeight: 0 }}>
         {withOptions.length === 0 ? (

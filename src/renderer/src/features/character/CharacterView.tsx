@@ -62,6 +62,8 @@ import { outputKind } from '@shared/outputs/kinds'
 import OutputFileLine from '../../components/OutputFileLine'
 import CarryAll from './CarryAll'
 import CharacterIdentity from './CharacterIdentity'
+import { LoadoutEquipmentStatus } from '../loadouts/LoadoutEquipmentStatus'
+import { LoadoutBar } from '../loadouts/LoadoutBar'
 import CharacterModel from './CharacterModel'
 import FactionPanel from './FactionPanel'
 import SkillsPanel from './SkillsPanel'
@@ -325,10 +327,14 @@ export default function CharacterView({
       <CharacterIdentity />
 
       {/* SHARING (EQ Zera), directly under the identity it is about to put on a card. */}
-      <ShareBar hasSheet={sheet !== null} onOpenSharingPrefs={onOpenSharingPrefs} />
+      <Stack direction={{ xs: 'column', lg: 'row' }} spacing={1} alignItems="flex-start">
+        <Box sx={{ flex: 1, minWidth: 0 }}><LoadoutBar capture /></Box>
+        <ShareBar hasSheet={sheet !== null} onOpenSharingPrefs={onOpenSharingPrefs} />
+      </Stack>
 
       {/* Only once the read has settled: a card that flashes before the dump loads would teach
           a command to someone who already ran it. */}
+      <LoadoutEquipmentStatus />
       {ready && sheet === null && <InstructionsCard />}
       {/* …and once a dump EXISTS, the shared freshness line (JOS-42's OutputFileLine, whose
           header asked the second `/outputfile` surface to adopt it rather than grow a second
@@ -338,7 +344,7 @@ export default function CharacterView({
       {sheet && (
         <OutputFileLine
           command={INVENTORY.command}
-          why="Re-type it in game whenever your gear changes - this sheet follows the dump."
+          why="Export current inventory, then Save current equipment for its matching loadout. Saved loadouts keep their own equipment date."
           updatedAt={sheet.loadedAt}
           steps={INVENTORY.steps}
           testId="character-outputfile"

@@ -1,3 +1,7 @@
+import { loadoutWishlist } from '@shared/loadouts'
+import { Button } from '@mui/material'
+import { LoadoutBar } from '../loadouts/LoadoutBar'
+import { useLoadouts } from '../loadouts/useLoadouts'
 // wishlist/WishlistView.tsx — THE FLAT WISH LIST (JOS-326; the shell it replaces was JOS-324's
 // honest placeholder).
 //
@@ -198,7 +202,10 @@ export default function WishlistView({ onOpenLoot }: WishlistViewProps = {}): JS
     seed: wishlist.seed
   })
 
-  const list = wishlist.list
+  const loadouts = useLoadouts()
+  const [onlyLoadout, setOnlyLoadout] = useState(false)
+  const selected = loadouts.selected
+  const list = useMemo(() => loadoutWishlist(wishlist.list, onlyLoadout ? selected?.wishKeys ?? null : null), [onlyLoadout, selected, wishlist.list])
   const entries = list.entries
   const importedKeys = useMemo(
     // eslint-disable-next-line eqc/no-domain-munging -- JOS-459 cutover ledger item 8: WishEntry comes from a corpus still bundled in the renderer (mobs/posky/bosses JSON). Moves behind knowledge queries when that surface cuts over.
@@ -217,13 +224,19 @@ export default function WishlistView({ onOpenLoot }: WishlistViewProps = {}): JS
       data-testid="wishlist-view"
       sx={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}
     >
+      <LoadoutBar />
+      <LoadoutWishFilter value={onlyLoadout} onChange={setOnlyLoadout} />
       <Stack direction="row" spacing={1} alignItems="center" sx={{ flexWrap: 'nowrap', mb: 1.5 }}>
         <WishAdd
           gear={gearState.rows}
           donors={donorsState.donors}
           ready={gearState.ready && donorsState.ready}
           wished={wished}
-          onPick={(hit) => wishlist.add(wishFromHit(hit, Date.now()))}
+          onPick={(hit) => {
+            const entry = wishFromHit(hit, Date.now())
+            wishlist.add(entry)
+            if (selected) void loadouts.update({ kind: 'wish', id: selected.id, wishKeys: [...new Set([...selected.wishKeys, entry.itemKey])] }).catch(() => { /* Shared error. */ })
+          }}
         />
         <TextField
           size="small"
@@ -271,5 +284,16 @@ export default function WishlistView({ onOpenLoot }: WishlistViewProps = {}): JS
         )}
       </Box>
     </Box>
+  )
+}
+
+function LoadoutWishFilter({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }): JSX.Element {
+  const { selected } = useLoadouts()
+  return (
+      <Stack direction="row" spacing={1} sx={{ py: 0.75 }}>
+        <Button variant={value ? 'outlined' : 'contained'} size="small" onClick={() => onChange(false)} data-testid="wishlist-all-loadouts">All loadouts</Button>
+        <Button variant={value ? 'contained' : 'outlined'} size="small" disabled={!selected} onClick={() => onChange(true)} data-testid="wishlist-selected-loadout">{selected?.name ?? 'Selected loadout'} only</Button>
+        <Typography variant="caption" color="text.secondary">One item can support several loadouts; owned inventory is shared.</Typography>
+      </Stack>
   )
 }

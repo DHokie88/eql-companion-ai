@@ -97,6 +97,7 @@ import LayersIcon from '@mui/icons-material/Layers'
 import { ExportSettingsSetting, ImportSettingsSetting } from '../profiles/ProfileSharing'
 import { ClassComboSetting } from '../profiles/ClassComboPanel'
 import { UpdateSetting, VersionSetting, useUpdateStatus, type SectionInputs } from './UpdateSetting'
+import { buildStrategiesSection } from './BuildStrategiesSetting'
 import { wikiDatasetSection } from './WikiDatasetSetting'
 import { EqFolderSetting } from './EqFolderSetting'
 // Combat: whose damage the meters show (JOS-115) + where the pet's sits. Its own file with its own
@@ -413,6 +414,7 @@ function buildSections({ version, status, onSendFeedback, onWhatsNew }: SectionI
       ]
     },
     wikiDatasetSection(),
+    buildStrategiesSection(),
     // Directly under Updates, which is where a person who just read the version number is
     // standing when they wonder what it changed (JOS-73).
     whatsNewSection(),

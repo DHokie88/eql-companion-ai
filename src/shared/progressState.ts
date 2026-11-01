@@ -60,6 +60,7 @@ export type CountSource = 'log' | 'inventory' | 'both' | 'rebaseline'
 
 /** Persisted user progress (inventory + quest completion). */
 export interface ProgressState {
+  loadoutBook?: import('./loadouts').LoadoutBook
   /** counts from the last inventory dump, keyed lowercased name */
   inventory: HeldCounts
   /**
