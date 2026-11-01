@@ -1,3 +1,4 @@
+import { RespawnAudioPlayer } from '../features/timers/RespawnAudioPlayer'
 // components/AppCelebrations.tsx — the app's EIGHT always-mounted celebration watches, and the two
 // snackbars they open, in one component that renders nothing else.
 //
@@ -218,6 +219,7 @@ export default function AppCelebrations(): JSX.Element {
     <>
       {/* Always-mounted: plays fired alert sounds regardless of the active tab. */}
       <AlertPlayer />
+      <RespawnAudioPlayer />
       <CelebrationToasts
         defeatToast={defeatToast}
         questToast={questToast}

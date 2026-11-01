@@ -21,6 +21,13 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.15.0',
+    date: '2026-11-01',
+    entries: [
+      { kind: 'new', text: 'Watched timers can play a selected sound when they end or at a time you choose before expiry. Preview the sound and set its volume; Alerts master volume and mute still apply.' }
+    ]
+  },
+  {
     version: '0.14.2',
     date: '2026-10-25',
     entries: [
@@ -49,6 +56,27 @@ export const RELEASE_NOTES: readonly ReleaseNote[] = [
     entries: [
       { kind: 'new', text: 'Discord references refresh at 7 a.m., 3 p.m. and 9 p.m. Eastern. What’s New and Ask EQ Oracle pick up completed refreshes automatically, without rebuilding or restarting.' },
       { kind: 'fixed', text: 'What’s New shows the last successful Discord check separately from the latest saved message, warns when updates are overdue, and keeps the last usable snapshot if a refresh cannot be loaded.' }
+    ]
+  },
+  {
+    version: '0.12.0',
+    date: '2026-10-24',
+    entries: [
+      { kind: 'new', text: 'Choose a sound and volume for each watched timer in its Sound settings. Test sound previews your selection before saving; Alerts master volume and mute still apply.' }
+    ]
+  },
+  {
+    version: '0.11.1',
+    date: '2026-10-24',
+    entries: [
+      { kind: 'fixed', text: 'Opening a timer’s Sound settings dismisses the mob hover card so it cannot cover the dialog.' }
+    ]
+  },
+  {
+    version: '0.11.0',
+    date: '2026-10-24',
+    entries: [
+      { kind: 'new', text: 'Watched respawn timers can play a sound when the countdown ends or at a time you choose before it ends. Set Sound on a running timer and preview the ding before saving. Alerts keep working while you use another page or minimize the app.' }
     ]
   },
   {

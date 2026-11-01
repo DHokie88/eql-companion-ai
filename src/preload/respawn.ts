@@ -14,6 +14,25 @@ import { IPC } from '../shared/ipc'
 import type { RespawnPrefs } from '../shared/respawn'
 
 export const respawnBridge = {
+  getRespawnAudio: (): Promise<import('../shared/respawnAudio').RespawnAudioPrefs> =>
+    ipcRenderer.invoke(IPC.respawnAudioGet),
+  setRespawnAudio: (
+    key: string,
+    lead: import('../shared/respawnAudio').RespawnAudioOption | number | null
+  ): Promise<import('../shared/respawnAudio').RespawnAudioPrefs> =>
+    ipcRenderer.invoke(IPC.respawnAudioSet, key, lead),
+  setRespawnAudioArmed: (armed: boolean): Promise<void> =>
+    ipcRenderer.invoke(IPC.respawnAudioArmed, armed),
+  onRespawnAudio: (
+    cb: (prefs: import('../shared/respawnAudio').RespawnAudioPrefs) => void
+  ): (() => void) => {
+    const listener = (
+      _event: unknown,
+      prefs: import('../shared/respawnAudio').RespawnAudioPrefs
+    ): void => cb(prefs)
+    ipcRenderer.on(IPC.respawnAudioChanged, listener)
+    return () => ipcRenderer.removeListener(IPC.respawnAudioChanged, listener)
+  },
   /** The persisted watch list. Auto-watch on, no explicit watches, by default. */
   getRespawn: (): Promise<RespawnPrefs> => ipcRenderer.invoke(IPC.respawnGet),
   /**
@@ -23,7 +42,8 @@ export const respawnBridge = {
    * a mob you start watching gets a row from its next death — and, if it already died during this
    * fold, from the death already in the model.
    */
-  setRespawn: (prefs: RespawnPrefs): Promise<RespawnPrefs> => ipcRenderer.invoke(IPC.respawnSet, prefs),
+  setRespawn: (prefs: RespawnPrefs): Promise<RespawnPrefs> =>
+    ipcRenderer.invoke(IPC.respawnSet, prefs),
   /**
    * "That sighting was the spawn — start this row's clock from it" (owner ruling, round 3).
    *

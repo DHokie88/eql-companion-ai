@@ -24,6 +24,9 @@
 // this is the cheap read that does not depend on the fold's timing.
 
 import { ipcMain } from 'electron'
+import { normalizeRespawnAudio, normalizeRespawnAudioOption } from '../../shared/respawnAudio'
+import { settingsStore } from '../store'
+import { getMainWindow, sendToMain } from '../windows'
 import { IPC } from '../../shared/ipc'
 import { respawnWithoutWatch } from '../../shared/respawn'
 import { getRespawnPrefs, setRespawnPrefs } from '../storeRespawn'
@@ -52,6 +55,35 @@ const MAX_ROW_ID = 160
 const MAX_MOB_KEY = 64
 
 export function registerRespawnIpc(): void {
+  ipcMain.handle(IPC.respawnAudioGet, () =>
+    normalizeRespawnAudio(settingsStore.get('respawnAudio'))
+  )
+  ipcMain.handle(IPC.respawnAudioSet, (_e, key: unknown, lead: unknown) => {
+    const prefs = normalizeRespawnAudio(settingsStore.get('respawnAudio'))
+    if (typeof key !== 'string' || !key || key.length > 64 || key !== key.trim().toLowerCase())
+      return prefs
+    const option = normalizeRespawnAudioOption(lead)
+    if (lead !== null && option === undefined) return prefs
+    if (lead === null) Reflect.deleteProperty(prefs, key)
+    else
+      Object.defineProperty(prefs, key, {
+        value: option,
+        enumerable: true,
+        configurable: true,
+        writable: true
+      })
+    const clean = normalizeRespawnAudio(prefs)
+    settingsStore.set('respawnAudio', clean)
+    sendToMain(IPC.respawnAudioChanged, clean)
+    return clean
+  })
+  // Keep the alarm's wall clock running while minimized, scoped to armed watched timers only.
+  ipcMain.handle(IPC.respawnAudioArmed, (event, armed: unknown) => {
+    const main = getMainWindow()
+    if (typeof armed === 'boolean' && main?.webContents === event.sender) {
+      main.webContents.setBackgroundThrottling(!armed)
+    }
+  })
   ipcMain.handle(IPC.respawnGet, () => getRespawnPrefs())
   ipcMain.handle(IPC.respawnSet, (_e, value: unknown) => {
     const next = setRespawnPrefs(value)

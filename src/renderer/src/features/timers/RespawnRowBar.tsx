@@ -100,6 +100,7 @@ import { fmtDuration } from '../buffs/format'
 import { mainMobLookup } from './mobLookup'
 import { RespawnEditDialog } from './RespawnEditDialog'
 import { UnwatchButton } from './UnwatchButton'
+import { RespawnAudioButton } from './RespawnAudioButton'
 
 /**
  * THE ROW'S TONE, one function for the accent, the clock text and the bar.
@@ -306,12 +307,14 @@ function NameAndClock({
   nowMs,
   r,
   t,
-  onUnwatch
+  onUnwatch,
+  onAudioOpenChange
 }: {
   row: RespawnRow
   nowMs: number
   r: RespawnReading
   t: RowTone
+  onAudioOpenChange: (open: boolean) => void
   onUnwatch?: (key: string) => void
 }): JSX.Element {
   return (
@@ -335,6 +338,7 @@ function NameAndClock({
       >
         {respawnClockLabel(row, nowMs, fmtDuration)}
       </Typography>
+      <RespawnAudioButton row={row} onOpenChange={onAudioOpenChange} />
       {/* Last, so the countdown keeps its place on every row and the control never sits between the
           name and the number the eye is looking for. */}
       {onUnwatch !== undefined && (
@@ -364,11 +368,11 @@ export function RespawnRowBar({
   onSetCustom?: (key: string, display: string, sec?: number) => void
 }): JSX.Element {
   const r = respawnReading(row, nowMs)
-  const hasEstimate = row.estimateMs !== undefined
   const basis = respawnBasisLabel(row)
   const t = tone(r)
   /** Whether this row's modal is open. Local, because it is a view state about this row's controls. */
   const [editing, setEditing] = useState(false)
+  const [audioEditing, setAudioEditing] = useState(false)
   return (
     <>
       <Tooltip
@@ -384,7 +388,7 @@ export function RespawnRowBar({
         // it, and would still be standing there long after the dialog was dismissed. MEASURED — the
         // e2e's "a clock row draws no card until it is pointed at" caught exactly that.
         title={
-          editing ? (
+          [editing, audioEditing].includes(true) ? (
             ''
           ) : (
             <MobCard mob={row.display} note={respawnCardNote(row, fmtDuration)} lookup={mainMobLookup} />
@@ -423,7 +427,7 @@ export function RespawnRowBar({
             borderRadius: 0.5
           }}
         >
-            <NameAndClock row={row} nowMs={nowMs} r={r} t={t} onUnwatch={onUnwatch} />
+            <NameAndClock row={row} nowMs={nowMs} r={r} t={t} onUnwatch={onUnwatch} onAudioOpenChange={setAudioEditing} />
           <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 0.25 }}>
             {/* Where it died, and (only when it is not the norm) what the clock counts from. The RUNG
                 is no longer here: round 9 moved it into the duration unit it describes. */}
@@ -454,7 +458,7 @@ export function RespawnRowBar({
           </Stack>
           <WorkingLine row={row} />
           {r.seen && <SeenRow row={row} nowMs={nowMs} onConfirmSighting={onConfirmSighting} />}
-          <ClockBar hasEstimate={hasEstimate} r={r} t={t} />
+          <ClockBar hasEstimate={row.estimateMs !== undefined} r={r} t={t} />
         </Box>
       </Tooltip>
       {/* MOUNTED ONLY WHILE OPEN, outside the tooltip's anchor: the dialog prefills from the row at

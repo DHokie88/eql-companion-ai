@@ -1161,6 +1161,10 @@ export const IPC = {
   // chose to watch and the respawn you typed for them.
   //
   // main -> renderer: the persisted watch list. Returns RespawnPrefs.
+  respawnAudioGet: 'respawn:audio:get',
+  respawnAudioSet: 'respawn:audio:set',
+  respawnAudioChanged: 'respawn:audio:changed',
+  respawnAudioArmed: 'respawn:audio:armed',
   respawnGet: 'respawn:get',
   // renderer -> main: replace it. VALIDATED AT THE HANDLER through the same normalizer the store
   // reader uses, applied to the running module, and PUSHED immediately (`registry.flushNow`) —

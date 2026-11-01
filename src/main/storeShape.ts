@@ -282,6 +282,7 @@ export interface StoreShape {
    * on the carve-out above: no schema bump, no migration, and `normalizeRespawnPrefs` defaults
    * every field, so an older build reading a store written here is unaffected and vice versa.
    */
+  respawnAudio?: import('../shared/respawnAudio').RespawnAudioPrefs
   respawn?: RespawnPrefs
   /**
    * The newest release whose notes this install has been SHOWN (JOS-73; shared/releaseNotes.ts).
