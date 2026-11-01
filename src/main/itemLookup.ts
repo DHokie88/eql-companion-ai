@@ -42,6 +42,8 @@ import { writeFileDurableAsync } from './telemetry/durableWrite'
 import { normalizeItemName, parseItemWikitext } from './itemLookupParse'
 import { buildQuestItemIndex } from './questItemIndex'
 import { buildItemDbIndex, itemKey, knowledgeFromDb, type ItemDbEntry, type ItemDbFile } from './itemsDb'
+import { mergeWikiItems } from './wikiDatasetCodec'
+import { activeWikiCache, ensureWikiDatasetLoaded } from './wikiDataset'
 import { heldClickySpells as clickySpells } from './itemClickies'
 import type { HeldCounts, ItemKnowledge, ItemQuestUse, PoskyData, QuestData } from '../shared/types'
 
@@ -134,8 +136,16 @@ const cacheKey = itemKey
 let itemDbIndex: Map<string, ItemDbEntry> | null = null
 
 /** The committed corpus keyed for lookup, built on first use. See the section header. */
+let itemDbCache: Awaited<ReturnType<typeof ensureWikiDatasetLoaded>> | undefined
+
 function itemDb(): Map<string, ItemDbEntry> {
-  itemDbIndex ??= buildItemDbIndex(itemsJson as unknown as ItemDbFile)
+  // Session wiki cache is immutable after ensureWikiDatasetLoaded. Rebuild only when that
+  // object identity changes, so a lookup before the load cannot pin the bundled index.
+  const cache = activeWikiCache()
+  if (itemDbIndex === null || itemDbCache !== cache) {
+    itemDbCache = cache
+    itemDbIndex = buildItemDbIndex(mergeWikiItems(itemsJson as unknown as ItemDbFile, cache))
+  }
   return itemDbIndex
 }
 
@@ -434,6 +444,7 @@ let queue: Promise<unknown> = Promise.resolve()
  * any posky-local answer).
  */
 export async function lookupItem(name: string): Promise<ItemKnowledge> {
+  await ensureWikiDatasetLoaded()
   const key = cacheKey(name)
   const display = normalizeItemName(name)
   const local = localKnowledge(name)
@@ -497,12 +508,15 @@ export async function lookupItem(name: string): Promise<ItemKnowledge> {
  * naturally by the shared serialized queue.
  */
 export function prefetchItem(name: string): void {
-  const key = cacheKey(name)
-  if (itemDb().has(key)) return // the committed DB already answers this — nothing to warm
-  const cache = loadCache()
-  const cached = cache.get(key)
-  if (cached && cacheHit(cached)) return
-  void lookupItem(name).catch(() => {
+  void (async () => {
+    await ensureWikiDatasetLoaded()
+    const key = cacheKey(name)
+    if (itemDb().has(key)) return
+    const cache = loadCache()
+    const cached = cache.get(key)
+    if (cached && cacheHit(cached)) return
+    await lookupItem(name)
+  })().catch(() => {
     /* prefetch errors are silent — the interactive lookup will retry + surface state */
   })
 }

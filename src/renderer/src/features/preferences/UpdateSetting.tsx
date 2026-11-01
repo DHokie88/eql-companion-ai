@@ -250,3 +250,11 @@ export function UpdateSetting({
     </Stack>
   )
 }
+
+export interface SectionInputs {
+  version: string
+  status: UpdateStatus
+  onSendFeedback: import('./FeedbackSetting').OpenFeedback
+  /** Rail switch to the What's new section — the Version row's link (JOS-73). */
+  onWhatsNew: () => void
+}

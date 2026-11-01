@@ -77,7 +77,9 @@ export default defineConfig({
           perfProbeWorker: resolve(__dirname, 'src/main/perfProbeWorker.ts'),
           resistTableWorker: resolve(__dirname, 'src/main/resistTableWorker.ts'),
           spellLibraryWriter: resolve(__dirname, 'src/main/spellLibrary/writerWorker.ts'),
-          spellLibraryQuery: resolve(__dirname, 'src/main/spellLibrary/queryWorker.ts')
+          spellLibraryQuery: resolve(__dirname, 'src/main/spellLibrary/queryWorker.ts'),
+          // Wiki dataset fetch, gunzip, and cache IO. A Worker() needs its own file.
+          wikiDatasetWorker: resolve(__dirname, 'src/main/wikiDatasetWorker.ts')
         }
       }
     }

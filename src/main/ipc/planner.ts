@@ -30,16 +30,33 @@ import { itemKey, type ItemDbFile } from '../itemsDb'
 // The COMMITTED wiki item database — the same module itemLookup.ts imports, so the JSON is
 // inlined into the main bundle exactly once.
 import itemsJson from '../data/items.json'
+import { ensureWikiDatasetLoaded } from '../wikiDataset'
+import { mergeWikiItems } from '../wikiDatasetCodec'
 // JOS-452 — the worn-focus resolution, memoized on the dump's identity in its own module because
 // the spell card's handler reads the same answer (src/main/planner/wornFocusCurrent.ts says why).
 import { currentWornFocus } from '../planner/wornFocusCurrent'
 
 let index: PlannerIndex | null = null
 let gear: GearIndexPayload | null = null
+let corpus: ItemDbFile | null = null
+let corpusCache: Awaited<ReturnType<typeof ensureWikiDatasetLoaded>> | undefined
 
-/** The donor + item indices, built on first use. */
-function plannerIndex(): PlannerIndex {
-  index ??= buildPlannerIndex(itemsJson as unknown as ItemDbFile)
+/** Bundled items plus the session wiki cache. The cache object does not change after load. */
+async function sessionCorpus(): Promise<ItemDbFile> {
+  const cache = await ensureWikiDatasetLoaded()
+  if (corpus === null || corpusCache !== cache) {
+    corpusCache = cache
+    corpus = mergeWikiItems(itemsJson as unknown as ItemDbFile, cache)
+    index = null
+    gear = null
+  }
+  return corpus
+}
+
+/** The donor + item indices, built on first use of this session's merged corpus. */
+async function plannerIndex(): Promise<PlannerIndex> {
+  const file = await sessionCorpus()
+  index ??= buildPlannerIndex(file)
   return index
 }
 
@@ -48,8 +65,9 @@ function plannerIndex(): PlannerIndex {
  * THIS file rather than a gear-only handler module because the memoization is per-import of a
  * committed corpus: two handler modules would each hold their own walk of the same 8.6 MB.
  */
-function gearIndex(): GearIndexPayload {
-  gear ??= buildGearIndex(itemsJson as unknown as ItemDbFile)
+async function gearIndex(): Promise<GearIndexPayload> {
+  const file = await sessionCorpus()
+  gear ??= buildGearIndex(file)
   return gear
 }
 
@@ -92,12 +110,12 @@ function gearOwnership(): OwnershipPayload {
 export function registerPlannerIpc(): void {
   // Every effect the corpus states, one row per (item, effect). The renderer fetches this once
   // and keeps it — it is derived from committed bytes and cannot change while the app runs.
-  ipcMain.handle(IPC.plannerDonors, () => plannerIndex().donors)
+  ipcMain.handle(IPC.plannerDonors, async () => (await plannerIndex()).donors)
 
   // Every equippable item, described in numbers (JOS-283). One versioned payload, fetched once —
   // the renderer scales it to any plus-state itself (shared/planner/gearScale.ts), so no upgrade
   // slider ever comes back here.
-  ipcMain.handle(IPC.gearIndex, (): GearIndexPayload => gearIndex())
+  ipcMain.handle(IPC.gearIndex, async (): Promise<GearIndexPayload> => gearIndex())
 
   // What the active character OWNS, keyed the way the gear index is (JOS-285). Re-asked by the
   // renderer on every `inventory:autoReloaded`; re-folded here only when the file itself moved.
@@ -105,8 +123,8 @@ export function registerPlannerIpc(): void {
 
   // Host picking: substring over item names, capped. A non-string query is not an error the UI
   // should have to render — it is simply no hits.
-  ipcMain.handle(IPC.plannerSearchItems, (_e, query: unknown) =>
-    typeof query === 'string' ? searchPlannerItems(plannerIndex().items, query) : []
+  ipcMain.handle(IPC.plannerSearchItems, async (_e, query: unknown) =>
+    typeof query === 'string' ? searchPlannerItems((await plannerIndex()).items, query) : []
   )
 
   // V7 — what the character is WEARING, from their newest `/outputfile inventory` dump. Read on

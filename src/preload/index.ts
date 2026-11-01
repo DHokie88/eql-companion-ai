@@ -6,6 +6,7 @@ import { rosterApi } from './roster'
 import { soundsBridge } from './sounds'
 // "What IS this" — the spell/item/mob lookups, split out at the 400-line ceiling (preload/knowledge.ts).
 import { knowledgeBridge } from './knowledge'
+import { wikiDatasetBridge } from './wikiDataset'
 import { spellLibrary } from './spellLibrary'
 // The log-stream pushes — line / character rebuild / quiet-switch offer (preload/logStream.ts).
 import { logStreamBridge } from './logStream'
@@ -407,6 +408,7 @@ const api = {
   ...soundsBridge,
   /** "What IS this" — spell / item / mob lookups, and the spell catalog: preload/knowledge.ts. */
   ...knowledgeBridge,
+  ...wikiDatasetBridge,
   spellLibrary,
 
   // ---- voice alerts / TTS (docs/plans/voice-alerts.md §3) ----
