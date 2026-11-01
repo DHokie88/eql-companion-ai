@@ -629,6 +629,8 @@ export interface ItemCraftRecipe {
 
 /** The "what's this item for" knowledge card for a single item name. */
 export interface ItemKnowledge {
+  /** Exact dataset and wiki revision; era is a source claim, not current-game proof. */
+  wikiDataset?: import('./wikiDataset').WikiDatasetEvidence
   /** the item name looked up (as requested; display name, not normalized) */
   name: string
   /** the wiki page title actually resolved (may differ via redirect/search) */

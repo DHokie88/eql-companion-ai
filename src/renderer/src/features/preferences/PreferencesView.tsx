@@ -96,8 +96,8 @@ import PrivacyTipIcon from '@mui/icons-material/PrivacyTip'
 import LayersIcon from '@mui/icons-material/Layers'
 import { ExportSettingsSetting, ImportSettingsSetting } from '../profiles/ProfileSharing'
 import { ClassComboSetting } from '../profiles/ClassComboPanel'
-import { UpdateSetting, VersionSetting, useUpdateStatus } from './UpdateSetting'
-import type { UpdateStatus } from '@shared/types'
+import { UpdateSetting, VersionSetting, useUpdateStatus, type SectionInputs } from './UpdateSetting'
+import { wikiDatasetSection } from './WikiDatasetSetting'
 import { EqFolderSetting } from './EqFolderSetting'
 // Combat: whose damage the meters show (JOS-115) + where the pet's sits. Its own file with its own
 // descriptor, same ceiling and same answer as PerfSetting and GraphicsSetting.
@@ -316,14 +316,6 @@ function analyticsSection(): PrefSection {
  *  the repo's `max-params` ceiling is 4 and the fourth argument was the one that would have hit
  *  it, but the real reason is that "version" and "the way to the release notes" are two halves of
  *  one row and read better named. */
-interface SectionInputs {
-  version: string
-  status: UpdateStatus
-  onSendFeedback: OpenFeedback
-  /** Rail switch to the What's new section — the Version row's link (JOS-73). */
-  onWhatsNew: () => void
-}
-
 /** The whole settings table, in render order. Rebuilt only when its inputs change. */
 function buildSections({ version, status, onSendFeedback, onWhatsNew }: SectionInputs): PrefSection[] {
   return [
@@ -420,6 +412,7 @@ function buildSections({ version, status, onSendFeedback, onWhatsNew }: SectionI
         }
       ]
     },
+    wikiDatasetSection(),
     // Directly under Updates, which is where a person who just read the version number is
     // standing when they wonder what it changed (JOS-73).
     whatsNewSection(),

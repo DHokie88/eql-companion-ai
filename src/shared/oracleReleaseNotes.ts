@@ -21,6 +21,14 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.16.0',
+    date: '2026-11-01',
+    entries: [
+      { kind: 'new', text: 'Preferences can download a checksum-verified EQL Wiki item dataset. Restart Oracle to use it in item lookup and Gear; your existing quest, crafting and extra item records stay available.' },
+      { kind: 'fixed', text: 'Wiki pages with ambiguous item names are held for identity review. Wiki expansion labels remain source claims rather than proof that an item is available in current EQL.' }
+    ]
+  },
+  {
     version: '0.15.0',
     date: '2026-11-01',
     entries: [

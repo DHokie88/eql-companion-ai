@@ -567,6 +567,12 @@ export const IPC = {
   // cached, politely-throttled wiki lookup). Returns ItemKnowledge.
   itemsLookup: 'items:lookup',
 
+  // ---- wiki dataset (Preferences > Wiki data) ----
+  // renderer -> main: current session status. No arguments. A refresh writes the next
+  // cache under userData and does not change the corpus this launch already bound.
+  wikiDatasetStatus: 'wikiDataset:status',
+  wikiDatasetRefresh: 'wikiDataset:refresh',
+
   // ---- mob knowledge ("what does this thing drop", Task #63) ----
   // renderer -> main: look up a mob's drop knowledge (own loot history + local quest catalog
   // first, then a cached, politely-throttled wiki lookup). Returns MobKnowledge. Exposed on
