@@ -45,6 +45,8 @@ async function firstRun(userData: string, log: FixtureLog): Promise<void> {
     await page.getByRole('button', { name: 'Follow live inventory' }).click()
     await page.waitForSelector('[data-testid="build-no-dump"]', { state: 'detached' })
     assert.match(await page.locator('[data-testid="build-toolbar"]').innerText(), /current inventory/)
+    assert.match(await page.locator('[data-testid="build-cell-ANY1"]').innerText(), /Brigandine Tunic/)
+    assert.match(await page.locator('[data-testid="build-cell-ANY2"]').innerText(), /Midnight Clad Straps/)
     check('an uncaptured loadout explains the available inventory and can return to live equipment', true)
     await page.click('[data-testid="tab-character"]')
     await page.click('[data-testid="loadout-lo2"]')

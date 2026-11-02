@@ -56,7 +56,8 @@ import {
   tierOf,
   type AreaFormKey,
   type BrowseFormMemory,
-  sanitizeBuildProfile
+  sanitizeBuildProfile,
+  sanitizeManaStat
 } from '../src/renderer/src/features/gear/areaMemory'
 
 /**
@@ -98,7 +99,7 @@ const BROWSE_FALLBACK: BrowseFormMemory = { socket: 'proc', slot: null, trioOnly
 
 test('the restart split is a table, and every key in it is on one of exactly two tiers', () => {
   const keys = Object.keys(AREA_FORM_TIER) as AreaFormKey[]
-  assert.equal(keys.length, 12, 'eleven fields were added by JOS-329 and the Build profile made twelve — update this test when a thirteenth is')
+  assert.equal(keys.length, 14, 'the two mana totals join the existing twelve stored fields')
   for (const key of keys) {
     const tier = tierOf(key)
     assert.ok(tier === 'restart' || tier === 'session', `${key} is on an unknown tier ${tier}`)
@@ -117,6 +118,8 @@ test('WHAT YOU TYPED IS SESSION-SCOPED — every search box, on all four tabs', 
   // the item picker; the expanded set is ephemeral navigation state).
   assert.equal(tierOf('eq.planner.item'), 'session')
   assert.equal(tierOf('eq.planner.open'), 'session')
+  assert.equal(tierOf('eq.build.manaInt'), 'session')
+  assert.equal(tierOf('eq.build.manaWis'), 'session')
 })
 
 test('WHAT YOU CHOSE IS RESTART-SCOPED — including the slider, whose old law said otherwise', () => {
@@ -175,7 +178,9 @@ const READERS: Reader[] = [
   { key: 'eq.planner.search', read: sanitizeSearch, fallback: '', legal: anyString },
   { key: 'eq.wishlist.search', read: sanitizeSearch, fallback: '', legal: anyString },
   { key: 'eq.character.search', read: sanitizeSearch, fallback: '', legal: anyString },
-  { key: 'eq.build.profile', read: sanitizeBuildProfile, fallback: 'tank' }
+  { key: 'eq.build.profile', read: sanitizeBuildProfile, fallback: 'tank' },
+  { key: 'eq.build.manaInt', read: sanitizeManaStat, fallback: null, legal: (v) => typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 1000 },
+  { key: 'eq.build.manaWis', read: sanitizeManaStat, fallback: null, legal: (v) => typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 1000 }
 ]
 
 test('every stored key has a reader in this file — a new key cannot be covered by being forgotten', () => {
@@ -201,15 +206,23 @@ test('garbage in localStorage falls back to the default, for every key, and neve
 
 test('…and the readers with a closed vocabulary take NO exemptions from that sweep', () => {
   // The counterweight to `legal`: if somebody adds an exemption to a structural key to make a red
-  // test green, this fails. Only free-text and opaque-id fields may be exempt, and there are five.
+  // test green, this fails. Numeric totals, free-text and opaque-id fields admit valid values.
   const exempt = READERS.filter((r) => r.legal !== undefined).map((r) => r.key)
   assert.deepEqual(exempt.sort(), [
+    'eq.build.manaInt',
+    'eq.build.manaWis',
     'eq.character.search',
     'eq.gear.search',
     'eq.planner.open',
     'eq.planner.search',
     'eq.wishlist.search'
   ])
+})
+
+test('mana totals accept valid values and reject out-of-range values', () => {
+  assert.equal(sanitizeManaStat(150), 150)
+  assert.equal(sanitizeManaStat(0), 0)
+  assert.equal(sanitizeManaStat(1001), null)
 })
 
 // ============================================================================================

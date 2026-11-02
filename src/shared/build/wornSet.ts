@@ -18,10 +18,10 @@
 import { upgradeStateForTier } from '../itemUpgrade'
 import type { GearRow } from '../planner/gear'
 import { scaleGearRow } from '../planner/gearScale'
-import { isAnyCell, PLAN_SLOTS, type PlanSlotId } from '../planner/types'
+import { PLAN_SLOTS, type PlanSlotId } from '../planner/types'
 
-/** The cells a build has: every plan cell but the two ANY cells (those are exaltation sockets). */
-export const BUILD_CELLS: readonly PlanSlotId[] = PLAN_SLOTS.filter((c) => !isAnyCell(c))
+/** Every equipped place, including the two slot-agnostic equipment cells. */
+export const BUILD_CELLS: readonly PlanSlotId[] = PLAN_SLOTS
 
 /** A worn item the gear index has no row for. Counted, named, never silently dropped. */
 export interface WornUnknown {

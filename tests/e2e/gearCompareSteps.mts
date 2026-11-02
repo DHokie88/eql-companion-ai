@@ -370,12 +370,17 @@ function checkFreshness(card: PairRead): void {
  * staged dump. The delta is COMPUTED: the hovered row is at base, the worn copy is at the `+5` its
  * name states, and the expected words come from the card's own `compareText`.
  */
+function checkAnySlots(card: PairRead): void {
+  check('the first any slot shows its worn item', card.cells.find((c) => c.cell === 'ANY1')?.name === 'Brigandine Tunic +1')
+  check('the second any slot shows its worn item', card.cells.find((c) => c.cell === 'ANY2')?.name === 'Midnight Clad Straps +2')
+}
 function checkEquippedCard(card: PairRead, base: GearRow): void {
   check(
-    'the equipped card names the cell this item would go in, once',
-    card.cells.length === 1 && card.cells[0].cell === 'PRIMARY',
+    'the equipped card names the primary cell and both any slots',
+    card.cells.map((c) => c.cell).join(',') === 'PRIMARY,ANY1,ANY2',
     card.cells.map((c) => c.cell).join(', ') || '(no cells)'
   )
+  checkAnySlots(card)
   const first = card.cells[0] as CardCell | undefined
   check(
     'and it names what the staged dump says is in that hand, at its own +N',
@@ -468,7 +473,7 @@ async function stepSecondHand(page: Page): Promise<void> {
     )
     const cells = card.cells.map((c) => c.cell)
     check('no cell is compared twice', new Set(cells).size === cells.length, cells.join(', '))
-    if (cells.length > 1) {
+    if (cells.includes('PRIMARY')) {
       check(
         'an item that states two slots is compared against both of them',
         cells.includes('PRIMARY') && cells.includes('SECONDARY'),

@@ -21,7 +21,7 @@ import { buildStrategiesSection } from '../preferences/BuildStrategiesSetting'
 // anywhere, and Reset puts the dump back. Every item name links out to the Loot drill-down.
 
 import { useState, type JSX } from 'react'
-import { Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, Paper, Stack, Switch, Typography } from '@mui/material'
+import { Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, Paper, Stack, Switch, TextField, Typography } from '@mui/material'
 import { LoadoutBar } from '../loadouts/LoadoutBar'
 import { BuildMeters } from './BuildMeters'
 import { BuildSetPanel, BuildUpgradesPanel } from './BuildPanels'
@@ -68,6 +68,24 @@ function NoDump({ build }: { build: BuildState }): JSX.Element {
   )
 }
 
+function ManaEstimateControls({ build }: { build: BuildState }): JSX.Element {
+  const change = (value: string, set: (next: number | null) => void): void => {
+    if (value === '') { set(null); return }
+    const n = Number(value)
+    if (Number.isFinite(n) && n >= 0 && n <= 1000) set(n)
+  }
+  return <Stack spacing={0.5} data-testid="build-mana-estimate">
+    <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+      <Typography variant="caption">Mana estimate · in-game totals</Typography>
+      <TextField label="INT" type="number" size="small" value={build.manaInt ?? ''} placeholder="150 assumed"
+        onChange={(event) => change(event.target.value, build.setManaInt)} slotProps={{ htmlInput: { min: 0, max: 1000, 'aria-label': 'Mana estimate INT' } }} sx={{ width: 130 }} />
+      <TextField label="WIS" type="number" size="small" value={build.manaWis ?? ''} placeholder="150 assumed"
+        onChange={(event) => change(event.target.value, build.setManaWis)} slotProps={{ htmlInput: { min: 0, max: 1000, 'aria-label': 'Mana estimate WIS' } }} sx={{ width: 130 }} />
+    </Stack>
+    <Typography variant="caption" color="text.secondary">Illustrative level 50 estimate: 9.4 mana per INT/WIS for full casters, 4.7 for hybrids; the two largest class pools count. These rates are unverified and omit stat breakpoints. Empty totals assume 150; enter your in-game totals for the displayed equipment. The mana weight values raw and estimated mana; INT/WIS weights are extra priorities.</Typography>
+  </Stack>
+}
+
 export default function BuildView({
   onOpenLoot,
   onOpenMob = NO_MOB
@@ -88,6 +106,7 @@ export default function BuildView({
     <Stack spacing={1.5} sx={{ height: '100%', minHeight: 0 }} data-testid="build-view">
       <LoadoutBar />
       <Stack direction="row" spacing={1} alignItems="center"><Toolbar build={build} /><Button onClick={() => setEditingStrategies(true)} data-testid="build-edit-strategies">Edit strategies</Button></Stack>
+      <ManaEstimateControls build={build} />
       <Dialog open={editingStrategies} onClose={() => setEditingStrategies(false)} maxWidth="md" fullWidth>
         <DialogTitle>Build strategies</DialogTitle><DialogContent>{buildStrategiesSection().items[0].content}</DialogContent>
         <DialogActions><Button onClick={() => setEditingStrategies(false)}>Close</Button></DialogActions>

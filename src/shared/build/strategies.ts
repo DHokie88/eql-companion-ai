@@ -47,7 +47,14 @@ export function strategyWeights(value: BuildStrategy, classes: readonly ClassAbb
 }
 function stat(stats: GearStats, key: StrategyStat): number | undefined { return key === 'RATIO' ? gearRatio(stats) : stats[key] }
 export function strategyItemScore(stats: GearStats, value: BuildStrategy, classes: readonly ClassAbbr[]): number {
+  return strategyScorer(value, classes)(stats)
+}
+/** Prepare weights once for scoring a full catalog rather than once per item. */
+export function strategyScorer(value: BuildStrategy, classes: readonly ClassAbbr[]): (stats: GearStats) => number {
   const weights = strategyWeights(value, classes)
+  return (stats) => scoreWithWeights(stats, value, weights)
+}
+function scoreWithWeights(stats: GearStats, value: BuildStrategy, weights: BuildWeights): number {
   let total = 0
   for (const key of STRATEGY_KEYS) {
     const amount = stat(stats, key)

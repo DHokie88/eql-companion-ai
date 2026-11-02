@@ -19,6 +19,7 @@ const SCORE_SX = { fontFamily: FONTS.mono, fontVariantNumeric: 'tabular-nums', w
 function fmt(n: number): string {
   return Math.round(n).toLocaleString()
 }
+function signed(n: number): string { return `${n >= 0 ? '+' : ''}${Math.round(n * 10) / 10}` }
 
 /** Where a row comes from, in one short clause: its first stated drop, or the flag that says. */
 export function sourceText(row: GearRow): string {
@@ -100,7 +101,7 @@ export function BuildSetPanel({ build, onOpenLoot }: { build: BuildState; onOpen
           Your set · {build.strategy.name} score
         </Typography>
         <Typography variant="caption" sx={{ ...SCORE_SX, color: 'primary.main' }} data-testid="build-score">
-          {fmt(build.score.current)} / {fmt(build.score.best)} best
+          {fmt(build.score.current)} / {fmt(build.score.best)} estimated best
         </Typography>
         {build.swaps.size > 0 && (
           <Button size="small" onClick={build.reset} data-testid="build-reset">
@@ -114,7 +115,7 @@ export function BuildSetPanel({ build, onOpenLoot }: { build: BuildState; onOpen
         ))}
       </Box>
       <Typography variant="caption" color="text.disabled" sx={{ mt: 0.75 }}>
-        Worn items are scored at the tier your dump states; candidates at their base tier. A two-hander in PRIMARY still shows a SECONDARY cell.
+        Worn items use their exported tier; candidates use base tier. Item scores stand alone; the set and upgrade gains count only its strongest item haste. Two-handed weapons still show a secondary cell.
       </Typography>
     </Paper>
   )
@@ -145,6 +146,9 @@ function UpgradeCell({ up, build, onOpenLoot }: { up: CellUpgrade; build: BuildS
             <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block' }}>
               {sourceText(o.row)}
             </Typography>
+            {o.mana && (o.mana.raw !== 0 || o.mana.derived !== 0) && <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+              Mana: raw {signed(o.mana.raw)} · INT/WIS estimate {signed(o.mana.derived)} · mana weight ×{o.mana.weight}
+            </Typography>}
           </Box>
           <Typography variant="caption" sx={{ ...SCORE_SX, color: 'success.main' }}>
             +{fmt(o.delta)}
@@ -167,7 +171,7 @@ export function BuildUpgradesPanel({ build, onOpenLoot }: { build: BuildState; o
   return (
     <Paper variant="outlined" sx={{ p: 1.25, display: 'flex', flexDirection: 'column', minHeight: 0 }} data-testid="build-upgrades">
       <Typography variant="caption" className="eq-display-label eq-card-rule" sx={{ display: 'block', color: 'text.secondary', pb: 0.5, mb: 0.75 }}>
-        Upgrades for {build.strategy.name} · {withOptions.length} {withOptions.length === 1 ? 'slot' : 'slots'}
+        Best upgrades for {build.strategy.name} · {withOptions.length} {withOptions.length === 1 ? 'item' : 'items'}
       </Typography>
       <Box sx={{ overflow: 'auto', minHeight: 0 }}>
         {withOptions.length === 0 ? (

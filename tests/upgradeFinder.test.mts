@@ -91,12 +91,25 @@ test('a ring beats the WEAKER of two worn rings, and the verdict names that cell
   assert.equal(v.delta, 126)
 })
 
-test('an item already worn in one paired cell is judged against the OTHER cell', () => {
+test('an item already worn anywhere is not offered as a new upgrade', () => {
   const v = upgradeVerdict(RING_BIG, ctx({ worn: worn([['FINGER', RING_BIG], ['FINGER2', RING_SMALL]]) }))
-  assert.ok(v, 'a second copy in the other finger is still a real upgrade')
-  assert.equal(v.cell, 'FINGER2')
+  assert.equal(v, null)
   // …and with the same ring in BOTH hands there is nothing left to say.
   assert.equal(upgradeVerdict(RING_BIG, ctx({ worn: worn([['FINGER', RING_BIG], ['FINGER2', RING_BIG]]) })), null)
+})
+
+test('the strongest gain can replace either any-slot item and an unknown any slot is never treated as empty', () => {
+  const verdict = upgradeVerdict(RING_BIG, ctx({ worn: worn([['FINGER', RING_MID], ['FINGER2', RING_MID], ['ANY1', RING_MID], ['ANY2', RING_SMALL]]) }))
+  assert.equal(verdict?.cell, 'ANY2')
+  assert.equal(upgradeVerdict(RING_BIG, ctx({ worn: worn([['ANY1', null]]), unknownCells: new Set(['ANY1', 'FINGER', 'FINGER2']) })), null)
+})
+
+test('a weaker extra haste item is scored without duplicating already active item haste', () => {
+  const old = row('Old Head', ['HEAD'], { AC: 2 })
+  const haste = row('Haste Belt', ['WAIST'], { HASTE: 40 })
+  const candidate = row('Haste Hat', ['HEAD'], { AC: 3, HASTE: 20 })
+  const verdict = upgradeVerdict(candidate, ctx({ weights: { AC: 1, HASTE: 10 }, worn: worn([['HEAD', old], ['WAIST', haste]]) }))
+  assert.equal(verdict?.delta, 1)
 })
 
 test('an UNKNOWN cell yields no verdict - a gain against a thing we cannot score is invented', () => {

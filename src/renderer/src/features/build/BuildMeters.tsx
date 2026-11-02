@@ -5,9 +5,6 @@
 import type { JSX } from 'react'
 import { LinearProgress, Paper, Stack, Typography } from '@mui/material'
 import { meterPercent } from '@shared/build/profiles'
-import { strategyItemScore, strategyWeights } from '@shared/build/strategies'
-import { buildScore } from '@shared/build/optimizer'
-import type { GearRow } from '@shared/planner/gear'
 import { FONTS, PALETTE } from '../../../../shared/palette'
 import type { BuildState } from './useBuild'
 
@@ -66,15 +63,12 @@ export function BuildMeters({ build }: { build: BuildState }): JSX.Element {
   return <Stack spacing={0.5}>
     <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" data-testid="build-meters">
       {build.strategies.map((strategy) => {
-        const weights = strategyWeights(strategy, build.classes)
-        const score = (row: GearRow): number => strategyItemScore(row.stats, strategy, build.classes)
-        const current = buildScore(build.set, weights, score)
         const base = strategy.base
         const id = base === 'custom' ? 'custom' : base
         return <Gauge key={strategy.id} label={strategy.name} value={strategy.id === build.strategy.id ? meterPercent(build.score.current, build.score.best) : null}
           color={base === 'dps' ? PALETTE.red : base === 'heal' ? PALETTE.green : PALETTE.cyan}
           selected={strategy.id === build.strategy.id} onSelect={() => build.setStrategy(strategy.id)}
-          note={strategy.id === build.strategy.id ? `Selected · score ${Math.round(current)}` : 'Choose these criteria'} testId={`build-meter-${id}`} />
+          note={strategy.id === build.strategy.id ? `Selected · score ${Math.round(build.score.current)}` : 'Choose these criteria'} testId={`build-meter-${id}`} />
       })}
     </Stack>
     <Typography variant="caption" color="text.secondary">Scores follow your criteria and available item data. Configure the five strategies in Preferences → Build strategies.</Typography>
