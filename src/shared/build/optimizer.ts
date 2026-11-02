@@ -165,6 +165,17 @@ export function upgradesFor(rows: readonly GearRow[], set: BuildSet, cells: read
   return cells.map((cell) => upgradesForCell({ rows, set, cell, ctx, worn, perCell }))
 }
 
+/** Keep the best options per slot and put the strongest slot improvements first. */
+export function groupUpgrades(upgrades: readonly CellUpgrade[], perCell = 3): CellUpgrade[] {
+  const groups: CellUpgrade[] = []
+  for (const up of upgrades) {
+    const options = up.options.slice(0, perCell)
+    if (options.length > 0) groups.push({ ...up, options })
+  }
+  groups.sort((a, b) => b.options[0].delta - a.options[0].delta || a.cell.localeCompare(b.cell))
+  return groups
+}
+
 /** Rank distinct items by their greatest single-slot gain across the entire set. */
 export function rankUpgrades(upgrades: readonly CellUpgrade[], limit = 50): CellUpgrade[] {
   const best = new Map<string, CellUpgrade>()

@@ -202,6 +202,16 @@ function coveredByCard(page: Page, sel: string): Promise<boolean> {
  */
 async function stepUpgradeCard(page: Page): Promise<void> {
   if (!check('the Upgrades panel offers an item name to hover', await appears(page, UPGRADE_NAME, 20_000))) return
+  const groups = await page.evaluate((panel) => [...document.querySelectorAll(`${panel} [data-testid^="build-upgrade-"]:not([data-testid="build-upgrade-option"])`)].map((group) => ({
+    id: group.getAttribute('data-testid'),
+    headings: group.querySelectorAll('.eq-display-label').length,
+    gains: [...group.querySelectorAll('[data-testid="build-upgrade-option"]')].map((item) => Number(item.getAttribute('data-upgrade-gain')))
+  })), UPGRADES)
+  check('upgrade choices are grouped once per slot with up to three in score order', groups.length > 0 &&
+    new Set(groups.map((group) => group.id)).size === groups.length &&
+    groups.every((group) => group.headings === 1 && group.gains.length > 0 && group.gains.length <= 3 &&
+      group.gains.every((gain, i) => i === 0 || group.gains[i - 1] >= gain)) &&
+    groups.every((group, i) => i === 0 || groups[i - 1].gains[0] >= group.gains[0]), JSON.stringify(groups))
   const item = await textOf(page, UPGRADE_NAME)
   await page.hover(UPGRADE_NAME, { timeout: 15_000 })
   const cards = await settle(() => countOf(page, POPPER), (n) => n > 0, { timeoutMs: 10_000 })

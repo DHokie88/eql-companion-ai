@@ -30,7 +30,7 @@ import {
   type SoloKit,
   type SoloReading
 } from '../../../../shared/build/profiles'
-import { bestBuild, buildScore, rankUpgrades, upgradesFor, type BuildSet, type CellUpgrade } from '../../../../shared/build/optimizer'
+import { bestBuild, buildScore, groupUpgrades, rankUpgrades, upgradesFor, type BuildSet, type CellUpgrade } from '../../../../shared/build/optimizer'
 // THE WORN READ IS SHARED NOW (shared/build/wornSet.ts). `useUpgradeFinder` asks the same question
 // from the Zone Loot rows and the item page, and two spellings of "what am I wearing" would be two
 // answers to it. `BUILD_CELLS` and `WornUnknown` are re-exported below for this tab's importers.
@@ -96,6 +96,7 @@ export interface BuildState {
   kit: SoloKit
   solo: SoloReading
   upgrades: CellUpgrade[]
+  farmUpgrades: CellUpgrade[]
 }
 
 export function useBuild(): BuildState {
@@ -159,14 +160,16 @@ export function useBuild(): BuildState {
     for (const item of unknown) if (!swaps.has(item.cell)) cells.add(item.cell)
     return cells
   }, [unknown, swaps])
-  const upgrades = useMemo(
-    () => rankUpgrades(upgradesFor(candidates, set, BUILD_CELLS, {
+  const allUpgrades = useMemo(
+    () => upgradesFor(candidates, set, BUILD_CELLS, {
       classes, weights, excluded, score: rowScore, hasteScore, mana, perCell: UPGRADE_LIMIT,
       wornKeys: new Set([...(inventory?.hosts.map((host) => host.key) ?? []), ...(liveInventory?.hosts.map((host) => host.key) ?? [])]),
       unknownCells: unscored
-    }), UPGRADE_LIMIT),
+    }),
     [candidates, set, classes, weights, excluded, rowScore, hasteScore, mana, inventory, liveInventory, unscored]
   )
+  const upgrades = useMemo(() => groupUpgrades(allUpgrades, 3), [allUpgrades])
+  const farmUpgrades = useMemo(() => rankUpgrades(allUpgrades, UPGRADE_LIMIT), [allUpgrades])
 
   const score = useMemo(() => {
     const current = buildScore(set, weights, rowScore, hasteScore) + gearManaScore(manaBaseline, worn.values(), set.values())
@@ -202,6 +205,6 @@ export function useBuild(): BuildState {
     score,
     kit,
     solo,
-    upgrades
+    upgrades, farmUpgrades
   }
 }

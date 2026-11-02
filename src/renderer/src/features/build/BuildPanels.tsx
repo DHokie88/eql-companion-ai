@@ -121,14 +121,14 @@ export function BuildSetPanel({ build, onOpenLoot }: { build: BuildState; onOpen
   )
 }
 
-function UpgradeCell({ up, build, onOpenLoot, showHeading }: { up: CellUpgrade; build: BuildState; onOpenLoot: (item: string) => void; showHeading: boolean }): JSX.Element {
+function UpgradeCell({ up, build, onOpenLoot }: { up: CellUpgrade; build: BuildState; onOpenLoot: (item: string) => void }): JSX.Element {
   return (
     <Box sx={{ mb: 1 }} data-testid={`build-upgrade-${up.cell}`}>
-      {showHeading && <Typography variant="caption" className="eq-display-label" sx={{ color: 'text.disabled' }}>
+      <Typography variant="caption" className="eq-display-label" sx={{ color: 'text.disabled' }}>
         {planSlotLabel(up.cell)} · {up.current ? up.current.name : 'empty'}
-      </Typography>}
+      </Typography>
       {up.options.map((o) => (
-        <Stack key={o.row.key} direction="row" spacing={1} alignItems="center" sx={{ py: 0.3, minWidth: 0 }}>
+        <Stack key={o.row.key} direction="row" spacing={1} alignItems="center" sx={{ py: 0.3, minWidth: 0 }} data-testid="build-upgrade-option" data-upgrade-gain={o.delta}>
           <Icon row={o.row} />
           <Box sx={{ minWidth: 0, flexGrow: 1 }}>
             {/* OWNER 2026-09-08: the name brings up the item window on hover. The click is
@@ -171,7 +171,7 @@ export function BuildUpgradesPanel({ build, onOpenLoot }: { build: BuildState; o
   return (
     <Paper variant="outlined" sx={{ p: 1.25, display: 'flex', flexDirection: 'column', minHeight: 0 }} data-testid="build-upgrades">
       <Typography variant="caption" className="eq-display-label eq-card-rule" sx={{ display: 'block', color: 'text.secondary', pb: 0.5, mb: 0.75 }}>
-        Best upgrades for {build.strategy.name} · {withOptions.length} {withOptions.length === 1 ? 'item' : 'items'}
+        Best upgrades for {build.strategy.name} · up to 3 per slot
       </Typography>
       <Box sx={{ overflow: 'auto', minHeight: 0 }}>
         {withOptions.length === 0 ? (
@@ -179,7 +179,7 @@ export function BuildUpgradesPanel({ build, onOpenLoot }: { build: BuildState; o
             Nothing in the index beats what you wear under these filters. Turn off in-era or owned-only to widen the search.
           </Typography>
         ) : (
-          withOptions.map((up, i) => <UpgradeCell key={up.options[0].row.key} up={up} build={build} onOpenLoot={onOpenLoot} showHeading={i === 0 || withOptions[i - 1].cell !== up.cell} />)
+          withOptions.map((up) => <UpgradeCell key={up.cell} up={up} build={build} onOpenLoot={onOpenLoot} />)
         )}
       </Box>
     </Paper>
