@@ -169,6 +169,7 @@ export function FarmPanel({ build, handlers }: { build: BuildState; handlers: Fa
       <Typography variant="caption" className="eq-display-label eq-card-rule" sx={{ display: 'block', color: 'text.secondary', pb: 0.5, mb: 0.75 }}>
         Where to farm · {zones.length} {zones.length === 1 ? 'zone' : 'zones'}
       </Typography>
+      <Typography variant="caption" color="text.secondary">Scores assume +5 or a higher owned tier.</Typography>
       <Box sx={{ overflow: 'auto', minHeight: 0 }}>
         {empty === null ? (
           zones.map((zone) => <FarmZoneBlock key={zone.zone} zone={zone} handlers={handlers} />)

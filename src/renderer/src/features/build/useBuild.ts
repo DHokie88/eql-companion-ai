@@ -13,8 +13,7 @@ import { strategyAllows, strategyScorer, strategyWeights, type BuildStrategy } f
 //
 // WHAT IT COMPUTES: for each profile, the set's score and the best score the same rows could
 // reach under the same filters (`bestBuild`) — a meter is the ratio; and for the SELECTED profile,
-// the upgrades per cell. Candidates are scored at their BASE tier, worn items at theirs; the
-// panel says so.
+// the upgrades per cell. Candidates use at least +5, or a higher owned tier when available.
 
 import { useCallback, useMemo, useState } from 'react'
 import type { ClassAbbr } from '@shared/classCombo'
@@ -43,6 +42,9 @@ import { useEraOnly } from '../planner/plannerData'
 import { outputUpdatedMillis } from '../../lib/outputFreshness'
 import { sanitizeManaStat } from '../gear/areaMemory'
 import { gearManaScore, manaForSet, type ManaEstimate } from '../../../../shared/build/manaEstimate'
+import { scaleGearRow } from '@shared/planner/gearScale'
+import { upgradeStateForTier } from '@shared/itemUpgrade'
+import { recommendedGearTier } from '../gear/gearOwnership'
 
 export { BUILD_CELLS }
 export type { WornUnknown }
@@ -67,6 +69,7 @@ export interface BuildState {
   strategies: BuildStrategy[]
   setStrategy: (id: string) => void
   rowScore: (row: GearRow) => number
+  candidateTier: (row: GearRow) => number
   wished: ReadonlySet<string>
   owned: (row: GearRow) => boolean
   addWish: (row: GearRow) => void
@@ -83,7 +86,7 @@ export interface BuildState {
   /** worn + swaps */
   set: BuildSet
   swaps: ReadonlyMap<PlanSlotId, GearRow>
-  swap: (cell: PlanSlotId, row: GearRow) => void
+  swap: (cell: PlanSlotId, row: GearRow, tier?: number) => void
   unswap: (cell: PlanSlotId) => void
   reset: () => void
   weights: BuildWeights
@@ -101,6 +104,11 @@ export function useBuild(): BuildState {
   const { eraHidden } = useEraHidden()
   const [eraOnly, setEraOnly] = useEraOnly()
   const ownership = useGearOwnership()
+  const candidateTier = useCallback((row: GearRow): number => recommendedGearTier(ownership.map, row.key), [ownership.map])
+  const candidates = useMemo(() => index.rows.map((row) => {
+    const tier = candidateTier(row)
+    return scaleGearRow(row, upgradeStateForTier(tier))
+  }), [index.rows, candidateTier])
   const { ownedOrLooted } = useOwnedOrLooted(ownership.map)
   const [ownedOnly, setOwnedOnly] = useState(false)
   const [profile, setProfile] = useRemembered<BuildProfile>('eq.build.profile', sanitizeBuildProfile)
@@ -152,24 +160,24 @@ export function useBuild(): BuildState {
     return cells
   }, [unknown, swaps])
   const upgrades = useMemo(
-    () => rankUpgrades(upgradesFor(index.rows, set, BUILD_CELLS, {
+    () => rankUpgrades(upgradesFor(candidates, set, BUILD_CELLS, {
       classes, weights, excluded, score: rowScore, hasteScore, mana, perCell: UPGRADE_LIMIT,
       wornKeys: new Set([...(inventory?.hosts.map((host) => host.key) ?? []), ...(liveInventory?.hosts.map((host) => host.key) ?? [])]),
       unknownCells: unscored
     }), UPGRADE_LIMIT),
-    [index.rows, set, classes, weights, excluded, rowScore, hasteScore, mana, inventory, liveInventory, unscored]
+    [candidates, set, classes, weights, excluded, rowScore, hasteScore, mana, inventory, liveInventory, unscored]
   )
 
   const score = useMemo(() => {
     const current = buildScore(set, weights, rowScore, hasteScore) + gearManaScore(manaBaseline, worn.values(), set.values())
-    const bestSet = bestBuild(index.rows, BUILD_CELLS, { classes, weights, excluded, score: rowScore, hasteScore, mana })
+    const bestSet = bestBuild(candidates, BUILD_CELLS, { classes, weights, excluded, score: rowScore, hasteScore, mana })
     const estimate = buildScore(bestSet, weights, rowScore, hasteScore) + gearManaScore(manaBaseline, worn.values(), bestSet.values())
     return { current, best: Math.max(current, estimate) }
-  }, [set, weights, rowScore, hasteScore, manaBaseline, worn, index.rows, classes, excluded, mana])
+  }, [set, weights, rowScore, hasteScore, manaBaseline, worn, candidates, classes, excluded, mana])
 
 
   return {
-    strategy, strategies, setStrategy, rowScore, wished, owned, addWish,
+    strategy, strategies, setStrategy, rowScore, candidateTier, wished, owned, addWish,
     ready: index.ready && inventoryReady,
     hasDump: inventory !== null,
     hasLiveInventory, usingLiveInventory, followLive,

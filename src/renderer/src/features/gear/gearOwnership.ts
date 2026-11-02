@@ -90,6 +90,20 @@ const NOTHING: GearOwnership = {
 
 export type GearOwnershipMap = ReadonlyMap<string, GearOwnership>
 
+/** Highest known tier on a copy that is not currently equipped. */
+export function availableOwnedTier(map: GearOwnershipMap | null, key: string): number | undefined {
+  let highest: number | undefined
+  for (const fact of map?.get(key)?.facts ?? []) {
+    if (fact.place !== 'equipped' && fact.tier !== undefined && fact.tier > (highest ?? 0)) highest = fact.tier
+  }
+  return highest
+}
+
+/** Candidates can be moted to +5; retain a higher tier already on an available copy. */
+export function recommendedGearTier(map: GearOwnershipMap | null, key: string): number {
+  return Math.max(5, availableOwnedTier(map, key) ?? 0)
+}
+
 /**
  * The order places are read in, and it is the order a player asks in: what is on me, what is on
  * my person, then the three stores, then the keyring, then the token we could not classify.

@@ -38,12 +38,12 @@ export function useBuildLoadout(rows: GearRow[]) {
     }
     return out
   }, [selected, localSwaps, byKey, classes])
-  const savePlan = useCallback((next: ReadonlyMap<PlanSlotId, GearRow>): void => {
+  const savePlan = useCallback((next: ReadonlyMap<PlanSlotId, GearRow>, changed?: { cell: PlanSlotId; tier: number }): void => {
     if (!selected) { setLocalSwaps(next); return }
-    const plan = Object.fromEntries([...next].map(([cell, row]) => [cell, { key: row.key, tier: selected.plan[cell]?.key === row.key ? selected.plan[cell]?.tier ?? 0 : 0 }]))
+    const plan = Object.fromEntries([...next].map(([cell, row]) => [cell, { key: row.key, tier: changed?.cell === cell ? changed.tier : selected.plan[cell]?.key === row.key ? selected.plan[cell]?.tier ?? 0 : 0 }]))
     void update({ kind: 'plan', id: selected.id, plan }).catch(() => { /* Shared error. */ })
   }, [selected, update])
-  const swap = useCallback((cell: PlanSlotId, row: GearRow) => savePlan(new Map(swaps).set(cell, row)), [swaps, savePlan])
+  const swap = useCallback((cell: PlanSlotId, row: GearRow, tier = 0) => savePlan(new Map(swaps).set(cell, row), { cell, tier }), [swaps, savePlan])
   const unswap = useCallback((cell: PlanSlotId) => { const next = new Map(swaps); next.delete(cell); savePlan(next) }, [swaps, savePlan])
   const reset = useCallback(() => savePlan(new Map()), [savePlan])
   const wished = useMemo(() => new Set(loadoutWishlist(list, selected?.wishKeys ?? null).entries.map((e) => e.itemKey)), [list, selected])
