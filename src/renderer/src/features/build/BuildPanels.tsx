@@ -30,9 +30,13 @@ export function sourceText(row: GearRow): string {
   return 'source not stated'
 }
 
-function Icon({ row }: { row: GearRow | null }): JSX.Element | null {
-  if (!row?.iconId) return null
-  return <img src={itemIconUrl(row.iconId)} alt="" width={20} height={20} style={{ flexShrink: 0, borderRadius: 3 }} />
+function Icon({ row }: { row: GearRow | null }): JSX.Element {
+  return <Box component="span" aria-hidden="true" data-testid="build-item-icon" data-missing={row?.iconId ? undefined : 'true'}
+    sx={{ width: 20, height: 20, flexShrink: 0, display: 'inline-flex', borderRadius: '3px', '&[data-missing="true"]': { bgcolor: 'action.hover' } }}>
+    {row?.iconId ? <img src={itemIconUrl(row.iconId)} alt="" width={20} height={20} style={{ borderRadius: 3 }}
+      onLoad={(event) => { event.currentTarget.style.visibility = 'visible'; if (event.currentTarget.parentElement) delete event.currentTarget.parentElement.dataset.missing }}
+      onError={(event) => { event.currentTarget.style.visibility = 'hidden'; if (event.currentTarget.parentElement) event.currentTarget.parentElement.dataset.missing = 'true' }} /> : null}
+  </Box>
 }
 
 /**
