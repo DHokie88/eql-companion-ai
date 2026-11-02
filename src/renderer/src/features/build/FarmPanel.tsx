@@ -157,7 +157,7 @@ function emptyText(hasDump: boolean, options: number): string | null {
 }
 
 export function FarmPanel({ build, handlers }: { build: BuildState; handlers: FarmHandlers }): JSX.Element {
-  const { upgrades, eraOnly, hasDump } = build
+  const { farmUpgrades: upgrades, eraOnly, hasDump } = build
   const pruned = useMemo(() => prune(upgrades, eraOnly), [upgrades, eraOnly])
   const zones = useMemo(
     () => farmPlan(pruned.upgrades, (key) => mergeItemSources(sourcesFor(key), pruned.byKey.get(key)?.wikiSources)),

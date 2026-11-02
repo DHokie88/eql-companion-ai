@@ -13,7 +13,7 @@ import {
   soloKit,
   soloReading
 } from '../src/shared/build/profiles'
-import { bestBuild, buildScore, candidatesForCell, rankUpgrades, upgradesFor, wearable } from '../src/shared/build/optimizer'
+import { bestBuild, buildScore, candidatesForCell, groupUpgrades, rankUpgrades, upgradesFor, wearable } from '../src/shared/build/optimizer'
 import { BUILD_CELLS, wornSet } from '../src/shared/build/wornSet'
 import { defaultBuildStrategies, strategyScorer, strategyWeights } from '../src/shared/build/strategies'
 import { estimatedMana, estimatedManaGain, gearManaScore } from '../src/shared/build/manaEstimate'
@@ -145,6 +145,17 @@ test('upgrades list only what beats the worn item, skip what is already worn els
   assert.deepEqual(ups[1].options.map((o) => o.row.name), ['Ring A'])
   assert.deepEqual(ups[2].options.map((o) => o.row.name), ['Ring A'], 'the empty second cell wants Ring A too; Ring B is worn, so it is not offered')
   assert.equal(upgradesFor(rows, set, ['CHEST'], { ...ctx, perCell: 0 })[0].options.length, 0)
+})
+
+test('upgrade groups show the best three for each slot, ordered by their strongest improvement', () => {
+  const hats = [10, 20, 30, 40].map((ac) => row(`Hat ${String(ac)}`, ['HEAD'], { AC: ac }))
+  const set = new Map([['HEAD', null], ['ANY1', row('Any one', ['CHEST'], { AC: 5 })], ['ANY2', row('Any two', ['CHEST'], { AC: 8 })]] as const)
+  const groups = groupUpgrades(upgradesFor(hats, set, ['ANY2', 'HEAD', 'ANY1'], { classes: [], weights: { AC: 1 }, perCell: 50 }))
+  assert.deepEqual(groups.map((g) => g.cell), ['HEAD', 'ANY1', 'ANY2'])
+  assert.deepEqual(groups[0].options.map((o) => o.row.name), ['Hat 40', 'Hat 30', 'Hat 20'])
+  assert.deepEqual(groups[1].options.map((o) => o.delta), [35, 25, 15])
+  assert.deepEqual(groups[2].options.map((o) => o.delta), [32, 22, 12])
+  assert.equal(groups[0].options[0].row.key, groups[1].options[0].row.key, 'the same candidate can be an option for different slots')
 })
 
 test('meters and the solo reading stay in 0..100 and read the kit the way the table says', () => {
