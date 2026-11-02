@@ -24,6 +24,8 @@ export interface BuildContext {
   weights: BuildWeights
   /** rows the current filters exclude (out of era, not owned, …) */
   excluded?: (row: GearRow) => boolean
+  /** Optional additional compatibility rule for a particular cell. */
+  allowsCell?: (row: GearRow, cell: PlanSlotId) => boolean
   /** how many upgrade options `upgradesFor` lists per cell (default 3) */
   perCell?: number
   /** Items actually worn before any hypothetical plan swaps. */
@@ -54,6 +56,7 @@ export function candidatesForCell(rows: readonly GearRow[], cell: PlanSlotId, ct
     if (slot === null && row.slots.length === 0) continue
     if (!wearable(row, ctx.classes)) continue
     if (ctx.excluded?.(row)) continue
+    if (ctx.allowsCell && !ctx.allowsCell(row, cell)) continue
     out.push({ row, score: ctx.score ? ctx.score(row) : itemScore(row.stats, ctx.weights) })
   }
   out.sort((a, b) => b.score - a.score || a.row.name.localeCompare(b.row.name))

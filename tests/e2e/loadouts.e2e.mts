@@ -85,6 +85,24 @@ async function firstRun(userData: string, log: FixtureLog): Promise<void> {
     const wish = page.getByRole('button',{name:'Wishlist',exact:true}).first()
     await wish.click()
     await page.waitForFunction(async () => (await window.eq.loadoutsGet()).book.loadouts[1].wishKeys.length > 0)
+    await page.click('[data-testid="build-load-optimal"]', { timeout: 60000 })
+    await page.waitForFunction(async () => {
+      const plan = Object.values((await window.eq.loadoutsGet()).book.loadouts[1].plan)
+      return plan.length > 5 && plan.every((item) => item.key === '__eq_empty_slot__' || item.tier === 5)
+    }, undefined, { timeout: 60000 })
+    assert.ok((await page.locator('[data-testid^="build-cell-"]').allInnerTexts()).some((text) => text.includes(' +5')), 'the loaded tier is visible on the plan')
+    const optimalPlan = await page.evaluate(async () => (await window.eq.loadoutsGet()).book.loadouts[1].plan)
+    await page.waitForFunction(() => !(document.querySelector('[data-testid="build-load-owned"]') as HTMLButtonElement)?.disabled, undefined, { timeout: 60000 })
+    await page.click('[data-testid="build-load-owned"]', { timeout: 60000 })
+    await page.waitForFunction(async (previous) => {
+      const current = (await window.eq.loadoutsGet()).book.loadouts[1].plan
+      const plan = Object.values(current)
+      const entries = (await window.eq.gearOwnership()).entries
+      const owned = new Set(entries.filter(([, rows]) => rows.some((row) => !row.exaltation)).map(([key]) => key))
+      return JSON.stringify(current) !== previous && plan.some((item) => item.key !== '__eq_empty_slot__') &&
+        plan.every((item) => item.key === '__eq_empty_slot__' || (item.tier >= 5 && owned.has(item.key)))
+    }, JSON.stringify(optimalPlan), { timeout: 60000 })
+    check('optimal loads +5, and best owned loads only inventory items into the saved plan', true)
     await page.click('[data-testid="tab-wishlist"]')
     await page.click('[data-testid="wishlist-selected-loadout"]')
     const book = await page.evaluate(async () => (await window.eq.loadoutsGet()).book)

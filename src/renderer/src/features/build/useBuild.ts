@@ -1,4 +1,4 @@
-import { useBuildLoadout } from './useBuildLoadout'
+import { useBuildLoadout, type PlannedGear } from './useBuildLoadout'
 import { strategyAllows, strategyScorer, strategyWeights, type BuildStrategy } from '@shared/build/strategies'
 // THE BUILD TAB'S STATE (EQ Zera, 2026-09-06): the worn set read off the inventory dump, the
 // swaps the player is trying, and everything the three profiles say about both — computed here,
@@ -45,6 +45,7 @@ import { gearManaScore, manaForSet, type ManaEstimate } from '../../../../shared
 import { scaleGearRow } from '@shared/planner/gearScale'
 import { upgradeStateForTier } from '@shared/itemUpgrade'
 import { recommendedGearTier } from '../gear/gearOwnership'
+import { useLoadBestPlan } from './useLoadBestPlan'
 
 export { BUILD_CELLS }
 export type { WornUnknown }
@@ -52,6 +53,16 @@ export type { WornUnknown }
 const UPGRADE_LIMIT = 50
 
 export type Meters = Record<BuildProfile, number>
+
+function profileReadings(rows: readonly GearRow[], classes: readonly ClassAbbr[], excluded: (row: GearRow) => boolean, set: BuildSet): Record<BuildProfile, { weights: BuildWeights; current: number; best: number }> {
+  const out = {} as Record<BuildProfile, { weights: BuildWeights; current: number; best: number }>
+  for (const p of BUILD_PROFILES) {
+    const weights = profileWeights(p, classes)
+    const ctx = { classes, weights, excluded }
+    out[p] = { weights, current: buildScore(set, weights), best: buildScore(bestBuild(rows, BUILD_CELLS, ctx), weights) }
+  }
+  return out
+}
 
 export interface BuildState {
   ready: boolean
@@ -85,10 +96,13 @@ export interface BuildState {
   unknown: WornUnknown[]
   /** worn + swaps */
   set: BuildSet
-  swaps: ReadonlyMap<PlanSlotId, GearRow>
+  swaps: ReadonlyMap<PlanSlotId, PlannedGear | null>
   swap: (cell: PlanSlotId, row: GearRow, tier?: number) => void
   unswap: (cell: PlanSlotId) => void
   reset: () => void
+  loadOptimal: () => void
+  loadBestOwned: () => void
+  canLoadOwned: boolean
   weights: BuildWeights
   meters: Meters
   /** the selected profile's score, and the best it could reach */
@@ -101,7 +115,7 @@ export interface BuildState {
 
 export function useBuild(): BuildState {
   const index = useGearIndex()
-  const { classes, inventory, liveInventory, inventoryReady, hasLiveInventory, usingLiveInventory, followLive, strategy, strategies, swaps, setStrategy, swap, unswap, reset, wished, owned, addWish } = useBuildLoadout(index.rows)
+  const { classes, inventory, liveInventory, inventoryReady, hasLiveInventory, usingLiveInventory, followLive, strategy, strategies, swaps, setStrategy, swap, unswap, reset, loadPlan, wished, owned, addWish } = useBuildLoadout(index.rows)
   const { eraHidden } = useEraHidden()
   const [eraOnly, setEraOnly] = useEraOnly()
   const ownership = useGearOwnership()
@@ -129,15 +143,7 @@ export function useBuild(): BuildState {
   )
 
   // Every profile's weights, current score and best reachable score — the three meters.
-  const readings = useMemo(() => {
-    const out = {} as Record<BuildProfile, { weights: BuildWeights; current: number; best: number }>
-    for (const p of BUILD_PROFILES) {
-      const weights = profileWeights(p, classes)
-      const ctx = { classes, weights, excluded }
-      out[p] = { weights, current: buildScore(set, weights), best: buildScore(bestBuild(index.rows, BUILD_CELLS, ctx), weights) }
-    }
-    return out
-  }, [index.rows, classes, excluded, set])
+  const readings = useMemo(() => profileReadings(index.rows, classes, excluded, set), [index.rows, classes, excluded, set])
 
   const meters = useMemo(() => {
     const out = {} as Meters
@@ -154,6 +160,8 @@ export function useBuild(): BuildState {
   const hasteScore = useCallback((row: GearRow) => scoreStats({ HASTE: row.stats.HASTE }), [scoreStats])
   const manaBaseline = useMemo<ManaEstimate>(() => ({ classes, intelligence: manaInt ?? 150, wisdom: manaWis ?? 150,
     manaWeight: weights.MP ?? 0 }), [classes, manaInt, manaWis, weights.MP])
+  const { canLoadOwned, loadOptimal, loadBestOwned } = useLoadBestPlan({ rows: index.rows, ownership: ownership.map,
+    strategy, eraOnly, eraHidden, unknown, worn, classes, weights, rowScore, hasteScore, mana: manaBaseline, loadPlan })
   const mana = useMemo(() => manaForSet(manaBaseline, worn.values(), set.values()), [manaBaseline, worn, set])
   const unscored = useMemo(() => {
     const cells = new Set<PlanSlotId>()
@@ -200,6 +208,7 @@ export function useBuild(): BuildState {
     swap,
     unswap,
     reset,
+    loadOptimal, loadBestOwned, canLoadOwned,
     weights,
     meters,
     score,

@@ -50,11 +50,13 @@ function SetRowName({
   row,
   unknown,
   swapped,
+  tier,
   onOpenLoot
 }: {
   row: GearRow | null
   unknown: WornUnknown | undefined
   swapped: boolean
+  tier?: number
   onOpenLoot: (item: string) => void
 }): JSX.Element {
   const line = (
@@ -64,7 +66,7 @@ function SetRowName({
       onClick={row ? () => onOpenLoot(row.name) : undefined}
       sx={{ minWidth: 0, flexGrow: 1, cursor: row ? 'pointer' : 'default', color: row ? (swapped ? 'primary.main' : 'text.primary') : 'text.disabled', '&:hover': row ? { textDecoration: 'underline' } : undefined }}
     >
-      {row ? row.name : unknown ? `${unknown.name} (not in the item database)` : 'empty'}
+      {row ? `${row.name}${tier ? ` +${String(tier)}` : ''}` : unknown ? `${unknown.name} (not in the item database)` : 'empty'}
     </Typography>
   )
   if (!row) return line
@@ -74,14 +76,14 @@ function SetRowName({
 function SetRow({ cell, build, onOpenLoot }: { cell: PlanSlotId; build: BuildState; onOpenLoot: (item: string) => void }): JSX.Element {
   const row = build.set.get(cell) ?? null
   const swapped = build.swaps.has(cell)
-  const unknown = build.unknown.find((u) => u.cell === cell)
+  const unknown = swapped ? undefined : build.unknown.find((u) => u.cell === cell)
   return (
     <Stack direction="row" spacing={1} alignItems="center" sx={{ py: 0.35, minWidth: 0 }} data-testid={`build-cell-${cell}`}>
       <Typography variant="caption" className="eq-display-label" sx={{ width: 84, flexShrink: 0, color: 'text.disabled' }}>
         {planSlotLabel(cell)}
       </Typography>
       <Icon row={row} />
-      <SetRowName row={row} unknown={unknown} swapped={swapped} onOpenLoot={onOpenLoot} />
+      <SetRowName row={row} unknown={unknown} swapped={swapped} tier={build.swaps.get(cell)?.planTier} onOpenLoot={onOpenLoot} />
       {swapped && <Chip size="small" label="trying" color="primary" variant="outlined" sx={{ height: 18, fontSize: 9 }} />}
       {row && (
         <Typography variant="caption" sx={{ ...SCORE_SX, color: 'text.secondary' }}>
@@ -113,13 +115,19 @@ export function BuildSetPanel({ build, onOpenLoot }: { build: BuildState; onOpen
           </Button>
         )}
       </Stack>
+      <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ pb: 0.75 }}>
+        <Button size="small" variant="outlined" onClick={build.loadOptimal} disabled={!build.ready}
+          data-testid="build-load-optimal" title="Estimate a full set using +5 items and the current era filter">Load optimal (+5)</Button>
+        <Button size="small" variant="outlined" onClick={build.loadBestOwned} disabled={!build.ready || !build.canLoadOwned}
+          data-testid="build-load-owned" title="Estimate a full set from your current inventory, at +5 or its higher owned tier">Load best owned</Button>
+      </Stack>
       <Box sx={{ overflow: 'auto', minHeight: 0 }}>
         {BUILD_CELLS.map((cell) => (
           <SetRow key={cell} cell={cell} build={build} onOpenLoot={onOpenLoot} />
         ))}
       </Box>
       <Typography variant="caption" color="text.disabled" sx={{ mt: 0.75 }}>
-        Worn items use their exported tier. Candidates are scored at +5 or the higher owned tier from your current inventory; item tooltips show base stats. Item scores stand alone; the set and upgrade gains count only its strongest item haste. Two-handed weapons still show a secondary cell.
+        Loaded sets are estimates for this strategy. Optimal uses +5; owned uses your inventory at +5 or its higher tier. Loading replaces the current plan. Only the strongest item haste counts. Item tooltips show base stats; manual swaps can ignore two-handed limits.
       </Typography>
     </Paper>
   )

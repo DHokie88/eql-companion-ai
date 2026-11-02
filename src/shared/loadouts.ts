@@ -8,6 +8,8 @@ export const LOADOUT_IDS = ['lo1', 'lo2', 'lo3', 'lo4', 'lo5'] as const
 export type LoadoutId = typeof LOADOUT_IDS[number]
 export interface LoadoutCapture { capturedAt: string; classes: ClassAbbr[]; sheet: Omit<CharacterSheet, 'carry'>; inventory: PlannerInventory }
 export interface LoadoutPlanItem { key: string; tier: number }
+/** A deliberate empty cell in a plan, distinct from leaving the worn item unchanged. */
+export const EMPTY_PLAN_ITEM = '__eq_empty_slot__'
 export interface CharacterLoadout { id: LoadoutId; name: string; classes: ClassAbbr[]; capture?: LoadoutCapture; plan: Partial<Record<PlanSlotId, LoadoutPlanItem>>; strategyId: string; wishKeys: string[] }
 export interface LoadoutBook { version: 1; loadouts: CharacterLoadout[]; strategies: BuildStrategy[] }
 export interface LoadoutState { characterId: string; book: LoadoutBook }
