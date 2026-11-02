@@ -1,5 +1,20 @@
 # AGENTS.md — EQ Oracle
 
+## Completion and Git synchronization
+
+- Finish the authorized work, including appropriate checks and documentation;
+  do not leave a task half done merely because an agent's turn is ending.
+- Before finishing, inspect Git status and the target branch, commit the work
+  that belongs to the task, and push the verified commit to its existing tracking
+  remote with an ordinary non-force push. Separate push approval is not needed.
+- Preserve unrelated changes, secrets, private runtime data, and explicit
+  acceptance or deployment boundaries. Do not commit credentials or ignored
+  personal data just to make a tree look clean.
+- If blocked or interrupted, preserve the work and report what is unfinished,
+  checks, exact branch and revision, Git status, push status, and the next step.
+  Never claim a task is complete when checks or the push did not succeed.
+
+
 Distilled operating manual. Per-task history lives in `git log` and Linear;
 this file holds only repeatable rules and load-bearing design. Long-form war
 stories were MOVED verbatim to `docs/agents-archive.md` (JOS-252) — a cut
