@@ -37,12 +37,8 @@
 //    there is NO dump — that is "we cannot see your body", a different statement, and the card
 //    answers it with the command instead (law 1).
 //
-// 3. THE ANY-CELLS ARE NOT COMPARED, AND THAT IS A DECISION RATHER THAN AN OVERSIGHT. A character
-//    has two `Any Slot` places (JOS-104) and the owner's own dump wears two CHEST items in them. A
-//    cell that constrains no slot is not "the slot this item occupies", so including it would put a
-//    breastplate under a hovered RING as if it were the thing being replaced. `cellsForSlot`
-//    already declines to return them, so this file inherits the refusal rather than restating it.
-//    The cost is honest and stated here: an any-slot item is invisible to this card.
+// 3. BOTH ANY-CELLS ARE INCLUDED. They are additional places the item can replace, and the card
+//    names them explicitly so their equipped hosts are not mistaken for the item's normal slot.
 //
 // ---------------------------------------------------------------------------
 // AND THE COMPARISON ITSELF IS LAW 1, TWICE
@@ -57,7 +53,7 @@
 
 import { GEAR_STAT_KEYS, type GearStatKey, type GearStats } from '../../../../shared/planner/gear'
 import type { PlannerInventoryHost } from '../../../../shared/planner/inventorySlots'
-import { cellsForSlot, planSlotLabel, type EquipSlot, type PlanSlotId } from '../../../../shared/planner/types'
+import { ANY_CELLS, cellsForSlot, planSlotLabel, type EquipSlot, type PlanSlotId } from '../../../../shared/planner/types'
 import { upgradeStateForTier, type ItemUpgradeState } from '../../../../shared/itemUpgrade'
 import { outputAgeLabel } from '../../lib/outputFreshness'
 import { statText } from './gearColumns'
@@ -105,6 +101,11 @@ export function equippedCells(index: EquippedIndex, slots: readonly EquipSlot[])
       seen.add(cell)
       out.push({ cell, label: planSlotLabel(cell), host: index.get(cell) ?? null })
     }
+  }
+  if (slots.length > 0) for (const cell of ANY_CELLS) {
+    if (seen.has(cell)) continue
+    seen.add(cell)
+    out.push({ cell, label: planSlotLabel(cell), host: index.get(cell) ?? null })
   }
   return out
 }

@@ -114,9 +114,16 @@ export const AREA_FORM_TIER = {
   // ---- the Build tab (EQ Zera) ----
   /** tank / dps / heal — the profile the meters and the upgrade list are read under */
   'eq.build.profile': 'restart',
+  'eq.build.manaInt': 'session',
+  'eq.build.manaWis': 'session',
   // ---- the Character tab ----
   'eq.character.search': 'session'
 } as const satisfies Record<string, MemoryTier>
+
+/** Entered total stats are session estimates; missing data remains explicitly unknown. */
+export function sanitizeManaStat(raw: unknown): number | null {
+  return typeof raw === 'number' && Number.isFinite(raw) && raw >= 0 && raw <= 1000 ? raw : null
+}
 
 /** A key this area knows how to remember. Anything else is a typo, caught at compile time. */
 export type AreaFormKey = keyof typeof AREA_FORM_TIER

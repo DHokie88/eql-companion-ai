@@ -27,7 +27,7 @@ import type { BuildProfile } from '../../../../shared/build/profiles'
 import { profileWeights } from '../../../../shared/build/profiles'
 import { upgradeVerdict, type UpgradeContext, type UpgradeVerdict } from '../../../../shared/build/upgradeFinder'
 import { unknownCells, wornSet } from '../../../../shared/build/wornSet'
-import { sanitizeBuildProfile } from '../gear/areaMemory'
+import { sanitizeBuildProfile, sanitizeManaStat } from '../gear/areaMemory'
 import { useEraHidden, useGearClasses, useGearIndex } from '../gear/gearData'
 import { useRemembered } from '../gear/useAreaMemory'
 import { usePlannerInventory } from '../planner/plannerInventory'
@@ -50,6 +50,8 @@ export function useUpgradeFinder(): UpgradeFinder {
   const { classes } = useGearClasses()
   const { eraHidden } = useEraHidden()
   const [profile] = useRemembered<BuildProfile>('eq.build.profile', sanitizeBuildProfile)
+  const [manaInt] = useRemembered('eq.build.manaInt', sanitizeManaStat)
+  const [manaWis] = useRemembered('eq.build.manaWis', sanitizeManaStat)
 
   // Keyed on the ARRAY identity, which `useGearIndex` holds stable for the window's life.
   const byKey = useMemo(() => new Map(index.rows.map((r) => [r.key, r])), [index.rows])
@@ -59,11 +61,13 @@ export function useUpgradeFinder(): UpgradeFinder {
     () => ({
       classes,
       weights: profileWeights(profile, classes),
+      mana: { classes, intelligence: manaInt ?? 150, wisdom: manaWis ?? 150, manaWeight: profileWeights(profile, classes).MP ?? 0 },
       worn: reading.worn,
       unknownCells: unknownCells(reading.unknown),
+      wornKeys: new Set(inventory?.hosts.map((host) => host.key) ?? []),
       excluded: eraHidden
     }),
-    [classes, profile, reading, eraHidden]
+    [classes, profile, reading, eraHidden, inventory, manaInt, manaWis]
   )
 
   const hasDump = inventory !== null

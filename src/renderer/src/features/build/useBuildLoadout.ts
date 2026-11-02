@@ -53,7 +53,7 @@ export function useBuildLoadout(rows: GearRow[]) {
     add(wishFromGear(row, Date.now()))
     if (selected) void update({ kind: 'wish', id: selected.id, wishKeys: [...new Set([...selected.wishKeys, row.key])] }).catch(() => { /* Shared error. */ })
   }, [add, owned, selected, update])
-  return { classes, inventory, inventoryReady: liveInventory.ready && ready, hasLiveInventory: liveInventory.inventory !== null,
+  return { classes, inventory, liveInventory: liveInventory.inventory, inventoryReady: liveInventory.ready && ready, hasLiveInventory: liveInventory.inventory !== null,
     usingLiveInventory: inventory !== null && inventory === liveInventory.inventory,
     followLive: () => select(null), strategy, strategies, swaps, setStrategy, swap, unswap, reset, wished, owned, addWish }
 }

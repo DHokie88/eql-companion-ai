@@ -1,5 +1,5 @@
 import { useBuildLoadout } from './useBuildLoadout'
-import { strategyAllows, strategyItemScore, strategyWeights, type BuildStrategy } from '@shared/build/strategies'
+import { strategyAllows, strategyScorer, strategyWeights, type BuildStrategy } from '@shared/build/strategies'
 // THE BUILD TAB'S STATE (EQ Zera, 2026-09-06): the worn set read off the inventory dump, the
 // swaps the player is trying, and everything the three profiles say about both — computed here,
 // drawn by the panels.
@@ -31,7 +31,7 @@ import {
   type SoloKit,
   type SoloReading
 } from '../../../../shared/build/profiles'
-import { bestBuild, buildScore, upgradesFor, type BuildSet, type CellUpgrade } from '../../../../shared/build/optimizer'
+import { bestBuild, buildScore, rankUpgrades, upgradesFor, type BuildSet, type CellUpgrade } from '../../../../shared/build/optimizer'
 // THE WORN READ IS SHARED NOW (shared/build/wornSet.ts). `useUpgradeFinder` asks the same question
 // from the Zone Loot rows and the item page, and two spellings of "what am I wearing" would be two
 // answers to it. `BUILD_CELLS` and `WornUnknown` are re-exported below for this tab's importers.
@@ -41,11 +41,13 @@ import { useRemembered } from '../gear/useAreaMemory'
 import { sanitizeBuildProfile } from '../gear/areaMemory'
 import { useEraOnly } from '../planner/plannerData'
 import { outputUpdatedMillis } from '../../lib/outputFreshness'
+import { sanitizeManaStat } from '../gear/areaMemory'
+import { gearManaScore, manaForSet, type ManaEstimate } from '../../../../shared/build/manaEstimate'
 
 export { BUILD_CELLS }
 export type { WornUnknown }
 
-const UPGRADES_PER_CELL = 3
+const UPGRADE_LIMIT = 50
 
 export type Meters = Record<BuildProfile, number>
 
@@ -55,6 +57,10 @@ export interface BuildState {
   hasLiveInventory: boolean
   usingLiveInventory: boolean
   followLive: () => void
+  manaInt: number | null
+  manaWis: number | null
+  setManaInt: (value: number | null) => void
+  setManaWis: (value: number | null) => void
   exportedAt: number | undefined
   classes: ClassAbbr[]
   strategy: BuildStrategy
@@ -91,13 +97,15 @@ export interface BuildState {
 
 export function useBuild(): BuildState {
   const index = useGearIndex()
-  const { classes, inventory, inventoryReady, hasLiveInventory, usingLiveInventory, followLive, strategy, strategies, swaps, setStrategy, swap, unswap, reset, wished, owned, addWish } = useBuildLoadout(index.rows)
+  const { classes, inventory, liveInventory, inventoryReady, hasLiveInventory, usingLiveInventory, followLive, strategy, strategies, swaps, setStrategy, swap, unswap, reset, wished, owned, addWish } = useBuildLoadout(index.rows)
   const { eraHidden } = useEraHidden()
   const [eraOnly, setEraOnly] = useEraOnly()
   const ownership = useGearOwnership()
   const { ownedOrLooted } = useOwnedOrLooted(ownership.map)
   const [ownedOnly, setOwnedOnly] = useState(false)
   const [profile, setProfile] = useRemembered<BuildProfile>('eq.build.profile', sanitizeBuildProfile)
+  const [manaInt, setManaInt] = useRemembered('eq.build.manaInt', sanitizeManaStat)
+  const [manaWis, setManaWis] = useRemembered('eq.build.manaWis', sanitizeManaStat)
   const byKey = useMemo(() => new Map(index.rows.map((r) => [r.key, r])), [index.rows])
   const { worn, unknown } = useMemo(() => wornSet(inventory?.hosts ?? [], byKey), [inventory, byKey])
   const set = useMemo(() => {
@@ -131,12 +139,33 @@ export function useBuild(): BuildState {
   const kit = useMemo(() => soloKit(classes), [classes])
   const solo = useMemo(() => soloReading(kit, meters), [kit, meters])
 
-  const weights = strategyWeights(strategy, classes)
-  const rowScore = useCallback((row: GearRow) => strategyItemScore(row.stats, strategy, classes), [strategy, classes])
+  const weights = useMemo(() => strategyWeights(strategy, classes), [strategy, classes])
+  const scoreStats = useMemo(() => strategyScorer(strategy, classes), [strategy, classes])
+  const rowScore = useCallback((row: GearRow) => scoreStats(row.stats), [scoreStats])
+  const hasteScore = useCallback((row: GearRow) => scoreStats({ HASTE: row.stats.HASTE }), [scoreStats])
+  const manaBaseline = useMemo<ManaEstimate>(() => ({ classes, intelligence: manaInt ?? 150, wisdom: manaWis ?? 150,
+    manaWeight: weights.MP ?? 0 }), [classes, manaInt, manaWis, weights.MP])
+  const mana = useMemo(() => manaForSet(manaBaseline, worn.values(), set.values()), [manaBaseline, worn, set])
+  const unscored = useMemo(() => {
+    const cells = new Set<PlanSlotId>()
+    for (const item of unknown) if (!swaps.has(item.cell)) cells.add(item.cell)
+    return cells
+  }, [unknown, swaps])
   const upgrades = useMemo(
-    () => upgradesFor(index.rows, set, BUILD_CELLS, { classes, weights, excluded, score: rowScore, perCell: UPGRADES_PER_CELL }),
-    [index.rows, set, classes, weights, excluded, rowScore]
+    () => rankUpgrades(upgradesFor(index.rows, set, BUILD_CELLS, {
+      classes, weights, excluded, score: rowScore, hasteScore, mana, perCell: UPGRADE_LIMIT,
+      wornKeys: new Set([...(inventory?.hosts.map((host) => host.key) ?? []), ...(liveInventory?.hosts.map((host) => host.key) ?? [])]),
+      unknownCells: unscored
+    }), UPGRADE_LIMIT),
+    [index.rows, set, classes, weights, excluded, rowScore, hasteScore, mana, inventory, liveInventory, unscored]
   )
+
+  const score = useMemo(() => {
+    const current = buildScore(set, weights, rowScore, hasteScore) + gearManaScore(manaBaseline, worn.values(), set.values())
+    const bestSet = bestBuild(index.rows, BUILD_CELLS, { classes, weights, excluded, score: rowScore, hasteScore, mana })
+    const estimate = buildScore(bestSet, weights, rowScore, hasteScore) + gearManaScore(manaBaseline, worn.values(), bestSet.values())
+    return { current, best: Math.max(current, estimate) }
+  }, [set, weights, rowScore, hasteScore, manaBaseline, worn, index.rows, classes, excluded, mana])
 
 
   return {
@@ -144,6 +173,7 @@ export function useBuild(): BuildState {
     ready: index.ready && inventoryReady,
     hasDump: inventory !== null,
     hasLiveInventory, usingLiveInventory, followLive,
+    manaInt, manaWis, setManaInt, setManaWis,
     exportedAt: outputUpdatedMillis(inventory?.loadedAt),
     classes,
     profile,
@@ -161,7 +191,7 @@ export function useBuild(): BuildState {
     reset,
     weights,
     meters,
-    score: { current: buildScore(set, weights, rowScore), best: buildScore(bestBuild(index.rows, BUILD_CELLS, { classes, weights, excluded, score: rowScore }), weights, rowScore) },
+    score,
     kit,
     solo,
     upgrades
