@@ -52,6 +52,9 @@ export type Meters = Record<BuildProfile, number>
 export interface BuildState {
   ready: boolean
   hasDump: boolean
+  hasLiveInventory: boolean
+  usingLiveInventory: boolean
+  followLive: () => void
   exportedAt: number | undefined
   classes: ClassAbbr[]
   strategy: BuildStrategy
@@ -88,7 +91,7 @@ export interface BuildState {
 
 export function useBuild(): BuildState {
   const index = useGearIndex()
-  const { classes, inventory, inventoryReady, strategy, strategies, swaps, setStrategy, swap, unswap, reset, wished, owned, addWish } = useBuildLoadout(index.rows)
+  const { classes, inventory, inventoryReady, hasLiveInventory, usingLiveInventory, followLive, strategy, strategies, swaps, setStrategy, swap, unswap, reset, wished, owned, addWish } = useBuildLoadout(index.rows)
   const { eraHidden } = useEraHidden()
   const [eraOnly, setEraOnly] = useEraOnly()
   const ownership = useGearOwnership()
@@ -140,6 +143,7 @@ export function useBuild(): BuildState {
     strategy, strategies, setStrategy, rowScore, wished, owned, addWish,
     ready: index.ready && inventoryReady,
     hasDump: inventory !== null,
+    hasLiveInventory, usingLiveInventory, followLive,
     exportedAt: outputUpdatedMillis(inventory?.loadedAt),
     classes,
     profile,

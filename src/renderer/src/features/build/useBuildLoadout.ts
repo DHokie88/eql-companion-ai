@@ -1,5 +1,5 @@
 import { loadoutWishlist, type CharacterLoadout } from '@shared/loadouts'
-import type { PlannerInventory } from '@shared/planner/inventorySlots'
+import { selectBuildInventory } from './selectBuildInventory'
 import type { BuildStrategy } from '@shared/build/strategies'
 import { useCallback, useMemo, useState } from 'react'
 import type { GearRow } from '@shared/planner/gear'
@@ -14,12 +14,12 @@ import { wishFromGear } from '../wishlist/wishSearch'
 import { useGearOwnership } from '../gear/gearData'
 import { usePlannerInventory } from '../planner/plannerInventory'
 export function useBuildLoadout(rows: GearRow[]) {
-  const { selected, live, liveClasses, state, update, ready } = useLoadouts()
+  const { selected, live, liveClasses, state, update, ready, following, select } = useLoadouts()
   const { add, list } = useWishlist()
   const liveInventory = usePlannerInventory()
   const ownership = useGearOwnership()
   const classes = selected?.classes ?? liveClasses
-  const inventory = selectedInventory(selected, live?.id, liveInventory.inventory)
+  const inventory = selectBuildInventory(selected, following, live?.id, liveInventory.inventory)
   const [localSwaps, setLocalSwaps] = useState<ReadonlyMap<PlanSlotId, GearRow>>(() => new Map())
   const [fallbackStrategy, setFallbackStrategy] = useState('s1')
   const strategies = state?.book.strategies ?? defaultBuildStrategies()
@@ -53,14 +53,9 @@ export function useBuildLoadout(rows: GearRow[]) {
     add(wishFromGear(row, Date.now()))
     if (selected) void update({ kind: 'wish', id: selected.id, wishKeys: [...new Set([...selected.wishKeys, row.key])] }).catch(() => { /* Shared error. */ })
   }, [add, owned, selected, update])
-  return { classes, inventory, inventoryReady: liveInventory.ready && ready, strategy, strategies, swaps, setStrategy, swap, unswap, reset, wished, owned, addWish }
-}
-
-function selectedInventory(selected: CharacterLoadout | null, liveId: string | undefined, live: PlannerInventory | null): PlannerInventory | null {
-  if (!selected) return live
-  const capture = selected.capture
-  if (capture?.classes.slice().sort().join('/') === selected.classes.slice().sort().join('/')) return capture.inventory
-  return selected.id === liveId ? live : null
+  return { classes, inventory, inventoryReady: liveInventory.ready && ready, hasLiveInventory: liveInventory.inventory !== null,
+    usingLiveInventory: inventory !== null && inventory === liveInventory.inventory,
+    followLive: () => select(null), strategy, strategies, swaps, setStrategy, swap, unswap, reset, wished, owned, addWish }
 }
 function selectedStrategy(strategies: BuildStrategy[], selected: CharacterLoadout | null, fallback: string): BuildStrategy {
   return strategies.find((p) => p.id === (selected?.strategyId ?? fallback)) ?? strategies[0]

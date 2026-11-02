@@ -48,22 +48,22 @@ function Toolbar({ build }: { build: BuildState }): JSX.Element {
         label={<Typography variant="caption">Owned or looted only</Typography>}
       />
       <Typography variant="caption" color="text.disabled" sx={{ ml: 'auto' }}>
-        saved equipment · {outputAgeLabel(build.exportedAt)}
+        {build.usingLiveInventory ? 'current inventory' : 'loadout equipment'} · {outputAgeLabel(build.exportedAt)}
       </Typography>
     </Stack>
   )
 }
 
-function NoDump(): JSX.Element {
+function NoDump({ build }: { build: BuildState }): JSX.Element {
   return (
     <Paper variant="outlined" sx={{ p: 2 }} data-testid="build-no-dump">
       <Typography variant="h6" sx={{ mb: 0.5 }}>
-        No inventory dump yet
+        {build.hasLiveInventory ? 'No saved equipment for this loadout' : 'No inventory dump yet'}
       </Typography>
       <Typography variant="body2" color="text.secondary">
-        In game, type <code>/outputfile inventory</code>. The app reads the file it writes, the Character tab shows what you wear, and this tab
-        scores it and finds the swaps. It re-reads on its own each time you export again.
+        {build.hasLiveInventory ? 'The current inventory is available. Follow live to use it, or save equipment for this loadout from the Character tab.' : <>In game, type <code>/outputfile inventory</code>. The app reads the file it writes and updates this tab when you export again.</>}
       </Typography>
+      {build.hasLiveInventory && <Button onClick={build.followLive}>Follow live inventory</Button>}
     </Paper>
   )
 }
@@ -92,7 +92,7 @@ export default function BuildView({
         <DialogTitle>Build strategies</DialogTitle><DialogContent>{buildStrategiesSection().items[0].content}</DialogContent>
         <DialogActions><Button onClick={() => setEditingStrategies(false)}>Close</Button></DialogActions>
       </Dialog>
-      {!build.hasDump && <NoDump />}
+      {!build.hasDump && <NoDump build={build} />}
       <BuildMeters build={build} />
       <Stack direction="row" spacing={1.5} sx={{ flexGrow: 1, minHeight: 0 }}>
         <Stack sx={{ flex: 1, minWidth: 0, minHeight: 0 }}>
