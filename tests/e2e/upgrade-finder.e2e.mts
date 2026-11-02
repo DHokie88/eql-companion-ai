@@ -212,6 +212,12 @@ async function stepUpgradeCard(page: Page): Promise<void> {
     groups.every((group) => group.headings === 1 && group.gains.length > 0 && group.gains.length <= 3 &&
       group.gains.every((gain, i) => i === 0 || group.gains[i - 1] >= gain)) &&
     groups.every((group, i) => i === 0 || groups[i - 1].gains[0] >= group.gains[0]), JSON.stringify(groups))
+  const icons = await page.evaluate((panel) => [...document.querySelectorAll(`${panel} [data-testid="build-upgrade-option"]`)].map((item) => {
+    const icon = item.querySelector('[data-testid="build-item-icon"]')
+    const name = item.querySelector('[data-testid="build-item-name"]')
+    return { width: icon?.getBoundingClientRect().width ?? 0, nameLeft: name?.getBoundingClientRect().left ?? 0 }
+  }), UPGRADES)
+  check('every upgrade reserves icon space and item names line up', icons.length > 0 && icons.every((icon) => icon.width === 20 && Math.abs(icon.nameLeft - icons[0].nameLeft) < 1), JSON.stringify(icons.slice(0, 5)))
   const item = await textOf(page, UPGRADE_NAME)
   await page.hover(UPGRADE_NAME, { timeout: 15_000 })
   const cards = await settle(() => countOf(page, POPPER), (n) => n > 0, { timeoutMs: 10_000 })
