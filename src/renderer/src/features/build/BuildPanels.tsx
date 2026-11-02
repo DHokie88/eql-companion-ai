@@ -115,18 +115,18 @@ export function BuildSetPanel({ build, onOpenLoot }: { build: BuildState; onOpen
         ))}
       </Box>
       <Typography variant="caption" color="text.disabled" sx={{ mt: 0.75 }}>
-        Worn items use their exported tier; candidates use base tier. Item scores stand alone; the set and upgrade gains count only its strongest item haste. Two-handed weapons still show a secondary cell.
+        Worn items use their exported tier. Candidates are scored at +5 or the higher owned tier from your current inventory; item tooltips show base stats. Item scores stand alone; the set and upgrade gains count only its strongest item haste. Two-handed weapons still show a secondary cell.
       </Typography>
     </Paper>
   )
 }
 
-function UpgradeCell({ up, build, onOpenLoot }: { up: CellUpgrade; build: BuildState; onOpenLoot: (item: string) => void }): JSX.Element {
+function UpgradeCell({ up, build, onOpenLoot, showHeading }: { up: CellUpgrade; build: BuildState; onOpenLoot: (item: string) => void; showHeading: boolean }): JSX.Element {
   return (
     <Box sx={{ mb: 1 }} data-testid={`build-upgrade-${up.cell}`}>
-      <Typography variant="caption" className="eq-display-label" sx={{ color: 'text.disabled' }}>
+      {showHeading && <Typography variant="caption" className="eq-display-label" sx={{ color: 'text.disabled' }}>
         {planSlotLabel(up.cell)} · {up.current ? up.current.name : 'empty'}
-      </Typography>
+      </Typography>}
       {up.options.map((o) => (
         <Stack key={o.row.key} direction="row" spacing={1} alignItems="center" sx={{ py: 0.3, minWidth: 0 }}>
           <Icon row={o.row} />
@@ -144,7 +144,7 @@ function UpgradeCell({ up, build, onOpenLoot }: { up: CellUpgrade; build: BuildS
               </Typography>
             </BuildItemName>
             <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block' }}>
-              {sourceText(o.row)}
+              Scored at +{build.candidateTier(o.row)}{build.owned(o.row) ? ' · owned' : ''} · {sourceText(o.row)}
             </Typography>
             {o.mana && (o.mana.raw !== 0 || o.mana.derived !== 0) && <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
               Mana: raw {signed(o.mana.raw)} · INT/WIS estimate {signed(o.mana.derived)} · mana weight ×{o.mana.weight}
@@ -153,7 +153,7 @@ function UpgradeCell({ up, build, onOpenLoot }: { up: CellUpgrade; build: BuildS
           <Typography variant="caption" sx={{ ...SCORE_SX, color: 'success.main' }}>
             +{fmt(o.delta)}
           </Typography>
-          <Button size="small" variant="outlined" onClick={() => build.swap(up.cell, o.row)} sx={{ flexShrink: 0 }}>
+          <Button size="small" variant="outlined" onClick={() => build.swap(up.cell, o.row, build.candidateTier(o.row))} sx={{ flexShrink: 0 }}>
             Try in plan
           </Button>
           <Button size="small" onClick={() => build.addWish(o.row)} disabled={build.owned(o.row) || build.wished.has(o.row.key)} data-testid={`build-wish-${o.row.key}`}>
@@ -179,7 +179,7 @@ export function BuildUpgradesPanel({ build, onOpenLoot }: { build: BuildState; o
             Nothing in the index beats what you wear under these filters. Turn off in-era or owned-only to widen the search.
           </Typography>
         ) : (
-          withOptions.map((up) => <UpgradeCell key={up.cell} up={up} build={build} onOpenLoot={onOpenLoot} />)
+          withOptions.map((up, i) => <UpgradeCell key={up.options[0].row.key} up={up} build={build} onOpenLoot={onOpenLoot} showHeading={i === 0 || withOptions[i - 1].cell !== up.cell} />)
         )}
       </Box>
     </Paper>

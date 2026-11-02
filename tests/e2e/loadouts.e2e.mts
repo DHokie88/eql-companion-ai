@@ -81,6 +81,7 @@ async function firstRun(userData: string, log: FixtureLog): Promise<void> {
     const after = await page.evaluate(async () => (await window.eq.loadoutsGet()).book)
     assert.deepEqual(after.loadouts[0].capture,original)
     assert.deepEqual(after.loadouts[0].plan,{})
+    assert.ok(Object.values(after.loadouts[1].plan).some((item) => item.tier >= 5), 'a suggested swap retains its scored tier')
     const wish = page.getByRole('button',{name:'Wishlist',exact:true}).first()
     await wish.click()
     await page.waitForFunction(async () => (await window.eq.loadoutsGet()).book.loadouts[1].wishKeys.length > 0)
