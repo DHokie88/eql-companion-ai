@@ -389,6 +389,8 @@ export interface RespawnWatchPref {
   display: string
   /** The user's own respawn, in SECONDS. Rung 1; absent means "use what you learn". */
   customSec?: number
+  /** Follow qualifying kill gaps without the wiki floor. */
+  autoAdjust?: boolean
 }
 
 export interface RespawnPrefs {
@@ -441,6 +443,7 @@ function normalizeWatch(raw: unknown): RespawnWatchPref | null {
   const out: RespawnWatchPref = { key, display: display.length > 0 ? display : key }
   const sec = typeof w.customSec === 'number' && Number.isFinite(w.customSec) ? Math.round(w.customSec) : 0
   if (sec >= RESPAWN_CUSTOM_MIN_SEC && sec <= RESPAWN_CUSTOM_MAX_SEC) out.customSec = sec
+  if (w.autoAdjust === true) { out.autoAdjust = true; delete out.customSec }
   return out
 }
 
@@ -496,6 +499,7 @@ export const RESPAWN_CONFIRM_TITLE =
 export interface RespawnEvidence {
   /** Rung 1 — the user's own number, in ms. */
   customMs?: number
+  autoAdjust?: boolean
   /** Rung 2 — the SMALLEST same-stay death→death gap, in ms. */
   observedMs?: number
   /** How many same-stay gaps back `observedMs`. Zero when there are none. */
@@ -516,9 +520,9 @@ export interface RespawnEstimate {
  * describing a different server).
  */
 export function resolveRespawn(ev: RespawnEvidence): RespawnEstimate {
-  if (ev.customMs !== undefined && ev.customMs > 0) return { estimateMs: ev.customMs, source: 'custom' }
+  if (!ev.autoAdjust && ev.customMs !== undefined && ev.customMs > 0) return { estimateMs: ev.customMs, source: 'custom' }
   if (ev.observedMs !== undefined && ev.observedMs > 0 && ev.samples > 0) {
-    const floored = ev.wikiMs !== undefined ? Math.max(ev.observedMs, ev.wikiMs) : ev.observedMs
+    const floored = !ev.autoAdjust && ev.wikiMs !== undefined ? Math.max(ev.observedMs, ev.wikiMs) : ev.observedMs
     return { estimateMs: floored, source: 'observed' }
   }
   if (ev.wikiMs !== undefined && ev.wikiMs > 0) return { estimateMs: ev.wikiMs, source: 'wiki' }
@@ -559,6 +563,8 @@ export interface RespawnRow {
   seenVia?: RespawnSeenVia
   estimateMs?: number
   source: RespawnSource
+  /** User opted to follow observed gaps without the wiki floor. */
+  autoAdjust?: boolean
   /** Rung 2's raw bound, kept beside `estimateMs` so the UI can show when the floor lifted it. */
   observedMs?: number
   samples: number
@@ -830,7 +836,7 @@ export function orderRespawnRows(rows: readonly RespawnRow[], nowMs: number): Re
  * numbers exist and the wiki's is the larger — i.e. when the guard in the header actually fired.
  */
 export function respawnFloored(row: RespawnRow): boolean {
-  if (row.source !== 'observed') return false
+  if (row.source !== 'observed' || row.autoAdjust) return false
   return row.observedMs !== undefined && row.wikiMs !== undefined && row.wikiMs > row.observedMs
 }
 
@@ -839,10 +845,11 @@ export function respawnSourceLabel(row: RespawnRow): string {
   if (row.source === 'custom') return 'your number'
   if (row.source === 'observed') {
     const n = row.samples === 1 ? '1 gap' : `${String(row.samples)} gaps`
+    if (row.autoAdjust) return `auto-adjust · your kills (${n})`
     return respawnFloored(row) ? `your kills (${n}), floored by the wiki` : `your kills (${n})`
   }
-  if (row.source === 'wiki') return 'wiki default'
-  return 'no estimate yet'
+  if (row.source === 'wiki') return row.autoAdjust ? 'wiki default · auto-adjust awaiting gaps' : 'wiki default'
+  return row.autoAdjust ? 'auto-adjust awaiting gaps' : 'no estimate yet'
 }
 
 /**
@@ -892,6 +899,7 @@ export function respawnCalculated(row: RespawnRow): RespawnRow {
   const est = resolveRespawn(ev)
   const out: RespawnRow = { ...row, source: est.source }
   delete out.customMs
+  delete out.autoAdjust
   if (est.estimateMs === undefined) delete out.estimateMs
   else out.estimateMs = est.estimateMs
   return out

@@ -105,7 +105,7 @@ async function closeEditor(page: Page, via: 'cancel' | 'save' | 'clear'): Promis
 export async function stepEditTheNumber(
   page: Page,
   mob: string,
-  readWatches: (p: Page) => Promise<{ watches: { key: string; customSec?: number }[] }>
+  readWatches: (p: Page) => Promise<{ watches: { key: string; customSec?: number; autoAdjust?: boolean }[] }>
 ): Promise<void> {
   const before = await settle(() => tabRows(page), (r) => find(r, mob) !== undefined, { timeoutMs: 30_000 })
   const row = find(before, mob)
@@ -164,6 +164,14 @@ export async function stepEditTheNumber(
     prefs.watches.some((w) => w.key === mob && w.customSec === 2670),
     JSON.stringify(prefs)
   )
+
+  // Auto-adjust replaces the manual value and follows the existing observed gap immediately.
+  await openEditor(page, mob)
+  await page.click(`${DIALOG} [data-testid="respawn-edit-auto"]`)
+  const adjusted = await settle(() => tabRows(page), (r) => find(r, mob)?.unit.includes('auto-adjust') === true, { timeoutMs: 30_000 })
+  check('auto-adjust uses the observed upper bound immediately', find(adjusted, mob)?.unit.includes('3m 00s') === true, JSON.stringify(adjusted))
+  const autoPrefs = await readWatches(page)
+  check('auto-adjust persists and removes the manual number', autoPrefs.watches.some((w) => w.key === mob && w.autoAdjust === true && w.customSec === undefined), JSON.stringify(autoPrefs))
 
   // RULING 6: the way back, which exists only where there is something to go back from.
   await openEditor(page, mob)

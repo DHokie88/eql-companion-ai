@@ -706,6 +706,7 @@ pub fn respawn_define(id: i64, watches: &[(&str, &str)]) -> ClientMessage {
                         key: (*key).to_owned(),
                         display: (*display).to_owned(),
                         custom_sec: None,
+                        auto_adjust: None,
                     })
                     .collect(),
             },

@@ -88,6 +88,7 @@ fn cells(row: &RespawnRow, order: i64) -> Cells {
     cells.insert("baseTs".to_owned(), Cell::int(row.base_ts));
     cells.insert("basis".to_owned(), Cell::text(row.basis));
     cells.insert("source".to_owned(), Cell::text(row.source));
+    cells.insert("autoAdjust".to_owned(), Cell::flag(row.auto_adjust));
     // `overridden` is the answer rather than the comparison: a client re-deriving it from the
     // `source` word beside it would hold a second copy of a rule that lives here.
     cells.insert("overridden".to_owned(), Cell::flag(row.source == "custom"));
@@ -169,6 +170,24 @@ mod tests {
 
         let unwatched = folded(&[ZONE, DEATH], serde_json::json!({"watches": []}));
         assert!(rows(unwatched.registry.respawn().expect("the module")).is_empty());
+    }
+
+    #[test]
+    fn auto_adjust_survives_the_typed_wire_and_reaches_the_view() {
+        let watch: protocol::generated::RespawnWatch = serde_json::from_value(serde_json::json!({
+            "key": "king tranix", "display": "King Tranix", "autoAdjust": true
+        })).unwrap();
+        let prefs = serde_json::json!({"watches": [watch]});
+        let f = folded(&[
+            r#"{"kind":"zone","seq":0,"ts":1000,"raw":"z","zone":"Nagafen's Lair"}"#,
+            r#"{"kind":"death","seq":1,"ts":2000,"raw":"d","name":"king tranix","bySelf":true}"#,
+            r#"{"kind":"death","seq":2,"ts":152000,"raw":"d","name":"king tranix","bySelf":true}"#,
+        ], prefs);
+        let module = f.registry.respawn().unwrap();
+        let rows = rows(module);
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows[0].cells.0.get("autoAdjust"), Some(&Cell::flag(true)));
+        assert_eq!(rows[0].cells.0.get("estimateMs"), Some(&Cell::int(150_000)));
     }
 
     #[test]

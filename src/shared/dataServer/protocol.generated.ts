@@ -8,7 +8,7 @@
 // schema edit that lands without regenerating turns tests/protocolSchema.test.mts red on the
 // TypeScript side and the protocol-codegen staleness test red on the Rust side.
 //
-// schema-digest: sha256:3ca9599ff8fb504a5505aeb8263ecb51476a6d35ff378964bb44b501fb949563
+// schema-digest: sha256:0b316efa267630956ff11f91b5bb69d3c216dce97ece63321af259ca9e9b6c1f
 
 /**
  * Anything that can travel the wire, in either direction. The transport adapters are generic over exactly this: a transport moves ProtocolMessages and knows nothing else about the protocol.
@@ -411,6 +411,10 @@ export interface RespawnWatch {
    * The user's own respawn, in SECONDS. Absent means `use what you learn`, which is a different statement from zero.
    */
   customSec?: number
+  /**
+   * Follow the smallest qualifying kill gap without applying the wiki floor.
+   */
+  autoAdjust?: boolean
   [k: string]: unknown
 }
 /**

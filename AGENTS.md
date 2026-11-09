@@ -949,7 +949,9 @@ alwaysOnTop, click-through pin).
    from your own kills; the wiki is a bad primary source (394 readable
    respawns across 7,872 pages), so the ladder is: your typed number, then
    your kills, then the wiki as a DEFAULT before you have kills and a FLOOR
-   under them once you do. Every observed gap is `respawn + your delay`, so
+   under them once you do. The player may opt a watched name into auto-adjust,
+   which follows its smallest qualifying gap without the wiki floor and replaces
+   a typed number; saving a number or choosing Use calculated exits that mode. Every observed gap is `respawn + your delay`, so
    the SMALLEST gap converges downward; it prints as `≤` with the sample
    count, and a clock at zero says **due**, never "spawned" (laws 1, 6). Two
    evidence rules keep the bound honest: a gap counts only when both deaths
