@@ -21,6 +21,13 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.18.0',
+    date: '2026-11-14',
+    entries: [
+      { kind: 'new', text: 'The XP overlay shows separate rates and counts for Fragments of Potential alongside motes.' }
+    ]
+  },
+  {
     version: '0.17.0',
     date: '2026-11-01',
     entries: [
