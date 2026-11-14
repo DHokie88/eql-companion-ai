@@ -1,6 +1,6 @@
 # Upstream parity inventory — 2026-11-14
 
-Working baseline: EQ Oracle `4af9697e3015da792915e6b2e6748d727f9d9655` (Windows `ai-foundation`, 0.17.0). This is an initial inventory, not a complete parity certification. Rows describe static source evidence unless a test is explicitly named. Preserve Oracle identity, local state, privacy, and the user's existing 133 unpublished commits.
+Working baseline: EQ Oracle `4af9697e3015da792915e6b2e6748d727f9d9655` (Windows `ai-foundation`, 0.17.0). This is an initial inventory, not a complete parity certification. Rows describe static source evidence unless a test is explicitly named. Preserve Oracle identity, local state, privacy, and the user's existing unpublished commits.
 
 | Source and exact revision | Capability | Status and evidence | Next verification |
 |---|---|---|---|
@@ -13,3 +13,5 @@ Working baseline: EQ Oracle `4af9697e3015da792915e6b2e6748d727f9d9655` (Windows 
 | Eye of Zomm `11796e8f00cb44784784d9cf29e10749cf798545` and EQL Tools `dffe5d2a6ad6529672be162450592a8359b2abc5` | Wiki dataset, live map, capture, item analysis | Prior donor analysis, not configured Git remotes. Item refresh integrated in Oracle 0.16.0; other recommendations in `docs/research/eoz-eqltools-20261101.md` were historical and must be rechecked against current source. | Refresh revisions and verify each workflow before describing a gap. |
 
 Codeweaver's existing donor specification is pinned to Oracle `f18df6e55237964f89868a967aaeb487e52c9411`, earlier than the current baseline. Its bounded brief was partial, so it is useful historical evidence, not a current exhaustive comparison. Re-lock sources and compare user workflows for future increments. Do not silently resume the separate unfinished Update 31 candidate.
+
+After refreshing origin, its `ai-foundation` was `713ea7e123ae443f96cb7ee1f368ce024acdb50a`; Oracle at `2f4cc09e801f487c1cd542beaa8abd7c247511c2` was 134 commits ahead and two behind. Review both histories before any synchronization; no push was performed.
