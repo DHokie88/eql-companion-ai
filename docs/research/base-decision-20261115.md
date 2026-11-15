@@ -2,7 +2,9 @@
 
 ## Decision
 
-Keep the existing Windows EQ Oracle tree as the working foundation for the next bounded parity wave. Make Community Companion the primary feature reference; continue monitoring EQ Zera, Brian, Eye of Zomm and EQL Tools. This is a reversible engineering decision, not a finding that Oracle has more features or that adapting Community will certainly be faster. Revisit after a measured, end-to-end Community feature port and a preservation spike in the opposite direction. Do not merge either history or run a donor against an existing profile during this comparison.
+Keep the existing Windows EQ Oracle tree as the safe baseline during a bounded foundation comparison, not as the selected long-term foundation. Community Companion is the leading alternative and primary feature reference; continue comparing EQ Zera, Brian, Eye of Zomm and EQL Tools. Resolve the foundation decision before another substantial parity wave increases divergence. Measure an end-to-end Community feature port and a preservation spike in the opposite direction, including a subsequent upstream update in each candidate. Do not merge either history or run a donor against an existing profile during this comparison.
+
+This revises the initial next-wave recommendation after Andrew's November 15 clarification: migrating now may avoid a larger migration later, while repeated imports can also provide useful Codeweaver evaluations. Neither benefit has yet been measured. Existing Oracle work is valuable because of the behavior and data it preserves, not because the time already spent on it must be recovered.
 
 ## Sources and scope
 
@@ -14,6 +16,8 @@ Keep the existing Windows EQ Oracle tree as the working foundation for the next 
 - EQL Tools `dffe5d2a6ad6529672be162450592a8359b2abc5`, main, 2026-09-01 UTC: https://github.com/sowoky/eqltools-companion/tree/dffe5d2a6ad6529672be162450592a8359b2abc5
 
 Default-branch heads and dates were checked against GitHub on November 15. A push to any branch, an unarchived status or a commit date does not guarantee future maintenance. EOZ's dataset branch is separate from its app's main branch. Feature statements below are static source or project-document evidence, not an execution of all five applications.
+
+A second November 15 check of the public GitHub repository and commit APIs returned the same Zera and Community heads. Neither repository was archived. Zera's last default-branch commit was October 18 and Community's was November 13. This supports a recent activity difference, not a finding that Zera is abandoned or that Community will remain maintained. A stronger maintenance assessment still needs release cadence, substantive fixes, contributor concentration and maintainer responses; a quiet month alone is insufficient.
 
 ## User-facing capability matrix
 
@@ -45,8 +49,22 @@ Default-branch heads and dates were checked against GitHub on November 15. A pus
 
 1. Preserve the current local branch and its 135 unpublished commits. Resolve the two origin-only commits separately, with their actual diffs and without force-pushing.
 2. Finish a workflow-by-workflow comparison of Community's Bazaar, Wiki Gaps, achievements/factions/unlocks, spells and gear against the current Oracle revision, with source, inputs, outputs, persistence and fixture-backed outcomes. The nav registry is a lead, not a proof of missing or equivalent behavior.
-3. In disposable workspaces, measure one representative Community-to-Oracle port including checkpoint and one reverse preservation spike covering Oracle's spell library, loadouts and AI/profile seams. Record time, conflicts, tests and gaps. Then choose the lower-risk long-term base from observed cost rather than commit count or repo size.
+3. Before another substantial parity wave, use disposable workspaces to measure one representative Community-to-Oracle port including checkpoint and one reverse preservation spike covering Oracle's spell library, loadouts and AI/profile seams. These are different-sized samples: record coverage and remaining work rather than comparing raw completion time as if it proved whole-project migration cost. Then apply a subsequent relevant upstream revision in each candidate to measure recurring update friction. Use historical revision pairs if necessary and label them as replayed evidence.
 4. Keep EOZ and EQL Tools as capability references; refresh their exact source comparison before choosing individual integrations. No donor launch, profile import, publication, runtime reconfiguration or installer deployment is authorized by this report alone.
+
+## Long-term cost and the Codeweaver opportunity
+
+Compare both directions over 12- and 24-month planning horizons. These horizons are decision scenarios, not predictions of maintainer activity. For each candidate, estimate initial transition work, recurring feature/fix imports, independent dependency and security maintenance, regression recovery, and the cost of a later forced migration. Record optimistic and pessimistic ranges, actual measured samples, and unmeasured assumptions separately. Neither the full migration cost nor the recurring cost has been measured yet.
+
+- Prefer migration now if a credible maintained base supplies most desired future work and its expected maintenance savings outweigh preserving Oracle's unique behavior, converting profiles safely and validating the result. A modestly cheaper first port into Oracle is not sufficient reason to stay if repeated adaptation is materially more expensive.
+- Prefer Oracle if its unique workflows are costly to preserve elsewhere and imports remain bounded, repeatable and adequately tested. Staying then means consciously owning its foundation, dependencies and security fixes even if Zera stops; it does not mean expecting Zera to resume.
+- When the evidence is close, favor the route that reduces future divergence from the upstream providing the most useful maintained behavior, provided Oracle's behavior and data can be preserved. Do not infer that route from commit volume alone or assume every upstream feature is beneficial.
+
+Codeweaver evaluation is a second objective that applies to either foundation. It can transfer Community features into Oracle, transfer Oracle features into a Community-based candidate, and import EOZ/EQL Tools capabilities afterward. Choosing Community therefore does not remove the multi-source integration workload. Keep the product maintenance estimate separate from the experimental effort invested in improving Codeweaver; avoid double-counting that effort as a product saving.
+
+Make each actual integration a reproducible evaluation: preserve exact source and target revisions, a focused brief, required behavior and fixtures, the candidate diff, independent review findings, test results and the next upstream update. Measure discovery omissions, incorrect changes, manual repair time, total time to acceptance and regressions after the follow-up update. Include profile isolation, checkpoint/restore and packaging/network identity when the case touches those seams. The Bazaar checkpoint gap is an example of a requirement a useful discovery result must surface, not proof that the existing bounded Codeweaver brief found it.
+
+Freeze those inputs and acceptance checks before comparing tool versions. Record successes and failures, including findings supplied by direct human/agent inspection rather than Codeweaver, so repeated imports become an evaluation corpus instead of merely repeated work. Creating this record within EQO does not itself change Codeweaver, resume paused work, authorize a paid route or reconfigure any worker runtime.
 
 Assessment: static source and Git history were inspected; no donor app was launched and no new benchmark or end-to-end comparison was run. Codeweaver has a newly pinned Oracle/Community comparison workspace at `/home/andrew/eqo-base-decision-20261115`; generated reports have their own completeness and omission fields. The existing donor analysis is dated 2026-11-01, and Hermes supplied an independent reading of that evidence, not new live validation. Grok was signed out on both checked hosts. No statement here claims full parity or verified faster migration.
 
