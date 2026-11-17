@@ -87,7 +87,7 @@ export const GEAR_CONTROL_LABEL: Record<GearControl, string> = {
   effect: 'Effect',
   classes: 'Classes',
   era: 'Current era',
-  owned: 'Owned or looted',
+  owned: 'Owned',
   upgrade: 'Upgrade state'
 }
 

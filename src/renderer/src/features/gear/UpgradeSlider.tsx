@@ -77,7 +77,7 @@ export default function UpgradeSlider({ state, onChange }: UpgradeSliderProps): 
         data-testid="gear-upgrade-label"
         color={base ? 'text.secondary' : 'primary.main'}
         sx={{ flexShrink: 0, fontVariantNumeric: 'tabular-nums', minWidth: 132 }}
-        title="What the table is showing: every stat scaled to this upgrade state, the way the item window reads it."
+        title="Simulated upgrade state. When Use owned stats is on, owned items use their inventory tier instead."
       >
         Tier {state.full}
         {max > 0 && ` · ${String(state.fraction)}/${String(max + 1)}`} · {percentLabel(state)}

@@ -98,7 +98,7 @@ const BROWSE_FALLBACK: BrowseFormMemory = { socket: 'proc', slot: null, trioOnly
 
 test('the restart split is a table, and every key in it is on one of exactly two tiers', () => {
   const keys = Object.keys(AREA_FORM_TIER) as AreaFormKey[]
-  assert.equal(keys.length, 12, 'eleven fields were added by JOS-329 and the Build profile made twelve — update this test when a thirteenth is')
+  assert.equal(keys.length, 13, 'eleven fields were added by JOS-329 and the Build profile made twelve — update this test when a thirteenth is')
   for (const key of keys) {
     const tier = tierOf(key)
     assert.ok(tier === 'restart' || tier === 'session', `${key} is on an unknown tier ${tier}`)
@@ -115,6 +115,7 @@ test('WHAT YOU TYPED IS SESSION-SCOPED — every search box, on all four tabs', 
   for (const key of typed) assert.equal(tierOf(key), 'session', `${key} must not outlive the session`)
   // …and the two narrowings that are reached BY typing ride with them (areaMemory's header argues
   // the item picker; the expanded set is ephemeral navigation state).
+  assert.equal(tierOf('eq.gear.ownedStats'), 'session')
   assert.equal(tierOf('eq.planner.item'), 'session')
   assert.equal(tierOf('eq.planner.open'), 'session')
 })
@@ -168,6 +169,7 @@ const READERS: Reader[] = [
   { key: 'eq.gear.sort', read: sanitizeGearSort, fallback: DEFAULT_GEAR_SORT },
   { key: 'eq.gear.classes', read: sanitizeGearClasses, fallback: null },
   { key: 'eq.gear.upgrade', read: sanitizeUpgrade, fallback: ITEM_UPGRADE_BASE },
+  { key: 'eq.gear.ownedStats', read: (r) => sanitizeFlag(r, false), fallback: false, legal: (r) => typeof r === 'boolean' },
   { key: 'eq.gear.search', read: sanitizeSearch, fallback: '', legal: anyString },
   { key: 'eq.planner.filters', read: (r) => sanitizeBrowseForm(r, BROWSE_FALLBACK), fallback: BROWSE_FALLBACK },
   { key: 'eq.planner.item', read: sanitizeItemFocus, fallback: null },
@@ -205,6 +207,7 @@ test('…and the readers with a closed vocabulary take NO exemptions from that s
   const exempt = READERS.filter((r) => r.legal !== undefined).map((r) => r.key)
   assert.deepEqual(exempt.sort(), [
     'eq.character.search',
+    'eq.gear.ownedStats',
     'eq.gear.search',
     'eq.planner.open',
     'eq.planner.search',

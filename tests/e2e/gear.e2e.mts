@@ -387,9 +387,9 @@ async function stepOwnedFilter(page: Page): Promise<void> {
   const narrowed = await until(async () => (await counts(page)).shown < all, 15_000)
   const shown = (await counts(page)).shown
   check(
-    'Owned or looted narrows the corpus to what this character has actually handled',
+    'Owned narrows the corpus to copies in the inventory dump',
     narrowed && shown > 0,
-    `${String(all)} in era → ${String(shown)} owned or looted`
+    `${String(all)} in era → ${String(shown)} owned`
   )
 
   // THE INVARIANT: every surviving row has something to say. A blank Owned cell under this filter
@@ -398,15 +398,12 @@ async function stepOwnedFilter(page: Page): Promise<void> {
     (sel) => [...document.querySelectorAll(sel)].filter((c) => (c as HTMLElement).innerText.trim() === '').length,
     OWNED_CELL
   )
-  check('every row the filter keeps states where it is or that it was looted', blanks === 0, `${String(blanks)} blank`)
+  check('every row the filter keeps states where it is', blanks === 0, `${String(blanks)} blank`)
 
   // The looted-but-not-in-the-dump arm — the one the checkbox exists for, and the one an ownership
   // index alone cannot answer.
   await typeAndSettle(page, SEARCH, LOOTED_ITEM)
-  check(
-    'a looted item the dump never named survives the filter on the log`s word alone',
-    (await countOf(page, `${ROW}[data-item-key="${LOOTED_KEY}"]`)) === 1
-  )
+  check('a looted item absent from the dump does not survive the Owned filter', (await countOf(page, `${ROW}[data-item-key="${LOOTED_KEY}"]`)) === 0)
 
   // …and something neither witness has ever seen is gone, and comes back when the filter is off.
   await typeAndSettle(page, SEARCH, 'fungus covered scale tunic')
@@ -579,11 +576,21 @@ async function stepUpgrade(page: Page): Promise<void> {
     `screen ${got.dmg}/${got.wis}/${got.ratio} · scaleGearRow ${want.dmg}/${want.wis}/${want.ratio}`
   )
   // DELAY never scales, which is the whole reason the ratio moved — 0.77 at base, 0.96 here.
-  check(
-    '…and the ratio moved because the damage did and the delay did not',
-    want.ratio !== base.ratio,
-    `${base.ratio} → ${want.ratio}`
-  )
+  check('…and the ratio moved because the damage did and the delay did not', want.ratio !== base.ratio, `${base.ratio} → ${want.ratio}`)
+  await page.click('[data-testid="gear-owned-stats-toggle"]')
+  const owned = expectedAt({ full: 5, fraction: 0 })
+  const showsOwned = await until(async () => (await cellText(page, THELVORN_KEY, 'DMG')) === owned.dmg, 15_000)
+  const ownedScreen = await screenAt(page)
+  check('owned stats use the inventory tier instead of the slider', showsOwned && ownedScreen.wis === owned.wis && ownedScreen.ratio === owned.ratio)
+  await page.hover(`${ROW}[data-item-key="${THELVORN_KEY}"]`)
+  check('the owned comparison identifies the tier-floor estimate', await until(async () => (await countOf(page, '[data-testid="gear-compare-owned-stats"]')) > 0, 15_000))
+  await typeAndSettle(page, SEARCH, LOOTED_ITEM)
+  const unownedAtSimulation = await cellText(page, LOOTED_KEY, 'AC')
+  check('the unowned row is present while owned stats are enabled', unownedAtSimulation !== '')
+  await page.click('[data-testid="gear-owned-stats-toggle"]')
+  check('unowned item keeps the simulated stats', (await cellText(page, LOOTED_KEY, 'AC')) === unownedAtSimulation)
+  await typeAndSettle(page, SEARCH, 'thelvorn')
+  check('turning owned stats off restores the simulation', await until(async () => (await cellText(page, THELVORN_KEY, 'DMG')) === want.dmg, 15_000))
   // HAND THE COLUMNS BACK TO THE DERIVATION. `stepGearColumns` below starts from whatever choice it
   // is handed and TOGGLES, so a list left here would silently un-pick two of the keys it picks.
   await resetColumns(page)
