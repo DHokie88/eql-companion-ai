@@ -39,7 +39,7 @@ import { equippedIndex, type EquippedIndex } from './gearCompare'
 import { eraChip, eraHides, type EraChipInfo } from '../planner/plannerData'
 import { sourceIndex } from '../planner/sourceIndex'
 import { sameClasses } from '../planner/plannerClasses'
-import { gearOwnershipMap, ownershipFor, type GearOwnershipMap } from './gearOwnership'
+import { gearOwnershipMap, isOwned as isOwnedItem, ownershipFor, type GearOwnershipMap } from './gearOwnership'
 // JOS-329: the two pieces of state below survive a tab switch now — see each one's own comment.
 import { sanitizeGearClasses, sanitizeUpgrade } from './areaMemory'
 import { useRemembered } from './useAreaMemory'
@@ -241,6 +241,8 @@ export interface GearCompareData {
   ready: boolean
   /** the plus-state the TABLE is simulating, so the card can admit that its item half is one */
   state: ItemUpgradeState
+  /** Optional per-item ownership for the gear table; other surfaces remain simulated. */
+  ownedStats?: GearOwnershipMap | null
 }
 
 export function useGearCompare(rows: readonly GearRow[], state: ItemUpgradeState): GearCompareData {
@@ -269,19 +271,24 @@ export function useGearCompare(rows: readonly GearRow[], state: ItemUpgradeState
  * The owned filter as the pure model wants it — the same injected-predicate shape `useEraHidden`
  * returns, and stable while the join is, so `filterGearRows`' memo can key on it.
  */
-export function useOwnedOrLooted(map: GearOwnershipMap | null): { ownedOrLooted: (row: GearRow) => boolean } {
+export function useOwned(map: GearOwnershipMap | null): { isOwned: (row: GearRow) => boolean } {
   return useMemo(
     () => ({
-      ownedOrLooted: (row: GearRow): boolean => {
-        if (map === null) return false
-        const o = ownershipFor(map, row)
-        // An exaltation counts: it is proof a copy passed through this character's hands, which is
-        // exactly what the checkbox asks (gearOwnership.ts, rule 2).
-        return o.owned || o.looted || o.exaltations > 0
-      }
+      isOwned: (row: GearRow): boolean => isOwnedItem(map, row)
     }),
     [map]
   )
+}
+
+/** Build still offers its separate owned-or-looted filter. */
+export function useOwnedOrLooted(map: GearOwnershipMap | null): { ownedOrLooted: (row: GearRow) => boolean } {
+  return useMemo(() => ({
+    ownedOrLooted: (row: GearRow): boolean => {
+      if (map === null) return false
+      const o = ownershipFor(map, row)
+      return o.owned || o.looted || o.exaltations > 0
+    }
+  }), [map])
 }
 
 /** The one chip the era join draws on a gear row, or null when it is in-era and has nothing to say. */

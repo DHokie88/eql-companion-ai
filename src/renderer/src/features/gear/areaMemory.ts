@@ -103,6 +103,7 @@ export const AREA_FORM_TIER = {
   /** the simulate-upgrade slider — persisted by owner ruling, see `sanitizeUpgrade` */
   'eq.gear.upgrade': 'restart',
   'eq.gear.search': 'session',
+  'eq.gear.ownedStats': 'session',
   // ---- the Exaltations tab ----
   /** socket tab, donor slot, "usable by these classes" — the three fields of `DonorFilters` */
   'eq.planner.filters': 'restart',
