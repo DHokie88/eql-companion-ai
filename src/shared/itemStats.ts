@@ -97,7 +97,9 @@ export interface ItemStatBlock {
 
 const SAVE_KEYS = [
   'SV FIRE', 'SV COLD', 'SV MAGIC', 'SV DISEASE', 'SV POISON',
-  'SV VOID', 'SV CORRUPTION', 'SV CHROMATIC', 'SV PRISMATIC', 'SV ALL'
+  'SV VOID', 'SV CORRUPTION', 'SV CHROMATIC', 'SV PRISMATIC', 'SV ALL',
+  'SVVOID', 'SVCORRUPTION', 'SV.VOID', 'SV.CORRUPTION', 'SV_VOID', 'SV_CORRUPTION',
+  'RESISTVOID', 'RESISTCORRUPTION'
 ]
 
 const EFFECT_KEYS = ['Combat Effect', 'Click Effect', 'Worn Effect', 'Proc Effect', 'Focus Effect', 'Effect']
@@ -406,7 +408,8 @@ function applyPair(out: ItemStatBlock, keyRaw: string, value: string): void {
     return
   }
   if (SAVE_KEYS.includes(upper)) {
-    out.saves.push({ key: upper, value })
+    const intrinsic = /^(?:SV[ ._]?|RESIST)(VOID|CORRUPTION)$/.exec(upper)
+    out.saves.push({ key: intrinsic ? `SV ${intrinsic[1]}` : upper, value })
     return
   }
   const list = LIST_FIELDS[upper]

@@ -9,14 +9,14 @@
 //   Thelvorn, Blade of Light — DMG 20, Atk Delay 26, WIS +15, WT 3.0. Owner screenshot at
 //        tier 2 + 3/4 reads DMG 25, ratio 0.96, WIS +19, WT 2.3; all four reproduce. ONE
 //        scaling attribute, so it is also the proof that SV VOID is NOT synthesized.
-//   Crown of King Tranix     — AC 13, CHA +15, SV MAGIC +20, WT 1.0. Two trigger fields, so
+//   Crown of King Tranix     — AC 13, CHA +15, SV MAGIC +20, WT 1.0. Several trigger fields, so
 //        it IS the SV VOID case.
 //   Axe of Lost Souls        — the NEGATIVE branches (AC -5, WIS -5, INT -5) beside the
 //        `base <= 10` flat branch (STR/STA +10, five saves at +5) and a big weight.
 //   A Ghoul's Heart          — a lone negative attribute and WT 0.1, the weight ENTRY GUARD.
 //
-// Every number asserted here comes from the reference algorithm as recorded in JOS-281 —
-// none of it is this test's own arithmetic (world-model law 1).
+// The fixture tables were checked against the pinned EQL Wiki shared engine, revision 4.
+// The additional in-game observations are documented in src/shared/itemScaling/README.md.
 //
 // Run: `npm test`.
 
@@ -125,7 +125,7 @@ test('the rounding helpers are Excel ROUND/ROUNDUP, not Math.round/Math.ceil', (
 test('Thelvorn at tier 2 + 3/4 reproduces all four screenshot numbers', () => {
   const s = scaleStatBlock(THELVORN, CHECKPOINT)
   assert.equal(s.dmg, 25) // 20 + floor(20 * 2.75 / 10)
-  assert.equal(statOf(s, 'WIS'), '+19') // floor(15 + round(4.125)), NOT 20
+  assert.equal(statOf(s, 'WIS'), '+19') // floor(15 + 4.125)
   assert.equal(s.weight, '2.3') // ceil-to-one-decimal of 2.2420…
   assert.equal(s.atkDelay, 26) // delay never scales
   assert.equal(damageRatio(s.dmg, s.atkDelay)?.toFixed(2), '0.96')
@@ -133,8 +133,8 @@ test('Thelvorn at tier 2 + 3/4 reproduces all four screenshot numbers', () => {
 
 test('Thelvorn: the whole-level DMG / WIS / WT / ratio tables', () => {
   const dmg = ['20', '22', '24', '26', '28', '30', '32', '34', '36', '38', '40']
-  const wis = ['15', '17', '18', '20', '21', '23', '24', '26', '27', '29', '30']
-  const wt = ['3.0', '2.8', '2.5', '2.2', '2.0', '1.7', '1.4', '1.2', '0.9', '0.6', '0.4']
+  const wis = ['15', '16', '18', '19', '21', '22', '24', '25', '27', '28', '30']
+  const wt = ['3.0', '2.8', '2.5', '2.2', '2.0', '1.7', '1.4', '1.2', '0.9', '0.6', '0.3']
   const ratio = ['0.77', '0.85', '0.92', '1.00', '1.08', '1.15', '1.23', '1.31', '1.38', '1.46', '1.54']
 
   for (const full of WHOLE) {
@@ -161,21 +161,21 @@ test('Thelvorn states ONE trigger field, so it never grows an SV VOID line', () 
 
 test('Crown of King Tranix at tier 2 + 3/4, synthetic SV VOID included', () => {
   const s = scaleStatBlock(CROWN, CHECKPOINT)
-  assert.equal(s.ac, 17) // floor(13 + round(3.575))
+  assert.equal(s.ac, 16) // floor(13 + 3.575)
   assert.equal(statOf(s, 'CHA'), '+19')
-  assert.equal(statOf(s, 'SV MAGIC'), '+26') // floor(20 + round(5.5)) — half AWAY from zero
+  assert.equal(statOf(s, 'SV MAGIC'), '+25') // floor(20 + 5.5)
   assert.equal(s.weight, '0.8')
   assert.deepEqual(
     s.saves.map((v) => `${v.key} ${v.value}`),
-    ['SV MAGIC +26', 'SV VOID +2']
+    ['SV MAGIC +25', 'SV VOID +2']
   )
 })
 
 test('Crown: the whole-level AC / CHA / SV MAGIC / WT tables and the SV VOID line', () => {
-  const ac = ['13', '14', '16', '17', '18', '20', '21', '22', '23', '25', '26']
-  const cha = ['15', '17', '18', '20', '21', '23', '24', '26', '27', '29', '30']
+  const ac = ['13', '14', '15', '16', '18', '19', '20', '22', '23', '24', '26']
+  const cha = ['15', '16', '18', '19', '21', '22', '24', '25', '27', '28', '30']
   const svm = ['20', '22', '24', '26', '28', '30', '32', '34', '36', '38', '40']
-  const wt = ['1.0', '1.0', '0.9', '0.8', '0.7', '0.6', '0.5', '0.4', '0.3', '0.2', '0.2']
+  const wt = ['1.0', '1.0', '0.9', '0.8', '0.7', '0.6', '0.5', '0.4', '0.3', '0.2', '0.1']
 
   for (const full of WHOLE) {
     const s = scaleStatBlock(CROWN, at(full))
@@ -189,36 +189,28 @@ test('Crown: the whole-level AC / CHA / SV MAGIC / WT tables and the SV VOID lin
 })
 
 // =================================================================================
-// THE FLOAT ARTIFACT — replicate, do not fix
+// Whole-tier weight boundaries
 // =================================================================================
 
-test('the tier-10 weight is an IEEE754 artifact, and this port keeps it', () => {
-  // The reference evaluates the curve in doubles. `0.09 * 10` lands just BELOW 0.9, so the
-  // remainder lands just ABOVE 0.1 and the product just above the exact decimal:
-  assert.equal(0.09 * 10 < 0.9, true)
-  assert.equal(3.0 * (1 - 0.09 * 10), 0.30000000000000027)
-  assert.equal(3.0 * (1 - 0.09 * 10) > 0.3, true)
-
-  // …so the ceiling-to-one-decimal steps to 0.4, where exact-decimal math would say 0.3.
-  assert.equal(excelRoundUp(0.3, 1), 0.3)
-  assert.equal(scaleWeight(3.0, at(10)), 0.4)
-  assert.equal(scaleStatBlock(THELVORN, at(10)).weight, '0.4')
-
-  // Same artifact one decade down: 1.0 ceils to 0.2, not the exact-decimal 0.1.
-  assert.equal(scaleWeight(1.0, at(10)), 0.2)
-  assert.equal(scaleStatBlock(CROWN, at(10)).weight, '0.2')
+test('whole-tier weight keeps exact tenths and rounds up genuine fractions', () => {
+  assert.equal(scaleWeight(2.5, at(8)), 0.7)
+  assert.equal(scaleWeight(5, at(2)), 4.1)
+  assert.equal(scaleWeight(2.5, at(10)), 0.3)
+  assert.equal(scaleStatBlock(THELVORN, at(10)).weight, '0.3')
+  assert.equal(scaleStatBlock(CROWN, at(10)).weight, '0.1')
 })
 
 // =================================================================================
 // THE BRANCHES — negative, zero, flat, entry-guarded
 // =================================================================================
 
-test('a negative stat SHRINKS toward zero by the tier and stops there', () => {
+test('small penalties shrink by tier and larger penalties follow their magnitude', () => {
   assert.equal(scalePrimary(-5, at(0)), -5)
   assert.equal(scalePrimary(-5, at(2, 3)), -3) // fraction ignored on this branch
   assert.equal(scalePrimary(-5, at(5)), 0)
   assert.equal(scalePrimary(-5, at(9)), 0) // never crosses into a bonus
-  assert.equal(scalePrimary(-100, at(10)), -90) // and a big penalty is still a penalty
+  assert.equal(scalePrimary(-25, at(5, 16)), -11)
+  assert.equal(scalePrimary(-100, at(10)), 0)
 
   const s = scaleStatBlock(AXE, CHECKPOINT)
   assert.equal(s.ac, -3)
@@ -287,9 +279,11 @@ test('stat keys normalize longest-first, and heroics are not attributes', () => 
   assert.equal(upgradeStatClass('Haste'), 'flat')
   assert.equal(upgradeStatClass('Mana Regen'), 'flat')
   assert.equal(upgradeStatClass('DMG'), 'damage')
+  assert.equal(upgradeStatClass('Backstab'), 'backstab')
+  assert.equal(upgradeStatClass('Range'), 'range')
   assert.equal(upgradeStatClass('Atk Delay'), 'delay')
   assert.equal(upgradeStatClass('WT'), 'weight')
-  for (const k of ['Attack', 'Dmg Bon', 'Backstab', 'Range', 'Size', 'Rec Level', 'HEROIC STR', 'Charges']) {
+  for (const k of ['Attack', 'Dmg Bon', 'Size', 'Rec Level', 'HEROIC STR', 'Charges']) {
     assert.equal(upgradeStatClass(k), 'unchanged', k)
   }
 })
@@ -301,8 +295,37 @@ test('a flat stat takes the tier and keeps its own spelling; unmodeled fields ar
   assert.equal(statOf(s, 'REGEN'), '+5')
   assert.equal(statOf(s, 'ATTACK'), '+10')
   assert.equal(statOf(s, 'REC LEVEL'), '45')
-  assert.equal(s.backstab, 25)
+  assert.equal(s.backstab, 29)
   assert.equal(s.dmgBonus, 24)
+})
+
+test('observed primary stats match the wiki comparison fixtures', () => {
+  // Thornstinger, Lustrous Russet Boots and Cloak of Flames in the wiki's revision 2 notes.
+  assert.equal(statOf(scaleStatBlock(parseStatsBlock('HP: 50'), at(5, 4)), 'HP'), '75')
+  assert.equal(scaleStatBlock(parseStatsBlock('AC: 14'), at(6, 5)).ac, 22)
+  assert.equal(statOf(scaleStatBlock(parseStatsBlock('HP: 50'), at(4, 4)), 'HP'), '71')
+})
+
+test('known primary or regen fields qualify for Void, while explicit Void takes precedence', () => {
+  for (const text of ['AC: 2 HP: 12 STR: 3', 'HP Regen: 2 Mana Regen: 2 Endurance Regen: 2', 'AC: 0 HP: 12']) {
+    assert.equal(statOf(scaleStatBlock(parseStatsBlock(text), at(5)), 'SV VOID'), '+5')
+  }
+  const singleKnown = parseStatsBlock('AC: 2 HP: ? Haste: 36% Attack: 10')
+  assert.equal(statOf(scaleStatBlock(singleKnown, at(5)), 'SV VOID'), undefined)
+  for (const [text, expected] of [
+    ['SV Void: +3', '+8'],
+    ['SVCorruption: +25', '+38'],
+    ['SV.Void: +0', '+0'],
+    ['ResistVoid: ?', '?']
+  ]) {
+    const block = parseStatsBlock(`AC: 2 HP: 12\n${text}`)
+    assert.deepEqual(scaleStatBlock(block, at(5, 16)).saves.map((s) => s.value), [expected])
+  }
+})
+
+test('tier scaling updates numeric Range and preserves multi-value range text', () => {
+  assert.equal(scaleStatBlock(parseStatsBlock('Range: 100'), at(3, 5)).range, '130')
+  assert.equal(scaleStatBlock(parseStatsBlock('Range: 50 / 75 / 100'), at(3, 5)).range, '50 / 75 / 100')
 })
 
 test('scaling is pure: the source block is never mutated and the rest is carried across', () => {
