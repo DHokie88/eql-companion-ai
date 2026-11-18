@@ -20,7 +20,9 @@ with or endorsed by the original author.
 are likewise not licensed: the same Trademark clause of the license withholds them,
 so a further fork or redistribution must ship under its own name.
 
-Bundled data is scraped from eqlwiki.com under that wiki's terms. The bundled sound
+Bundled data is scraped from eqlwiki.com under that wiki's terms. Item scaling uses
+MIT-licensed EQL Wiki rules by Maergoth (see src/shared/itemScaling/LICENSE).
+The bundled sound
 pack (resources/soundpacks/eq-zera-console/) is original to this fork, synthesized by
 scripts/gen-sounds.mts. Sound packs installed from the in-app browser are third-party
 and carry their own licenses and attribution in their own manifests.

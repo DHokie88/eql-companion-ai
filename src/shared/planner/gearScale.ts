@@ -7,7 +7,7 @@
 // milliseconds, which is well inside a frame.
 //
 // EVERY RULE HERE IS PHASE 0'S (src/shared/itemUpgrade.ts), CALLED — none is restated. This file
-// is a dispatch: `upgradeStatClass` says which of the five rules a key takes, the rule computes the
+// is a dispatch: `upgradeStatClass` says which rule a key takes, the rule computes the
 // value, and the only thing this file adds is the shape of the answer (a vector instead of an
 // `ItemStatBlock`). `tests/gearIndex.test.mts` proves the equivalence the hard way, over the real
 // corpus: for every indexed key of every equippable item, the vector's scaled value equals
@@ -21,11 +21,14 @@
 
 import {
   normalizeUpgradeState,
+  scaleBackstab,
   scaleDamage,
   scaleFlat,
   scalePrimary,
+  scaleRange,
   scaleWeight,
   upgradeStatClass,
+  upgradeVoidBonus,
   type ItemUpgradeState
 } from '../itemUpgrade'
 import { damageRatio } from '../itemStats'
@@ -47,6 +50,10 @@ export function scaleGearStat(key: GearStatKey, base: number, state: ItemUpgrade
       return scaleFlat(base, state)
     case 'damage':
       return scaleDamage(base, state)
+    case 'backstab':
+      return scaleBackstab(base, state)
+    case 'range':
+      return scaleRange(base, state)
     case 'weight':
       return scaleWeight(base, state)
     case 'delay':
@@ -76,7 +83,9 @@ export function scaleGearStats(
     if (base === undefined) continue
     out[key] = scaleGearStat(key, base, s)
   }
-  if (voidSynth && s.full > 0) out.SV_VOID = s.full
+  if (voidSynth && s.full > 0 && out.SV_VOID === undefined && out.SV_CORRUPTION === undefined) {
+    out.SV_VOID = upgradeVoidBonus(s)
+  }
   return out
 }
 

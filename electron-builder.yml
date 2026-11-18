@@ -11,6 +11,7 @@ directories:
 files:
   - out/**
   - package.json
+  - src/shared/itemScaling/LICENSE
   # THE WIKI ART SHIPS (JOS-198). 780 files, 3.75 MB — 751 item icons and 29 boss portraits,
   # committed to the repo so this list is all that is needed and no build step touches a wiki.
   # Named EXPLICITLY rather than `resources/**`: any OTHER soundpack directory beside it is a
