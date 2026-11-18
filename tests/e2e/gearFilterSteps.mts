@@ -34,6 +34,7 @@ const SEARCH = '[data-testid="gear-search"] input'
 const CLASSES = '[data-testid="gear-classes"]'
 const WEAPON = '[data-testid="gear-weapon"]'
 const SLOT = '[data-testid="gear-slot"]'
+const NEXT_SLOT = '[data-testid="gear-next-slot"]'
 const MISMATCH = '[data-testid="planner-mismatch-chip"]'
 
 /** Thelvorn, Blade of Light — PAL-only, PRIMARY, `Skill: 1H Slashing`. The whole fixture, in one row. */
@@ -196,9 +197,22 @@ export async function stepGearSlotPicks(page: Page, all: number): Promise<number
     `${String(primaries)} primaries → ${String(both)} primaries or secondaries, of ${String(all)}`
   )
 
+  await page.click(NEXT_SLOT)
+  check('Next slot replaces both picks with Range and keeps the dropdown closed',
+    (await chipsIn(page, SLOT)).join(',') === 'RANGE' &&
+      (await page.getAttribute(`${SLOT} input`, 'aria-expanded')) === 'false')
+  await page.click(NEXT_SLOT)
+  check('Next slot advances Range to Ammo', (await chipsIn(page, SLOT)).join(',') === 'AMMO')
+  await page.click(NEXT_SLOT)
+  check('Next slot wraps Ammo to Head', (await chipsIn(page, SLOT)).join(',') === 'HEAD')
+
   await clearPicks(page, SLOT)
   const emptied = await until(async () => (await shownCount(page)) === all, 15_000)
   check('…and clearing the picker returns the full corpus', emptied, `${String(await shownCount(page))} of ${String(all)}`)
+
+  await page.click(NEXT_SLOT)
+  check('Next slot starts at Head with no pick', (await chipsIn(page, SLOT)).join(',') === 'HEAD')
+  await clearPicks(page, SLOT)
 
   await pickIn(page, SLOT, 'PRIMARY')
   await until(async () => (await shownCount(page)) === primaries, 15_000)
