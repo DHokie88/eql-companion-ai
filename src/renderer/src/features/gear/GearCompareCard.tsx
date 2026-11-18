@@ -120,6 +120,7 @@ import {
   type EquippedCell
 } from './gearCompare'
 import type { GearCompareData } from './gearData'
+import { ownedUpgradeState } from './gearOwnership'
 
 /** How many of the item's own stats the left card lists before collapsing to "+N more". */
 const MAX_STATS = 10
@@ -188,7 +189,9 @@ const INVENTORY_COMMAND = outputKind('inventory').command
  * is nothing to say and the line is absent, which is also the whole of the Exaltations browser's
  * case (it hands this card `ITEM_UPGRADE_BASE` and simulates nothing).
  */
-function SimulatedLine({ data }: { data: GearCompareData }): JSX.Element | null {
+function SimulatedLine({ data, row }: { data: GearCompareData; row: GearRow }): JSX.Element | null {
+  const ownedState = ownedUpgradeState(data.ownedStats ?? null, row)
+  if (ownedState) return <div style={{ ...LABEL_STYLE, marginTop: 2 }} data-testid="gear-compare-owned-stats">owned tier {ownedState.full} · tier-floor estimate (partial progress unavailable)</div>
   const { full, fraction } = data.state
   if (full === 0) return null
   const denominator = full >= ITEM_MAX_TIER ? 0 : 2 ** full
@@ -277,7 +280,7 @@ export function GearCompareCard({ row, data }: { row: GearRow; data: GearCompare
         {row.slots.join(' ')}
         {row.classes.length > 0 && ` · ${row.classes.length >= 16 ? 'ALL' : row.classes.join(' ')}`}
       </div>
-      <SimulatedLine data={data} />
+      <SimulatedLine data={data} row={row} />
       <ItemStats row={row} />
     </div>
   )

@@ -103,14 +103,7 @@ export interface GearFilters {
   effect: EffectFilter
   /** hide rows the era join places outside the current expansion */
   eraOnly: boolean
-  /**
-   * THE OWNER'S CHECKBOX (JOS-285): keep only what this character owns or has looted.
-   *
-   * "Or looted" is not a softening — it is the second witness. The dump is one instant and the log
-   * is a history, and an item you looted last week and put in a bag the dump does not cover is
-   * still an item you have handled. `gearOwnership.ts` decides what qualifies (a wearable copy, an
-   * exaltation made from one, or a loot line); this flag only says whether to apply it.
-   */
+  /** Keep wearable copies in the latest inventory dump; loot history does not prove ownership. */
   ownedOnly: boolean
 }
 
@@ -139,19 +132,10 @@ export const DEFAULT_GEAR_FILTERS: GearFilters = {
 export interface GearFilterDeps {
   /** `plannerData.eraHides(row, true)`, injected. Default: nothing is ever hidden by era. */
   eraHidden?: (row: GearRow) => boolean
-  /**
-   * Does this character own or have they looted this row (`gearOwnership.ts`)? Injected for the
-   * same reason `eraHidden` is: the answer comes from a live dump and the loot module, neither of
-   * which a pure filter may reach.
-   *
-   * DEFAULT: NOTHING QUALIFIES — so a caller that turns `ownedOnly` on without supplying an
-   * answer gets an EMPTY table rather than a filter that silently did nothing. An empty table is
-   * visible and the view names the toggle responsible for it (the JOS-67 law); a no-op filter is
-   * a control that lies about being on.
-   */
-  ownedOrLooted?: (row: GearRow) => boolean
   /** The displayed Owned cell, injected so sorting agrees with the live ownership join. */
   ownedText?: (row: GearRow) => string
+  /** Does the latest inventory dump name a wearable copy? */
+  isOwned?: (row: GearRow) => boolean
 }
 
 // ---- the predicates ------------------------------------------------------------------------
@@ -221,7 +205,7 @@ function matchesIdentity(row: GearRow, filters: GearFilters): boolean {
  */
 export function matchesGear(row: GearRow, filters: GearFilters, deps: GearFilterDeps = {}): boolean {
   if (!matchesIdentity(row, filters)) return false
-  if (filters.ownedOnly && !(deps.ownedOrLooted?.(row) ?? false)) return false
+  if (filters.ownedOnly && !(deps.isOwned?.(row) ?? false)) return false
   return !(filters.eraOnly && (deps.eraHidden?.(row) ?? false))
 }
 
@@ -325,8 +309,8 @@ export function sortGearRows<T extends GearRow>(rows: readonly T[], sort: GearSo
  * The base rows are never mutated: the next slider position starts from the same numbers, which is
  * what makes dragging the selector reversible rather than cumulative.
  */
-export function scaleAll<T extends GearRow>(rows: readonly T[], state: ItemUpgradeState): T[] {
-  return rows.map((r) => ({ ...r, stats: scaleGearRow(r, state).stats }))
+export function scaleAll<T extends GearRow>(rows: readonly T[], state: ItemUpgradeState, stateForRow?: (row: T) => ItemUpgradeState): T[] {
+  return rows.map((r) => ({ ...r, stats: scaleGearRow(r, stateForRow?.(r) ?? state).stats }))
 }
 
 /**
