@@ -332,12 +332,14 @@ function ShapePickers({ prefs, columns }: { prefs: GearPrefs; columns: readonly 
 function CountLine({
   counts,
   scrapedAt,
+  wikiDatasetGeneratedAt,
   ownership,
   prefs,
   columns
 }: {
   counts: { shown: number; total: number }
   scrapedAt: string | null
+  wikiDatasetGeneratedAt: string | null
   ownership: { readAt: number | null }
   prefs: GearPrefs
   columns: readonly GearColumn[]
@@ -347,10 +349,11 @@ function CountLine({
       <Typography variant="caption" color="text.secondary" data-testid="gear-count">
         {counts.shown.toLocaleString()} of {counts.total.toLocaleString()} items
       </Typography>
-      {/* WHEN the data is from, never when the index was built — the corpus's own `scrapedAt`. */}
       {scrapedAt !== null && (
-        <Typography variant="caption" color="text.secondary">
-          · wiki data from {scrapedAt.slice(0, 10)}
+        <Typography variant="caption" color="text.secondary" data-testid="gear-wiki-date"
+          title={wikiDatasetGeneratedAt === null ? undefined : `Includes fallback items from the bundled ${scrapedAt.slice(0, 10)} data.`}
+        >
+          · {wikiDatasetGeneratedAt === null ? 'Bundled wiki data' : 'Wiki update'} {(wikiDatasetGeneratedAt ?? scrapedAt).slice(0, 10)}
         </Typography>
       )}
       {/* THE DUMP'S AGE, SAID ONCE, BY THE THING THAT OWNS IT (JOS-253/268). The Owned column rests
@@ -466,7 +469,7 @@ function useOwnedStats(rows: readonly GearRow[], state: ItemUpgradeState, active
 }
 
 export default function GearView({ onOpenLoot, onPreview }: GearViewProps = {}): JSX.Element {
-  const { rows, ready, refused, scrapedAt } = useGearIndex()
+  const { rows, ready, refused, scrapedAt, wikiDatasetGeneratedAt } = useGearIndex()
   const classes = useGearClasses()
   const upgrade = useUpgradeState()
   const [showOwnedStats, setShowOwnedStats] = useRemembered('eq.gear.ownedStats', (raw) => sanitizeFlag(raw, false))
@@ -526,6 +529,7 @@ export default function GearView({ onOpenLoot, onPreview }: GearViewProps = {}):
       <CountLine
         counts={{ shown: table.rows.length, total: rows.length }}
         scrapedAt={scrapedAt}
+        wikiDatasetGeneratedAt={wikiDatasetGeneratedAt}
         ownership={ownership}
         prefs={prefs}
         columns={table.columns}

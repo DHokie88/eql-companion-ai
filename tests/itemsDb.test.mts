@@ -31,6 +31,13 @@ const db = itemsJson as unknown as ItemDbFile
 const posky = poskyJson as unknown as PoskyData
 const index = buildItemDbIndex(db)
 
+test('stored bonus-damage records are repaired from their original stat text', () => {
+  const entry = db.items['blessed champion arrows']
+  assert.equal(knowledgeFromDb(entry).stats?.dmg, 11)
+  assert.equal(index.get('blessed champion arrows')?.stats?.dmg, 11)
+  assert.ok(index.get('blessed champion arrows')?.stats?.extras.includes('Fire DMG: 4'))
+})
+
 /** Corpus floors — comfortably under the 2026-08-03 scrape so a growing wiki stays green. */
 const MIN_ITEMS = 11_000
 const MIN_KEYS = 11_000

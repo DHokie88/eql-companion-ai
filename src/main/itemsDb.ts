@@ -24,7 +24,7 @@
 //     rare; otherwise the title IS the name.
 // Both are restored in ONE place, `knowledgeFromDb`, so no caller ever sees the compact form.
 
-import { itemBaseName } from '../shared/itemStats'
+import { hasBonusDamage, itemBaseName, parseStatsBlock } from '../shared/itemStats'
 // The rename overlay (JOS-415) — items.json is a scrape rewritten wholesale, so a name the wiki
 // has since changed is corrected at LOAD, never in the file. Read its header before adding a row.
 import { renamedItems } from '../shared/itemRenames'
@@ -75,12 +75,19 @@ export interface ItemDbFile {
  */
 export function knowledgeFromDb(entry: ItemDbEntry): Omit<ItemKnowledge, 'cached'> {
   return {
-    ...entry,
+    ...repairStoredDamage(entry),
     name: entry.name ?? entry.page,
     lore: entry.lore ?? false,
     quest: entry.quest ?? false,
     questUses: entry.questUses ?? []
   }
+}
+
+/** Correct old parsed records without discarding separately supplied classes, slots or effects. */
+function repairStoredDamage(entry: ItemDbEntry): ItemDbEntry {
+  if (!entry.stats || !entry.statsBlock || !hasBonusDamage(entry.statsBlock)) return entry
+  const parsed = parseStatsBlock(entry.statsBlock)
+  return { ...entry, stats: { ...entry.stats, dmg: parsed.dmg, extras: parsed.extras } }
 }
 
 /** A wiki page title in MediaWiki's canonical form: `_` is a space, runs of space collapse, and
@@ -115,5 +122,5 @@ export function buildItemDbIndex(file: ItemDbFile): Map<string, ItemDbEntry> {
   // Through the rename overlay, which keeps the OLD key as an alias onto the renamed record — a
   // loot line or a share bundle spelling the old name still resolves, and resolves to the current
   // name (shared/itemRenames.ts states why).
-  return new Map(Object.entries(renamedItems(file.items ?? {})))
+  return new Map(Object.entries(renamedItems(file.items ?? {})).map(([key, entry]) => [key, repairStoredDamage(entry)]))
 }

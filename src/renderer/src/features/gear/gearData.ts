@@ -62,12 +62,15 @@ export interface GearIndexState {
   ready: boolean
   /** the corpus's own `scrapedAt` — WHEN the data is from */
   scrapedAt: string | null
+  wikiDatasetGeneratedAt: string | null
   stats: GearBuildStats | null
   /** the payload stated a version this build does not know — nothing is drawn */
   refused: boolean
 }
 
-const EMPTY: GearIndexState = { rows: [], ready: false, scrapedAt: null, stats: null, refused: false }
+const EMPTY: GearIndexState = {
+  rows: [], ready: false, scrapedAt: null, wikiDatasetGeneratedAt: null, stats: null, refused: false
+}
 
 let CACHE: GearIndexState | null = null
 let INFLIGHT: Promise<GearIndexState> | null = null
@@ -80,6 +83,7 @@ async function fetchIndex(): Promise<GearIndexState> {
           rows: payload.rows.map(toRow),
           ready: true,
           scrapedAt: payload.scrapedAt,
+          wikiDatasetGeneratedAt: payload.wikiDatasetGeneratedAt ?? null,
           stats: payload.stats,
           refused: false
         }

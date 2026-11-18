@@ -67,7 +67,10 @@ async function plannerIndex(): Promise<PlannerIndex> {
  */
 async function gearIndex(): Promise<GearIndexPayload> {
   const file = await sessionCorpus()
-  gear ??= buildGearIndex(file)
+  gear ??= {
+    ...buildGearIndex(file),
+    ...(corpusCache ? { wikiDatasetGeneratedAt: corpusCache.generatedAt } : {})
+  }
   return gear
 }
 

@@ -21,6 +21,20 @@ import {
   unlockedExaltationSlots
 } from '../src/shared/itemStats'
 
+test('elemental and bane damage lines cannot overwrite base weapon damage', () => {
+  const blade = parseStatsBlock('Skill: 1H Slashing Atk Delay: 20\nDMG: 8 Fire DMG: 4\nWIS: +4')
+  assert.equal(blade.dmg, 8)
+  assert.equal(blade.atkDelay, 20)
+  assert.deepEqual(blade.extras, ['Fire DMG: 4'])
+  assert.deepEqual(blade.stats, [{ key: 'WIS', value: '+4' }])
+
+  const greenmist = parseStatsBlock('DMG: 18 AC: 5\nBane DMG: [[Shissar]] +6')
+  assert.equal(greenmist.dmg, 18)
+  assert.equal(greenmist.ac, 5)
+  assert.deepEqual(greenmist.extras, ['Bane DMG: Shissar +6'])
+  assert.equal(parseStatsBlock('Cold DMG: 4').dmg, undefined)
+})
+
 // =================================================================================
 // ITEM-WINDOW STAT BLOCK (the game's item description window).
 // Fixtures are VERBATIM {{Itempage}} wikitext fetched from eqlwiki.com on 2026-08-02:

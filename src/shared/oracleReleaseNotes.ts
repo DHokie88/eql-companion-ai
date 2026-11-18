@@ -21,6 +21,14 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.20.1',
+    date: '2026-11-17',
+    entries: [
+      { kind: 'fixed', text: 'Gear previews and rankings use corrected upgrade math for attributes, resists, weight, Backstab and single-value Range. Elemental and bane damage stay separate from base weapon damage.' },
+      { kind: 'changed', text: 'Gear shows the date of the active wiki update. Refresh the item catalog in Preferences → Wiki data, then restart to use the download.' }
+    ]
+  },
+  {
     version: '0.20.0',
     date: '2026-11-17',
     entries: [

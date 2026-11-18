@@ -264,6 +264,8 @@ export interface GearIndexPayload {
   version: number
   /** the corpus's own `scrapedAt` — WHEN the data is from, never when the index was built */
   scrapedAt: string
+  /** Generation date of the downloaded wiki pack used alongside the bundled item data. */
+  wikiDatasetGeneratedAt?: string
   rows: GearRow[]
   stats: GearBuildStats
 }

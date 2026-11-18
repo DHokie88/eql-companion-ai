@@ -102,6 +102,12 @@ const SAVE_KEYS = [
 
 const EFFECT_KEYS = ['Combat Effect', 'Click Effect', 'Worn Effect', 'Proc Effect', 'Focus Effect', 'Effect']
 
+const BONUS_DAMAGE_KEYS = [
+  'Fire DMG', 'Cold DMG', 'Magic DMG', 'Poison DMG', 'Disease DMG', 'Bane DMG',
+  'Fire Damage', 'Cold Damage', 'Magic Damage', 'Poison Damage', 'Disease Damage', 'Bane Damage',
+  'Elemental DMG', 'Elemental Damage'
+]
+
 const STRUCT_KEYS = [
   'Slot', 'Class', 'Race', 'Skill', 'Atk Delay', 'Delay', 'DMG', 'Dmg Bon', 'Damage Bonus',
   // Third spelling, first seen on the 2026-08-18 Mistmoore-rework pages ("Atk Delay: 28 DMG
@@ -127,12 +133,19 @@ const STAT_KEYS = [
   'Required Level', 'Req Level', 'Cast Time', 'Cooldown', 'Recast', 'Range Damage'
 ]
 
-const ALL_KEYS = [...SAVE_KEYS, ...EFFECT_KEYS, ...STRUCT_KEYS, ...STAT_KEYS]
+const ALL_KEYS = [...SAVE_KEYS, ...EFFECT_KEYS, ...STRUCT_KEYS, ...STAT_KEYS, ...BONUS_DAMAGE_KEYS]
 
 const esc = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 // Longest-first so `Dmg Bon` wins over `DMG` and `Atk Delay` over `Delay` at the same spot.
 const KEY_ALT = [...ALL_KEYS].sort((a, b) => b.length - a.length).map(esc).join('|')
 const KEY_RE = new RegExp(`(?:^|\\s)(${KEY_ALT})\\s*:\\s*`, 'gi')
+const BONUS_DAMAGE_RE = new RegExp(`(?:^|\\s)(?:${BONUS_DAMAGE_KEYS.map(esc).join('|')})\\s*:`, 'i')
+const BONUS_DAMAGE_KEY_SET = new Set(BONUS_DAMAGE_KEYS.map((key) => key.toUpperCase()))
+
+/** Whether older parsers could have mistaken a damage modifier for base damage. */
+export function hasBonusDamage(raw: string): boolean {
+  return BONUS_DAMAGE_RE.test(raw)
+}
 
 /** Flag phrases the game prints above the stats. Longest-first; matched case-insensitively. */
 const FLAG_PHRASES = [
@@ -384,6 +397,10 @@ function applyPair(out: ItemStatBlock, keyRaw: string, value: string): void {
   // Every remaining field records TEXT, and empty text is nothing to record.
   if (!value) return
 
+  if (BONUS_DAMAGE_KEY_SET.has(upper)) {
+    out.extras.push(`${key}: ${value}`)
+    return
+  }
   if (EFFECT_KEYS.some((k) => k.toUpperCase() === upper)) {
     out.effects.push(parseEffect(key, value))
     return
