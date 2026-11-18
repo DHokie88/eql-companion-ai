@@ -7,6 +7,7 @@ import { app } from 'electron'
 import { join } from 'node:path'
 import { Worker } from 'node:worker_threads'
 import { WikiDatasetClient } from './wikiDatasetClient'
+import { E2E } from './e2e'
 import type { WikiDatasetCache, WikiDatasetStatus } from '../shared/wikiDataset'
 import {
   WIKI_CACHE_DIR_NAME,
@@ -18,6 +19,7 @@ import {
 
 const WORKER_PATH = join(__dirname, 'wikiDatasetWorker.js')
 const CALL_TIMEOUT_MS = 180_000
+const STARTUP_CHECK_DELAY_MS = 2_500
 
 const client = new WikiDatasetClient(() => new Worker(WORKER_PATH), CALL_TIMEOUT_MS)
 
@@ -26,7 +28,10 @@ let refreshing = false
 let restartRequired = false
 let lastError: string | null = null
 let active: WikiDatasetCache | null | undefined
-let downloaded: WikiDatasetSummary | null = null
+let lastChecked: WikiDatasetSummary | null = null
+let startupCheckScheduled = false
+let refreshRequested = false
+let startupCheckTimer: ReturnType<typeof setTimeout> | undefined
 const loadSlot: { current: Promise<WikiDatasetCache | null> | null } = { current: null }
 const refreshSlot: { current: Promise<WikiDatasetStatus> | null } = { current: null }
 
@@ -48,12 +53,31 @@ export function getWikiDatasetStatus(): Promise<WikiDatasetStatus> {
 }
 
 export function refreshWikiDataset(): Promise<WikiDatasetStatus> {
+  refreshRequested = true
   return singleFlight(refreshSlot, doRefresh)
+}
+
+/** Give the window and log engine a head start, then check once without delaying either. */
+export function scheduleWikiDatasetStartupCheck(onStatus: (status: WikiDatasetStatus) => void): void {
+  if (E2E || stopping || startupCheckScheduled) return
+  startupCheckScheduled = true
+  startupCheckTimer = setTimeout(() => {
+    startupCheckTimer = undefined
+    // An earlier manual refresh already did the work, or is still doing it.
+    if (stopping || refreshRequested) return
+    void refreshWikiDataset().then((status) => {
+      if (!stopping) onStatus(status)
+    })
+    void getWikiDatasetStatus().then((status) => {
+      if (!stopping && status.state === 'refreshing') onStatus(status)
+    })
+  }, STARTUP_CHECK_DELAY_MS).unref()
 }
 
 export function shutdownWikiDataset(): void {
   if (stopping) return
   stopping = true
+  clearTimeout(startupCheckTimer)
   refreshing = false
   client.stop()
 }
@@ -78,7 +102,7 @@ async function loadFromWorker(): Promise<WikiDatasetCache | null> {
 }
 
 async function doRefresh(): Promise<WikiDatasetStatus> {
-  if (process.env.EQ_E2E === '1') {
+  if (E2E) {
     await ensureWikiDatasetLoaded()
     lastError = 'Wiki dataset downloads are disabled during isolated tests.'
     return snapshotStatus()
@@ -100,7 +124,7 @@ async function doRefresh(): Promise<WikiDatasetStatus> {
       lastError = response.refresh.error
     } else {
       lastError = null
-      downloaded = response.refresh.summary
+      lastChecked = response.refresh.summary
       restartRequired = response.refresh.summary.sha256 !== (active?.sha256 ?? null)
     }
   } catch (err) {
@@ -112,7 +136,7 @@ async function doRefresh(): Promise<WikiDatasetStatus> {
 }
 
 function snapshotStatus(): WikiDatasetStatus {
-  const saved = downloaded ?? (active ? summarize(active) : null)
+  const saved = lastChecked ?? (active ? summarize(active) : null)
   const summary = saved ?? { version: null, generatedAt: null, checkedAt: null, sha256: null, items: 0, npcs: 0, zones: 0, identityConflicts: 0, quarantinedItems: 0 }
   let state: WikiDatasetStatus['state']
   if (refreshing) state = 'refreshing'

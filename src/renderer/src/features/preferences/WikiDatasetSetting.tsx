@@ -1,5 +1,4 @@
-// Preferences > Wiki data. Refresh downloads one public dataset file. The result
-// stays on disk until the next Oracle launch. This session keeps the cache it opened with.
+// Startup and manual refresh check the same public item feed. A new pack is used next launch.
 
 import { type JSX, useCallback, useEffect, useState } from 'react'
 import { Box, Button, Chip, Stack, Typography } from '@mui/material'
@@ -35,16 +34,23 @@ export function WikiDatasetSetting(): JSX.Element {
 
   useEffect(() => {
     let cancelled = false
+    let pushed = false
+    const unsubscribe = window.eq.onWikiDatasetStatus((next) => {
+      pushed = true
+      setLocalError(null)
+      setStatus(next)
+    })
     window.eq.getWikiDatasetStatus().then(
       (next) => {
-        if (!cancelled) setStatus(next)
+        if (!cancelled && !pushed) setStatus(next)
       },
       (err: unknown) => {
-        if (!cancelled) setLocalError(err instanceof Error ? err.message : 'Wiki dataset status failed.')
+        if (!cancelled && !pushed) setLocalError(err instanceof Error ? err.message : 'Wiki dataset status failed.')
       }
     )
     return () => {
       cancelled = true
+      unsubscribe()
     }
   }, [])
 
@@ -109,6 +115,9 @@ function WikiDatasetCard({ status, localError, refresh }: CardProps): JSX.Elemen
       </Typography>
       <Typography variant="caption" color="text.secondary">
         Generated {showTime(status.generatedAt, 'unknown')} · Checked {showTime(status.checkedAt, 'never')}
+      </Typography>
+      <Typography variant="caption" color="text.secondary">
+        Oracle checks for new item data when it opens. New downloads are used the next time you open Oracle.
       </Typography>
       {(status.error ?? localError) && (
         <Typography variant="caption" color="warning.main" sx={{ wordBreak: 'break-word' }}>

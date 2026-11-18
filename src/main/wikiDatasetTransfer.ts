@@ -136,7 +136,15 @@ export async function refreshWikiDatasetOnDisk(
     if (!isEnoent(err)) return { ok: false, error: 'Saved wiki dataset could not be read.', retained: true }
   }
   try {
-    const cache = await downloadWikiDataset(stamp, deps)
+    const fetchImpl = deps.fetchImpl ?? globalThis.fetch
+    const manifest = await downloadManifest(fetchImpl, deps.manifestDeadlineMs ?? MANIFEST_DEADLINE_MS)
+    // Only a cache that passes the usual disk validation may stand in for a download.
+    // A corrupt cache can still be repaired with a fresh, verified pack.
+    const saved = await loadWikiDatasetFromDisk(cacheDir).catch(() => null)
+    if (saved?.sha256 === manifest.sha256) {
+      return { ok: true, summary: { ...summarize(saved), checkedAt: stamp } }
+    }
+    const cache = await downloadWikiDataset(manifest, stamp, deps, fetchImpl)
     try {
       await writeCacheAtomically(cacheFile, cache)
     } catch {
@@ -162,18 +170,24 @@ export function summarize(cache: WikiDatasetCache): WikiDatasetSummary {
   }
 }
 
-async function downloadWikiDataset(checkedAt: string, deps: TransferDeps): Promise<WikiDatasetCache> {
-  const fetchImpl = deps.fetchImpl ?? globalThis.fetch
+async function downloadManifest(fetchImpl: typeof fetch, deadlineMs: number): Promise<ValidManifest> {
+  const bytes = await withDeadline(deadlineMs, (signal) =>
+    fetchBytes(fetchImpl, WIKI_DATASET_MANIFEST_URL, { maxBytes: MAX_MANIFEST_BYTES }, signal)
+  )
+  return parseManifest(parseJson(bytes, 'manifest'))
+}
+
+async function downloadWikiDataset(
+  manifest: ValidManifest,
+  checkedAt: string,
+  deps: TransferDeps,
+  fetchImpl: typeof fetch
+): Promise<WikiDatasetCache> {
   const gunzip = deps.gunzip ?? defaultGunzip
   const decode = deps.decode ?? defaultDecode
   const maxDecoded = deps.maxDecodedBytes ?? MAX_DECODED_BYTES
-  const manifestDeadline = deps.manifestDeadlineMs ?? MANIFEST_DEADLINE_MS
   const payloadDeadline = deps.payloadDeadlineMs ?? PAYLOAD_DEADLINE_MS
 
-  const manifestBytes = await withDeadline(manifestDeadline, (signal) =>
-    fetchBytes(fetchImpl, WIKI_DATASET_MANIFEST_URL, { maxBytes: MAX_MANIFEST_BYTES }, signal)
-  )
-  const manifest = parseManifest(parseJson(manifestBytes, 'manifest'))
   const compressed = await withDeadline(payloadDeadline, async (signal) => {
     const bytes = await fetchBytes(fetchImpl, manifest.packUrl, { maxBytes: manifest.bytes, declaredBytes: manifest.bytes }, signal)
     if (bytes.length !== manifest.bytes) {

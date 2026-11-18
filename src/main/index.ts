@@ -81,6 +81,7 @@ import {
   sendToMain
 } from './windows'
 import { watchDisplays } from './windowPlacement'
+import { scheduleWikiDatasetStartupCheck } from './wikiDataset'
 import { OVERLAY_KINDS } from '../shared/types'
 
 // --- custom schemes: the permanent image cache (eqimg://) and the speech cache (eqspeech://) ---
@@ -351,6 +352,7 @@ if (!gotSingleInstanceLock) {
     // data (the plan's boundary); phase 0 has no renderer surface, so what this buys today is an
     // engine that exists and narrates itself into the dev log.
     startEngineSupervisor()
+    scheduleWikiDatasetStartupCheck((status) => sendToMain(IPC.onWikiDatasetStatus, status))
     // Drain the offline feedback queue (feedback/queue.ts). A report filed while the user's
     // network was unhappy is spooled to <userData>/feedback.json + feedback-pending/*.gz and
     // sent later over the same wire, carrying the same idempotency key; without this call it
