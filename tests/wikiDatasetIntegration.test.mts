@@ -2,14 +2,16 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
 import { gzipSync } from 'node:zlib'
-import { mkdtemp, rm, writeFile, readFile } from 'node:fs/promises'
+import { mkdtemp, rm, writeFile, readFile, stat, utimes } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { refreshWikiDatasetOnDisk, loadWikiDatasetFromDisk, parseStoredWikiCache,
   WIKI_CACHE_FILE_NAME, WIKI_DATASET_MANIFEST_URL } from '../src/main/wikiDatasetTransfer'
 
 const checkedAt = '2026-11-01T18:00:00.000Z'
-function sourceFixture(): { gzip: Buffer; manifest: object; fetchImpl: typeof fetch } {
+const recheckedAt = '2026-11-02T18:00:00.000Z'
+
+function sourceFixture() {
   const item = (wikiTitle: string, name = wikiTitle) => ({ wikiTitle, name,
     displayLines: ['MAGIC ITEM', 'Slot: PRIMARY', 'AC: 2', 'Class: WAR', 'Unknown stat: 7'], revisionId: 123 })
   const payload = { meta: { schemaVersion: 3, sample: false, generatedAt: '2026-11-01T12:32:52+00:00' },
@@ -40,6 +42,52 @@ test('real codec and transport preserve source time, page counts, aliases, evide
     assert.ok(loaded?.items['useful sword'].statsBlock?.includes('Unknown stat: 7'))
     assert.equal(loaded?.quarantinedItems?.length, 2)
     assert.equal(loaded?.items['rune casing'], undefined)
+  } finally { await rm(dir, { recursive: true, force: true }) }
+})
+
+test('an unchanged manifest updates status without downloading or rewriting the saved pack', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'wiki-integration-'))
+  const file = join(dir, WIKI_CACHE_FILE_NAME)
+  const fixture = sourceFixture()
+  try {
+    assert.equal((await refreshWikiDatasetOnDisk(dir, checkedAt, fixture)).ok, true)
+    const saved = await readFile(file)
+    const savedAt = new Date(checkedAt)
+    await utimes(file, savedAt, savedAt)
+    const { mtimeMs } = await stat(file)
+    let fetches = 0
+    const result = await refreshWikiDatasetOnDisk(dir, recheckedAt, {
+      fetchImpl: (url, init) => {
+        fetches += 1
+        assert.equal(String(url), WIKI_DATASET_MANIFEST_URL)
+        return fixture.fetchImpl(url, init)
+      },
+      decode: () => assert.fail('the same pack should skip decoding'),
+      gunzip: () => assert.fail('the same pack should skip decompression')
+    })
+    assert.ok(result.ok)
+    assert.equal(fetches, 1)
+    assert.equal(result.summary.sha256, fixture.manifest.sha256)
+    assert.equal(result.summary.checkedAt, recheckedAt)
+    assert.deepEqual(await readFile(file), saved)
+    assert.equal((await stat(file)).mtimeMs, mtimeMs)
+    assert.equal((await loadWikiDatasetFromDisk(dir))?.checkedAt, checkedAt)
+  } finally { await rm(dir, { recursive: true, force: true }) }
+})
+
+test('a corrupt saved pack is replaced even when its recorded checksum matches', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'wiki-integration-'))
+  const file = join(dir, WIKI_CACHE_FILE_NAME)
+  const fixture = sourceFixture()
+  try {
+    const sha256 = fixture.manifest.sha256
+    await writeFile(file, JSON.stringify({ schemaVersion: 1, sha256, items: 'corrupt' }))
+    const result = await refreshWikiDatasetOnDisk(dir, recheckedAt, fixture)
+    assert.ok(result.ok)
+    const loaded = await loadWikiDatasetFromDisk(dir)
+    assert.equal(loaded?.sha256, sha256)
+    assert.equal(loaded?.checkedAt, recheckedAt)
+    assert.equal(loaded?.items['sword alias'].page, 'Useful sword')
   } finally { await rm(dir, { recursive: true, force: true }) }
 })
 

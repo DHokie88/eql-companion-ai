@@ -22,6 +22,7 @@ import {
 } from '../src/main/wikiDatasetTransfer'
 
 const CHECKED = '2026-11-01T18:00:00.000Z'
+const RECHECKED = '2026-11-02T18:00:00.000Z'
 const VERSION = '20261101T123256Z-52e0eb8675bc'
 const GENERATED = '2026-11-01T12:32:58+00:00'
 const PACK = 'eqlwiki-eye-of-zomm-data.json.gz'
@@ -150,28 +151,38 @@ test('valid payload verifies sha256 before gunzip, writes a sealed cache, and ke
   }
 })
 
-test('bad sha256 does not gunzip and retains the last good file', async () => {
-  const packed = packageOf(rawDataset())
-  const manifest = { ...(packed.manifest as object), sha256: 'a'.repeat(64), bytes: packed.gzip.length }
+test('a changed pack replaces the saved cache only after its SHA-256 is verified', async () => {
+  const previous = packageOf(rawDataset())
+  const packed = packageOf(rawDataset([{ name: 'Bronze Sword', stats: { ac: 4 } }]))
   const dir = tempDir()
   const file = resolveWikiCacheFile(dir)
-  writeFileSync(file, Buffer.from('LAST-GOOD'))
   let inflated = 0
   try {
-    const { fetchImpl } = mockFetch(JSON.stringify(manifest), packed.gzip)
-    const result = await refreshWikiDatasetOnDisk(dir, CHECKED, deps(fetchImpl, decodeOk, {
+    const initial = mockFetch(JSON.stringify(previous.manifest), previous.gzip)
+    assert.equal((await refreshWikiDatasetOnDisk(dir, CHECKED, deps(initial.fetchImpl))).ok, true)
+    const saved = readFileSync(file)
+    const invalidManifest = { ...(packed.manifest as object), sha256: 'a'.repeat(64) }
+    const corrupt = mockFetch(JSON.stringify(invalidManifest), packed.gzip)
+    const result = await refreshWikiDatasetOnDisk(dir, RECHECKED, deps(corrupt.fetchImpl, decodeOk, {
       gunzip: () => {
         inflated += 1
         return Buffer.from('{}')
       }
     }))
-    assert.equal(result.ok, false)
-    if (result.ok) return
+    assert.ok(!result.ok)
     assert.equal(result.retained, true)
     assert.match(result.error, /SHA-256/)
     assert.equal(inflated, 0)
-    assert.equal(readFileSync(file).toString(), 'LAST-GOOD')
-    assert.equal(readdirSync(dir).some((name) => name.includes('.tmp')), false)
+    assert.deepEqual(readFileSync(file), saved)
+
+    const valid = mockFetch(JSON.stringify(packed.manifest), packed.gzip)
+    assert.equal((await refreshWikiDatasetOnDisk(dir, RECHECKED, deps(valid.fetchImpl))).ok, true)
+    assert.deepEqual(valid.calls.map(({ url }) => url), [WIKI_DATASET_MANIFEST_URL, PACK_URL])
+    const loaded = await loadWikiDatasetFromDisk(dir)
+    assert.equal(loaded?.sha256, packed.sha)
+    assert.ok(loaded?.items['bronze sword'])
+    assert.equal(loaded?.items['rusted sword'], undefined)
+    assert.deepEqual(readdirSync(dir), [WIKI_CACHE_FILE_NAME])
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }

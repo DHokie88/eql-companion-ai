@@ -575,6 +575,7 @@ export const IPC = {
   // cache under userData and does not change the corpus this launch already bound.
   wikiDatasetStatus: 'wikiDataset:status',
   wikiDatasetRefresh: 'wikiDataset:refresh',
+  onWikiDatasetStatus: 'wikiDataset:statusChanged',
 
   // ---- mob knowledge ("what does this thing drop", Task #63) ----
   // renderer -> main: look up a mob's drop knowledge (own loot history + local quest catalog
