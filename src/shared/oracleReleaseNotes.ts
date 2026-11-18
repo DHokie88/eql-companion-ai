@@ -21,6 +21,13 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.21.0',
+    date: '2026-11-17',
+    entries: [
+      { kind: 'new', text: 'EQ Oracle checks for new wiki item data in the background at startup. It downloads only when the catalog changes. New data takes effect the next time Oracle opens.' }
+    ]
+  },
+  {
     version: '0.20.1',
     date: '2026-11-17',
     entries: [
