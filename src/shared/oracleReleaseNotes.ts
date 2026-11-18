@@ -21,6 +21,14 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.19.0',
+    date: '2026-11-17',
+    entries: [
+      { kind: 'new', text: 'Gear can show stats at the highest tier you own while continuing to simulate unowned items. Inventory exports do not include partial progress toward the next tier, so owned stats use the start of the recorded tier.' },
+      { kind: 'changed', text: 'The Owned filter now shows wearable copies in your inventory export, rather than items only seen in your loot history. Current era, Owned and Use owned stats sit beside the upgrade simulation.' }
+    ]
+  },
+  {
     version: '0.18.0',
     date: '2026-11-14',
     entries: [
