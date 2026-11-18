@@ -21,6 +21,13 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.20.0',
+    date: '2026-11-17',
+    entries: [
+      { kind: 'new', text: 'The right arrow beside Gear’s Slots picker replaces the current selection with the next slot, so you can compare gear one slot at a time. It starts at Head when the picker is empty and wraps back to Head after Ammo.' }
+    ]
+  },
+  {
     version: '0.19.0',
     date: '2026-11-17',
     entries: [
