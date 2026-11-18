@@ -29,7 +29,7 @@
 //
 // AND SINCE JOS-285 (phase 4) IT SAYS WHAT YOU ALREADY HAVE. The ownership join hangs off exactly
 // the seam phase 3 left — `row.key` is `itemKey(name)` is `ownershipKey` — so the OWNED column is
-// one map lookup per rendered row and the "Owned or looted" filter is one injected predicate,
+// one map lookup per rendered row and the Owned filter is one injected predicate,
 // beside the era one. Two things are deliberately NOT restated here: the dump's age (the
 // `/outputfile` freshness line owns both instants — JOS-253/268) and the keyring exclusion (the
 // fold owns the roster; this tab only reports what the fold left out of the player's own file).
@@ -135,7 +135,7 @@ import GearTable, { ROW_HEIGHT } from './GearTable'
 import { useWishlist } from '../wishlist/useWishlist'
 import { wishFromGear } from '../wishlist/wishSearch'
 import { useGearPrefs, type GearPrefs } from './useGearPrefs'
-import { sanitizeGearForm, sanitizeGearSort, type GearFormMemory } from './areaMemory'
+import { sanitizeFlag, sanitizeGearForm, sanitizeGearSort, type GearFormMemory } from './areaMemory'
 import { useRemembered, useRememberedSearch } from './useAreaMemory'
 import {
   GEAR_CONTROLS,
@@ -150,12 +150,13 @@ import {
   useEraHidden,
   useGearClasses,
   useGearCompare,
+  type GearCompareData,
   useGearIndex,
   useGearOwnership,
-  useOwnedOrLooted,
+  useOwned,
   useUpgradeState
 } from './gearData'
-import { ownedCellText, ownershipFor, uncountedNote, type GearOwnershipMap } from './gearOwnership'
+import { ownedCellText, ownershipFor, ownedUpgradeState, uncountedNote, type GearOwnershipMap } from './gearOwnership'
 import {
   DEFAULT_GEAR_FILTERS,
   filterGearRows,
@@ -214,10 +215,10 @@ function useTableRows(
   rows: readonly GearRow[],
   state: ItemUpgradeState,
   filters: GearFilters,
-  opts: { sort: GearSort; deps: GearFilterDeps; chosen: GearSortKey[] | null; priorities: GearPriorities; extras: PriorityKey[]; hasOwned: boolean }
+  opts: { sort: GearSort; deps: GearFilterDeps; chosen: GearSortKey[] | null; priorities: GearPriorities; extras: PriorityKey[]; hasOwned: boolean; stateForRow?: (row: GearRow) => ItemUpgradeState }
 ): TableState {
-  const { sort, deps, chosen, priorities, extras, hasOwned } = opts
-  const scaled = useMemo(() => scaleAll(rows, state), [rows, state])
+  const { sort, deps, chosen, priorities, extras, hasOwned, stateForRow } = opts
+  const scaled = useMemo(() => scaleAll(rows, state, stateForRow), [rows, state, stateForRow])
   const filtered = useMemo(() => filterGearRows(scaled, filters, deps), [scaled, filters, deps])
   const columns = useMemo(() => [{ key: 'SCORE' as const, label: 'Score', percent: false }, ...columnsFor(chosen, sort)], [chosen, sort])
   const scored = useMemo(() => scoreGear(filtered, priorities, extras), [filtered, priorities, extras])
@@ -257,7 +258,7 @@ function emptyText(ready: boolean, refused: boolean, table: TableState): string 
   if (refused) return 'This build cannot read the gear index it was served - it states a newer version.'
   if (!ready) return 'Reading the item database…'
   if (table.hiddenByOwned > 0) {
-    return `Nothing here is owned or looted - ${String(table.hiddenByOwned)} items match the other filters. Ownership is read from your newest /outputfile inventory dump plus this character's loot history.`
+    return `Nothing here is owned - ${String(table.hiddenByOwned)} items match the other filters. Ownership is read from your newest /outputfile inventory dump.`
   }
   if (table.hiddenByEra > 0) {
     return `No gear matches these filters - but ${String(table.hiddenByEra)} items are hidden by the Current era toggle above.`
@@ -424,25 +425,9 @@ export interface GearViewProps {
   onPreview?: (item: string) => void
 }
 
-export default function GearView({ onOpenLoot, onPreview }: GearViewProps = {}): JSX.Element {
-  const { rows, ready, refused, scrapedAt } = useGearIndex()
-  const classes = useGearClasses()
-  const upgrade = useUpgradeState()
-  const ownership = useGearOwnership()
-  // JOS-335. The wish list, mounted here so a search row can write to it and so every row knows
-  // whether it is already wanted — see the header for why one mount is the whole story.
-  const wishes = useGearWishes()
-  // JOS-297. A view unmounts on every tab switch, so both choices are localStorage-backed.
-  const prefs = useGearPrefs()
-  // JOS-329, and the same law one level up: EVERY field of this form outlives the tab now. The five
-  // structural filters and the sort are on the RESTART tier, the search box is on the SESSION tier
-  // — `areaMemory.ts` states the rule and owns both sanitizers.
+function useGearForm(): { own: GearFilters; setOwn: (next: GearFilters) => void } {
   const [form, setForm] = useRemembered<GearFormMemory>('eq.gear.filters', sanitizeGearForm)
-  const [text, setText] = useRememberedSearch('eq.gear.search')
-  const [sort, setSort] = useRemembered<GearSort>('eq.gear.sort', sanitizeGearSort)
-  const scrollRef = useRef<HTMLDivElement>(null)
-
-  /**
+/**
    * THE BAR'S OWN `GearFilters`, REBUILT FROM THE STORED FORM.
    *
    * `GearFilters` has seven fields and only five of them belong to this key: `text` and `classes`
@@ -466,6 +451,33 @@ export default function GearView({ onOpenLoot, onPreview }: GearViewProps = {}):
     [setForm]
   )
 
+  return { own, setOwn }
+}
+
+/** One owned-tier decision supplies both scaling and the comparison card. */
+function useOwnedStats(rows: readonly GearRow[], state: ItemUpgradeState, active: boolean, map: GearOwnershipMap | null): {
+  stateForRow: (row: GearRow) => ItemUpgradeState
+  compare: GearCompareData
+} {
+  const stateForRow = useCallback((row: GearRow) => (active ? ownedUpgradeState(map, row) : null) ?? state, [active, map, state])
+  const base = useGearCompare(rows, state)
+  const compare = useMemo(() => ({ ...base, ownedStats: active ? map : null }), [base, active, map])
+  return { stateForRow, compare }
+}
+
+export default function GearView({ onOpenLoot, onPreview }: GearViewProps = {}): JSX.Element {
+  const { rows, ready, refused, scrapedAt } = useGearIndex()
+  const classes = useGearClasses()
+  const upgrade = useUpgradeState()
+  const [showOwnedStats, setShowOwnedStats] = useRemembered('eq.gear.ownedStats', (raw) => sanitizeFlag(raw, false))
+  const ownership = useGearOwnership()
+  const wishes = useGearWishes()
+  const prefs = useGearPrefs()
+  const { own, setOwn } = useGearForm()
+  const [text, setText] = useRememberedSearch('eq.gear.search')
+  const [sort, setSort] = useRemembered<GearSort>('eq.gear.sort', sanitizeGearSort)
+  const scrollRef = useRef<HTMLDivElement>(null)
+
   // Both deferrals, and nothing else deferred: the two controls whose every movement re-derives
   // six thousand rows (see the header).
   const deferredText = useDeferredValue(text)
@@ -487,15 +499,10 @@ export default function GearView({ onOpenLoot, onPreview }: GearViewProps = {}):
   // The two injected verdicts the pure filter cannot answer for itself, merged into one stable
   // object so `filterGearRows`' memo re-runs when either MOVES and never merely because it rendered.
   const era = useEraHidden()
-  const owned = useOwnedOrLooted(ownership.map)
+  const owned = useOwned(ownership.map)
   const deps = useMemo(() => ({ ...era, ...owned, ownedText: (row: GearRow) => ownership.map === null ? '' : ownedCellText(ownershipFor(ownership.map, row)) }), [era, owned, ownership.map])
-  const table = useTableRows(rows, state, filters, { sort, deps, chosen: prefs.columns, priorities: prefs.priorities, extras: prefs.priorityExtras, hasOwned: ownership.map !== null })
-  // JOS-338. The hover card's data, and it is deliberately OUTSIDE the three-memo pipeline above:
-  // what you are wearing is not a filter, not a sort and not a scale, so no keystroke and no slider
-  // tick can reach it. It takes the UNSCALED corpus (the card joins an equipped item by key and
-  // scales it at ITS OWN `+N`) and the state IN FORCE, which is what lets the card admit that its
-  // item half is a simulation while the equipped half is a fact off the player's dump.
-  const compare = useGearCompare(rows, state)
+  const { stateForRow, compare } = useOwnedStats(rows, state, visible.has('upgrade') && showOwnedStats, ownership.map)
+  const table = useTableRows(rows, state, filters, { sort, deps, chosen: prefs.columns, priorities: prefs.priorities, extras: prefs.priorityExtras, hasOwned: ownership.map !== null, stateForRow })
   const win = useWindowedRows({ count: table.rows.length, rowHeight: ROW_HEIGHT, scrollRef })
   const hint = useMemo(
     () => ownedHint(ownership.map, uncountedNote(ownership.payload.uncounted)),
@@ -511,6 +518,8 @@ export default function GearView({ onOpenLoot, onPreview }: GearViewProps = {}):
         text={text} setText={setText}
         classes={classes}
         upgrade={upgrade}
+        showOwnedStats={showOwnedStats}
+        setShowOwnedStats={setShowOwnedStats}
         visible={visible}
       />
 

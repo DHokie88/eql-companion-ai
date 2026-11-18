@@ -1,22 +1,7 @@
 // gear/GearFilterBar.tsx — the Gear tab's two toolbar rows.
 //
-// TWO ROWS, EACH `nowrap`, AND THAT IS THE flexWrap LAW rather than a layout preference: wrapping
-// converts content overflow into HEIGHT, so a bar that wraps turns a toolbar into a growing block
-// and pushes the table it filters off the bottom of the pane. Two DELIBERATE rows is not wrapping
-// — it is a stated shape, and the first holds controls that never shrink beside exactly one thing
-// that may (the search box).
-//
-// THE SPLIT IS BY QUESTION, not by fit. The first row asks WHICH ITEMS — name, slots, weapon type,
-// classes, effect kind, era, owned. The second asks WHAT THEY READ, and since JOS-302 that is one
-// control: the plus-state being simulated.
-//
-// THE SECOND ROW USED TO CARRY TWO MORE (owner ruling 2026-08-13: *drop the min-ratio and
-// stat-at-least filters completely - sorting services that need without spending toolbar real
-// estate*). A `Min ratio` box and a `Stat at least` box that grew a row of removable chips are
-// DELETED, controls and predicates both — `gearFilter.ts`'s header states why a sort answers the
-// question better, and `gearColumns.ts` states where the chips' second job (conjuring the column)
-// went. The row survives because the plus-state slider is still on it and is still a statement
-// about what the numbers READ rather than about which rows they belong to.
+// Search and identity controls sit on the first row; simulation and ownership controls share the
+// second row and may wrap in a narrow window. Hidden controls remain inert.
 //
 // NO POPPER ON ANY OF IT (JOS-143). The hints are native `title`s: these controls sit directly
 // above a dense windowed table, and an interactive MUI Tooltip opened from a chip up here lands on
@@ -41,10 +26,9 @@
 // AND SINCE JOS-297 THE BAR IS CONFIGURABLE (owner feedback: *we should be able to customize which
 // filters we see*). `visible` is the set of controls to draw — the whole vocabulary while the user
 // has not said otherwise, so the shipped bar is what an untouched install still gets. Two rules
-// hold it honest. A control that is not drawn is not FILTERING either: `gearPrefs.inertFilters`
-// forces its field inert upstream, so this file only has to decide what to render. And a row whose
-// every control is hidden is not RENDERED — an empty `Stack` is still a gap, and the two rows'
-// whole contract is that they cost fixed height rather than growing (the `flexWrap` law above).
+// hold it honest. A hidden filter does not filter (`gearPrefs.inertFilters`), and a hidden slider
+// also disables the owned-stats mode.
+
 
 import type { JSX } from 'react'
 import { Chip, MenuItem, Stack, TextField } from '@mui/material'
@@ -113,6 +97,8 @@ export interface GearFilterBarProps {
   setText: (v: string) => void
   classes: GearClasses
   upgrade: { state: ItemUpgradeState; set: (s: ItemUpgradeState) => void }
+  showOwnedStats: boolean
+  setShowOwnedStats: (v: boolean) => void
   /** which controls to draw (JOS-297) — `gearPrefs.controlsVisible`, the whole set by default */
   visible: ReadonlySet<GearControl>
 }
@@ -176,7 +162,7 @@ function SelectRow({ filters, setFilters, visible }: Pick<GearFilterBarProps, 'f
 }
 
 /** WHICH ITEMS: name, slot, classes, effect kind, era. Search is always drawn — see the header. */
-function IdentityRow({ filters, setFilters, text, setText, classes, visible }: Omit<GearFilterBarProps, 'upgrade' | 'priorities' | 'onPriorities' | 'extras' | 'onExtras'>): JSX.Element {
+function IdentityRow({ filters, setFilters, text, setText, classes, visible }: Omit<GearFilterBarProps, 'upgrade' | 'priorities' | 'onPriorities' | 'extras' | 'onExtras' | 'showOwnedStats' | 'setShowOwnedStats'>): JSX.Element {
   return (
     <Stack direction="row" spacing={1} alignItems="center" sx={{ flexWrap: 'nowrap' }}>
       <TextField
@@ -207,30 +193,6 @@ function IdentityRow({ filters, setFilters, text, setText, classes, visible }: O
         />
       )}
 
-      {visible.has('era') && (
-        <ToggleChip
-          label="Current era"
-          testId="gear-era-toggle"
-          on={filters.eraOnly}
-          onToggle={() => setFilters({ ...filters, eraOnly: !filters.eraOnly })}
-          hint={`Hide items from outside ${CURRENT_ERA_LABEL}`}
-        />
-      )}
-
-      {/* THE OWNER'S CHECKBOX (JOS-285). It belongs on the WHICH ITEMS row, beside era and class:
-          all three ask who a row is, none of them asks what it reads. The hint states both
-          witnesses and the one thing a player would otherwise have to guess — that "not counted"
-          key rings exist; which ones, over their own dump, is on the Owned column's header. */}
-      {visible.has('owned') && (
-        <ToggleChip
-          label="Owned or looted"
-          testId="gear-owned-toggle"
-          on={filters.ownedOnly}
-          onToggle={() => setFilters({ ...filters, ownedOnly: !filters.ownedOnly })}
-          hint="Keep only what your newest /outputfile inventory dump names or your loot history saw. Some key rings are not counted - see the Owned column."
-        />
-      )}
-
       {visible.has('classes') && classes.offer !== null && (
         <Chip
           size="small"
@@ -247,27 +209,20 @@ function IdentityRow({ filters, setFilters, text, setText, classes, visible }: O
   )
 }
 
-/** WHAT THEY READ: the simulated plus-state, and — since JOS-302 — nothing else. */
-function NumbersRow({ upgrade }: Pick<GearFilterBarProps, 'upgrade'>): JSX.Element {
+/** The simulation and related display and filter controls. */
+function NumbersRow({ upgrade, filters, setFilters, visible, showOwnedStats, setShowOwnedStats }: Pick<GearFilterBarProps, 'upgrade' | 'filters' | 'setFilters' | 'visible' | 'showOwnedStats' | 'setShowOwnedStats'>): JSX.Element {
   return (
-    <Stack direction="row" spacing={1} alignItems="center" sx={{ flexWrap: 'nowrap', minWidth: 0 }}>
-      <UpgradeSlider state={upgrade.state} onChange={upgrade.set} />
+    <Stack direction="row" spacing={1} useFlexGap alignItems="center" sx={{ flexWrap: 'wrap', minWidth: 0 }}>
+      {visible.has('upgrade') && <UpgradeSlider state={upgrade.state} onChange={upgrade.set} />}
+      {visible.has('era') && <ToggleChip label="Current era" testId="gear-era-toggle" on={filters.eraOnly} onToggle={() => setFilters({ ...filters, eraOnly: !filters.eraOnly })} hint={`Hide items from outside ${CURRENT_ERA_LABEL}`} />}
+      {visible.has('owned') && <ToggleChip label="Owned" testId="gear-owned-toggle" on={filters.ownedOnly} onToggle={() => setFilters({ ...filters, ownedOnly: !filters.ownedOnly })} hint="Keep only wearable copies in your newest /outputfile inventory dump. Some key rings are not counted; see the Owned column." />}
+      {visible.has('upgrade') && <ToggleChip label="Use owned stats" testId="gear-owned-stats-toggle" on={showOwnedStats} onToggle={() => setShowOwnedStats(!showOwnedStats)} hint="Use the highest owned copy's tier from your latest inventory dump; other items use the simulation. The dump omits partial tier progress, so these are tier-floor estimates." />}
     </Stack>
   )
 }
 
-/**
- * Does the WHAT THEY READ row have anything left to draw? An empty row is height with no content.
- *
- * It is a one-entry list now that the ratio and threshold controls are gone, and it stays a LIST
- * rather than collapsing into `visible.has('upgrade')` at the call site: the row is a place, and
- * the next control that belongs to "what they read" should join a named set rather than have to
- * re-derive that a row can be empty.
- */
-const NUMBERS_CONTROLS: readonly GearControl[] = ['upgrade']
-
 export default function GearFilterBar(props: GearFilterBarProps): JSX.Element {
-  const { filters, setFilters, text, setText, classes, upgrade, visible, priorities, onPriorities, extras, onExtras } = props
+  const { filters, setFilters, text, setText, classes, upgrade, visible, priorities, onPriorities, extras, onExtras, showOwnedStats, setShowOwnedStats } = props
   return (
     <Stack spacing={1} sx={{ mb: 1, flexShrink: 0 }}>
       <IdentityRow
@@ -279,7 +234,7 @@ export default function GearFilterBar(props: GearFilterBarProps): JSX.Element {
         visible={visible}
       />
       <GearPriorityBar value={priorities} onChange={onPriorities} extras={extras} onExtras={onExtras} />
-      {NUMBERS_CONTROLS.some((c) => visible.has(c)) && <NumbersRow upgrade={upgrade} />}
+      {(['upgrade', 'era', 'owned'] as const).some((c) => visible.has(c)) && <NumbersRow upgrade={upgrade} filters={filters} setFilters={setFilters} visible={visible} showOwnedStats={showOwnedStats} setShowOwnedStats={setShowOwnedStats} />}
     </Stack>
   )
 }

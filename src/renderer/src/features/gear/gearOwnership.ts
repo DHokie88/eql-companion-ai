@@ -1,3 +1,4 @@
+import { upgradeStateForTier, type ItemUpgradeState } from '../../../../shared/itemUpgrade'
 // gear/gearOwnership.ts — THE JOIN (JOS-285, phase 4): do I own this, where is it, at what +N.
 //
 // This is the phase the feature exists for. A wiki tab can tell you a Cloak of Flames has AC 10;
@@ -205,6 +206,19 @@ export function gearOwnershipMap(
  */
 export function ownershipFor(map: GearOwnershipMap, row: Pick<GearRow, 'key'>): GearOwnership {
   return map.get(row.key) ?? NOTHING
+}
+
+/** Ownership is established by wearable dump rows, not loot history or exaltations. */
+export function isOwned(map: GearOwnershipMap | null, row: Pick<GearRow, 'key'>): boolean {
+  return map !== null && ownershipFor(map, row).owned
+}
+
+/** Highest named wearable tier; the dump omits fractional progress. */
+export function ownedUpgradeState(map: GearOwnershipMap | null, row: Pick<GearRow, 'key'>): ItemUpgradeState | null {
+  if (map === null) return null
+  const facts = ownershipFor(map, row).facts
+  if (facts.length === 0) return null
+  return upgradeStateForTier(Math.max(...facts.map((fact) => fact.tier ?? 0)))
 }
 
 // ---- the words ------------------------------------------------------------------------------
