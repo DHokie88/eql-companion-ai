@@ -31,7 +31,8 @@
 
 
 import type { JSX } from 'react'
-import { Chip, MenuItem, Stack, TextField } from '@mui/material'
+import { Chip, IconButton, MenuItem, Stack, TextField } from '@mui/material'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { CLASS_ABBRS } from '@shared/classCombo'
 import type { ItemUpgradeState } from '@shared/itemUpgrade'
 import { EQUIP_SLOTS } from '@shared/planner/types'
@@ -103,25 +104,42 @@ export interface GearFilterBarProps {
   visible: ReadonlySet<GearControl>
 }
 
+/** Walk the dropdown order, starting after the most recently selected slot. */
+function SlotPicker({ filters, setFilters }: Pick<GearFilterBarProps, 'filters' | 'setFilters'>): JSX.Element {
+  const selected = filters.slots[filters.slots.length - 1]
+  const current = selected === undefined ? -1 : EQUIP_SLOTS.indexOf(selected)
+  const next = EQUIP_SLOTS[(current + 1) % EQUIP_SLOTS.length]
+
+  return (
+    <Stack direction="row" alignItems="center" spacing={0.25}>
+      <ChipMultiSelect
+        options={EQUIP_SLOTS}
+        value={filters.slots}
+        onChange={(slots) => setFilters({ ...filters, slots })}
+        label="Slots"
+        placeholder="every slot"
+        minWidth={190}
+        testId="gear-slot"
+      />
+      <IconButton
+        type="button"
+        size="small"
+        aria-label="Next slot"
+        title={`Next slot: ${next}`}
+        data-testid="gear-next-slot"
+        onClick={() => setFilters({ ...filters, slots: [next] })}
+      >
+        <ChevronRightIcon fontSize="small" />
+      </IconButton>
+    </Stack>
+  )
+}
+
 /** The three closed-list narrowings of WHO a row is: its slots, its weapon kind, its effect kind. */
 function SelectRow({ filters, setFilters, visible }: Pick<GearFilterBarProps, 'filters' | 'setFilters' | 'visible'>): JSX.Element {
   return (
     <>
-      {/* MULTI-SELECT SINCE JOS-302, and it KEPT its testid: `gear-slot` is the handle the e2e slot
-          step and JOS-297's control-visibility step both read, and a rename would have been churn
-          in two specs to say the same thing. What changed is the semantics the step asserts —
-          several slots at once, and the table shows rows matching ANY of them. */}
-      {visible.has('slot') && (
-        <ChipMultiSelect
-          options={EQUIP_SLOTS}
-          value={filters.slots}
-          onChange={(slots) => setFilters({ ...filters, slots })}
-          label="Slots"
-          placeholder="every slot"
-          minWidth={190}
-          testId="gear-slot"
-        />
-      )}
+      {visible.has('slot') && <SlotPicker filters={filters} setFilters={setFilters} />}
 
       {/* JOS-302's third ask. The options are the CATEGORIES first and then the nine types
           (`WEAPON_PICKS`), because "the two-handers" is the common question and a category is only
