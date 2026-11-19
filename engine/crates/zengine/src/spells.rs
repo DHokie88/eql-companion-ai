@@ -87,7 +87,7 @@ impl ClientSpells {
         let mut records = 0;
         for line in text.lines().filter(|line| !line.trim().is_empty()) {
             let fields: Vec<_> = line.split('^').collect();
-            if !matches!(fields.len(), 173 | 174)
+            if !fold::spells_us::captured_spell_row_supported(&fields)
                 || fields[0].parse::<u32>().is_err()
                 || fields[1].trim().is_empty()
             {
@@ -246,6 +246,39 @@ mod tests {
             Some("Synthetic category")
         );
         assert!(ClientSpells::captured(spells_path, dbstr_path, "revision-b".into()).is_err());
+        std::fs::remove_dir_all(dir).unwrap();
+    }
+
+    #[test]
+    fn a_190_column_capture_activates_and_a_172_column_capture_does_not() {
+        let dir = scratch("wide");
+        let spells_path = dir.join("spells_us.txt");
+        let dbstr_path = dir.join("dbstr_us.txt");
+        let mut fields = row("42", "Wide Synthetic", "2", "1|0|-20|0|100|20")
+            .split('^')
+            .map(str::to_string)
+            .collect::<Vec<_>>();
+        fields.insert(74, "6789".to_string());
+        let slots = fields.pop().expect("slots");
+        fields.extend(std::iter::repeat_n("0".to_string(), 16));
+        fields.push(slots);
+        assert_eq!(fields.len(), 190);
+        std::fs::write(&spells_path, fields.join("^")).unwrap();
+        std::fs::write(&dbstr_path, "1^5^Synthetic\n").unwrap();
+        assert!(
+            ClientSpells::captured(spells_path.clone(), dbstr_path.clone(), "wide".into()).is_ok()
+        );
+        fields.pop();
+        std::fs::write(&spells_path, fields.join("^")).unwrap();
+        assert!(
+            ClientSpells::captured(spells_path.clone(), dbstr_path.clone(), "short".into())
+                .is_err()
+        );
+        let mut legacy = vec!["0".to_string(); 172];
+        legacy[0] = "1".to_string();
+        legacy[1] = "Legacy Short".to_string();
+        std::fs::write(&spells_path, legacy.join("^")).unwrap();
+        assert!(ClientSpells::captured(spells_path, dbstr_path, "legacy".into()).is_err());
         std::fs::remove_dir_all(dir).unwrap();
     }
 

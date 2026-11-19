@@ -92,6 +92,44 @@ const SPELL_ID_LIMIT = new Set([232, 339, 340, 360, 374, 383, 481])
 const MESSAGE_KEYS = ['you_cast', 'other_casts', 'on_you', 'on_other', 'fades']
 const LATE_FIELDS: Record<string, number> = { resistMod: 78, recourse: 81, descriptionId: 85, categoryId: 86, subcategoryId: 87, aeMaxTargets: 143, displayNameId: 165 }
 const EARLY_FIELDS: Record<string, number> = { range: 4, aeRange: 5, castMs: 8, recoveryMs: 9, recastMs: 10, durationFormula: 11, durationCap: 12, aoeDurationMs: 13, mana: 14, beneficialCode: 28, resist: 29, target: 30, skill: 32 }
+/** Known widths. 174 and 190 both insert one column at 74. 190 also inserts 16 columns immediately before the packed slots, which land at 189. */
+export type ClientSpellLayout = 173 | 174 | 190
+const SLOT_INDEX: Record<ClientSpellLayout, number> = { 173: 172, 174: 173, 190: 189 }
+
+export function clientSpellColumnShift(layout: ClientSpellLayout): number {
+  return layout === 173 ? 0 : 1
+}
+
+/** 173-layout index to the index stored on this row. Only layout 190 moves the packed slot off the 174 shift. */
+export function clientSpellColumnIndex(layout: ClientSpellLayout, index: number): number {
+  if (layout === 190 && index === 172) return SLOT_INDEX[190]
+  return index + (index >= 74 ? clientSpellColumnShift(layout) : 0)
+}
+
+function packedSlotsValid(field: string | undefined): boolean {
+  if (!field) return false
+  const pieces = field.split('$').filter((piece) => piece.length > 0)
+  if (!pieces.length) return false
+  return pieces.every((piece) => {
+    const parts = piece.split('|')
+    if (parts.length !== 6) return false
+    return parts.every((part, partIndex) => {
+      const value = part.trim()
+      if (!value) return false
+      return [0, 1, 4].includes(partIndex)
+        ? /^[+-]?\d+$/.test(value)
+        : /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i.test(value)
+    })
+  })
+}
+
+function detectLayout(rawFields: string[]): ClientSpellLayout {
+  const width = rawFields.length
+  if (width === 190 || (width > 190 && packedSlotsValid(rawFields[189]))) return 190
+  if (width === 174 || (width > 174 && packedSlotsValid(rawFields[173]))) return 174
+  if (width === 173 || (width > 173 && packedSlotsValid(rawFields[172]))) return 173
+  throw new Error(`unsupported row layout (${width} fields); expected a supported 173-, 174-, or 190-field layout`)
+}
 
 /** Original 173-layout indexes whose meaning Oracle interprets. Unknown columns remain raw. */
 export const INTERPRETED_SPELL_COLUMNS: ReadonlySet<number> = new Set([
@@ -100,9 +138,10 @@ export const INTERPRETED_SPELL_COLUMNS: ReadonlySet<number> = new Set([
   ...Array.from({ length: 16 }, (_value, index) => index + 36)
 ])
 
-function sourceLines(text: string, file: SpellSourceFile): string[] {
+function sourceLines(text: string, file: SpellSourceFile, retainBlank = false): string[] {
   if (!text.trim()) throw new Error(`${file}: empty source file`)
-  return text.replace(/^\uFEFF/, '').split(/\r?\n/).filter((line) => line.length > 0)
+  const lines = text.replace(/^\uFEFF/, '').split(/\r?\n/)
+  return retainBlank ? lines : lines.filter((line) => line.length > 0)
 }
 
 function numeric(text: string, where: string): number {
@@ -201,6 +240,24 @@ function resolveDescription(raw: string, record: ClientSpellRecord): string {
     })
 }
 
+const FLAG_EFFECTS = new Set(['Invisibility', 'SeeInvis', 'WaterBreathing', 'InvisVsUndead', 'InvisVsAnimals', 'Levitate', 'TrueNorth', 'FeignDeath', 'BindAffinity', 'DivineAura', 'InfraVision', 'UltraVision', 'Identify', 'WipeHateList', 'StopRain', 'Silence', 'AntiGate', 'Familiar', 'CancelMagic', 'Invisibility2', 'InvisVsUndead2', 'ImprovedInvisAnimals'])
+
+function namedEffectKind(name: string): 'reference' | 'flag' | 'bounds' | null {
+  if (/^(Summon|Illusion|Teleport|Translocate|WeaponProc|CallPet|Succor|Gate)/.test(name)) return 'reference'
+  if (name.startsWith('Limit') || name.startsWith('Ff_') || name.startsWith('FF')) return 'bounds'
+  if (FLAG_EFFECTS.has(name) || name.startsWith('Invis')) return 'flag'
+  return null
+}
+
+/** Secondary slots whose base, limit, or max is an ID, a flag, or a bound are not magnitudes. */
+export function clientSpellEffectValueKind(effect: ClientSpellEffect): 'amount' | 'reference' | 'flag' | 'bounds' {
+  const named = namedEffectKind(SPA_NAMES[effect.spa] ?? '')
+  if (named) return named
+  if (SPELL_ID_BASE.has(effect.spa) || SPELL_ID_LIMIT.has(effect.spa) || effect.spa === 288) return 'reference'
+  if (effect.spa === 148 || effect.spa === 149) return 'bounds'
+  return 'amount'
+}
+
 function spellReference(effect: ClientSpellEffect): number | null {
   if (SPELL_ID_BASE.has(effect.spa) && effect.base) return effect.base
   if (SPELL_ID_LIMIT.has(effect.spa) && effect.limit) return effect.limit
@@ -273,12 +330,11 @@ function namedFields(raw: string[], shift: number, id: number): Record<string, s
 
 function parseRecord(line: string): ClientSpellRecord {
   const rawFields = line.split('^')
-  const layout = rawFields.length
-  if (layout !== 173 && layout !== 174) throw new Error(`spells_us.txt: unsupported row layout (${layout} fields)`)
+  const layout = detectLayout(rawFields)
   const id = integer(rawFields[0], 'spells_us.txt ID')
   const name = rawFields[1]
   if (!rawFields[0].trim() || id < 0 || !name.trim()) throw new Error('spells_us.txt: missing or invalid spell ID/name')
-  const shift = layout === 174 ? 1 : 0
+  const shift = clientSpellColumnShift(layout)
   const fields = namedFields(rawFields, shift, id)
   const n = (key: string): number => Number(fields[key])
   const rank = /\s+(?:Rk\.?\s*)?([IVXLC]+|\d+)\s*$/i.exec(name)
@@ -290,7 +346,7 @@ function parseRecord(line: string): ClientSpellRecord {
   })
   return {
     id, name, rank: rank?.[1] ?? null, layout, rawFields, fields, classes,
-    effects: parseEffects(rawFields[172 + shift], id), messages: {}, description: '', rawDescription: '', category: '', subcategory: '',
+    effects: parseEffects(rawFields[SLOT_INDEX[layout]] ?? '', id), messages: {}, description: '', rawDescription: '', category: '', subcategory: '',
     mana: n('mana'), beneficial: n('beneficialCode') !== 0, target: n('target'), range: n('range'), aeRange: n('aeRange'),
     castMs: n('castMs'), recoveryMs: n('recoveryMs'), recastMs: n('recastMs'), durationFormula: n('durationFormula'), durationCap: n('durationCap'), aoeDurationMs: n('aoeDurationMs')
   }
@@ -322,7 +378,13 @@ function enrichNames(record: ClientSpellRecord, strings: Map<string, string>): v
 export function parseClientSpellBundle(sources: Record<SpellSourceFile, string>): ClientSpellRecord[] {
   const messages = parseMessages(sources['spells_us_str.txt'])
   const strings = parseStrings(sources['dbstr_us.txt'])
-  const records = sourceLines(sources['spells_us.txt'], 'spells_us.txt').map(parseRecord)
+  const records = sourceLines(sources['spells_us.txt'], 'spells_us.txt', true).flatMap((line, index) => {
+    if (!line) return []
+    try { return [parseRecord(line)] } catch (error) {
+      const reason = error instanceof Error ? error.message.replace(/^spells_us\.txt: /, '') : String(error)
+      throw new Error(`spells_us.txt row ${index + 1}: ${reason}`)
+    }
+  })
   const names = new Map<number, string>()
   for (const record of records) {
     if (names.has(record.id)) throw new Error(`spells_us.txt: duplicate spell ID ${record.id}`)

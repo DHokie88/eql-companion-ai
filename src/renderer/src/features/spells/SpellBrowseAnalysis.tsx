@@ -1,14 +1,15 @@
 import type { JSX } from 'react'
-import { Button, Checkbox, FormControl, InputLabel, ListItemText, MenuItem, Select, Stack, Tab, Tabs } from '@mui/material'
-import type { SpellBrowseSort, SpellMetric, SpellSearchQuery, SpellSearchResult } from '@shared/spellLibrary'
-import { efficiencyAmount, wholeAmount } from './SpellEstimate'
-import { selectableBrowseColumns } from './spellBrowseColumns'
-export function BrowseColumnPicker({ metric, columns, setColumns }: {
-  metric: SpellMetric; columns: SpellBrowseSort[]; setColumns: (columns: SpellBrowseSort[]) => void
+import { Checkbox, FormControl, InputLabel, ListItemText, MenuItem, Select, Tab, Tabs } from '@mui/material'
+import type { SpellMetric, SpellSearchQuery, SpellSearchResult } from '@shared/spellLibrary'
+import { browseColumns, selectableBrowseColumns, type BrowseDisplayField, type CategoryDisplay } from './spellBrowseColumns'
+export function BrowseColumnPicker({ metric, columns, setColumns, display = 'both', uniformType = false }: {
+  metric: SpellMetric; columns: BrowseDisplayField[]; setColumns: (columns: BrowseDisplayField[]) => void
+  display?: CategoryDisplay; uniformType?: boolean
 }): JSX.Element {
+  const shown = browseColumns(metric, display, columns, uniformType).length
   return <FormControl size="small" sx={{ width: 130, ml: 'auto' }}><InputLabel id="browse-columns-label">Columns</InputLabel>
-      <Select multiple labelId="browse-columns-label" label="Columns" value={columns} renderValue={(values) => `${values.length + 2} shown`} data-testid="spells-columns" onChange={(e) => setColumns(e.target.value as SpellBrowseSort[])}>
-        <MenuItem disabled>Spell and Class/Level always shown</MenuItem>
+      <Select multiple labelId="browse-columns-label" label="Columns" value={columns} renderValue={() => `${shown} shown`} data-testid="spells-columns" onChange={(e) => setColumns(e.target.value as BrowseDisplayField[])}>
+        <MenuItem disabled>Spell, Rank, and Class/Level always shown</MenuItem>
         {selectableBrowseColumns(metric).map((column) => <MenuItem key={column.field} value={column.field} data-testid={`spells-column-${column.field}`}><Checkbox checked={columns.includes(column.field)} /><ListItemText primary={column.label} /></MenuItem>)}
       </Select>
     </FormControl>
@@ -23,14 +24,3 @@ export function BrowseGroups({ group, onChange, counts }: {
     <Tab value="excluded" label={`Unsupported / utility (${counts?.excluded ?? 0})`} data-testid="spells-group-excluded" />
   </Tabs>
 }
-export function BrowseHighlights({ highlights = [], onSelect }: {
-  highlights: SpellSearchResult['highlights']; onSelect: (kind: 'efficiency' | 'amount' | 'rate', group: NonNullable<SpellSearchQuery['group']>) => void
-}): JSX.Element {
-  return <Stack direction="row" gap={1} flexWrap="wrap" data-testid="spells-highlights">{highlights.map(({ kind, record }) => {
-    const value = kind === 'efficiency' ? record?.calculation.perMana : kind === 'amount' ? record?.calculation.total : record?.calculation.analysis?.timing.rate
-    return <Button key={kind} variant="outlined" size="small" disabled={!record} data-testid={`spells-highlight-${kind}`} onClick={() => onSelect(kind, record?.mana === 0 ? 'zero-mana' : 'ranked')} sx={{ flex: '1 1 220px', textTransform: 'none', justifyContent: 'flex-start', textAlign: 'left' }}>
-      {kind === 'efficiency' ? 'Best efficiency' : kind === 'amount' ? 'Largest cast' : 'Highest modeled rate'} · {record ? `${record.name} (${highlightValue(kind, value ?? null)})` : 'Unavailable'}
-    </Button>
-  })}</Stack>
-}
-function highlightValue(kind: string, value: number | null): string { return kind === 'efficiency' ? efficiencyAmount(value) : wholeAmount(value) }

@@ -92,3 +92,72 @@ fn js_number_is_javascripts_number_and_not_rusts_parser() {
         assert!(js_number(spelled).is_nan(), "Number({spelled:?}) is NaN");
     }
 }
+
+fn synthetic_row(fields: &[(usize, &str)]) -> String {
+    let mut row = vec!["0".to_string(); 173];
+    for index in 0..F_CLASS_COUNT {
+        row[F_CLASS_FIRST + index] = "255".to_string();
+    }
+    for (index, value) in fields {
+        row[*index] = (*value).to_string();
+    }
+    row.join("^")
+}
+
+fn widen(text: &str, layout: usize) -> String {
+    let mut fields: Vec<String> = text.split('^').map(str::to_string).collect();
+    if layout == 174 || layout == 190 {
+        fields.insert(74, "6789".to_string());
+    }
+    if layout == 190 {
+        let slots = fields.pop().expect("packed slots");
+        fields.extend(std::iter::repeat_n("0".to_string(), 16));
+        fields.push(slots);
+    }
+    fields.join("^")
+}
+
+#[test]
+fn a_190_column_row_keeps_the_174_shift_and_reads_slots_at_189() {
+    let base = synthetic_row(&[
+        (F_ID, "7"),
+        (F_NAME, "Wide Synthetic"),
+        (F_RESIST_ADJ, "-17"),
+        (F_AE_MAX_TARGETS, "4"),
+        (F_CATEGORY, "114"),
+        (F_SUBCATEGORY, "43"),
+        (F_SLOTS, "1|0|-20|0|102|100"),
+        (F_CLASS_FIRST + 11, "20"),
+    ]);
+    let wide = widen(&base, 190);
+    assert_eq!(wide.split('^').count(), 190);
+    let info = parse_spells_us(&wide).into_values().next().expect("one");
+    assert_eq!(info.resist_adj, -17.0);
+    assert_eq!(info.ae_max_targets, Some(4.0));
+    assert_eq!(info.category, Some(114));
+    assert_eq!(info.subcategory, Some(43));
+    assert_eq!(info.class_levels[11], 20);
+    assert_eq!(info.damage_slot.expect("damage").base, -20.0);
+    assert_eq!(info.damage_slot.expect("damage").calc, 102.0);
+    assert_eq!(info.damage_slot.expect("damage").max, 100.0);
+}
+
+#[test]
+fn a_validated_trailing_column_is_kept_and_an_unrecognized_width_is_dropped() {
+    let base = synthetic_row(&[
+        (F_ID, "8"),
+        (F_NAME, "Tail Synthetic"),
+        (F_RESIST_ADJ, "3"),
+        (F_SLOTS, "1|0|-5|0|100|5"),
+    ]);
+    let trailed = format!("{}^tail", widen(&base, 190));
+    assert_eq!(trailed.split('^').count(), 191);
+    let info = parse_spells_us(&trailed).into_values().next().expect("one");
+    assert_eq!(info.resist_adj, 3.0);
+    assert_eq!(info.damage_slot.expect("damage").base, -5.0);
+    let mut short: Vec<String> = widen(&base, 190).split('^').map(str::to_string).collect();
+    short.pop();
+    assert_eq!(short.len(), 189);
+    assert!(parse_spells_us(&short.join("^")).is_empty());
+    assert!(parse_spells_us(&vec!["0"; 200].join("^")).is_empty());
+}

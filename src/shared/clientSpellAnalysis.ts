@@ -14,6 +14,7 @@ import type { ClientSpellMechanics } from './clientSpellMechanics'
 export { isAreaTarget, SpellMechanicsCatalog } from './clientSpellMechanics'
 export interface ClientSpellAnalysisOptions {
   rankOnly?: boolean
+  browseRank?: boolean
   level: number
   metric: SpellMetric
   classes: SpellClass[]

@@ -5,6 +5,7 @@ import { compareSpellValues, matchesSpellType, minimumSpellLevel, spellBrowseSor
 import { analysisArg, ANALYSIS_SORTS, choiceArg, RANKING_CATEGORIES } from './analysisValidation'
 import { matchesSpellSearch, SEARCH_QUERY_FIELDS, spellSearchOptions } from './browseQuery'
 import { catalogSummary } from './searchCatalog'
+import { cachedAmbiguousSpellNames } from './spellBrowseEraTable'
 import { levelArg, pageArgs, queryObject } from './queryValidation'
 import type { SpellModifierContext } from '../../shared/spellModifiers'
 import type { SpellLibraryStorage } from './storage'
@@ -86,9 +87,10 @@ export class SpellAnalysisQueries {
     const rows = options.group === 'zero-mana' ? groups.zeroMana : groups[options.group]
     rows.sort((a, b) => compareSpellValues(sortValue(a, options.sortBy), sortValue(b, options.sortBy), options.direction) || a.id - b.id)
     const eligible = [...groups.ranked, ...groups.zeroMana]
+    const pageRows = rows.slice((options.page - 1) * options.pageSize, options.page * options.pageSize)
+    if (dataset && options.query.browseRank === true) this.attachBrowseRanks(dataset, pageRows, context)
     return { dataset, total: rows.length, page: options.page, pageSize: options.pageSize,
-      records: rows.slice((options.page - 1) * options.pageSize, options.page * options.pageSize),
-      categories: [...result.categories].sort(), subcategories: [...result.subcategories].sort(), counts: result.counts,
+      records: pageRows, categories: [...result.categories].sort(), subcategories: [...result.subcategories].sort(), counts: result.counts,
       groupCounts: { ranked: groups.ranked.length, zeroMana: groups.zeroMana.length, excluded: groups.excluded.length },
       highlights: [{ kind: 'efficiency', record: bestRow(groups.ranked, 'efficiency') },
         { kind: 'amount', record: bestRow(eligible, 'amount') }, { kind: 'rate', record: bestRow(eligible, 'rate') }],
@@ -100,13 +102,15 @@ export class SpellAnalysisQueries {
     const mechanics = dataset ? this.evaluation.mechanics(dataset) : undefined
     const groups: RankingGroups = { ranked: [], zeroMana: [], excluded: [] }
     const result = { groups, categories: new Set<string>(), subcategories: new Set<string>(), counts: { dd: 0, dot: 0, aoe: 0, heal: 0, hot: 0 } }
-    if (dataset) for (const record of this.storage.records(dataset.snapshotId)) {
+    const records = dataset ? [...this.storage.records(dataset.snapshotId)] : []
+    const ambiguous = dataset ? cachedAmbiguousSpellNames(dataset.snapshotId, records) : undefined
+    for (const record of records) {
       facets(record, options.filters, result)
-      if (!matchesSpellSearch(record, options.filters, mechanics)) continue
+      if (!matchesSpellSearch(record, options.filters, mechanics, ambiguous)) continue
       countCategories(record, result.counts, mechanics)
       if (!matchesSpellType(record, options.category, mechanics)) continue
       const calculation = calculate(record, options.level, record.beneficial ? 'healing' : 'damage')
-      addRow(groups, { ...catalogSummary(record, options.filters.classes, mechanics, options.level), rankEvidence: this.evaluation.rankEvidence(dataset, record, context), calculation, calculations: [calculation] })
+      addRow(groups, { ...catalogSummary(record, options.filters.classes, { mechanics, level: options.level, ambiguous }), rankEvidence: this.evaluation.rankEvidence(dataset, record, context), calculation, calculations: [calculation] })
     }
     return result
   }
@@ -116,21 +120,32 @@ export class SpellAnalysisQueries {
     const mechanics = dataset ? this.evaluation.mechanics(dataset) : undefined
     const calculate = this.evaluation.calculator(dataset, options.query, context)
     const rows: SpellSummary[] = [], result = { categories: new Set<string>(), subcategories: new Set<string>() }
-    if (dataset && !options.empty) for (const record of this.storage.records(dataset.snapshotId)) {
-      facets(record, options.filters, result)
-      if (!matchesSpellSearch(record, options.filters, mechanics)) continue
-      const learned = minimumSpellLevel(record.classes, options.filters.classes)
-      if (learned === null) continue
-      rows.push({ ...catalogSummary(record, options.filters.classes, mechanics, learned),
-        detectedRank: this.evaluation.detectedRank(dataset, record, context), rankEvidence: this.evaluation.rankEvidence(dataset, record, context),
-        calculations: this.byLevelCalculations(record, learned, options.query, calculate) })
+    if (dataset && !options.empty) {
+      const ambiguous = cachedAmbiguousSpellNames(dataset.snapshotId, this.storage.recordNames(dataset.snapshotId))
+      for (const record of this.storage.records(dataset.snapshotId)) {
+        facets(record, options.filters, result)
+        if (!matchesSpellSearch(record, options.filters, mechanics, ambiguous)) continue
+        const learned = minimumSpellLevel(record.classes, options.filters.classes)
+        if (learned === null) continue
+        rows.push({ ...catalogSummary(record, options.filters.classes, { mechanics, level: learned, ambiguous }),
+          detectedRank: this.evaluation.detectedRank(dataset, record, context), rankEvidence: this.evaluation.rankEvidence(dataset, record, context),
+          calculations: this.byLevelCalculations(record, learned, options.query, calculate) })
+      }
     }
-    rows.sort((a, b) => compareSpellValues(spellBrowseSortValue(a, options.filters.sortBy, options.filters.selected),
-      spellBrowseSortValue(b, options.filters.sortBy, options.filters.selected), options.filters.direction) || a.id - b.id)
+    rows.sort((a, b) => compareSpellValues(spellBrowseSortValue(a, options.filters.sortBy, options.filters.selected, options.filters.classes),
+      spellBrowseSortValue(b, options.filters.sortBy, options.filters.selected, options.filters.classes), options.filters.direction) || a.id - b.id)
+    const pageRows = rows.slice((options.page - 1) * options.pageSize, options.page * options.pageSize)
+    if (dataset && options.query.browseRank === true) this.attachBrowseRanks(dataset, pageRows, context)
     return { dataset, total: rows.length, page: options.page, pageSize: options.pageSize,
-      records: rows.slice((options.page - 1) * options.pageSize, options.page * options.pageSize),
-      categories: [...result.categories].sort(), subcategories: [...result.subcategories].sort(),
+      records: pageRows, categories: [...result.categories].sort(), subcategories: [...result.subcategories].sort(),
       level: options.level, throughLevel: options.throughLevel, contextRevision: (context as SpellModifierContext | undefined)?.revision ?? null }
+  }
+
+  private attachBrowseRanks(dataset: SpellDataset, rows: SpellSummary[], context: unknown): void {
+    for (const row of rows) {
+      const record = this.storage.record(dataset.snapshotId, row.id)
+      if (record) row.browseRank = this.evaluation.browseMetadata(dataset, record, context) ?? undefined
+    }
   }
 
   private byLevelCalculations(record: ClientSpellRecord, level: number, query: Record<string, unknown>, calculate: SpellCalculator) {

@@ -14,31 +14,31 @@ export async function browseRainChecks(page: Page): Promise<void> {
   await page.getByTestId('spells-search').fill('302')
   const row = page.getByTestId('spells-record')
   assert.equal(await settle(() => row.count(), (n) => n === 1), 1)
-  assert.equal(await page.getByTestId('spells-sort-type').count(), 0, 'one matching type is redundant')
+  assert.equal(await page.getByTestId('spells-sort-type').count(), 1, 'a search does not hide Type; only an explicit type filter does')
   for (let targets = 1; targets <= 4; targets++) {
     await choose(page, 'spells-target-count', `${targets} target${targets > 1 ? 's' : ''}`)
-    const expected = targets === 1 ? '60' : '80'
+    const expected = targets === 1 ? '63' : '84'
     assert.equal(await settle(() => rainAmount(page), (value) => value === expected), expected)
-    const compact = `20 × ${targets === 1 ? 3 : 4}`
+    const compact = `21 × ${targets === 1 ? 3 : 4}`
     assert.equal(await settle(() => row.getByTestId('rain-summary-302').innerText(), (value) => value === compact), compact)
     assert.doesNotMatch(await row.getByTestId('spells-amount-302-damage').innerText(), /Partial|Range|→/)
     const efficiencyColumn = await page.getByRole('table', { name: 'Spell catalog' }).locator('thead th').evaluateAll((headers) => headers.findIndex((header) => header.textContent?.replace(/\s/g, '').includes('Damage/Mana')))
-    assert.equal(await row.locator('td').nth(efficiencyColumn).innerText(), targets === 1 ? '6.00' : '8.00', 'efficiency uses one client mana payment')
+    assert.equal(await row.locator('td').nth(efficiencyColumn).innerText(), targets === 1 ? '6.30' : '8.40', 'efficiency uses one client mana payment')
   }
   await choose(page, 'spells-target-count', '3 targets')
-  assert.equal(await settle(() => row.getByTestId('rain-summary-302').innerText(), (value) => value === '20 × 4'), '20 × 4')
+  assert.equal(await settle(() => row.getByTestId('rain-summary-302').innerText(), (value) => value === '21 × 4'), '21 × 4')
   await page.getByTestId('spells-open-302').click()
   const detail = page.getByTestId('spells-detail')
-  assert.equal(await settle(() => detail.getByTestId('spells-amount-302-damage').innerText(), (value) => value === '80'), '80')
+  assert.equal(await settle(() => detail.getByTestId('spells-amount-302-damage').innerText(), (value) => value === '84'), '84')
   assert.match(await settle(() => detail.getByTestId('rain-summary-302').first().innerText(), (value) => value.includes('3 + 1')), /3 \+ 1/)
   await page.getByTestId('spells-detail-back').click()
   assert.equal(await page.getByTestId('spells-search').inputValue(), '302')
-  assert.equal(await rainAmount(page), '80')
+  assert.equal(await rainAmount(page), '84')
   await choose(page, 'spells-target-count', '8 targets')
-  assert.equal(await settle(() => rainAmount(page), (value) => value === '80'), '80')
-  assert.equal(await settle(() => row.getByTestId('rain-summary-302').innerText(), (value) => value === '20 × 4'), '20 × 4')
+  assert.equal(await settle(() => rainAmount(page), (value) => value === '84'), '84')
+  assert.equal(await settle(() => row.getByTestId('rain-summary-302').innerText(), (value) => value === '21 × 4'), '21 × 4')
   await choose(page, 'spells-target-count', '4 targets')
-  assert.equal(await settle(() => row.getByTestId('rain-summary-302').innerText(), (value) => value === '20 × 4'), '20 × 4')
+  assert.equal(await settle(() => row.getByTestId('rain-summary-302').innerText(), (value) => value === '21 × 4'), '21 × 4')
   await dumpArtifacts(page, 'rain-browse')
   await page.getByTestId('spells-reset-filters').click()
 }

@@ -9,9 +9,30 @@ export interface SpellEmulation {
   focus: 'detected' | 'none' | 'selected'
   focusIds: number[]
 }
-export interface SpellModifierPreferences { mode: SpellValueMode; emulation: SpellEmulation; targets?: import('./spellAnalysis').SpellTargetCount }
+/** Browse-only rank choices. Rank 0 stays on `emulation.rank` for older client/base contexts and is never stored here. */
+export interface SpellBrowsePreferences {
+  /** Global preview, I–X. Absent means the baseline I model. */
+  rank?: number | null
+  /** When true, a valid observed II–X rank outranks the global preview. */
+  useMyRanks?: boolean
+}
+export interface SpellModifierPreferences {
+  mode: SpellValueMode
+  emulation: SpellEmulation
+  targets?: import('./spellAnalysis').SpellTargetCount
+  browse?: SpellBrowsePreferences
+}
 export function defaultSpellModifierPreferences(): SpellModifierPreferences {
   return { mode: 'client', emulation: { rank: null, ranks: {}, focus: 'detected', focusIds: [] } }
+}
+/** Copy a positive saved rank and Show mine into browse fields. Overrides stay on `emulation.ranks`. */
+export function withBrowsePreferences(preferences: SpellModifierPreferences): SpellModifierPreferences {
+  if (preferences.browse) return preferences
+  const browse: SpellBrowsePreferences = {}
+  const rank = preferences.emulation.rank
+  if (typeof rank === 'number' && rank >= 1 && rank <= 10) browse.rank = rank
+  if (preferences.mode === 'mine') browse.useMyRanks = true
+  return Object.keys(browse).length === 0 ? preferences : { ...preferences, browse }
 }
 export interface SpellFocusCandidate { effect: string; item: string }
 export interface SpellModifierContext {
@@ -39,6 +60,8 @@ export interface SpellModifierApplied {
   baseline: Pick<SpellCalculation, 'instant' | 'perTick' | 'ticks' | 'total' | 'perMana' | 'mana'>
   rank: number | null
   rankSource: 'detected' | 'simulated' | 'unknown'
+  /** Present when the browse rank path produced this calculation. */
+  resolvedRank?: { rank: number; source: 'override' | 'observed' | 'global' | 'baseline'; label: string; owned: boolean }
   focus: { id: number; name: string; item: string; minPct: number; maxPct: number; pct: number } | null
   range: { min: number; max: number } | null
   partial: boolean

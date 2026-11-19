@@ -1,7 +1,7 @@
 /** Hand-authored client rows only. No installation files or production spell names. */
 import type { SpellSourceFile } from '../../../src/shared/spellLibrary'
 
-export function spellFields(id = 101, name = 'Test Beacon', layout: 173 | 174 = 173): string[] {
+export function spellFields(id = 101, name = 'Test Beacon', layout: 173 | 174 | 190 = 173): string[] {
   const fields = new Array<string>(173).fill('0')
   fields[0] = String(id)
   fields[1] = name
@@ -28,7 +28,12 @@ export function spellFields(id = 101, name = 'Test Beacon', layout: 173 | 174 = 
   fields[143] = '8'
   fields[165] = '901'
   fields[172] = '1|79|-40|5|100|40$2|254|0|0|100|0'
-  if (layout === 174) fields.splice(74, 0, '6789')
+  if (layout !== 173) fields.splice(74, 0, '6789')
+  if (layout === 190) {
+    const slots = fields.pop() ?? ''
+    for (let index = 0; index < 16; index++) fields.push('0')
+    fields.push(slots)
+  }
   return fields
 }
 

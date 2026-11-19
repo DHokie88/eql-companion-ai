@@ -51,13 +51,20 @@ async function epoch(page: Page): Promise<number> {
     })
   })
 }
+async function useMyRanks(page: Page, enabled: boolean): Promise<void> {
+  const toggle = page.getByTestId('spells-use-my-ranks').getByRole('checkbox')
+  if (await toggle.isChecked() !== enabled) await toggle.click()
+  const result = await settle(() => page.evaluate(() => window.eq.spellLibrary.modifierContext()), (value) => value.preferences.browse?.useMyRanks === enabled)
+  assert.equal(result.preferences.browse?.useMyRanks, enabled)
+}
+
 async function mine(page: Page): Promise<void> {
   await page.getByTestId('nav-spells').click()
   await page.getByTestId('spells-classes').click()
   await page.getByTestId('spells-classes-all').click()
+  await useMyRanks(page, true)
   await page.getByTestId('spells-open-101').click()
   const detail = page.getByTestId('spells-detail')
-  await detail.getByTestId('spells-mode-mine').click()
   await settle(() => detail.getByTestId('spells-amount-101-healing').innerText(), (text) => text.includes('8 → 18'))
   const panel = detail.getByTestId('bard-song-instruments')
   assert.match(await panel.innerText(), /Mystical Lute.*2.1×/s)
@@ -104,7 +111,8 @@ async function refreshAndSinging(page: Page, staged: FixtureLog): Promise<void> 
 }
 
 async function detailAppearance(page: Page): Promise<void> {
-  assert.equal(await page.getByTestId('spell-description').innerText(), 'Binds up to 8 nearby enemies.')
+  assert.equal(await page.getByTestId('spell-description').innerText(),
+    'Binds up to 8 nearby enemies. Slows movement by 20%. Slows attacks by 20% (80% of normal attack speed).')
   const surface = await page.getByRole('dialog').evaluate((element) => ({ background: getComputedStyle(element).backgroundColor, overlay: getComputedStyle(element).backgroundImage }))
   assert.equal(surface.background, 'rgb(15, 17, 21)'); assert.equal(surface.overlay, 'none')
   const summary = page.getByTestId('spell-effect-summary'), instruments = page.getByTestId('bard-song-instruments')
@@ -116,7 +124,10 @@ async function detailAppearance(page: Page): Promise<void> {
   await technical.click()
   await dumpArtifacts(page, 'spell-detail-mine-clean')
   assert.equal(await instruments.getByRole('columnheader', { name: 'Base effect', exact: true }).count(), 1)
-  await page.getByTestId('spells-detail').getByTestId('spells-mode-mine').click()
+  await page.getByTestId('spells-detail-back').click()
+  await useMyRanks(page, false)
+  await page.getByTestId('spells-open-738').click()
+  await instruments.waitFor()
   await settle(() => instruments.getByRole('columnheader', { name: 'Base effect', exact: true }).count(), (count) => count === 0)
   await dumpArtifacts(page, 'spell-detail-client-clean')
 }

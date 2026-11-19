@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { SpellLibraryService, type SpellRpc } from '../src/main/spellLibrary/service'
-import type { SpellDataset } from '../src/shared/spellLibrary'
+import { spellLibraryErrorNotice, type SpellDataset, type SpellLibraryStatus } from '../src/shared/spellLibrary'
 import { defaultSpellModifierPreferences, type SpellModifierContext } from '../src/shared/spellModifiers'
 
 function deferred<T>() {
@@ -59,9 +59,13 @@ test('overlapping checks coalesce and a root change discards the old activation'
   } finally { r.service.stop() }
 })
 
-test('failed refresh retains prior revision; history queries carry no accidental snapshot filter', async () => {
-  let fail = false
-  const r = rig(async (root) => { if (fail) throw new Error('synthetic malformed record'); return published(root) })
+test('failed refresh retains prior revision; a later success swaps to the new catalog', async () => {
+  let mode: 'ok' | 'fail' | 'next' = 'ok'
+  const r = rig(async (root) => {
+    if (mode === 'fail') throw new Error('synthetic malformed record')
+    if (mode === 'next') return { dataset: { ...dataset(root), snapshotId: 'snapshot-next', contentId: 'content-next', recordCount: 4 }, materializedDir: 'profile/spells/materialized/next' }
+    return published(root)
+  })
   try {
     await r.service.check('startup')
     const before = r.service.status().dataset
@@ -69,14 +73,39 @@ test('failed refresh retains prior revision; history queries carry no accidental
     await r.service.query('detail', { id: 101, snapshotId: undefined })
     assert.deepEqual(r.queries[0], { method: 'history', args: { installId: 'A', query: { page: 1 } } })
     assert.equal((r.queries[1].args as { query: { snapshotId: string } }).query.snapshotId, before?.snapshotId)
-    fail = true
+    mode = 'fail'
     await r.service.check('manual')
     assert.equal(r.service.status().phase, 'error')
     assert.equal(r.service.status().dataset, before)
+    assert.match(r.service.status().message, /last valid captured catalog/)
     assert.deepEqual(r.installs, ['A'])
     await r.service.replayActivation()
     assert.deepEqual(r.engine, ['A', 'A'])
+    mode = 'next'
+    await r.service.check('manual')
+    assert.equal(r.service.status().phase, 'ready')
+    assert.equal(r.service.status().error, null)
+    assert.equal(r.service.status().dataset?.snapshotId, 'snapshot-next')
+    assert.equal(r.service.status().dataset?.recordCount, 4)
+    assert.deepEqual(r.installs, ['A', 'A'])
   } finally { r.service.stop() }
+})
+
+test('a writer error notice names retry and the last good catalog without the extra diagnostic line', () => {
+  const failed: SpellLibraryStatus = {
+    phase: 'error', dataset: dataset('A'), installation: 'A', checkedAt: null,
+    message: 'Refresh failed. Using the last valid captured catalog.',
+    error: 'spells_us.txt: unsupported row layout (189 fields)\nsecond line',
+    storageBytes: 10
+  }
+  const notice = spellLibraryErrorNotice(failed)
+  assert.equal(notice?.action, 'Retry')
+  assert.match(notice?.summary ?? '', /last good catalog \(3 spells\)/)
+  assert.equal(notice?.detail, 'spells_us.txt: unsupported row layout (189 fields)')
+  assert.equal(spellLibraryErrorNotice({ ...failed, phase: 'ready', error: null }), null)
+  const empty = spellLibraryErrorNotice({ ...failed, dataset: null })
+  assert.match(empty?.summary ?? '', /retry/)
+  assert.doesNotMatch(empty?.summary ?? '', /last good/)
 })
 
 test('a query from an old installation cannot resolve successfully after selection changes', async () => {

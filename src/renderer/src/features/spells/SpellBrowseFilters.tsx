@@ -1,7 +1,8 @@
 import type { JSX, ReactNode } from 'react'
-import { Button, FormControl, InputLabel, MenuItem, Paper, Select, Stack, TextField, ToggleButton, ToggleButtonGroup, Tooltip } from '@mui/material'
+import { Button, FormControl, InputLabel, MenuItem, Paper, Select, Stack, TextField, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from '@mui/material'
 import type { SpellBrowseType } from '@shared/spellLibrary'
 import type { BrowseFilters } from './useSpellBrowse'
+import { SpellLevelBounds } from './SpellLevelBounds'
 
 function ChoiceFilter({ name, label, value, options, onChange, compact = false }: {
   name: string; label: string; value: string; options: { value: string; label: string }[]; onChange: (value: string) => void; compact?: boolean
@@ -33,17 +34,20 @@ interface Props {
   filters: BrowseFilters; maximum: string; categories: string[]; subcategories: string[]; invalid: string | null
   change: <K extends keyof BrowseFilters>(key: K, value: BrowseFilters[K]) => void; reset: () => void
   hideTypes?: boolean; controls?: ReactNode; columns?: ReactNode; typeOptions?: { value: SpellBrowseType; label: string }[]
+  characterKey?: string; levelCaption?: string
 }
-export function SpellBrowseFilters({ filters, maximum, categories, subcategories, change, reset, invalid, hideTypes = false, controls, columns }: Props): JSX.Element {
+export function SpellBrowseFilters({ filters, maximum, categories, subcategories, change, reset, invalid, hideTypes = false, controls, columns, characterKey = '', levelCaption }: Props): JSX.Element {
+  const min = /^\d+$/.test(filters.min) ? Number(filters.min) : 0
+  const max = /^\d+$/.test(maximum) ? Number(maximum) : 0
   return <Paper variant="outlined" sx={{ p: 2, bgcolor: 'background.paper', borderRadius: 2 }} data-testid="spells-filter-panel"><Stack spacing={2}>
-    <Stack direction="row" gap={1} flexWrap="wrap">
+    <Stack direction="row" gap={1} flexWrap="wrap" alignItems="flex-start">
       <TextField size="small" label="Spell name or ID" value={filters.text} slotProps={{ htmlInput: { 'data-testid': 'spells-search' } }} onChange={(e) => change('text', e.target.value)} sx={{ minWidth: 230, flexGrow: 1 }} />
-      <Tooltip title="Spell eligibility level across your selected classes. Blank bounds include every level; level limits omit records without a class requirement. Caster level separately controls calculated strength."><Stack direction="row" gap={1}>
-        <TextField size="small" label="Min spell level" type="number" value={filters.min} error={!!invalid} slotProps={{ htmlInput: { min: 1, max: 255, 'data-testid': 'spells-min-level' } }} onChange={(e) => change('min', e.target.value)} sx={{ width: 135 }} />
-        <TextField size="small" label="Max spell level" type="number" value={maximum} error={!!invalid} slotProps={{ htmlInput: { min: 1, max: 255, 'data-testid': 'spells-max-level' } }} onChange={(e) => change('max', e.target.value)} sx={{ width: 135 }} />
-      </Stack></Tooltip>
-      <Button onClick={reset} data-testid="spells-reset-filters">Reset filters</Button>
+      <Tooltip title="Eligibility across the selected classes. Min 0 includes an explicit level-less class row. A missing or ineligible level stays unknown. Caster level, from the character's stated level, is separate and drives calculated strength.">
+        <span><SpellLevelBounds min={min} max={max} characterKey={characterKey} caption={levelCaption} onMin={(value) => change('min', String(value))} onMax={(value) => change('max', String(value))} /></span>
+      </Tooltip>
+      <Button onClick={reset} data-testid="spells-reset-filters" sx={{ mt: 0.5 }}>Reset filters</Button>
     </Stack>
+    {invalid && <Typography color="error" variant="caption">{invalid}</Typography>}
     {controls}
     {!hideTypes && <TypeFilters filters={filters} change={change} columns={columns} />}
     <Stack direction="row" gap={1} flexWrap="wrap">

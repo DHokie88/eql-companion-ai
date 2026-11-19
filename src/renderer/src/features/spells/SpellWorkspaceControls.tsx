@@ -1,9 +1,6 @@
 import type { JSX } from 'react'
 import { useState } from 'react'
-import { FormControl, FormControlLabel, Switch, IconButton, InputLabel, MenuItem, Select, Stack, TextField, Tooltip } from '@mui/material'
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
-import ChevronRightIcon from '@mui/icons-material/ChevronRight'
-import MyLocationIcon from '@mui/icons-material/MyLocation'
+import { FormControl, FormControlLabel, Switch, InputLabel, MenuItem, Select, Stack, Tooltip } from '@mui/material'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import { SPELL_CLASSES, type SpellClass } from '@shared/spellLibrary'
 import type { SpellTargetCount } from '@shared/spellAnalysis'
@@ -12,14 +9,13 @@ import { SpellTargetControls } from './SpellTargetControls'
 import type { SpellModifiersState } from './useSpellModifiers'
 import type { useSpellViewState } from './useSpellViewState'
 
-export function SpellWorkspaceControls({ state, classes, combo, level, statedLevel, modifiers, targets }: {
-  state: ReturnType<typeof useSpellViewState>; classes: SpellClass[]; combo: SpellClass[]; level: number
-  statedLevel: number | null; modifiers: SpellModifiersState; targets: SpellTargetCount
+export function SpellWorkspaceControls({ state, classes, combo, modifiers, targets }: {
+  state: ReturnType<typeof useSpellViewState>; classes: SpellClass[]; combo: SpellClass[]
+  modifiers: SpellModifiersState; targets: SpellTargetCount
 }): JSX.Element {
   return <Stack spacing={1} data-testid="spells-workspace-controls">
     <Stack direction="row" gap={1} alignItems="center" flexWrap="wrap">
       <ClassesPicker mode={state.mode} classes={classes} combo={combo} onChange={(mode, selected) => { state.setMode(mode); state.setClasses(selected) }} />
-      <SpellLevelPicker level={level} onChange={state.setLevel} statedLevel={statedLevel} />
       <SpellModifierControls state={modifiers}>
         <SpellTargetControls targets={targets} disabled={!modifiers.context || modifiers.saving || modifiers.loading} onChange={(value) => {
           state.setBrowseTargets(null)
@@ -49,13 +45,4 @@ function ClassesPicker({ mode, classes, combo, onChange }: {
       {SPELL_CLASSES.map((code) => <MenuItem key={code} value={code}>{code}</MenuItem>)}
     </Select>
   </FormControl>
-}
-
-export function SpellLevelPicker({ level, onChange, statedLevel }: { level: number; onChange: (value: number | null) => void; statedLevel: number | null }): JSX.Element {
-  return <Stack direction="row" gap={0.25} alignItems="center" data-testid="spells-level-picker">
-    <IconButton size="small" disabled={level <= 1} onClick={() => onChange(level - 1)} aria-label="Previous level" data-testid="spells-level-previous"><ChevronLeftIcon /></IconButton>
-    <TextField label="Level" size="small" value={level} slotProps={{ htmlInput: { inputMode: 'numeric', pattern: '[0-9]*', 'data-testid': 'spells-level', style: { textAlign: 'center' } } }} sx={{ width: 70 }} onChange={(event) => { const value = Number(event.target.value); if (Number.isInteger(value) && value >= 1 && value <= 255) onChange(value) }} />
-    <IconButton size="small" disabled={level >= 255} onClick={() => onChange(level + 1)} aria-label="Next level" data-testid="spells-level-next"><ChevronRightIcon /></IconButton>
-    {statedLevel !== null && <Tooltip disableInteractive title={`Follow character level ${statedLevel}`}><IconButton size="small" onClick={() => onChange(null)} aria-label={`Follow level ${statedLevel}`}><MyLocationIcon sx={{ fontSize: 18 }} /></IconButton></Tooltip>}
-  </Stack>
 }

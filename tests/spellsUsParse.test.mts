@@ -305,3 +305,33 @@ test('a malformed row is skipped rather than half-read', () => {
   const table = parseSpellsUs(['not^a^row', '', TASHANI].join('\n'))
   assert.deepEqual(Object.keys(table), ['tashani'])
 })
+
+test('layout 190 uses the 174 shift with slots at 189, and a 172-field row still has no slots', () => {
+  const base = row({ id: 7, name: 'Wide Synthetic', castMs: 2500, recastMs: 6000, mana: 40, resistType: 2, targetType: 5, resistAdj: -17, classes: { 11: 20 }, slots: '1|0|-20|0|102|100' }).split('^')
+  base.splice(74, 0, '6789')
+  const slots = base.pop() ?? ''
+  for (let index = 0; index < 16; index++) base.push('0')
+  base.push(slots)
+  assert.equal(base.length, 190)
+  assert.equal(base[79], '-17')
+  assert.match(base[189], /^1\|0\|/)
+  const wide = parseSpellsUs(base.join('^'))['wide synthetic']
+  assert.equal(wide.resistAdj, -17)
+  assert.equal(wide.castMs, 2500)
+  assert.equal(wide.recastMs, 6000)
+  assert.equal(wide.mana, 40)
+  assert.equal(wide.axis, 'fire')
+  assert.deepEqual(wide.hpSlot, { base: -20, max: 100, calc: 102 })
+  const trailed = parseSpellsUs([...base, 'tail'].join('^'))['wide synthetic']
+  assert.equal(trailed.resistAdj, -17)
+  assert.deepEqual(trailed.hpSlot, wide.hpSlot)
+  assert.deepEqual(parseSpellsUs(base.slice(0, 189).join('^')), {})
+  assert.deepEqual(parseSpellsUs(new Array<string>(200).fill('0').join('^')), {})
+  const legacy = new Array<string>(172).fill('0')
+  legacy[1] = 'Legacy Short'
+  legacy[78] = '-4'
+  const short = parseSpellsUs(legacy.join('^'))['legacy short']
+  assert.equal(short.resistAdj, -4)
+  assert.equal(short.hpSlot, undefined)
+  assert.deepEqual(parseSpellsUs(new Array<string>(171).fill('1').join('^')), {})
+})

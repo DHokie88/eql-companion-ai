@@ -517,20 +517,10 @@ fn field<'a>(f: &[&'a str], i: usize) -> Option<&'a str> {
     f.get(i).copied()
 }
 
-/// A category or subcategory id — `Number(x) || 0`, then absent-means-nothing.
-///
-/// A zero is an absence and not an id: the string table's spell-category namespace starts at 1, so
-/// nothing names zero. The cast saturates rather than wrapping for an absurd value, which resolves
-/// to no word and reads as no category.
-#[allow(
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss,
-    reason = "guarded positive; a value past u32 saturates to an id nothing names, which reads as no category"
-)]
-fn category_id(f: &[&str], i: usize) -> Option<u32> {
-    let v = js_number_or_zero(field(f, i));
-    (v > 0.0).then_some(v as u32)
-}
+#[path = "spell_row_layout.rs"]
+mod spell_row_layout;
+pub use spell_row_layout::captured_spell_row_supported;
+use spell_row_layout::{category_id, project_spell_row};
 
 /// `rowInfo` — one row's whole answer.
 ///
@@ -538,26 +528,26 @@ fn category_id(f: &[&str], i: usize) -> Option<u32> {
 /// by [`parse_spells_us`] before it decides whether this row wins its key, and reading them twice
 /// would be two chances to disagree about what a valid level is.
 fn row_info(f: &[&str], name: &str, class_levels: ClassLevels) -> SpellInfo {
-    // The 174-column format inserts one field at 74. Earlier columns are unchanged.
-    let shifted = |index: usize| index + usize::from(f.len() == 174 && index >= 74);
-    let slots = parse_slots(field(f, shifted(F_SLOTS)));
+    // `parse_spells_us` has already projected 174 and 190 back onto these legacy indexes.
+    // A 172-field row still has no slot field.
+    let slots = parse_slots(field(f, F_SLOTS));
     let bard_only = bard_only(&class_levels);
     let recast_ms = js_number_or_zero(field(f, F_RECAST_MS));
-    let ae = js_number_or_zero(field(f, shifted(F_AE_MAX_TARGETS)));
+    let ae = js_number_or_zero(field(f, F_AE_MAX_TARGETS));
     let mana = js_number_or_zero(field(f, F_MANA));
     // `Number(f[11]) || 0`, and the whole `hpDuration` branch turns on it being non-zero.
     let formula = js_number_or_zero(field(f, F_DURATION_FORMULA));
     let hp = hp_slots_of(&slots, formula != 0.0);
     SpellInfo {
         name: name.to_owned(),
-        category: category_id(f, shifted(F_CATEGORY)),
-        subcategory: category_id(f, shifted(F_SUBCATEGORY)),
+        category: category_id(f, F_CATEGORY),
+        subcategory: category_id(f, F_SUBCATEGORY),
         class_levels,
         // Not `|| 0`: the resist type goes into `axisFromResistType` as `Number(...)` alone, and an
         // unparseable one is NaN, which matches no arm and is therefore `None` — the same answer a
         // chromatic spell gets.
         axis: axis_from_resist_type(js_number(field(f, F_RESIST_TYPE).unwrap_or(""))),
-        resist_adj: js_number_or_zero(field(f, shifted(F_RESIST_ADJ))),
+        resist_adj: js_number_or_zero(field(f, F_RESIST_ADJ)),
         cast_ms: js_number_or_zero(field(f, F_CAST_MS)),
         recast_ms: (recast_ms > 0.0).then_some(recast_ms),
         ae_max_targets: (ae > 0.0).then_some(ae),
@@ -603,7 +593,10 @@ pub fn parse_spells_us(text: &str) -> SpellTable {
         if line.is_empty() {
             continue;
         }
-        let f: Vec<&str> = line.split('^').collect();
+        let source: Vec<&str> = line.split('^').collect();
+        let Some(f) = project_spell_row(&source) else {
+            continue;
+        };
         if f.len() < F_SLOTS {
             continue;
         }

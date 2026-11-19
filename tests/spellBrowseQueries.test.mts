@@ -2,15 +2,16 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { SpellLibraryQueries } from '../src/main/spellLibrary/queries'
 import { clientSpellType, compareSpellValues, minimumSpellLevel, sortSpellCalculations } from '../src/shared/clientSpellBrowse'
-import { SPELL_BROWSE_SORTS, type SpellSearchQuery, type SpellSearchResult } from '../src/shared/spellLibrary'
+import { SPELL_BROWSE_SORTS, type SpellDetailResult, type SpellSearchQuery, type SpellSearchResult } from '../src/shared/spellLibrary'
 import { spellRow, storageFixture, syntheticCatalog } from './spellLibrarySynthetic.mts'
 
 function fixture(rows: string[][]) {
   const f = storageFixture()
   const published = f.storage.publish({ root: f.root, reason: 'startup', parserVersion: '1', ...syntheticCatalog(rows) })
   const queries = new SpellLibraryQueries(f.storage)
-  return { ...f, search(query: SpellSearchQuery = {}) {
-    return queries.handle('search', { installId: published.dataset.installId, query }) as SpellSearchResult
+  const installId = published.dataset.installId
+  return { ...f, installId, queries, search(query: SpellSearchQuery = {}) {
+    return queries.handle('search', { installId, query }) as SpellSearchResult
   } }
 }
 function ids(result: SpellSearchResult): number[] { return result.records.map((r) => r.id) }
@@ -91,7 +92,8 @@ test('unknown levels and unsupported amounts sort last in both directions; zero 
 test('invalid filters and arbitrary sort keys are rejected before scanning', () => {
   const f = fixture([spellRow()])
   try {
-    for (const query of [{ minLevel: 20, maxLevel: 10 }, { minLevel: 0 }, { maxLevel: 1.5 }, { allLevels: 'yes' },
+    assert.deepEqual(ids(f.search({ minLevel: 0, maxLevel: 0, level: 50 })), [])
+    for (const query of [{ minLevel: 20, maxLevel: 10 }, { maxLevel: 1.5 }, { allLevels: 'yes' },
       { type: 'sql' }, { polarity: 'all' }, { mana: 'negative' }, { sortBy: 'rawFields' }, { direction: 'sideways' },
       { selectedIds: [1, 2, 3, 4, 5] }, { selectedIds: [-1] }, { effect: -1 }]) {
       assert.throws(() => f.search(query as SpellSearchQuery), /Invalid|must not exceed/)
@@ -221,5 +223,75 @@ test('arbitrary captured area caps include utility delivery labels without inven
     assert.deepEqual(ids(f.search({ type: 'dd' })), [1, 4])
     for (const type of ['aoe0', 'aoe-4', 'aoe1.5', 'aoe004', 'aoe2147483648']) assert.throws(() => f.search({ type } as SpellSearchQuery), /Invalid/)
     for (const query of [{ group: 'random' }, { metric: 'buff' }, { includeHighlights: 'yes' }]) assert.throws(() => f.search(query as SpellSearchQuery), /Invalid/)
+  } finally { f.close() }
+})
+
+function bardRow(id: number, name: string, level: number, extra?: (fields: string[]) => void): string[] {
+  const fields = spellRow(id, name)
+  for (let index = 36; index < 52; index++) fields[index] = '255'
+  fields[43] = String(level)
+  extra?.(fields)
+  return fields
+}
+
+test('Class/Level sorts the full result by class and numeric requirement before pagination', () => {
+  const rows = [
+    bardRow(10, 'High Note', 60),
+    bardRow(30, 'Low Note', 58),
+    bardRow(20, 'Mid Note', 59),
+    bardRow(40, 'Early Note', 8),
+    bardRow(5, 'Fearless', 55, (fields) => { fields[47] = '60' })
+  ]
+  const f = fixture(rows)
+  const base = { allSpells: true, level: 60, sortBy: 'classes' as const, pageSize: 2 }
+  try {
+    assert.deepEqual(ids(f.search({ ...base, direction: 'asc' })), [40, 30])
+    assert.deepEqual(ids(f.search({ ...base, direction: 'asc', page: 2 })), [20, 10])
+    assert.deepEqual(ids(f.search({ ...base, direction: 'asc', page: 3 })), [5])
+    assert.deepEqual(ids(f.search({ ...base, direction: 'desc' })), [10, 20])
+    assert.deepEqual(ids(f.search({ ...base, direction: 'desc', page: 2 })), [30, 40])
+    assert.deepEqual(ids(f.search({ ...base, direction: 'desc', page: 3 })), [5], 'an ambiguous multi-class row stays after comparable rows')
+    assert.deepEqual(ids(f.search({ ...base, direction: 'asc', bestInLine: true })), [40, 30])
+    assert.deepEqual(ids(f.search({ ...base, direction: 'asc', bestInLine: true, page: 2 })), [20, 10])
+    assert.deepEqual(ids(f.search({ ...base, classes: ['BRD'], allLevels: true, direction: 'asc', pageSize: 10 })), [40, 5, 30, 20, 10])
+    const fearless = f.search({ ...base, pageSize: 10 }).records.find((row) => row.id === 5)
+    assert.deepEqual(fearless?.classes.map((entry) => [entry.code, entry.level]), [['BRD', 55], ['WIZ', 60]])
+    assert.deepEqual(ids(f.search({ allSpells: true, level: 60, sortBy: 'id', pageSize: 10 })), [5, 10, 20, 30, 40])
+  } finally { f.close() }
+})
+
+test('current and preview keep unknown spells and still exclude later eras', () => {
+  const rows = [
+    spellRow(1, 'Synthetic Bolt'),
+    spellRow(2, 'Leach'),
+    spellRow(3, 'Abscond'),
+    spellRow(4, 'Abolish Enchantment')
+  ]
+  const f = fixture(rows)
+  try {
+    const current = f.search({ era: 'current', allSpells: true, pageSize: 10 })
+    assert.deepEqual(ids(current), [1, 2])
+    assert.deepEqual(current.records.map((row) => row.era), ['unknown', 'classic'])
+    const preview = f.search({ era: 'preview', allSpells: true, pageSize: 10 })
+    assert.deepEqual(ids(preview), [1, 2, 3])
+    assert.deepEqual(preview.records.map((row) => row.era), ['unknown', 'classic', 'kunark'])
+    assert.equal(f.search({ era: 'current', text: 'Abolish Enchantment', allSpells: true }).total, 0)
+    assert.equal(f.search({ era: 'preview', text: 'Abolish Enchantment', allSpells: true }).total, 0)
+  } finally { f.close() }
+})
+
+test('a duplicated display name does not inherit an era from the shared name', () => {
+  const rows = [spellRow(1, 'Leach'), spellRow(2, 'leach'), spellRow(3, 'Synthetic Bolt'), spellRow(4, 'Abolish Enchantment')]
+  const f = fixture(rows)
+  try {
+    const current = f.search({ era: 'current', allSpells: true, pageSize: 10 })
+    assert.deepEqual(ids(current), [1, 2, 3])
+    assert.deepEqual(current.records.map((row) => row.era), ['unknown', 'unknown', 'unknown'])
+    const preview = f.search({ era: 'preview', allSpells: true, pageSize: 10 })
+    assert.deepEqual(preview.records.filter((row) => row.id === 1 || row.id === 2).map((row) => row.era), ['unknown', 'unknown'])
+    assert.equal(f.search({ era: 'current', text: 'Abolish Enchantment', allSpells: true }).total, 0)
+    const detail = f.queries.handle('detail', { installId: f.installId, query: { id: 1 } }) as SpellDetailResult
+    assert.equal(detail.era, 'unknown')
+    assert.equal(detail.record?.name, 'Leach')
   } finally { f.close() }
 })
