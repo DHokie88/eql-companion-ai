@@ -105,13 +105,23 @@ test('browse effects keep every slot and rank only supported HP amounts', () => 
   assert.deepEqual(slots.map((slot) => slot.slot), [1, 2])
   assert.equal(slots[0].name, 'Health change')
   assert.equal(slots[0].timing, 'instant')
-  assert.equal(slots[0].amount, 124)
+  assert.equal(slots[0].amount, -124)
   assert.equal(slots[1].timing, 'raw')
   assert.equal(slots[1].amount, null)
-  assert.match(spellBrowseEffectText(slots[0]), /SPA 0 · Health change: −124|SPA 0 · Health change: -124|−124|124/)
+  assert.equal(spellBrowseEffectText(slots[0]), 'SPA 0 · Health change: −124')
   assert.match(spellBrowseEffectText(slots[1]), /raw 5/)
   assert.match(slots[1].formula ?? '', /999/)
   assert.deepEqual(slots[1].raw, { base: 5, limit: 0, calc: 999, max: 0 })
+})
+
+test('SPA keeps signed resist changes and models periodic damage duration at the resolved rank', () => {
+  const damage = modifierSpell({ effects: [effect(0, -100), { slot: 2, spa: 46, base: -40, limit: 0, calc: 100, max: 0 }], durationFormula: 7, durationCap: 6 })
+  const [hitPoints, resist] = spellBrowseEffectSlots(damage, 50, 10)
+  assert.equal(hitPoints.timing, 'per-tick')
+  assert.equal(hitPoints.amount, -130)
+  assert.equal(hitPoints.ticks, 9)
+  assert.equal(resist.timing, 'instant')
+  assert.equal(resist.amount, -40)
 })
 
 test('search, compare, and detail share browse rank and the cache key hears rank, caster, and source', () => {
@@ -158,7 +168,7 @@ test('detail and compare use the same browse rank as search', () => {
 
 function assertHonestEffectSlots(slots: NonNullable<SpellSearchResult['records'][number]['effects']>): void {
   assert.equal(slots[0].timing, 'instant')
-  assert.equal(slots[0].amount, 124)
+  assert.equal(slots[0].amount, -124)
   const reference = slots.find((slot) => slot.spa === 85)
   const resist = slots.find((slot) => slot.spa === 46)
   const flag = slots.find((slot) => slot.spa === 12)

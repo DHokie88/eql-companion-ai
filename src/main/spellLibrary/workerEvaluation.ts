@@ -1,4 +1,4 @@
-import type { ClientSpellRecord, SpellCalculation, SpellDataset, SpellMetric } from '../../shared/spellLibrary'
+import type { ClientSpellRecord, SpellBrowseRankMetadata, SpellCalculation, SpellDataset, SpellMetric } from '../../shared/spellLibrary'
 import type { SpellModifierContext, SpellRankEvidence } from '../../shared/spellModifiers'
 import { calculateClientSpell, CLIENT_SPELL_CALCULATION_SCOPE } from '../../shared/clientSpellCalculations'
 import { evaluateModifiedSpell, SpellModifierCatalog } from '../../shared/clientSpellModifiers'
@@ -42,6 +42,12 @@ export class WorkerSpellEvaluation {
     const context = input as SpellModifierContext | undefined
     if (!context) return null
     return resolveBrowseRank(record, context, this.catalog(dataset))
+  }
+  browseMetadata(dataset: SpellDataset, record: ClientSpellRecord, input: unknown): SpellBrowseRankMetadata | null {
+    const context = input as SpellModifierContext | undefined
+    if (!context) return null
+    const rank = resolveBrowseRank(record, context, this.catalog(dataset))
+    return { ...rank, characterKey: context.character?.key ?? '', contextRevision: context.revision, snapshotId: dataset.snapshotId }
   }
   detectedRank(dataset: SpellDataset, record: ClientSpellRecord, input: unknown): number | null {
     return this.rankEvidence(dataset, record, input)?.rank ?? null

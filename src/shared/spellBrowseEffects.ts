@@ -1,6 +1,6 @@
 import { clientSpellEffectAmount, clientSpellDurationTicks } from './clientSpellCalculations'
 import { clientSpellEffectLabel, clientSpellEffectValueKind } from './clientSpellParser'
-import { rankedHpAmount } from './clientSpellRankRules'
+import { rankDotDurationTicks, rankedHpAmount } from './clientSpellRankRules'
 import type { ClientSpellEffect, ClientSpellRecord, SpellMetric } from './spellLibrary'
 
 export type SpellEffectTiming = 'instant' | 'per-tick' | 'raw'
@@ -42,6 +42,17 @@ function slotFormula(input: { kind: ReturnType<typeof clientSpellEffectValueKind
   return null
 }
 
+function rankForEffect(effect: ClientSpellEffect, beneficial: boolean, rank: number | null): number | null {
+  if (effect.spa !== 0 && effect.spa !== 79) return null
+  return (beneficial ? effect.base > 0 : effect.base < 0) ? rank : null
+}
+
+function slotDuration(effect: ClientSpellEffect, input: { timing: SpellEffectTiming; ticks: number | null; metric: SpellMetric; rank: number | null }): number | null {
+  const { timing, ticks, metric, rank } = input
+  if (timing !== 'per-tick' || ticks === null) return null
+  return metric === 'damage' && effect.spa === 0 && rank !== null ? rankDotDurationTicks(ticks, rank) : ticks
+}
+
 /** Every captured slot, in order. Rank scaling uses the shared HP rules; other formulas stay raw. */
 export function spellBrowseEffectSlots(record: ClientSpellRecord, level: number, rank: number | null): SpellBrowseEffectSlot[] {
   const ticks = clientSpellDurationTicks(record, level)
@@ -51,14 +62,15 @@ export function spellBrowseEffectSlots(record: ClientSpellRecord, level: number,
     const kind = clientSpellEffectValueKind(effect)
     const supported = clientAmount !== null && kind === 'amount'
     const timing = slotTiming(record, effect, supported)
-    const amount = !supported || clientAmount === null ? null
-      : rank !== null && (effect.spa === 0 || effect.spa === 79)
-        ? rankedHpAmount(record, effect, clientAmount, { metric, rank })
-        : clientAmount
+    const effectRank = rankForEffect(effect, record.beneficial, rank)
+    const magnitude = !supported || clientAmount === null ? null
+      : effectRank === null ? clientAmount : rankedHpAmount(record, effect, clientAmount, { metric, rank: effectRank })
+    const amount = magnitude === null || effect.base >= 0 ? magnitude : -magnitude
+    const duration = slotDuration(effect, { timing, ticks, metric, rank: effectRank })
     return {
       slot: effect.slot, spa: effect.spa, name: clientSpellEffectLabel(effect.spa), timing, amount,
       raw: { base: effect.base, limit: effect.limit, calc: effect.calc, max: effect.max },
-      formula: slotFormula({ kind, supported, timing, ticks, record, effect }), ticks: timing === 'per-tick' ? ticks : null
+      formula: slotFormula({ kind, supported, timing, ticks, record, effect }), ticks: duration
     }
   })
 }

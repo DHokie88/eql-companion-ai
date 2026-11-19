@@ -63,7 +63,7 @@ function useByLevel({ classes, level, evaluation, enabled }: { classes: SpellCla
   const load = useCallback(() => {
     if (invalid) return Promise.reject(new Error(invalid))
     return window.eq.spellLibrary.byLevel({ classes: classKey ? classKey.split(',') as SpellClass[] : [], level,
-      throughLevel: through ?? Math.min(255, level + 10), view, page, pageSize: 40, evaluation, text: queryText, sortBy: sort.field, direction: sort.direction,
+      throughLevel: through ?? Math.min(255, level + 10), view, page, pageSize: 40, evaluation, browseRank: true, text: queryText, sortBy: sort.field, direction: sort.direction,
       category: category || undefined, subcategory: subcategory || undefined, effect: effect ? Number(effect) : undefined,
       type: type || undefined, polarity: polarity || undefined, mana: mana || undefined, minLevel: min ? Number(min) : undefined, maxLevel: maximum ? Number(maximum) : undefined })
   }, [classKey, level, through, view, page, evaluation, queryText, sort.field, sort.direction, category, subcategory, effect, type, polarity, mana, min, maximum, invalid])
@@ -85,8 +85,8 @@ function ByLevelTable({ records, selected, sort, onOpen, onPreview, onToggle }: 
     {sort.field === 'level' && (index === 0 || records[index - 1].learnedLevel !== r.learnedLevel) && <TableRow><TableCell colSpan={7} sx={{ bgcolor: 'action.hover' }}><Typography variant="subtitle2">Eligible at level {r.learnedLevel ?? 'unknown'}</Typography></TableCell></TableRow>}
     <TableRow data-testid="by-level-record" data-spell-id={r.id}>
     <TableCell>{r.learnedLevel ?? '-'}</TableCell><TableCell>{r.id}</TableCell><TableCell sx={{ minWidth: 210 }}><SpellNameButton id={r.id} onOpen={onOpen}>{r.name}</SpellNameButton>
-      <SpellRowRank id={r.id} name={r.name} evidence={r.rankEvidence} /><Typography variant="caption" display="block">{r.description?.slice(0, 220)}</Typography></TableCell>
-    <TableCell>{r.classes.map((c) => `${c.code} ${c.level}`).join(' · ')}</TableCell><TableCell>{r.category}<Typography variant="caption" display="block">{r.subcategory}</Typography></TableCell><TableCell>{r.mana}</TableCell>
+      <SpellRowRank id={r.id} name={r.name} evidence={r.rankEvidence} browseRank={r.browseRank} /><Typography variant="caption" display="block">{r.description?.slice(0, 220)}</Typography></TableCell>
+    <TableCell>{r.classes.map((c) => `${c.code} ${c.level}`).join(' · ')}</TableCell><TableCell>{r.category}<Typography variant="caption" display="block">{r.subcategory}</Typography></TableCell><TableCell>{r.calculations?.[0]?.mana ?? r.mana}</TableCell>
     <TableCell><Button size="small" disabled={r.learnedLevel == null} onClick={() => onPreview(r.id, r.learnedLevel ?? 1)} data-testid={`by-level-preview-${r.id}`}>Preview at {r.learnedLevel}</Button><Button size="small" disabled={!selected.includes(r.id) && selected.length >= 4} onClick={() => onToggle(r.id)} data-testid={`by-level-compare-${r.id}`}>{selected.includes(r.id) ? 'Selected' : 'Add to Compare'}</Button></TableCell>
   </TableRow></Fragment>)}</TableBody></Table></Box>
 }

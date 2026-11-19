@@ -28,6 +28,12 @@ function wholeCharacterLevel(value: number | null | undefined): value is number 
   return typeof value === 'number' && Number.isInteger(value) && value >= 1 && value <= BROWSE_LEVEL_MAX
 }
 
+/** Retain a manual minimum when an automatic maximum follows a lower level. */
+export function effectiveBrowseMax(automatic: number, minimum: string): number {
+  const saved = /^\d+$/.test(minimum) ? Number(minimum) : 0
+  return Math.max(automatic, Math.min(saved, BROWSE_LEVEL_MAX))
+}
+
 /** Arrow steps reject a move that would leave the band or invert Min and Max. */
 export function stepBrowseLevel(current: number, delta: number, other: number, side: 'min' | 'max'): number {
   const next = current + delta

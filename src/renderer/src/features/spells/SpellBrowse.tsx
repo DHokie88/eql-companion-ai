@@ -11,6 +11,12 @@ import { BrowseColumnPicker, BrowseGroups } from './SpellBrowseAnalysis'
 import { SpellBrowseToolbar } from './SpellBrowseToolbar'
 import { hideUniformTypeColumn } from './spellBrowseColumns'
 
+function browseMaxCaption({ manual, effective, autoMax, levelCaption }: { manual: string | null; effective: number; autoMax: number; levelCaption?: string }): string | undefined {
+  if (manual) return undefined
+  if (effective > autoMax) return `Max held at the minimum · ${levelCaption ?? `Automatic max ${autoMax}`}`
+  return levelCaption
+}
+
 function browseColumnDisplay(category: string, subcategory: string): 'both' | 'subcategory' | 'none' {
   if (!category) return 'both'
   if (subcategory) return 'none'
@@ -51,10 +57,11 @@ export function SpellBrowse({ classes, level, autoMax, levelCaption, characterKe
   const category = browseCategory(browse.filters, data)
   const columnDisplay = browseColumnDisplay(category, browse.filters.subcategory)
   const uniformType = hideUniformTypeColumn(browse.filters.type, data?.matchingTypes)
+  const maxCaption = browseMaxCaption({ manual: browse.filters.max, effective: Number(browse.maximum), autoMax, levelCaption })
   useEffect(() => { if (initialCategory) { focusCategory(initialCategory); onFocusConsumed?.() } }, [initialCategory, focusCategory, onFocusConsumed])
   useSpellScroll('browse', Boolean(data) && enabled)
   return <Stack spacing={1.5} data-testid="spells-browse">
-    <SpellBrowseFilters {...browse} characterKey={characterKey} levelCaption={levelCaption} controls={controls} columns={<BrowseColumnPicker {...browse} display={columnDisplay} uniformType={uniformType} />} categories={data?.categories ?? []} subcategories={data?.subcategories ?? []} typeOptions={data?.typeOptions} />
+    <SpellBrowseFilters {...browse} characterKey={characterKey} levelCaption={maxCaption} controls={controls} columns={<BrowseColumnPicker {...browse} display={columnDisplay} uniformType={uniformType} />} categories={data?.categories ?? []} subcategories={data?.subcategories ?? []} typeOptions={data?.typeOptions} />
     <SpellBrowseToolbar era={browse.era} onEra={browse.setEra} />
     {enabled ? <BrowseResults browse={browse} selected={selected} onOpen={onOpen} onToggle={onToggle} /> : <Alert severity="info">Choose one or more classes, or select All classes to browse spells.</Alert>}
   </Stack>

@@ -58,17 +58,18 @@ function RankChoices({ id, name, shown, override, anchor, setAnchor, choose, dis
 }): JSX.Element {
   const { source, owned, label } = shown
   return <Stack direction="row" alignItems="center" data-testid={`spell-rank-cell-${id}`}>
-    <Button size="small" aria-haspopup="listbox" aria-label={`Rank for ${name}`} data-testid={`spell-preview-rank-${id}`} data-rank-source={owned ? 'owned' : source} disabled={disabled} onClick={(event) => setAnchor(event.currentTarget)} sx={{ minWidth: 0, px: 0.75, py: 0.25, textTransform: 'none' }}>
+    <Button size="small" aria-haspopup="menu" aria-expanded={Boolean(anchor)} aria-label={`Rank for ${name}`} data-testid={`spell-preview-rank-${id}`} data-rank-source={owned ? 'owned' : source} disabled={disabled} onClick={(event) => setAnchor(event.currentTarget)} sx={{ minWidth: 0, px: 0.75, py: 0.25, textTransform: 'none' }}>
       {owned
         ? <Chip size="small" color="success" variant="outlined" icon={<CheckIcon />} label={`Yours ${label}`} data-testid="spell-owned-rank" sx={{ height: 22, fontSize: 11, '& .MuiChip-icon': { fontSize: 14 } }} />
         : <span>{label}{source === 'override' ? ' manual' : ' ▾'}</span>}
     </Button>
-    <Menu anchorEl={anchor} open={Boolean(anchor)} onClose={() => setAnchor(null)} slotProps={{ paper: { sx: { bgcolor: 'background.paper', backgroundImage: 'none' } } }}>
-      <MenuItem dense onClick={() => choose(null)} data-testid={`spell-rank-auto-${id}`}>Auto</MenuItem>
-      <Stack direction="row" flexWrap="wrap" sx={{ width: 196, px: 0.5 }}>
-        {RANKS.map((value) => <MenuItem key={value} dense sx={{ width: 64, justifyContent: 'center' }} data-testid={`spell-rank-option-${id}-${value}`} onClick={() => choose(value)}>{rankLabel(value)}</MenuItem>)}
-      </Stack>
-      <MenuItem dense disabled={override === null} onClick={() => choose(null)} data-testid={`spell-rank-reset-${id}`}>Reset override</MenuItem>
+    <Menu anchorEl={anchor} open={Boolean(anchor)} onClose={() => setAnchor(null)} slotProps={{
+      paper: { sx: { bgcolor: 'background.paper', backgroundImage: 'none' } },
+      list: { 'aria-label': `Rank for ${name}`, sx: { display: 'grid', gridTemplateColumns: 'repeat(5, minmax(38px, 1fr))', px: 0.5 } }
+    }}>
+      <MenuItem dense sx={{ gridColumn: '1 / -1' }} onClick={() => choose(null)} data-testid={`spell-rank-auto-${id}`}>Auto</MenuItem>
+      {RANKS.map((value) => <MenuItem key={value} dense sx={{ justifyContent: 'center', px: 0.5 }} data-testid={`spell-rank-option-${id}-${value}`} onClick={() => choose(value)}>{rankLabel(value)}</MenuItem>)}
+      <MenuItem dense sx={{ gridColumn: '1 / -1' }} disabled={override === null} onClick={() => choose(null)} data-testid={`spell-rank-reset-${id}`}>Reset override</MenuItem>
     </Menu>
   </Stack>
 }

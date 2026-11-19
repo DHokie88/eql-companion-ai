@@ -39,12 +39,12 @@ function collect(storage: SpellLibraryStorage, dataset: SpellDataset | null, opt
   const matches: SpellSummary[] = [], categories = new Set<string>(), subcategories = new Set<string>(), types = new Set<string>()
   const candidates = new Map<number, SpellLineCandidate>()
   const sourceRecords = new Map<number, ClientSpellRecord>()
-  const records = dataset ? [...storage.records(dataset.snapshotId)] : []
-  const ambiguous = dataset ? cachedAmbiguousSpellNames(dataset.snapshotId, records) : undefined
-  for (const record of records) {
+  const ambiguous = dataset ? cachedAmbiguousSpellNames(dataset.snapshotId, storage.recordNames(dataset.snapshotId)) : undefined
+  const untyped = { ...options, type: undefined }
+  for (const record of dataset ? storage.records(dataset.snapshotId) : []) {
     if (record.category) categories.add(record.category)
     if (record.subcategory && (!options.category || record.category === options.category)) subcategories.add(record.subcategory)
-    if (!matchesSpellSearch(record, { ...options, type: undefined }, input.mechanics, ambiguous)) continue
+    if (!matchesSpellSearch(record, untyped, input.mechanics, ambiguous)) continue
     const row = catalogSummary(record, options.classes, { mechanics: input.mechanics, level: options.level, ambiguous })
     addTypes(row, types)
     if (options.type && !matchesSpellSearch(record, options, input.mechanics, ambiguous)) continue
@@ -97,7 +97,7 @@ function evaluationOptions(query: Record<string, unknown>, options: SearchOption
 }
 function evaluatePage(storage: SpellLibraryStorage, dataset: SpellDataset | null, rows: SpellSummary[], pageEval: { evaluation: ReturnType<typeof evaluationOptions>; effects: { level: number; rank: (record: ClientSpellRecord) => number | null } | null }): void {
   const { evaluation, effects } = pageEval
-  if (!dataset) return
+  if (!dataset || (!effects && (evaluation.level === undefined || evaluation.all))) return
   for (const row of rows) {
     const record = storage.record(dataset.snapshotId, row.id)
     if (!record) continue

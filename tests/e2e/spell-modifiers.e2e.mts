@@ -43,7 +43,17 @@ async function mine(page: Page, checked: boolean): Promise<void> {
 }
 async function rowRank(page: Page, id: number, label: string): Promise<void> {
   await page.getByTestId(`spell-preview-rank-${id}`).click()
-  await page.getByRole('menuitem', { name: label, exact: true }).click()
+  const option = page.getByRole('menuitem', { name: label, exact: true })
+  if (id !== 101 || label !== 'III') {
+    await option.click()
+    return
+  }
+  await option.waitFor()
+  await page.keyboard.press('Home')
+  for (let step = 0; step < 3; step++) await page.keyboard.press('ArrowDown')
+  assert.equal(await option.evaluate((element) => element === document.activeElement), true)
+  await dumpArtifacts(page, 'rank-override-menu')
+  await page.keyboard.press('Enter')
 }
 async function amount(page: Page, expected: string): Promise<void> {
   assert.equal(await settle(() => page.getByTestId('spells-amount-101-damage').innerText(), (text) => text === expected), expected)

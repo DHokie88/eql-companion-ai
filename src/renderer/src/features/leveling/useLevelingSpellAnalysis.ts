@@ -12,7 +12,7 @@ export function useLevelingSpellAnalysis(category: SpellRankingCategory = 'dd') 
   const modifiers = useSpellModifiers()
   const classKey = combo.resolved.join(',')
   const classes = useMemo(() => classKey ? classKey.split(',') as SpellClass[] : [], [classKey])
-  const context = modifiers.context
+  const context = modifiers.confirmedContext
   const targets = spellPreviewTargets(modifiers.context?.preferences.targets)
   const evaluation = useMemo<SpellEvaluationOptions | undefined>(() => context
     ? { mode: context.preferences.mode, contextRevision: context.revision, classes } : undefined, [context, classes])

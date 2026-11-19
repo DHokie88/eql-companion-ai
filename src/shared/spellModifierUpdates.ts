@@ -77,8 +77,8 @@ function staleRevision(cause: unknown): boolean {
 /** Main still checks every revision atomically. Only the user's original changes
  * are replayed, at most twice, against fresh facts for the same profile identity.
  */
-export async function saveSpellModifierPreferences(original: SpellModifierContext, requested: SpellModifierPreferences, io: ModifierUpdateIO): Promise<SpellModifierContext> {
-  let expected = original
+export async function saveSpellModifierPreferences(original: SpellModifierContext, requested: SpellModifierPreferences, io: ModifierUpdateIO, confirmed = original): Promise<SpellModifierContext> {
+  let expected = confirmed
   for (let attempt = 0; attempt < 3; attempt++) {
     assertSelection(original, expected, io)
     const preferences = rebaseSpellModifierPreferences(original.preferences, requested, expected.preferences)

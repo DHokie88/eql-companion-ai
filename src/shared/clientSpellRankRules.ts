@@ -11,9 +11,13 @@ export function rankedHpAmount(record: ClientSpellRecord, effect: ClientSpellEff
   if (effect.spa === 0 && record.durationFormula > 0) return scaleExactSpellHeal(amount, rank)
   return scaleExactSpellDamage(amount, rank)
 }
+export function rankDotDurationTicks(ticks: number, rank: number): number {
+  return Math.round(ticks * (100 + 5 * rank) / 100)
+}
+
 export function rankDotDuration(calculation: SpellCalculation, rank: number | null): SpellCalculation {
   if (calculation.metric !== 'damage' || !rank || calculation.total === null || calculation.ticks === null || !calculation.perTick) return calculation
-  const durationTicks = Math.round((calculation.durationTicks ?? calculation.ticks) * (100 + 5 * rank) / 100)
+  const durationTicks = rankDotDurationTicks(calculation.durationTicks ?? calculation.ticks, rank)
   const ticks = durationTicks + (calculation.durationTicks === undefined ? 0 : 1)
   const total = (calculation.instant ?? 0) + calculation.perTick * ticks
   return { ...calculation, durationTicks, ticks, total, perMana: calculation.mana > 0 ? total / calculation.mana : null }

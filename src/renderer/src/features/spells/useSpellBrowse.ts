@@ -8,6 +8,7 @@ import { useSpellPageReset, useSpellWorkspaceState } from './spellWorkspace'
 import type { SpellAnalysisOptions, SpellRankingCategory } from '@shared/spellAnalysis'
 import { browseColumns, DEFAULT_BROWSE_COLUMNS, hideUniformTypeColumn, type BrowseDisplayField } from './spellBrowseColumns'
 import type { BrowseEra } from './SpellBrowseToolbar'
+import { effectiveBrowseMax } from './spellLevelRange'
 
 export interface BrowseFilters {
   text: string; min: string; max: string | null; category: string; subcategory: string; effect: string
@@ -65,8 +66,9 @@ export function useSpellBrowse({ classes, level, autoMax, allSpells, evaluation,
   const [columns, setColumns] = useSpellWorkspaceState<BrowseDisplayField[]>('browse-visible-columns', DEFAULT_BROWSE_COLUMNS)
   const [era, setEra] = useSpellWorkspaceState<BrowseEra>('browse-era', 'current')
   const queryText = useSearchText(filters.text)
+  const includeEffects = columns.includes('spa')
   const { min, category, subcategory, effect, type, polarity, hpFilter } = filters
-  const maximum = filters.max === null || filters.max === '' ? String(autoMax) : filters.max
+  const maximum = filters.max === null || filters.max === '' ? String(effectiveBrowseMax(autoMax, min)) : filters.max
   const invalid = browseFilterError(filters, maximum)
   const classKey = classes.join(','), selectedKey = sort.field === 'selected' ? selected.join(',') : ''
   useSpellPageReset(`${classKey}:${level}:${allSpells}:${sort.field}:${sort.direction}:${group}:${metric}:${bestInLine}:${era}:${min}:${maximum}`, setPage)
@@ -76,10 +78,10 @@ export function useSpellBrowse({ classes, level, autoMax, allSpells, evaluation,
       minLevel: min === '' ? 0 : Number(min), maxLevel: maximum === '' ? undefined : Number(maximum),
       category: category || undefined, subcategory: subcategory || undefined, effect: effect === '' ? undefined : Number(effect),
       type: browseType(type), polarity: polarity || undefined, hpFilter: hpFilter || undefined, bestInLine, group, metric, includeHighlights: false,
-      browseRank: true, era, includeEffects: columns.includes('spa'),
+      browseRank: true, era, includeEffects,
       sortBy: sort.field, direction: sort.direction, selectedIds: selectedKey ? selectedKey.split(',').map(Number) : [], page, pageSize: 40, evaluation: { ...evaluation, rankOnly: true }, analysis }
     return window.eq.spellLibrary.search(query)
-  }, [queryText, classKey, level, allSpells, min, category, subcategory, effect, type, polarity, hpFilter, bestInLine, maximum, sort.field, sort.direction, selectedKey, page, evaluation, invalid, analysis, group, metric, era, columns])
+  }, [queryText, classKey, level, allSpells, min, category, subcategory, effect, type, polarity, hpFilter, bestInLine, maximum, sort.field, sort.direction, selectedKey, page, evaluation, invalid, analysis, group, metric, era, includeEffects])
   const result = useLibraryQuery(load, undefined, enabled)
   useVisibleSort({ sort, filters, metric, columns, data: result.data })
   const change = <K extends keyof BrowseFilters>(key: K, value: BrowseFilters[K]): void => {

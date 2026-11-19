@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { LEVEL_MAX } from '../src/renderer/src/features/leveling/viewedLevel'
-import { automaticBrowseMax, browseLevelCaption, commitBrowseLevel, stepBrowseLevel } from '../src/renderer/src/features/spells/spellLevelRange'
+import { automaticBrowseMax, browseLevelCaption, commitBrowseLevel, effectiveBrowseMax, stepBrowseLevel } from '../src/renderer/src/features/spells/spellLevelRange'
 
 test('automatic Max uses the latest /who, then the stated level, and never treats a gap as 0', () => {
   assert.deepEqual(automaticBrowseMax(60, 12), { level: 60, source: 'who' })
@@ -22,4 +22,10 @@ test('browse level edits clamp, reject inversion, and keep whole numbers', () =>
   assert.deepEqual(commitBrowseLevel('26', 25, 'min'), { ok: false, error: 'Minimum spell level must not exceed maximum spell level.' })
   assert.deepEqual(commitBrowseLevel('1.5', 65, 'max'), { ok: false, error: 'Enter a whole spell level.' })
   assert.deepEqual(commitBrowseLevel('0', 65, 'min'), { ok: true, value: 0 })
+})
+
+test('a new lower automatic maximum does not invert a manually edited range', () => {
+  assert.equal(effectiveBrowseMax(46, '58'), 58)
+  assert.equal(effectiveBrowseMax(60, '58'), 60)
+  assert.equal(effectiveBrowseMax(46, '0'), 46)
 })

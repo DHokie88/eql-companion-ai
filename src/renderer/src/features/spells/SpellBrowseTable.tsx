@@ -55,7 +55,7 @@ function SpellCell(props: CellProps): JSX.Element {
 function SpaCell({ record }: { record: SpellSummary }): JSX.Element {
   const slots = record.effects ?? []
   if (!slots.length) return <>-</>
-  return <Stack gap={0.25} data-testid={`spell-spa-${record.id}`} sx={{ maxWidth: 240 }}>{slots.map((slot) => <Typography key={slot.slot} variant="caption" title={slot.formula ?? undefined} sx={{ display: 'block', whiteSpace: 'normal', overflowWrap: 'anywhere', lineHeight: 1.35 }}>{spellBrowseEffectText(slot)}</Typography>)}</Stack>
+  return <Stack gap={0.25} data-testid={`spell-spa-${record.id}`} sx={{ maxWidth: 240 }}>{slots.map((slot) => <Typography key={slot.slot} variant="caption" title={slot.formula ?? (slot.ticks === null ? undefined : `Duration: ${slot.ticks} ticks`)} sx={{ display: 'block', whiteSpace: 'normal', overflowWrap: 'anywhere', lineHeight: 1.35 }}>{spellBrowseEffectText(slot)}</Typography>)}</Stack>
 }
 function TextCell({ record, field }: Pick<CellProps, 'record' | 'field'>): JSX.Element {
   if (field === 'classes') return <>{record.classes.length ? record.classes.map((c) => `${c.code} ${c.level}`).join(' · ') : 'Internal / NPC'}</>

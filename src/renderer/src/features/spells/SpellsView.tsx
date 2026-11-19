@@ -43,10 +43,7 @@ function SpellsWorkspace({ routing, status, modifiers }: { routing: AppRouting; 
   const classes = scopeClasses(mode, combo.resolved, pickedClasses)
   const classKey = classes.join(',')
   const context = modifiers.context
-  // Provenance-only exports refresh visible evidence; the worker reuses cached arithmetic.
-  const evaluation = useMemo<SpellEvaluationOptions | undefined>(() => context ? {
-    mode: context.preferences.mode, contextRevision: context.revision, classes: classKey ? classKey.split(',') as SpellClass[] : []
-  } : undefined, [context, classKey])
+  const evaluation = useSpellEvaluation(modifiers.confirmedContext, classKey)
   const targets = spellPreviewTargets(state.browseTargets ?? modifiers.context?.preferences.targets)
   const analysis = useMemo(() => ({ scope: 'pack' as const, targets }), [targets])
   const busy = ['checking', 'importing', 'activating'].includes(status.phase)
@@ -60,6 +57,13 @@ function SpellsWorkspace({ routing, status, modifiers }: { routing: AppRouting; 
       <LibraryContent routing={routing} state={state} modifiers={modifiers} evaluation={evaluation} analysis={analysis} classes={classes} level={level} autoMax={automatic.level} levelCaption={browseLevelCaption(automatic.source, automatic.level)} characterKey={context?.character?.key ?? ''} controls={<SpellWorkspaceControls state={state} classes={classes} combo={combo.resolved} modifiers={modifiers} targets={targets} />} />
     </Stack>
   )
+}
+
+// Calculations use acknowledged preferences, so optimistic steps do not enqueue catalog queries.
+function useSpellEvaluation(context: SpellModifiersState['confirmedContext'], classKey: string): SpellEvaluationOptions | undefined {
+  return useMemo(() => context ? {
+    mode: context.preferences.mode, contextRevision: context.revision, classes: classKey ? classKey.split(',') as SpellClass[] : []
+  } : undefined, [context, classKey])
 }
 
 function casterLevel(picked: number | null, stated: number | null): number { return picked ?? stated ?? 50 }

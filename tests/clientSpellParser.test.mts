@@ -172,7 +172,7 @@ test('a validated trailing column is kept and a short or unrecognized row fails'
   const missing = spellFields(102, 'Test Beacon', 190)
   missing.pop()
   assert.equal(missing.length, 189)
-  assert.throws(() => parseClientSpellBundle(spellBundle([missing.join('^')])), /unsupported row layout \(189 fields\)/)
+  assert.throws(() => parseClientSpellBundle(spellBundle([missing.join('^')])), /spells_us.txt row 1: unsupported row layout \(189 fields\).*173-, 174-, or 190-field/)
   const malformed = spellFields(103, 'Test Beacon', 190)
   malformed[189] = '1|79|bad|0|100|0'
   assert.throws(() => parseClientSpellBundle(spellBundle([spellFields().join('^'), malformed.join('^')])), /invalid number/)

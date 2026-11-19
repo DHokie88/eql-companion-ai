@@ -128,7 +128,7 @@ function detectLayout(rawFields: string[]): ClientSpellLayout {
   if (width === 190 || (width > 190 && packedSlotsValid(rawFields[189]))) return 190
   if (width === 174 || (width > 174 && packedSlotsValid(rawFields[173]))) return 174
   if (width === 173 || (width > 173 && packedSlotsValid(rawFields[172]))) return 173
-  throw new Error(`spells_us.txt: unsupported row layout (${width} fields)`)
+  throw new Error(`unsupported row layout (${width} fields); expected a supported 173-, 174-, or 190-field layout`)
 }
 
 /** Original 173-layout indexes whose meaning Oracle interprets. Unknown columns remain raw. */
@@ -138,9 +138,10 @@ export const INTERPRETED_SPELL_COLUMNS: ReadonlySet<number> = new Set([
   ...Array.from({ length: 16 }, (_value, index) => index + 36)
 ])
 
-function sourceLines(text: string, file: SpellSourceFile): string[] {
+function sourceLines(text: string, file: SpellSourceFile, retainBlank = false): string[] {
   if (!text.trim()) throw new Error(`${file}: empty source file`)
-  return text.replace(/^\uFEFF/, '').split(/\r?\n/).filter((line) => line.length > 0)
+  const lines = text.replace(/^\uFEFF/, '').split(/\r?\n/)
+  return retainBlank ? lines : lines.filter((line) => line.length > 0)
 }
 
 function numeric(text: string, where: string): number {
@@ -377,7 +378,13 @@ function enrichNames(record: ClientSpellRecord, strings: Map<string, string>): v
 export function parseClientSpellBundle(sources: Record<SpellSourceFile, string>): ClientSpellRecord[] {
   const messages = parseMessages(sources['spells_us_str.txt'])
   const strings = parseStrings(sources['dbstr_us.txt'])
-  const records = sourceLines(sources['spells_us.txt'], 'spells_us.txt').map(parseRecord)
+  const records = sourceLines(sources['spells_us.txt'], 'spells_us.txt', true).flatMap((line, index) => {
+    if (!line) return []
+    try { return [parseRecord(line)] } catch (error) {
+      const reason = error instanceof Error ? error.message.replace(/^spells_us\.txt: /, '') : String(error)
+      throw new Error(`spells_us.txt row ${index + 1}: ${reason}`)
+    }
+  })
   const names = new Map<number, string>()
   for (const record of records) {
     if (names.has(record.id)) throw new Error(`spells_us.txt: duplicate spell ID ${record.id}`)

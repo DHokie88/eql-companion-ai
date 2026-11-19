@@ -29,10 +29,10 @@ function LevelStepper({ label, value, other, side, testId, characterKey, onCommi
   const onKey = (event: KeyboardEvent): void => {
     if (event.key === 'Enter') { event.preventDefault(); commit() }
   }
-  return <Stack direction="row" gap={0.25} alignItems="center" data-testid={`${testId}-stepper`}>
-    <IconButton size="small" aria-label={`Decrease ${label}`} data-testid={`${testId}-decrease`} onMouseDown={(event) => event.preventDefault()} onClick={() => step(-1)}><ChevronLeftIcon fontSize="small" /></IconButton>
-    <TextField size="small" label={label} value={shown} error={!!error} helperText={error ?? ' '} slotProps={{ htmlInput: { inputMode: 'numeric', 'aria-invalid': error ? true : undefined, 'data-testid': testId, style: { textAlign: 'center', width: 36 } } }} sx={{ width: 118 }} onFocus={() => { if (draft === null) setDraft(String(value)) }} onChange={(event) => { setDraft(event.target.value); setError(null) }} onBlur={commit} onKeyDown={onKey} />
-    <IconButton size="small" aria-label={`Increase ${label}`} data-testid={`${testId}-increase`} onMouseDown={(event) => event.preventDefault()} onClick={() => step(1)}><ChevronRightIcon fontSize="small" /></IconButton>
+  return <Stack direction="row" gap={0.25} alignItems="flex-start" data-testid={`${testId}-stepper`}>
+    <IconButton size="small" sx={{ mt: 0.625 }} aria-label={`Decrease ${label}`} data-testid={`${testId}-decrease`} onMouseDown={(event) => event.preventDefault()} onClick={() => step(-1)}><ChevronLeftIcon fontSize="small" /></IconButton>
+    <TextField size="small" label={label} value={shown} error={!!error} helperText={error ?? undefined} slotProps={{ htmlInput: { inputMode: 'numeric', 'aria-invalid': error ? true : undefined, 'data-testid': testId, style: { textAlign: 'center', width: 36 } } }} sx={{ width: 118 }} onFocus={() => { if (draft === null) setDraft(String(value)) }} onChange={(event) => { setDraft(event.target.value); setError(null) }} onBlur={commit} onKeyDown={onKey} />
+    <IconButton size="small" sx={{ mt: 0.625 }} aria-label={`Increase ${label}`} data-testid={`${testId}-increase`} onMouseDown={(event) => event.preventDefault()} onClick={() => step(1)}><ChevronRightIcon fontSize="small" /></IconButton>
   </Stack>
 }
 

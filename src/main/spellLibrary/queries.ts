@@ -1,5 +1,5 @@
 import type {
-  ClientSpellRecord, SpellBeforeAfterResult, SpellBrowseRankMetadata, SpellChangesResult, SpellComparisonResult,
+  ClientSpellRecord, SpellBeforeAfterResult, SpellChangesResult, SpellComparisonResult,
   SpellDataset, SpellHistoryResult, SpellRankingResult, SpellSearchResult, SpellSummary,
   SpellTimelineResult, SpellCalculation, SpellMetric
 } from '../../shared/spellLibrary'
@@ -102,24 +102,14 @@ export class SpellLibraryQueries {
   }
   private remember<T>(cached: { method: string; installId: string; dataset: SpellDataset | null; query: unknown; context: unknown }, produce: () => T): T {
     const { method, installId, dataset, query, context } = cached
-    const key = this.cache.key(method, { installId, dataset, query, context: this.contextForKey(context) })
+    const key = this.cache.key(method, { installId, dataset, query, context })
     const stored = this.cache.get(key)
     if (stored !== undefined) return stored as T
     const result = produce()
     this.cache.set(key, result)
     return result
   }
-  private withBrowseRank(query: Record<string, unknown>, context: unknown): Record<string, unknown> {
-    const preferences = (context as SpellModifierContext | undefined)?.preferences
-    const requested = query.browseRank === true || (preferences?.browse !== undefined && (query.evaluation !== undefined || query.analysis !== undefined || query.includeEffects === true))
-    return requested ? { ...query, browseRank: true } : query
-  }
-  private browseMetadata(dataset: SpellDataset, record: ClientSpellRecord, context: unknown): SpellBrowseRankMetadata | null {
-    const modifiers = context as SpellModifierContext | undefined
-    const resolved = this.evaluation.browseRank(dataset, record, context)
-    if (!resolved || !modifiers) return null
-    return { ...resolved, characterKey: modifiers.character?.key ?? '', contextRevision: modifiers.revision, snapshotId: dataset.snapshotId }
-  }
+
   private analysisQuery(method: 'rankings' | 'byLevel', installId: string, args: Record<string, unknown>): unknown {
     const query = queryObject(args.query, [...SEARCH_QUERY_FIELDS, 'categoryTab', 'group', 'view', 'throughLevel'])
     const dataset = this.dataset(installId, query)
@@ -139,7 +129,7 @@ export class SpellLibraryQueries {
     return snapshot ? this.storage.dataset(installId, snapshot) : this.storage.active(installId)
   }
   private search(installId: string, input: unknown, context: unknown): SpellSearchResult {
-    const query = this.withBrowseRank(queryObject(input, SEARCH_QUERY_FIELDS), context)
+    const query = queryObject(input, SEARCH_QUERY_FIELDS)
     const dataset = this.dataset(installId, query)
     return this.remember({ method: 'search', installId, dataset, query, context }, () => {
       const calculate = this.evaluation.calculator(dataset, query, context)
@@ -150,7 +140,7 @@ export class SpellLibraryQueries {
         const record = this.storage.record(dataset.snapshotId, row.id)
         if (!record) continue
         row.rankEvidence = this.evaluation.rankEvidence(dataset, record, context)
-        if (query.browseRank === true) row.browseRank = this.browseMetadata(dataset, record, context) ?? undefined
+        if (query.browseRank === true) row.browseRank = this.evaluation.browseMetadata(dataset, record, context) ?? undefined
       }
       return result
     })
@@ -182,11 +172,11 @@ export class SpellLibraryQueries {
   }
   private detailEra(dataset: SpellDataset | null, record: ClientSpellRecord | null): { era: ReturnType<typeof spellEraLabel> } | undefined {
     if (!record || !dataset) return undefined
-    return { era: spellEraLabel(record.name, cachedAmbiguousSpellNames(dataset.snapshotId, this.storage.records(dataset.snapshotId))) }
+    return { era: spellEraLabel(record.name, cachedAmbiguousSpellNames(dataset.snapshotId, this.storage.recordNames(dataset.snapshotId))) }
   }
   private detailRank(dataset: SpellDataset | null, record: ClientSpellRecord | null, query: Record<string, unknown>, context: unknown) {
     if (query.browseRank !== true || !record || !dataset) return undefined
-    return { browseRank: this.browseMetadata(dataset, record, context) }
+    return { browseRank: this.evaluation.browseMetadata(dataset, record, context) }
   }
   private detailEffects(dataset: SpellDataset | null, record: ClientSpellRecord | null, query: Record<string, unknown>, context: unknown) {
     if (query.includeEffects !== true || !record) return undefined
@@ -208,7 +198,7 @@ export class SpellLibraryQueries {
       const effectSummary = clientSpellSlowSummary(record, level)
       results.push({ ...calculate(record, level, metric), ...(effectSummary ? { effectSummary } : {}) })
       rankEvidence[String(id)] = this.evaluation.rankEvidence(dataset, record, context)
-      if (query.browseRank === true) browseRank[String(id)] = this.browseMetadata(dataset, record, context)
+      if (query.browseRank === true) browseRank[String(id)] = this.evaluation.browseMetadata(dataset, record, context)
     }
     return { results, rankEvidence, browseRank }
   }
@@ -220,13 +210,13 @@ export class SpellLibraryQueries {
     return this.evaluation.catalog(dataset).rank(record, modifiers).rank
   }
   private detail(installId: string, input: unknown, context: unknown) {
-    const query = this.withBrowseRank(queryObject(input, ['snapshotId', 'id', 'level', 'evaluation', 'analysis', 'browseRank', 'includeEffects']), context)
+    const query = queryObject(input, ['snapshotId', 'id', 'level', 'evaluation', 'analysis', 'browseRank', 'includeEffects'])
     const id = spellId(query.id)
     const dataset = this.dataset(installId, query)
     return this.remember({ method: 'detail', installId, dataset, query, context }, () => this.detailBody(dataset, id, query, context))
   }
   private compare(installId: string, input: unknown, context: unknown): SpellComparisonResult {
-    const query = this.withBrowseRank(queryObject(input, ['snapshotId', 'ids', 'level', 'metric', 'evaluation', 'analysis', 'browseRank']), context)
+    const query = queryObject(input, ['snapshotId', 'ids', 'level', 'metric', 'evaluation', 'analysis', 'browseRank'])
     if (!Array.isArray(query.ids) || query.ids.length > 4) throw new Error('Compare at most four spells')
     const ids = [...new Set(query.ids.map(spellId))]
     const level = levelArg(query.level)
