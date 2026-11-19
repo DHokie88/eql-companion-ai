@@ -21,6 +21,16 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.21.1',
+    date: '2026-11-19',
+    entries: [
+      { kind: 'new', text: 'Spells Browse has a global rank slider from I to X, a Use my ranks toggle, and a Current era filter with a Kunark preview. Open a spell to set its individual rank.' },
+      { kind: 'fixed', text: 'Best in line keeps Ranger arrows separate from Wizard area spells when their client timer numbers match. Shared timer groups now require matching classes and compatible delivery.', fromReport: true },
+      { kind: 'changed', text: 'Browse shows rank as text and keeps era in the toolbar. The chevron by a spell name expands its alternatives.', fromReport: true },
+      { kind: 'fixed', text: 'Class/Level sorts numerically in both directions across the full result. Spell imports support the newer 190-column client records.', fromReport: true }
+    ]
+  },
+  {
     version: '0.21.0',
     date: '2026-11-17',
     entries: [

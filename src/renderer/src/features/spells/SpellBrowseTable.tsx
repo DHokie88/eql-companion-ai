@@ -2,7 +2,6 @@ import { Fragment, type JSX } from 'react'
 import { Box, Button, IconButton, Stack, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import type { SpellBrowseSort, SpellMetric, SpellSummary } from '@shared/spellLibrary'
-import { spellEraCaption } from '@shared/spellBrowseEra'
 import { spellBrowseEffectText } from '@shared/spellBrowseEffects'
 import { amount, efficiencyAmount, wholeAmount, EstimateAmount } from './SpellEstimate'
 import { SpellNameButton, SpellSortHeader, type useSpellSort } from './SpellTableControls'
@@ -18,7 +17,6 @@ interface CellProps {
 const WRAPPING_COLUMNS = new Set<BrowseDisplayField>(['name', 'description', 'classes', 'category', 'subcategory', 'type', 'spa'])
 function NameCell({ record, expanded, toggleLine, onOpen }: CellProps): JSX.Element {
   return <Stack direction="row" alignItems="center" gap={0.5} flexWrap="wrap"><SpellNameButton id={record.id} onOpen={onOpen}>{record.name}</SpellNameButton>
-      {record.era && <Typography variant="caption" data-testid={`spell-era-${record.id}`} color={record.era === 'unknown' ? 'warning.main' : 'text.secondary'}>{spellEraCaption(record.era)}</Typography>}
       {record.line && <Tooltip title={`${record.line.alternatives.length} alternatives. ${record.line.reason}`}><IconButton size="small" aria-label={`Alternatives for ${record.name}`} aria-expanded={expanded} onClick={toggleLine} data-testid={`spells-expand-${record.id}`}><ExpandMoreIcon sx={{ transform: expanded ? 'rotate(180deg)' : undefined }} /></IconButton></Tooltip>}</Stack>
 }
 function CategoryCell({ record, display }: CellProps): JSX.Element {
@@ -37,7 +35,7 @@ function identityCell(props: CellProps): JSX.Element | null {
   const { record, field } = props
   if (field === 'id') return <>{record.id}</>
   if (field === 'name') return <NameCell {...props} />
-  if (field === 'rank') return <SpellRowRank id={record.id} name={record.name} evidence={record.rankEvidence} browseRank={record.browseRank} />
+  if (field === 'rank') return <SpellRowRank id={record.id} name={record.name} browseRank={record.browseRank} readOnly />
   if (field === 'spa') return <SpaCell record={record} />
   return null
 }

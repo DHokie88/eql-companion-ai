@@ -2,6 +2,7 @@ import { clientSpellColumnIndex } from '../../shared/clientSpellParser'
 import { linesForClass, type SpellLine } from '../data/spellLineLookup'
 import { bestSpellLines, type SpellLineCandidate } from '../../shared/clientSpellLines'
 import { compareSpellValues, spellBrowseSortValue } from '../../shared/clientSpellBrowse'
+import { isAreaTarget } from '../../shared/clientSpellDelivery'
 import { SPELL_CLASSES, type ClientSpellRecord, type SpellClass, type SpellSummary } from '../../shared/spellLibrary'
 import type { spellSearchOptions } from './browseQuery'
 
@@ -49,7 +50,18 @@ function eligibleClasses(record: ClientSpellRecord, options: Options) {
     && (options.minLevel === undefined || entry.level >= options.minLevel)
     && (ceiling === undefined || entry.level <= ceiling))
 }
-function memberships(record: ClientSpellRecord, options: Options): Membership[] {
+function timerMembership(record: ClientSpellRecord, type: SpellSummary['spellType']): Membership | null {
+  const timer = capturedSpellTimer(record)
+  if (!timer) return null
+  // Timer IDs are reused across classes. Only collapse comparable choices within
+  // the same class set and delivery, including ordinary area damage and rain.
+  const classes = record.classes.map(({ code }) => code).sort().join(',')
+  const delivery = type === 'rain' || type?.startsWith('aoe') ? 'dd' : type
+  return { key: `timer:${timer}:${classes}:${isAreaTarget(record.target) ? 'area' : 'single'}:${delivery ?? 'other'}:${Number(record.beneficial)}`,
+    reason: `Spells share recast timer ${timer.split(':')[1]}${timer.startsWith('discipline:') ? ' (discipline)' : ''}.` }
+}
+
+function memberships(record: ClientSpellRecord, type: SpellSummary['spellType'], options: Options): Membership[] {
   const classes = eligibleClasses(record, options)
   if (!classes.length) return []
   const result: Membership[] = []
@@ -59,8 +71,8 @@ function memberships(record: ClientSpellRecord, options: Options): Membership[] 
     result.push({ key: `replacement:${entry.code}:${found.line.id}:${record.target}:${Number(record.beneficial)}`,
       tier: found.tier, reason: `${entry.code} replacement line: ${found.line.name}.` })
   }
-  const timer = capturedSpellTimer(record)
-  if (timer) result.push({ key: `timer:${timer}`, reason: `Spells share recast timer ${timer.split(':')[1]}${timer.startsWith('discipline:') ? ' (discipline)' : ''}.` })
+  const timer = timerMembership(record, type)
+  if (timer) result.push(timer)
   return result
 }
 
@@ -93,7 +105,7 @@ function collectLabels(rows: SpellSummary[], records: ReadonlyMap<number, Client
   for (const row of rows) {
     const record = records.get(row.id)
     if (!record) continue
-    for (const membership of memberships(record, options)) {
+    for (const membership of memberships(record, row.spellType, options)) {
       const group = labels.get(membership.key) ?? { membership, rows: [], tiers: new Set<number>() }
       group.rows.push(row)
       if (membership.tier !== undefined) group.tiers.add(membership.tier)

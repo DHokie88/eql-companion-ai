@@ -42,18 +42,20 @@ async function mine(page: Page, checked: boolean): Promise<void> {
   await settle(() => toggle.isChecked(), (value) => value === checked)
 }
 async function rowRank(page: Page, id: number, label: string): Promise<void> {
+  await page.getByTestId(`spells-open-${id}`).click()
   await page.getByTestId(`spell-preview-rank-${id}`).click()
   const option = page.getByRole('menuitem', { name: label, exact: true })
-  if (id !== 101 || label !== 'III') {
+  if (id === 101 && label === 'III') {
+    await option.waitFor()
+    await page.keyboard.press('Home')
+    for (let step = 0; step < 3; step++) await page.keyboard.press('ArrowDown')
+    assert.equal(await option.evaluate((element) => element === document.activeElement), true)
+    await dumpArtifacts(page, 'rank-override-menu')
+    await page.keyboard.press('Enter')
+  } else {
     await option.click()
-    return
   }
-  await option.waitFor()
-  await page.keyboard.press('Home')
-  for (let step = 0; step < 3; step++) await page.keyboard.press('ArrowDown')
-  assert.equal(await option.evaluate((element) => element === document.activeElement), true)
-  await dumpArtifacts(page, 'rank-override-menu')
-  await page.keyboard.press('Enter')
+  await page.getByTestId('spells-detail-back').click()
 }
 async function amount(page: Page, expected: string): Promise<void> {
   assert.equal(await settle(() => page.getByTestId('spells-amount-101-damage').innerText(), (text) => text === expected), expected)
@@ -68,6 +70,7 @@ function stageSources(staged: FixtureLog): void {
 }
 async function compactControls(page: Page): Promise<void> {
   const row = page.getByTestId('spells-record').filter({ has: page.getByTestId('spells-open-101') })
+  assert.equal(await row.getByTestId('spell-preview-rank-101').count(), 0)
   assert.equal(await page.getByTestId('spell-owned-rank').count(), 0)
   await amount(page, '42')
   const toolbar = await page.getByTestId('spells-browse-toolbar').boundingBox()
@@ -92,11 +95,10 @@ async function compactControls(page: Page): Promise<void> {
   await rowRank(page, 101, 'III')
   await context(page, (c) => c.preferences.emulation.ranks['101']?.rank === 3)
   await amount(page, '47')
-  assert.match(await page.getByTestId('spell-preview-rank-101').innerText(), /III manual/)
+  assert.match(await page.getByTestId('spell-rank-cell-101').innerText(), /III manual/)
   await rowRank(page, 102, 'IV')
   await context(page, (c) => c.preferences.emulation.ranks['102']?.rank === 4 && c.preferences.emulation.ranks['101']?.rank === 3)
-  await page.getByTestId('spell-preview-rank-101').click()
-  await page.getByTestId('spell-rank-auto-101').click()
+  await rowRank(page, 101, 'Auto')
   await context(page, (c) => c.preferences.emulation.ranks['101'] === undefined && c.preferences.emulation.ranks['102']?.rank === 4)
   await amount(page, '61')
   await rank(page, 10)

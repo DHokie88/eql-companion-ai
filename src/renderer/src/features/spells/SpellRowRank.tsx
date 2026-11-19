@@ -21,8 +21,8 @@ function displayedRank(live: SpellBrowseRankMetadata | null, override: number | 
   return { rank, source: 'global', owned: false, label: rankLabel(rank) }
 }
 
-export function SpellRowRank({ id, name, browseRank }: {
-  id: number; name: string; evidence?: SpellRankEvidence | null; browseRank?: SpellBrowseRankMetadata | null
+export function SpellRowRank({ id, name, browseRank, readOnly }: {
+  id: number; name: string; evidence?: SpellRankEvidence | null; browseRank?: SpellBrowseRankMetadata | null; readOnly?: boolean
 }): JSX.Element | null {
   const state = useSpellRankState()
   const snapshotId = useSpellRankSnapshot()
@@ -32,6 +32,7 @@ export function SpellRowRank({ id, name, browseRank }: {
   useEffect(() => { setAnchor(null) }, [characterKey, id])
   if (!context) return null
   const shown = rowRankView({ context, browseRank, snapshotId, id, name })
+  if (readOnly) return <span data-testid={`spell-rank-cell-${id}`} data-rank-source={shown.source}><RankValue shown={shown} /></span>
   const override = spellMoteOverride(context.preferences, { id, name })
   const choose = (next: number | null): void => {
     setAnchor(null)
@@ -52,16 +53,19 @@ function currentRowRank(browseRank: SpellBrowseRankMetadata | null | undefined, 
   if (!browseRank || !currentBrowseRank(browseRank, guard)) return null
   return browseRank
 }
+type RankView = ReturnType<typeof displayedRank>
+function RankValue({ shown }: { shown: RankView }): JSX.Element {
+  if (shown.owned) return <Chip size="small" color="success" variant="outlined" icon={<CheckIcon />} label={`Yours ${shown.label}`} data-testid="spell-owned-rank" sx={{ height: 22, fontSize: 11, '& .MuiChip-icon': { fontSize: 14 } }} />
+  return <span>{shown.label}{shown.source === 'override' ? ' manual' : ''}</span>
+}
 function RankChoices({ id, name, shown, override, anchor, setAnchor, choose, disabled }: {
-  id: number; name: string; shown: { source: string; owned: boolean; label: string }; override: number | null
+  id: number; name: string; shown: RankView; override: number | null
   anchor: HTMLElement | null; setAnchor: (anchor: HTMLElement | null) => void; choose: (next: number | null) => void; disabled: boolean
 }): JSX.Element {
-  const { source, owned, label } = shown
+  const { source, owned } = shown
   return <Stack direction="row" alignItems="center" data-testid={`spell-rank-cell-${id}`}>
     <Button size="small" aria-haspopup="menu" aria-expanded={Boolean(anchor)} aria-label={`Rank for ${name}`} data-testid={`spell-preview-rank-${id}`} data-rank-source={owned ? 'owned' : source} disabled={disabled} onClick={(event) => setAnchor(event.currentTarget)} sx={{ minWidth: 0, px: 0.75, py: 0.25, textTransform: 'none' }}>
-      {owned
-        ? <Chip size="small" color="success" variant="outlined" icon={<CheckIcon />} label={`Yours ${label}`} data-testid="spell-owned-rank" sx={{ height: 22, fontSize: 11, '& .MuiChip-icon': { fontSize: 14 } }} />
-        : <span>{label}{source === 'override' ? ' manual' : ' ▾'}</span>}
+      <RankValue shown={shown} />{!owned && source !== 'override' && ' ▾'}
     </Button>
     <Menu anchorEl={anchor} open={Boolean(anchor)} onClose={() => setAnchor(null)} slotProps={{
       paper: { sx: { bgcolor: 'background.paper', backgroundImage: 'none' } },

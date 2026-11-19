@@ -39,7 +39,7 @@ test('existing companion replacement ladders collapse the reported ten AOE rows 
   } finally { f.close() }
 })
 
-test('captured positive timer IDs merge exact shared cooldown choices across geometry, with both layouts and discipline namespaces', () => {
+test('captured positive timer IDs group compatible area spells across layouts and respect discipline namespaces', () => {
   const first = replacementRow(1, 'Timer first', 1), second = replacementRow(2, 'Timer second', 1, { damage: 150 })
   first[97] = '12'; second[97] = '12'; second[30] = '4'; second.splice(74, 0, '0')
   const discipline = replacementRow(3, 'Discipline separate', 1); discipline[97] = '12'; discipline[98] = '1'
@@ -56,6 +56,26 @@ test('captured positive timer IDs merge exact shared cooldown choices across geo
     assert.match(result.records.find((row) => row.id === 2)!.line!.reason, /Spells share recast timer 12/)
     assert.deepEqual(f.source.records.map(capturedSpellTimer), ['spell:12', 'spell:12', 'discipline:12', 'spell:13', ...invalid.map(() => null)])
     assert.equal(JSON.stringify(f.source.records), snapshot)
+  } finally { f.close() }
+})
+
+test('a shared timer cannot connect Ranger arrows to Wizard area damage or single-target damage to area damage', () => {
+  const cold = replacementRow(374, 'Numbing Cold', 1)
+  const clap = replacementRow(471, 'Thunderclap', 30, { damage: 500 })
+  const single = spellRow(1, 'Single-target Wizard bolt')
+  const otherArea = replacementRow(2, 'Ranger area spell', 1, { code: 'RNG' })
+  const flame = replacementRow(3565, 'Flaming Arrow', 26, { code: 'RNG' })
+  const burning = replacementRow(3564, 'Burning Arrow', 36, { code: 'RNG', damage: 250 })
+  for (const row of [flame, burning]) { row[30] = '5'; row[13] = '0'; row[11] = '1'; row[12] = '4' }
+  flame[97] = '1'
+  for (const row of [cold, clap, single, otherArea, burning]) row[97] = '4'
+  const f = fixture([cold, clap, single, otherArea, flame, burning])
+  try {
+    const result = f.search({ level: 50, classes: ['RNG', 'WIZ'], sortBy: 'amount', direction: 'desc' })
+    assert.equal(result.matchingRecords, 6)
+    assert.deepEqual(new Set(ids(result)), new Set([1, 2, 471, 3564]))
+    assert.deepEqual(result.records.find((row) => row.id === 471)?.line?.alternatives.map((row) => row.id), [374])
+    assert.deepEqual(result.records.find((row) => row.id === 3564)?.line?.alternatives.map((row) => row.id), [3565])
   } finally { f.close() }
 })
 
