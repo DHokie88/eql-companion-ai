@@ -27,6 +27,11 @@ export interface CharacterSnap {
    * projection). See shared/currentLevel.ts for the precedence rules and the wording.
    */
   level?: LevelStatement
+  /**
+   * The latest `/who` row even when a later ding is the current `level`. Leveling still reads
+   * `level` (latest statement, then the ding tail). This fact is only so that `/who` is not dropped.
+   */
+  lastWho?: LevelStatement
 }
 
 /** Every field is optional in a delta — the module pushes only what actually moved. */

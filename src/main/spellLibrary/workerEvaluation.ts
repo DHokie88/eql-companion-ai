@@ -5,6 +5,7 @@ import { evaluateModifiedSpell, SpellModifierCatalog } from '../../shared/client
 import { analyzeClientSpell, SpellMechanicsCatalog } from '../../shared/clientSpellAnalysis'
 import { analysisArg } from './analysisValidation'
 import { classesArg, evaluationArg } from './queryValidation'
+import { resolveBrowseRank, type ResolvedBrowseRank } from '../../shared/browseSpellRank'
 import type { SpellLibraryStorage } from './storage'
 import { describeClientSpell } from '../../shared/clientSpellDescriptions'
 import { bardSongPresentation } from '../../shared/bardSongPresentation'
@@ -37,6 +38,11 @@ export class WorkerSpellEvaluation {
     this.cached.mechanics ??= new SpellMechanicsCatalog(this.storage.records(dataset.snapshotId))
     return this.cached.mechanics
   }
+  browseRank(dataset: SpellDataset, record: ClientSpellRecord, input: unknown): ResolvedBrowseRank | null {
+    const context = input as SpellModifierContext | undefined
+    if (!context) return null
+    return resolveBrowseRank(record, context, this.catalog(dataset))
+  }
   detectedRank(dataset: SpellDataset, record: ClientSpellRecord, input: unknown): number | null {
     return this.rankEvidence(dataset, record, input)?.rank ?? null
   }
@@ -57,10 +63,13 @@ export class WorkerSpellEvaluation {
     const analysis = analysisArg(query.analysis)
     if (!dataset) return calculateClientSpell
     if (analysis) return this.analysisCalculator(dataset, query, modifiers)
-    if (!options || options.mode === 'client' || !modifiers) return calculateClientSpell
+    if ((!options || options.mode === 'client' || !modifiers) && query.browseRank !== true) return calculateClientSpell
+    if (!modifiers) return calculateClientSpell
     const catalog = this.catalog(dataset)
-    const classes = options.classes ?? classesArg(query.classes) ?? []
-    return (record, level, metric) => evaluateModifiedSpell(record, { level, metric, classes, context: modifiers, rankOnly: options.rankOnly }, catalog)
+    const classes = options?.classes ?? classesArg(query.classes) ?? []
+    const browseRank = query.browseRank === true
+    const rankOnly = options?.rankOnly
+    return (record, level, metric) => evaluateModifiedSpell(record, { level, metric, classes, context: modifiers, rankOnly, browseRank }, catalog)
   }
   private analysisCalculator(dataset: SpellDataset, query: Record<string, unknown>, context: SpellModifierContext | undefined): SpellCalculator {
     const analysis = analysisArg(query.analysis)
@@ -68,7 +77,8 @@ export class WorkerSpellEvaluation {
     const dependencies = { modifiers: this.catalog(dataset), mechanics: this.mechanics(dataset) }
     const evaluation = evaluationArg(query.evaluation)
     const classes = evaluation?.classes ?? classesArg(query.classes) ?? []
-    return (record, level, metric) => analyzeClientSpell(record, { level, metric, classes, context, analysis, rankOnly: evaluation?.rankOnly }, dependencies)
+    const browseRank = query.browseRank === true
+    return (record, level, metric) => analyzeClientSpell(record, { level, metric, classes, context, analysis, rankOnly: evaluation?.rankOnly, browseRank }, dependencies)
   }
 }
 

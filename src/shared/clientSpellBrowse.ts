@@ -7,6 +7,10 @@ export const SPELL_TYPE_LABELS: Record<SpellBrowseType, string> = { dd: 'DD', do
 const AREA_TARGETS = new Set([2, 4, 8, 20, 24, 25, 32, 36, 37, 40, 42, 44, 45, 50])
 const spellCollator = new Intl.Collator('en', { sensitivity: 'base', numeric: true })
 
+/**
+ * Lowest listed class level in scope. An empty class list is unknown or NPC, not level 0.
+ * The parser omits client column 0 (cannot use) and 255, so a stored 0 is the only level-less row.
+ */
 export function minimumSpellLevel(entries: ClientSpellClass[], classes: readonly SpellClass[]): number | null {
   const eligible = entries.filter((entry) => !classes.length || classes.includes(entry.code))
   return eligible.length ? Math.min(...eligible.map((entry) => entry.level)) : null
@@ -60,9 +64,25 @@ export function compareSpellValues(a: string | number | null, b: string | number
   return direction === 'asc' ? result : -result
 }
 
-export function spellBrowseSortValue(record: SpellSummary, field: SpellBrowseSort, selected: ReadonlySet<number>): string | number | null {
+/**
+ * Class/Level sort key for the full result, before pagination.
+ * One selected class uses that class's own requirement.
+ * Several different requirements and no single selected class sort as unknown (null), after every comparable row.
+ * Equal keys stay tied so the caller can break them with the numeric id.
+ */
+export function spellBrowseClassSortValue(record: SpellSummary, classes: readonly SpellClass[] = []): string | null {
+  const scope = classes.length ? record.classes.filter((entry) => classes.includes(entry.code)) : record.classes
+  if (!scope.length) return null
+  const level = scope[0].level
+  if (classes.length !== 1 && scope.some((entry) => entry.level !== level)) return null
+  const ordered = classes.length === 1 ? [scope[0]] : [...scope].sort((a, b) => a.code.localeCompare(b.code))
+  // Three digits keep level 8 before 58. compareSpellValues orders this one string in either direction.
+  return `${ordered.map((entry) => entry.code).join(' / ')} ${String(ordered[0].level).padStart(3, '0')}`
+}
+
+export function spellBrowseSortValue(record: SpellSummary, field: SpellBrowseSort, selected: ReadonlySet<number>, classes: readonly SpellClass[] = []): string | number | null {
   if (field === 'amount' || field === 'efficiency') return summaryCalculationValue(record, field)
-  if (field === 'classes') return record.classes.map((c) => c.code).sort().join(' / ') || null
+  if (field === 'classes') return spellBrowseClassSortValue(record, classes)
   if (field === 'description') return record.description ?? null
   return recordSortValue(record, field, selected)
     ?? analysisSortValue(record, field)

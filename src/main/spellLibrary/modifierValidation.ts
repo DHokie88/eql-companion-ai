@@ -1,4 +1,4 @@
-import type { SpellModifierPreferences, SpellModifierUpdate } from '../../shared/spellModifiers'
+import type { SpellBrowsePreferences, SpellModifierPreferences, SpellModifierUpdate } from '../../shared/spellModifiers'
 import { targetCountArg } from './analysisValidation'
 
 function object(value: unknown): Record<string, unknown> {
@@ -44,6 +44,22 @@ function overrides(value: unknown): SpellModifierPreferences['emulation']['ranks
   return result
 }
 
+function browsePreferences(value: unknown): SpellBrowsePreferences {
+  const row = object(value)
+  for (const key of Object.keys(row)) if (key !== 'rank' && key !== 'useMyRanks') throw new Error('Unexpected browse setting')
+  const browse: SpellBrowsePreferences = {}
+  if (row.rank !== undefined && row.rank !== null) {
+    const parsed = rank(row.rank)
+    if (parsed < 1) throw new Error('Browse rank must be I through X')
+    browse.rank = parsed
+  }
+  if (row.useMyRanks !== undefined) {
+    if (typeof row.useMyRanks !== 'boolean') throw new Error('Invalid Use my ranks setting')
+    browse.useMyRanks = row.useMyRanks
+  }
+  return browse
+}
+
 function focusIds(value: unknown): number[] {
   if (!Array.isArray(value) || value.length > 64) throw new Error('Invalid simulated focus selection')
   const ids = value.map((id: unknown) => spellId(id))
@@ -54,7 +70,10 @@ function focusIds(value: unknown): number[] {
 /** Every renderer and disk preference enters through this complete, bounded shape. */
 export function validateModifierPreferences(value: unknown): SpellModifierPreferences {
   const prefs = object(value)
-  keys(prefs, prefs.targets === undefined ? ['mode', 'emulation'] : ['mode', 'emulation', 'targets'])
+  const expected = ['mode', 'emulation']
+  if (prefs.targets !== undefined) expected.push('targets')
+  if (prefs.browse !== undefined) expected.push('browse')
+  keys(prefs, expected)
   if (prefs.mode !== 'client' && prefs.mode !== 'mine' && prefs.mode !== 'emulate') throw new Error('Invalid spell value mode')
   const emulation = object(prefs.emulation)
   keys(emulation, ['rank', 'ranks', 'focus', 'focusIds'])
@@ -62,6 +81,7 @@ export function validateModifierPreferences(value: unknown): SpellModifierPrefer
   return {
     mode: prefs.mode,
     ...(prefs.targets === undefined ? {} : { targets: targetCountArg(prefs.targets) }),
+    ...(prefs.browse === undefined ? {} : { browse: browsePreferences(prefs.browse) }),
     emulation: {
       rank: emulation.rank === null ? null : rank(emulation.rank),
       ranks: overrides(emulation.ranks),

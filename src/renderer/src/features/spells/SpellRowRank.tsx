@@ -1,31 +1,74 @@
-import type { JSX } from 'react'
-import { Chip, MenuItem, Select, Stack, Tooltip } from '@mui/material'
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
+import { type JSX, useEffect, useState } from 'react'
+import { Button, Chip, Menu, MenuItem, Stack } from '@mui/material'
+import CheckIcon from '@mui/icons-material/Check'
+import type { SpellBrowseRankMetadata } from '@shared/spellLibrary'
 import type { SpellRankEvidence } from '@shared/spellModifiers'
-import { currentSpellRankEvidence, previewSpellMote, spellMoteOverride } from '@shared/spellRankPreviews'
-import { useSpellRankState, useSpellRankSnapshot } from './spellRankState'
-import { MOTE_RANKS } from './SpellRankOverrides'
+import { currentBrowseRank } from '@shared/browseSpellRank'
+import { previewSpellMote, spellMoteOverride } from '@shared/spellRankPreviews'
+import { useSpellRankSnapshot, useSpellRankState } from './spellRankState'
 import { rankLabel } from './SpellEstimate'
 
-export function SpellRowRank({ id, name, evidence }: { id: number; name: string; evidence?: SpellRankEvidence | null }): JSX.Element | null {
-  const state = useSpellRankState(), context = state?.context
-  const currentEvidence = useCurrentEvidence(evidence)
-  if (!context) return null
-  return <Stack direction="row" alignItems="center" gap={0.75} flexWrap="wrap" sx={{ mt: 0.5 }}>
-    <ObservedRank evidence={evidence} />
-    {context.preferences.mode === 'emulate' && <Tooltip disableInteractive title="Simulated mote rank for this numeric spell ID. Auto follows the Rank control or observed rank."><span><Select<number | ''> size="small" displayEmpty value={spellMoteOverride(context.preferences, { id, name }) ?? ''} renderValue={(value) => value === '' ? inheritedRank(context.preferences.emulation.rank, currentEvidence) : rankLabel(value)} disabled={state.saving || state.loading} inputProps={{ 'aria-label': `Preview mote rank for ${name} (${id})` }} data-testid={`spell-preview-rank-${id}`} sx={{ fontSize: 12, minWidth: 64, '& .MuiSelect-select': { py: 0.5 } }} onChange={(event) => state.update(previewSpellMote(context.preferences, { id, name }, event.target.value === '' ? null : Number(event.target.value)))}><MenuItem value="">Auto</MenuItem>{MOTE_RANKS.map((rank) => <MenuItem key={rank} value={rank}>{rankLabel(rank)}</MenuItem>)}</Select></span></Tooltip>}
-  </Stack>
+const RANKS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+function boundedRank(rank: number | null | undefined): number | null {
+  return typeof rank === 'number' && rank >= 1 && rank <= 10 ? rank : null
 }
-function ObservedRank({ evidence }: { evidence?: SpellRankEvidence | null }): JSX.Element | null {
-  const current = useCurrentEvidence(evidence)
-  if (!current) return null
-  return <Tooltip disableInteractive title="Highest mote rank observed in this character's own cast or merge logs. This is log evidence, not a current spellbook scan."><Chip size="small" color="success" variant="outlined" icon={<CheckCircleOutlineIcon />} label={`Yours ${rankLabel(current.rank)}`} data-testid="spell-owned-rank" sx={{ height: 22, fontSize: 11, '& .MuiChip-icon': { fontSize: 14 } }} /></Tooltip>
-}
-function useCurrentEvidence(evidence?: SpellRankEvidence | null): SpellRankEvidence | null {
-  const context = useSpellRankState()?.context
-  const snapshotId = useSpellRankSnapshot()
-  if (!evidence || !currentSpellRankEvidence(evidence, { characterKey: context?.character?.key ?? null, revision: context?.revision ?? null, snapshotId })) return null
-  return evidence
+function displayedRank(live: SpellBrowseRankMetadata | null, override: number | null, global: number | null | undefined): { rank: number; source: string; owned: boolean; label: string } {
+  if (live) return { rank: live.rank, source: live.source, owned: live.owned, label: live.label }
+  const manual = boundedRank(override)
+  if (manual !== null) return { rank: manual, source: 'override', owned: false, label: rankLabel(manual) }
+  const rank = boundedRank(global) ?? 1
+  return { rank, source: 'global', owned: false, label: rankLabel(rank) }
 }
 
-function inheritedRank(rank: number | null, evidence?: SpellRankEvidence | null): string { return rank !== null ? rankLabel(rank) : evidence ? rankLabel(evidence.rank) : '?' }
+export function SpellRowRank({ id, name, browseRank }: {
+  id: number; name: string; evidence?: SpellRankEvidence | null; browseRank?: SpellBrowseRankMetadata | null
+}): JSX.Element | null {
+  const state = useSpellRankState()
+  const snapshotId = useSpellRankSnapshot()
+  const context = state?.context
+  const characterKey = context?.character?.key ?? ''
+  const [anchor, setAnchor] = useState<HTMLElement | null>(null)
+  useEffect(() => { setAnchor(null) }, [characterKey, id])
+  if (!context) return null
+  const shown = rowRankView({ context, browseRank, snapshotId, id, name })
+  const override = spellMoteOverride(context.preferences, { id, name })
+  const choose = (next: number | null): void => {
+    setAnchor(null)
+    state.update(previewSpellMote(context.preferences, { id, name }, next))
+  }
+  return <RankChoices id={id} name={name} shown={shown} override={override} anchor={anchor} setAnchor={setAnchor} choose={choose} disabled={state.saving || state.loading} />
+}
+
+function rowRankView(input: { context: NonNullable<ReturnType<typeof useSpellRankState>>['context']; browseRank: SpellBrowseRankMetadata | null | undefined; snapshotId: string | null; id: number; name: string }) {
+  const { context, browseRank, snapshotId, id, name } = input
+  if (!context) return displayedRank(null, null, 1)
+  const override = spellMoteOverride(context.preferences, { id, name })
+  const live = currentRowRank(browseRank, { characterKey: context.character?.key ?? null, revision: context.revision ?? null, snapshotId })
+  const global = context.preferences.browse?.rank ?? context.preferences.emulation.rank
+  return displayedRank(live, override, global)
+}
+function currentRowRank(browseRank: SpellBrowseRankMetadata | null | undefined, guard: { characterKey: string | null; revision: string | null; snapshotId: string | null }): SpellBrowseRankMetadata | null {
+  if (!browseRank || !currentBrowseRank(browseRank, guard)) return null
+  return browseRank
+}
+function RankChoices({ id, name, shown, override, anchor, setAnchor, choose, disabled }: {
+  id: number; name: string; shown: { source: string; owned: boolean; label: string }; override: number | null
+  anchor: HTMLElement | null; setAnchor: (anchor: HTMLElement | null) => void; choose: (next: number | null) => void; disabled: boolean
+}): JSX.Element {
+  const { source, owned, label } = shown
+  return <Stack direction="row" alignItems="center" data-testid={`spell-rank-cell-${id}`}>
+    <Button size="small" aria-haspopup="listbox" aria-label={`Rank for ${name}`} data-testid={`spell-preview-rank-${id}`} data-rank-source={owned ? 'owned' : source} disabled={disabled} onClick={(event) => setAnchor(event.currentTarget)} sx={{ minWidth: 0, px: 0.75, py: 0.25, textTransform: 'none' }}>
+      {owned
+        ? <Chip size="small" color="success" variant="outlined" icon={<CheckIcon />} label={`Yours ${label}`} data-testid="spell-owned-rank" sx={{ height: 22, fontSize: 11, '& .MuiChip-icon': { fontSize: 14 } }} />
+        : <span>{label}{source === 'override' ? ' manual' : ' ▾'}</span>}
+    </Button>
+    <Menu anchorEl={anchor} open={Boolean(anchor)} onClose={() => setAnchor(null)} slotProps={{ paper: { sx: { bgcolor: 'background.paper', backgroundImage: 'none' } } }}>
+      <MenuItem dense onClick={() => choose(null)} data-testid={`spell-rank-auto-${id}`}>Auto</MenuItem>
+      <Stack direction="row" flexWrap="wrap" sx={{ width: 196, px: 0.5 }}>
+        {RANKS.map((value) => <MenuItem key={value} dense sx={{ width: 64, justifyContent: 'center' }} data-testid={`spell-rank-option-${id}-${value}`} onClick={() => choose(value)}>{rankLabel(value)}</MenuItem>)}
+      </Stack>
+      <MenuItem dense disabled={override === null} onClick={() => choose(null)} data-testid={`spell-rank-reset-${id}`}>Reset override</MenuItem>
+    </Menu>
+  </Stack>
+}

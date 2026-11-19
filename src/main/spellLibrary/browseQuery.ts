@@ -1,11 +1,13 @@
 import type { SpellMechanicsCatalog } from '../../shared/clientSpellMechanics'
 import { SPELL_BROWSE_SORTS, type ClientSpellRecord, type SpellBrowseSort, type SpellBrowseType, type SpellSortDirection } from '../../shared/spellLibrary'
 import { matchesSpellType, minimumSpellLevel } from '../../shared/clientSpellBrowse'
-import { classesArg, levelArg, optionalText } from './queryValidation'
+import { spellEraAdmits, type SpellEraFilter } from '../../shared/spellBrowseEra'
+import { classesArg, levelArg, optionalText, spellLevelBound } from './queryValidation'
+import { spellEraLabel } from './spellBrowseEraTable'
 import { integerArg } from './workerProtocol'
 
 export const SEARCH_QUERY_FIELDS = ['snapshotId', 'text', 'classes', 'level', 'category', 'subcategory', 'effect', 'allSpells', 'allLevels',
-  'minLevel', 'maxLevel', 'type', 'polarity', 'mana', 'sortBy', 'direction', 'selectedIds', 'page', 'pageSize', 'evaluation', 'analysis', 'group', 'metric', 'includeHighlights', 'bestInLine', 'hpFilter']
+  'minLevel', 'maxLevel', 'type', 'polarity', 'mana', 'sortBy', 'direction', 'selectedIds', 'page', 'pageSize', 'evaluation', 'analysis', 'group', 'metric', 'includeHighlights', 'bestInLine', 'hpFilter', 'era', 'includeEffects', 'browseRank']
 
 function optionalChoice<T extends string>(value: unknown, name: string, choices: readonly T[]): T | undefined {
   if (value === undefined) return undefined
@@ -33,8 +35,8 @@ function resultOptions(query: Record<string, unknown>) {
     includeHighlights: optionalBoolean(query.includeHighlights, 'includeHighlights') }
 }
 export function spellSearchOptions(query: Record<string, unknown>) {
-  const minLevel = query.minLevel === undefined ? undefined : levelArg(query.minLevel)
-  const maxLevel = query.maxLevel === undefined ? undefined : levelArg(query.maxLevel)
+  const minLevel = query.minLevel === undefined ? undefined : spellLevelBound(query.minLevel)
+  const maxLevel = query.maxLevel === undefined ? undefined : spellLevelBound(query.maxLevel)
   if (minLevel !== undefined && maxLevel !== undefined && minLevel > maxLevel) throw new Error('Minimum spell level must not exceed maximum spell level')
   return {
     classes: classesArg(query.classes) ?? [], level: query.level === undefined ? undefined : levelArg(query.level),
@@ -47,6 +49,7 @@ export function spellSearchOptions(query: Record<string, unknown>) {
     hpFilter: optionalChoice(query.hpFilter, 'HP filter', ['damage', 'healing'] as const),
     ...resultOptions(query),
     polarity: optionalChoice(query.polarity, 'polarity', ['beneficial', 'detrimental'] as const),
+    era: optionalChoice<SpellEraFilter>(query.era, 'era', ['current', 'preview', 'unknown', 'all']),
     mana: optionalChoice(query.mana, 'mana filter', ['free', 'cost'] as const),
     sortBy: optionalChoice<SpellBrowseSort>(query.sortBy, 'sort column', SPELL_BROWSE_SORTS) ?? 'id',
     direction: optionalChoice<SpellSortDirection>(query.direction, 'sort direction', ['asc', 'desc']) ?? 'asc', selected: new Set(selection(query.selectedIds))
@@ -57,6 +60,7 @@ type SearchOptions = ReturnType<typeof spellSearchOptions>
 function matchesLevel(record: ClientSpellRecord, options: SearchOptions): boolean {
   const learned = minimumSpellLevel(record.classes, options.classes)
   const ceiling = options.maxLevel ?? (options.allLevels || options.allSpells ? undefined : options.level)
+  // Null is unknown or NPC. A minimum of 0 does not promote that absence into a learned level.
   if (learned === null) return options.classes.length === 0 && options.minLevel === undefined && ceiling === undefined
   return (options.minLevel === undefined || learned >= options.minLevel) && (ceiling === undefined || learned <= ceiling)
 }
@@ -78,5 +82,6 @@ export function matchesSpellSearch(record: ClientSpellRecord, options: SearchOpt
   if (options.category && record.category !== options.category) return false
   if (options.subcategory && record.subcategory !== options.subcategory) return false
   if (options.effect !== undefined && !record.effects.some((slot) => slot.spa === options.effect)) return false
+  if (options.era && !spellEraAdmits(spellEraLabel(record.name), options.era)) return false
   return matchesLevel(record, options) && matchesTraits(record, options, mechanics)
 }

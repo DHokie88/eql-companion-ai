@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto'
 import { resolve } from 'node:path'
 import {
   defaultSpellModifierPreferences,
+  withBrowsePreferences,
   SPELL_MODIFIER_MODEL_VERSION,
   type SpellModifierContext,
   type SpellModifierPreferences
@@ -121,7 +122,8 @@ export class SpellModifierCoordinator {
         facts = unavailable(error)
       }
       if (token !== this.invalidation || key !== selectionKey(this.deps.selection())) continue
-      const preferences = (selection.character === null ? this.sessionProfiles[key] : this.profiles[key]) ?? defaultSpellModifierPreferences()
+      const stored = (selection.character === null ? this.sessionProfiles[key] : this.profiles[key]) ?? defaultSpellModifierPreferences()
+      const preferences = withBrowsePreferences(stored)
       const character = selection.character === null ? null : { ...selection.character, key }
       const value = { profileKey: key, modelVersion: SPELL_MODIFIER_MODEL_VERSION, character, preferences, ...facts }
       // Export timestamps are provenance. Rewriting identical gear must not re-rank the catalog.

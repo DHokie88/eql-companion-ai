@@ -2,22 +2,24 @@ import { Fragment, type JSX } from 'react'
 import { Box, Button, IconButton, Stack, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import type { SpellBrowseSort, SpellMetric, SpellSummary } from '@shared/spellLibrary'
+import { spellEraCaption } from '@shared/spellBrowseEra'
+import { spellBrowseEffectText } from '@shared/spellBrowseEffects'
 import { amount, efficiencyAmount, wholeAmount, EstimateAmount } from './SpellEstimate'
 import { SpellNameButton, SpellSortHeader, type useSpellSort } from './SpellTableControls'
 import { SpellRowRank } from './SpellRowRank'
 import { SpellCastSummary } from './SpellCastSummary'
-import { browseColumns, browseColumnWidth, browseTimingValue, DEFAULT_BROWSE_COLUMNS, type CategoryDisplay } from './spellBrowseColumns'
+import { browseColumns, browseColumnWidth, browseTimingValue, DEFAULT_BROWSE_COLUMNS, type BrowseDisplayField, type CategoryDisplay } from './spellBrowseColumns'
 import { useSpellWorkspaceState } from './spellWorkspace'
 
 interface CellProps {
-  record: SpellSummary; field: SpellBrowseSort; display: CategoryDisplay; selected: number[]; expanded: boolean
+  record: SpellSummary; field: BrowseDisplayField; display: CategoryDisplay; selected: number[]; expanded: boolean
   toggleLine: () => void; onOpen: (id: number) => void; onToggle: (id: number) => void
 }
-const WRAPPING_COLUMNS = new Set<SpellBrowseSort>(['name', 'description', 'classes', 'category', 'subcategory', 'type'])
+const WRAPPING_COLUMNS = new Set<BrowseDisplayField>(['name', 'description', 'classes', 'category', 'subcategory', 'type', 'spa'])
 function NameCell({ record, expanded, toggleLine, onOpen }: CellProps): JSX.Element {
-  return <><Stack direction="row" alignItems="center" gap={0.5}><SpellNameButton id={record.id} onOpen={onOpen}>{record.name}</SpellNameButton>
+  return <Stack direction="row" alignItems="center" gap={0.5} flexWrap="wrap"><SpellNameButton id={record.id} onOpen={onOpen}>{record.name}</SpellNameButton>
+      {record.era && <Typography variant="caption" data-testid={`spell-era-${record.id}`} color={record.era === 'unknown' ? 'warning.main' : 'text.secondary'}>{spellEraCaption(record.era)}</Typography>}
       {record.line && <Tooltip title={`${record.line.alternatives.length} alternatives. ${record.line.reason}`}><IconButton size="small" aria-label={`Alternatives for ${record.name}`} aria-expanded={expanded} onClick={toggleLine} data-testid={`spells-expand-${record.id}`}><ExpandMoreIcon sx={{ transform: expanded ? 'rotate(180deg)' : undefined }} /></IconButton></Tooltip>}</Stack>
-      <SpellRowRank id={record.id} name={record.name} evidence={record.rankEvidence} /></>
 }
 function CategoryCell({ record, display }: CellProps): JSX.Element {
   return <>{display === 'subcategory' ? record.subcategory || '-' : record.category || 'Uncategorized'}{display === 'both' && record.subcategory && <Typography variant="caption" display="block" color="text.secondary">{record.subcategory}</Typography>}</>
@@ -31,19 +33,29 @@ function CompareCell({ record, selected, onToggle }: CellProps): JSX.Element {
   const active = selected.includes(record.id)
   return <Button size="small" variant={active ? 'contained' : 'outlined'} disabled={!active && selected.length >= 4} onClick={() => onToggle(record.id)} data-testid={`spells-compare-${record.id}`}>{active ? 'Selected' : 'Add'}</Button>
 }
-function SpellCell(props: CellProps): JSX.Element {
+function identityCell(props: CellProps): JSX.Element | null {
   const { record, field } = props
-  switch (field) {
-    case 'id': return <>{record.id}</>
-    case 'name': return <NameCell {...props} />
-    case 'category':
-    case 'subcategory': return <CategoryCell {...props} />
-    case 'amount':
-    case 'efficiency': return <CalculationCell {...props} />
-    case 'mana': return <>{record.calculations?.[0]?.mana ?? record.mana}</>
-    case 'selected': return <CompareCell {...props} />
-    default: return <TextCell record={record} field={field} />
-  }
+  if (field === 'id') return <>{record.id}</>
+  if (field === 'name') return <NameCell {...props} />
+  if (field === 'rank') return <SpellRowRank id={record.id} name={record.name} evidence={record.rankEvidence} browseRank={record.browseRank} />
+  if (field === 'spa') return <SpaCell record={record} />
+  return null
+}
+function metricCell(props: CellProps): JSX.Element | null {
+  const { record, field } = props
+  if (field === 'category' || field === 'subcategory') return <CategoryCell {...props} />
+  if (field === 'amount' || field === 'efficiency') return <CalculationCell {...props} />
+  if (field === 'mana') return <>{record.calculations?.[0]?.mana ?? record.mana}</>
+  if (field === 'selected') return <CompareCell {...props} />
+  return null
+}
+function SpellCell(props: CellProps): JSX.Element {
+  return identityCell(props) ?? metricCell(props) ?? <TextCell record={props.record} field={props.field} />
+}
+function SpaCell({ record }: { record: SpellSummary }): JSX.Element {
+  const slots = record.effects ?? []
+  if (!slots.length) return <>-</>
+  return <Stack gap={0.25} data-testid={`spell-spa-${record.id}`} sx={{ maxWidth: 240 }}>{slots.map((slot) => <Typography key={slot.slot} variant="caption" title={slot.formula ?? undefined} sx={{ display: 'block', whiteSpace: 'normal', overflowWrap: 'anywhere', lineHeight: 1.35 }}>{spellBrowseEffectText(slot)}</Typography>)}</Stack>
 }
 function TextCell({ record, field }: Pick<CellProps, 'record' | 'field'>): JSX.Element {
   if (field === 'classes') return <>{record.classes.length ? record.classes.map((c) => `${c.code} ${c.level}`).join(' · ') : 'Internal / NPC'}</>
@@ -53,7 +65,7 @@ function TextCell({ record, field }: Pick<CellProps, 'record' | 'field'>): JSX.E
 }
 export function SpellBrowseTable({ records, selected, sort, filters, metric = 'damage', columns = DEFAULT_BROWSE_COLUMNS, uniformType = false, onOpen, onToggle }: {
   records: SpellSummary[]; selected: number[]; sort: ReturnType<typeof useSpellSort<SpellBrowseSort>>
-  filters?: { category: string; subcategory: string }; metric?: SpellMetric; columns?: SpellBrowseSort[]; uniformType?: boolean
+  filters?: { category: string; subcategory: string }; metric?: SpellMetric; columns?: BrowseDisplayField[]; uniformType?: boolean
   onOpen: (id: number) => void; onToggle: (id: number) => void
 }): JSX.Element {
   const categoryDisplay = !filters?.category ? 'both' : filters.subcategory ? 'none' : 'subcategory'
@@ -68,7 +80,11 @@ export function SpellBrowseTable({ records, selected, sort, filters, metric = 'd
       }} onOpen={onOpen} onToggle={onToggle} />
     </TableCell>)}
   </TableRow>
-  return <Box sx={{ overflowX: 'auto' }}><Table size="small" aria-label="Spell catalog" sx={{ tableLayout: 'fixed', width: '100%', minWidth: Math.min(totalWidth, 900) + Math.max(0, visible.length - 10) * 80, '& .MuiTableCell-root': { px: 1, py: 1, fontVariantNumeric: 'tabular-nums' } }}><colgroup>{visible.map((column) => <col key={column.field} style={{ width: `${100 * browseColumnWidth(column.field) / totalWidth}%` }} />)}</colgroup><TableHead><TableRow>
-    {visible.map((column) => <SpellSortHeader key={column.field} {...column} sort={sort} align={column.field === 'name' || column.field === 'description' ? 'left' : 'center'} />)}
+  const plain = new Set<BrowseDisplayField>(['rank', 'spa'])
+  const scroll = visible.some((column) => column.field === 'spa' || column.field === 'description')
+  return <Box sx={{ overflowX: 'auto' }} data-testid="spells-table-scroll"><Table size="small" aria-label="Spell catalog" sx={{ tableLayout: 'fixed', width: '100%', minWidth: scroll ? totalWidth : '100%', '& .MuiTableCell-root': { px: 1, py: 1, fontVariantNumeric: 'tabular-nums' } }}><colgroup>{visible.map((column) => <col key={column.field} style={{ width: `${100 * browseColumnWidth(column.field) / totalWidth}%` }} />)}</colgroup><TableHead><TableRow>
+    {visible.map((column) => plain.has(column.field)
+      ? <TableCell key={column.field} align={column.field === 'spa' ? 'left' : 'center'}>{column.label}</TableCell>
+      : <SpellSortHeader key={column.field} field={column.field as SpellBrowseSort} label={column.label} sort={sort} align={column.field === 'name' || column.field === 'description' ? 'left' : 'center'} />)}
   </TableRow></TableHead><TableBody>{records.map((record) => <Fragment key={record.id}>{row(record)}{record.line && expanded.includes(record.line.key) && record.line.alternatives.map((alternative) => row(alternative, true))}</Fragment>)}</TableBody></Table></Box>
 }

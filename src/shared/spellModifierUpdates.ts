@@ -14,7 +14,28 @@ export function rebaseSpellModifierPreferences(original: SpellModifierPreference
     }
   }
   result.emulation.ranks = rebaseRanks(original.emulation.ranks, requested.emulation.ranks, fresh.emulation.ranks)
-  return result
+  return applyBrowse(original, requested, result)
+}
+
+function browseRank(preferences: SpellModifierPreferences): number | null {
+  const rank = preferences.browse?.rank
+  return typeof rank === 'number' ? rank : null
+}
+function applyBrowse(original: SpellModifierPreferences, requested: SpellModifierPreferences, fresh: SpellModifierPreferences): SpellModifierPreferences {
+  const rankChanged = browseRank(original) !== browseRank(requested)
+  const mineChanged = (original.browse?.useMyRanks === true) !== (requested.browse?.useMyRanks === true)
+  if (!rankChanged && !mineChanged) return fresh
+  const browse = { ...fresh.browse }
+  if (rankChanged) {
+    if (browseRank(requested) === null) delete browse.rank
+    else browse.rank = browseRank(requested) ?? undefined
+  }
+  if (mineChanged) browse.useMyRanks = requested.browse?.useMyRanks === true
+  if (browse.rank === undefined && browse.useMyRanks === undefined) {
+    const { browse: _removed, ...rest } = fresh
+    return rest
+  }
+  return { ...fresh, browse }
 }
 
 function rebaseRanks(original: SpellModifierPreferences['emulation']['ranks'], requested: SpellModifierPreferences['emulation']['ranks'], fresh: SpellModifierPreferences['emulation']['ranks']) {

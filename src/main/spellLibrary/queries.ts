@@ -1,5 +1,5 @@
 import type {
-  ClientSpellRecord, SpellBeforeAfterResult, SpellChangesResult, SpellComparisonResult,
+  ClientSpellRecord, SpellBeforeAfterResult, SpellBrowseRankMetadata, SpellChangesResult, SpellComparisonResult,
   SpellDataset, SpellHistoryResult, SpellRankingResult, SpellSearchResult, SpellSummary,
   SpellTimelineResult, SpellCalculation, SpellMetric
 } from '../../shared/spellLibrary'
@@ -13,6 +13,8 @@ import { SpellLibraryStorage } from './storage'
 import { integerArg, objectArgs, stringArg } from './workerProtocol'
 import { classesArg, levelArg, metricArg, optionalText, pageArgs, queryObject, requiredSnapshotArg, snapshotArg, spellId } from './queryValidation'
 import type { SpellModifierContext } from '../../shared/spellModifiers'
+import { spellBrowseEffectSlots } from '../../shared/spellBrowseEffects'
+import { spellEraLabel } from './spellBrowseEraTable'
 import type { SpellByLevelResult, SpellRankingsResult } from '../../shared/spellAnalysis'
 import { clientSpellSlowSummary } from '../../shared/clientSpellDescriptions'
 
@@ -93,13 +95,38 @@ export class SpellLibraryQueries {
     if (!Object.hasOwn(handlers, method)) throw new Error('Unknown spell query method')
     return handlers[method]()
   }
+  private contextForKey(context: unknown): unknown {
+    const modifiers = context as SpellModifierContext | undefined
+    if (!modifiers) return undefined
+    return { ...modifiers, inventory: { ...modifiers.inventory, exportedAt: undefined } }
+  }
+  private remember<T>(cached: { method: string; installId: string; dataset: SpellDataset | null; query: unknown; context: unknown }, produce: () => T): T {
+    const { method, installId, dataset, query, context } = cached
+    const key = this.cache.key(method, { installId, dataset, query, context: this.contextForKey(context) })
+    const stored = this.cache.get(key)
+    if (stored !== undefined) return stored as T
+    const result = produce()
+    this.cache.set(key, result)
+    return result
+  }
+  private withBrowseRank(query: Record<string, unknown>, context: unknown): Record<string, unknown> {
+    const preferences = (context as SpellModifierContext | undefined)?.preferences
+    const requested = query.browseRank === true || (preferences?.browse !== undefined && (query.evaluation !== undefined || query.analysis !== undefined || query.includeEffects === true))
+    return requested ? { ...query, browseRank: true } : query
+  }
+  private browseMetadata(dataset: SpellDataset, record: ClientSpellRecord, context: unknown): SpellBrowseRankMetadata | null {
+    const modifiers = context as SpellModifierContext | undefined
+    const resolved = this.evaluation.browseRank(dataset, record, context)
+    if (!resolved || !modifiers) return null
+    return { ...resolved, characterKey: modifiers.character?.key ?? '', contextRevision: modifiers.revision, snapshotId: dataset.snapshotId }
+  }
   private analysisQuery(method: 'rankings' | 'byLevel', installId: string, args: Record<string, unknown>): unknown {
     const query = queryObject(args.query, [...SEARCH_QUERY_FIELDS, 'categoryTab', 'group', 'view', 'throughLevel'])
     const dataset = this.dataset(installId, query)
     this.evaluation.calculator(dataset, query, args.modifiers)
     const context = args.modifiers as SpellModifierContext | undefined
     // Inventory export time is UI provenance, not an effective calculation input.
-    const effectiveContext = context ? { ...context, inventory: { ...context.inventory, exportedAt: undefined } } : undefined
+    const effectiveContext = this.contextForKey(context)
     const key = this.cache.key(method, { installId, dataset, query, context: effectiveContext })
     const cached = this.cache.get(key)
     if (cached !== undefined) return refreshInstrumentProvenance(cached as SpellRankingsResult | SpellByLevelResult, context)
@@ -112,45 +139,104 @@ export class SpellLibraryQueries {
     return snapshot ? this.storage.dataset(installId, snapshot) : this.storage.active(installId)
   }
   private search(installId: string, input: unknown, context: unknown): SpellSearchResult {
-    const query = queryObject(input, SEARCH_QUERY_FIELDS)
+    const query = this.withBrowseRank(queryObject(input, SEARCH_QUERY_FIELDS), context)
     const dataset = this.dataset(installId, query)
-    const calculate = this.evaluation.calculator(dataset, query, context)
-    const result = searchCatalog(this.storage, dataset, query, { calculate, mechanics: dataset ? this.evaluation.mechanics(dataset) : undefined })
-    const highlights = result.highlights?.flatMap((entry) => entry.record ? [entry.record] : []) ?? []
-    if (dataset) for (const row of [...result.records.flatMap((row) => [row, ...row.line?.alternatives ?? []]), ...highlights]) {
-      const record = this.storage.record(dataset.snapshotId, row.id)
-      if (record) row.rankEvidence = this.evaluation.rankEvidence(dataset, record, context)
-    }
-    return result
+    return this.remember({ method: 'search', installId, dataset, query, context }, () => {
+      const calculate = this.evaluation.calculator(dataset, query, context)
+      const effectRank = query.includeEffects === true ? (record: ClientSpellRecord) => this.effectRank(dataset, record, query, context) : undefined
+      const result = searchCatalog(this.storage, dataset, query, { calculate, mechanics: dataset ? this.evaluation.mechanics(dataset) : undefined, effectRank })
+      const highlights = result.highlights?.flatMap((entry) => entry.record ? [entry.record] : []) ?? []
+      if (dataset) for (const row of [...result.records.flatMap((entry) => [entry, ...entry.line?.alternatives ?? []]), ...highlights]) {
+        const record = this.storage.record(dataset.snapshotId, row.id)
+        if (!record) continue
+        row.rankEvidence = this.evaluation.rankEvidence(dataset, record, context)
+        if (query.browseRank === true) row.browseRank = this.browseMetadata(dataset, record, context) ?? undefined
+      }
+      return result
+    })
   }
-  private detail(installId: string, input: unknown, context: unknown) {
-    const query = queryObject(input, ['snapshotId', 'id', 'level', 'evaluation', 'analysis'])
-    const id = spellId(query.id)
-    const dataset = this.dataset(installId, query)
+  private detailBody(dataset: SpellDataset | null, id: number, query: Record<string, unknown>, context: unknown) {
     const record = dataset ? this.storage.record(dataset.snapshotId, id) : null
     const calculate = this.evaluation.calculator(dataset, query, context)
-    const presentation = record && query.level !== undefined ? this.evaluation.presentation(dataset, { record, level: levelArg(query.level), query, context }) : undefined
-    return { dataset, record, presentation, rankEvidence: record ? this.evaluation.rankEvidence(dataset, record, context) : null, ...((query.evaluation !== undefined || query.analysis !== undefined) && record ? { calculations: hpCalculations(record, levelArg(query.level), calculate) } : {}) }
+    const level = query.level === undefined ? undefined : levelArg(query.level)
+    const effects = this.detailEffects(dataset, record, query, context)
+    const calculations = this.detailCalculations(record, query, level, calculate)
+    return {
+      dataset, record,
+      presentation: this.detailPresentation({ dataset, record, query, context, level }),
+      rankEvidence: this.detailEvidence(dataset, record, context),
+      ...this.detailEra(record),
+      ...this.detailRank(dataset, record, query, context),
+      ...(effects ? { effects } : {}),
+      ...(calculations ? { calculations } : {})
+    }
+  }
+  private detailPresentation(input: { dataset: SpellDataset | null; record: ClientSpellRecord | null; query: Record<string, unknown>; context: unknown; level: number | undefined }) {
+    const { dataset, record, query, context, level } = input
+    if (!record || level === undefined) return undefined
+    return this.evaluation.presentation(dataset, { record, level, query, context })
+  }
+  private detailEvidence(dataset: SpellDataset | null, record: ClientSpellRecord | null, context: unknown) {
+    if (!record || !dataset) return null
+    return this.evaluation.rankEvidence(dataset, record, context)
+  }
+  private detailEra(record: ClientSpellRecord | null): { era: ReturnType<typeof spellEraLabel> } | undefined {
+    if (!record) return undefined
+    return { era: spellEraLabel(record.name) }
+  }
+  private detailRank(dataset: SpellDataset | null, record: ClientSpellRecord | null, query: Record<string, unknown>, context: unknown) {
+    if (query.browseRank !== true || !record || !dataset) return undefined
+    return { browseRank: this.browseMetadata(dataset, record, context) }
+  }
+  private detailEffects(dataset: SpellDataset | null, record: ClientSpellRecord | null, query: Record<string, unknown>, context: unknown) {
+    if (query.includeEffects !== true || !record) return undefined
+    return spellBrowseEffectSlots(record, levelArg(query.level), this.effectRank(dataset, record, query, context))
+  }
+  private detailCalculations(record: ClientSpellRecord | null, query: Record<string, unknown>, level: number | undefined, calculate: SpellCalculator) {
+    const wants = query.evaluation !== undefined || query.analysis !== undefined || query.browseRank === true
+    if (!wants || !record || level === undefined) return undefined
+    return hpCalculations(record, level, calculate)
+  }
+  private comparedSpells(dataset: SpellDataset, request: { ids: number[]; level: number; metric: SpellMetric; query: Record<string, unknown>; context: unknown; calculate: SpellCalculator }) {
+    const { ids, level, metric, query, context, calculate } = request
+    const results: SpellCalculation[] = []
+    const rankEvidence: NonNullable<SpellComparisonResult['rankEvidence']> = {}
+    const browseRank: NonNullable<SpellComparisonResult['browseRank']> = {}
+    for (const id of ids) {
+      const record = this.storage.record(dataset.snapshotId, id)
+      if (!record) continue
+      const effectSummary = clientSpellSlowSummary(record, level)
+      results.push({ ...calculate(record, level, metric), ...(effectSummary ? { effectSummary } : {}) })
+      rankEvidence[String(id)] = this.evaluation.rankEvidence(dataset, record, context)
+      if (query.browseRank === true) browseRank[String(id)] = this.browseMetadata(dataset, record, context)
+    }
+    return { results, rankEvidence, browseRank }
+  }
+  private effectRank(dataset: SpellDataset | null, record: ClientSpellRecord, query: Record<string, unknown>, context: unknown): number | null {
+    if (!dataset) return null
+    if (query.browseRank === true) return this.evaluation.browseRank(dataset, record, context)?.rank ?? null
+    const modifiers = context as SpellModifierContext | undefined
+    if (!modifiers || modifiers.preferences.mode === 'client') return null
+    return this.evaluation.catalog(dataset).rank(record, modifiers).rank
+  }
+  private detail(installId: string, input: unknown, context: unknown) {
+    const query = this.withBrowseRank(queryObject(input, ['snapshotId', 'id', 'level', 'evaluation', 'analysis', 'browseRank', 'includeEffects']), context)
+    const id = spellId(query.id)
+    const dataset = this.dataset(installId, query)
+    return this.remember({ method: 'detail', installId, dataset, query, context }, () => this.detailBody(dataset, id, query, context))
   }
   private compare(installId: string, input: unknown, context: unknown): SpellComparisonResult {
-    const query = queryObject(input, ['snapshotId', 'ids', 'level', 'metric', 'evaluation', 'analysis'])
+    const query = this.withBrowseRank(queryObject(input, ['snapshotId', 'ids', 'level', 'metric', 'evaluation', 'analysis', 'browseRank']), context)
     if (!Array.isArray(query.ids) || query.ids.length > 4) throw new Error('Compare at most four spells')
     const ids = [...new Set(query.ids.map(spellId))]
     const level = levelArg(query.level)
     const metric = metricArg(query.metric)
     const dataset = this.dataset(installId, query)
-    const calculate = this.evaluation.calculator(dataset, query, context)
-    const results: SpellCalculation[] = []
-    const rankEvidence: NonNullable<SpellComparisonResult['rankEvidence']> = {}
-    if (dataset) for (const id of ids) {
-      const record = this.storage.record(dataset.snapshotId, id)
-      if (record) {
-        const effectSummary = clientSpellSlowSummary(record, level)
-        results.push({ ...calculate(record, level, metric), ...(effectSummary ? { effectSummary } : {}) })
-        rankEvidence[String(id)] = this.evaluation.rankEvidence(dataset, record, context)
-      }
-    }
-    return { dataset, level, scope: spellEvaluationScope(query), results, rankEvidence }
+    return this.remember({ method: 'compare', installId, dataset, query, context }, () => {
+      const calculate = this.evaluation.calculator(dataset, query, context)
+      const compared = dataset ? this.comparedSpells(dataset, { ids, level, metric, query, context, calculate }) : { results: [], rankEvidence: {}, browseRank: {} }
+      return { dataset, level, scope: spellEvaluationScope(query), results: compared.results, rankEvidence: compared.rankEvidence, ...(query.browseRank === true ? { browseRank: compared.browseRank } : {}) }
+    })
   }
   private rank(installId: string, input: unknown, context: unknown): SpellRankingResult {
     const query = queryObject(input, ['snapshotId', 'classes', 'level', 'metric', 'ranking', 'limit', 'evaluation'])

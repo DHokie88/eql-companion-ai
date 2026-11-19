@@ -288,6 +288,40 @@ function prefer(existing: { info: SpellResistInfo; playable: boolean }, playable
   return !existing.playable && playable
 }
 
+/** A packed slot blob is enough to recognize a known layout when columns trail it. Blank is not. */
+function packedSlotsValid(field: string | undefined): boolean {
+  if (!field) return false
+  const pieces = field.trim().split('$').filter((piece) => piece.length > 0)
+  if (!pieces.length) return false
+  return pieces.every((piece) => {
+    const parts = piece.split('|')
+    return parts.length >= 6 && parts.slice(0, 6).every((part) => part.trim() !== '' && Number.isFinite(Number(part)))
+  })
+}
+
+/**
+ * Project a row onto the legacy 173 column map.
+ * Layout 174 drops the inserted column at 74. Layout 190 does that and also drops the 16
+ * columns that sit immediately before the packed slots at 189. A 172-field row is unchanged
+ * so its missing slot field still reads as no slots.
+ * Returns null for a width that is not a known layout and has no validated pack.
+ */
+function project190(sourceFields: string[]): string[] {
+  const projected = [...sourceFields.slice(0, 74), ...sourceFields.slice(75, 173), sourceFields[189] ?? '']
+  if (sourceFields.length > 190) projected.push(...sourceFields.slice(190))
+  return projected
+}
+function projectSpellRow(sourceFields: string[]): string[] | null {
+  const width = sourceFields.length
+  if (width < F_SLOTS) return null
+  if (width === 190 || (width > 190 && packedSlotsValid(sourceFields[189]))) return project190(sourceFields)
+  if (width === 174 || (width > 174 && packedSlotsValid(sourceFields[173]))) {
+    return [...sourceFields.slice(0, 74), ...sourceFields.slice(75)]
+  }
+  if (width === 172 || width === 173 || packedSlotsValid(sourceFields[172])) return sourceFields
+  return null
+}
+
 /**
  * Parse the whole file. ~74k rows; measured around 350 ms on the owner's machine, which is
  * exactly why the caller runs it on a worker thread (JOS-371: no synchronous multi-MB work on the
@@ -299,10 +333,10 @@ export function parseSpellsUs(text: string): SpellResistTable {
   for (const line of text.split('\n')) {
     if (!line) continue
     const sourceFields = line.replace(/\r$/, '').split('^')
-    // Newer clients insert one column at 74. Keep the legacy projection's
-    // canonical-name selection unchanged, but read its verified columns correctly.
-    const f = sourceFields.length === 174 ? [...sourceFields.slice(0, 74), ...sourceFields.slice(75)] : sourceFields
-    if (f.length < F_SLOTS) continue
+    // 174 and 190 insert one column at 74. 190's packed slots move to field 189.
+    // Projection restores the legacy indexes. Rows shorter than 172 still drop.
+    const f = projectSpellRow(sourceFields)
+    if (!f || f.length < F_SLOTS) continue
     const name = f[F_NAME]
     if (!name || !Number.isFinite(Number(f[F_ID]))) continue
     const key = spellCanonKey(name)

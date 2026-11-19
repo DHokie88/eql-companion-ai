@@ -26,9 +26,12 @@ test('rebase applies changed leaves and per-ID removals while preserving unrelat
   const fresh = structuredClone(original)
   fresh.emulation.focus = 'selected'; fresh.emulation.focusIds = [9001]
   fresh.emulation.ranks['3'] = { name: 'Third', rank: 9 }
+  fresh.browse = { rank: 2 }
+  requested.browse = { rank: 6, useMyRanks: true }
   const before = structuredClone([original, requested, fresh])
   const result = rebaseSpellModifierPreferences(original, requested, fresh)
   assert.equal(result.mode, 'emulate'); assert.equal(result.targets, 3); assert.equal(result.emulation.rank, 1)
+  assert.equal(result.browse?.rank, 6); assert.equal(result.browse?.useMyRanks, true)
   assert.equal(result.emulation.focus, 'selected'); assert.deepEqual(result.emulation.focusIds, [9001])
   assert.deepEqual(result.emulation.ranks, { 2: { name: 'Second', rank: 0 }, 3: { name: 'Third', rank: 9 }, 4: { name: 'Fourth', rank: 1 } })
   assert.deepEqual([original, requested, fresh], before)

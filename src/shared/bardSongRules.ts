@@ -1,4 +1,5 @@
 import type { BardInstrumentFamily, BardSongEffectEstimate } from './bardInstruments'
+import { clientSpellColumnIndex } from './clientSpellParser'
 import type { ClientSpellEffect, ClientSpellRecord } from './spellLibrary'
 
 const FAMILIES: Readonly<Record<number, BardInstrumentFamily>> = { 12: 'brass', 41: 'singing', 49: 'string', 54: 'wind', 70: 'percussion' }
@@ -6,9 +7,9 @@ const SCALED = new Set([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 46, 47, 48, 49, 50, 55
 const FIXED = new Set([11, 12, 13, 14, 18, 19, 21, 27, 28, 29, 30, 31, 57, 63, 86, 89, 98, 119, 152, 158, 160, 161, 162, 179, 180, 254, 260, 261, 270, 298, 310, 314, 315, 316, 329, 351, 361, 417])
 
 export function bardSongFamily(record: ClientSpellRecord): BardInstrumentFamily | null {
-  // IS_SKILL / CombatSkill: original current-client column 98, shifted after the 174-layout insertion.
+  // IS_SKILL / CombatSkill: original column 98. Layouts 174 and 190 insert one column at 74.
   // Read it for calculations only; a new model must not reinterpret immutable source-history rows.
-  const discipline = record.rawFields[record.layout === 174 ? 99 : 98]
+  const discipline = record.rawFields[clientSpellColumnIndex(record.layout, 98)]
   if (record.fields.isDiscipline || discipline?.trim() !== '0') return null
   return record.classes.some((entry) => entry.code === 'BRD') ? FAMILIES[Number(record.fields.skill)] ?? null : null
 }

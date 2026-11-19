@@ -7,17 +7,19 @@ import { levelArg, pageArgs } from './queryValidation'
 import type { SpellLibraryStorage } from './storage'
 import type { SpellCalculator } from './workerEvaluation'
 import { clientSpellDescription } from '../../shared/clientSpellDescriptions'
+import { spellBrowseEffectSlots } from '../../shared/spellBrowseEffects'
 import { spellLineCandidate, type SpellLineCandidate } from '../../shared/clientSpellLines'
 import { bestCatalogSpellLines } from './bestSpellLines'
+import { spellEraLabel } from './spellBrowseEraTable'
 
 const CALCULATED_SORTS = new Set(['amount', 'efficiency', 'rate', 'cast', 'recovery', 'recast', 'duration', 'ticks', 'waves', 'targets', 'hits'])
 type SearchOptions = ReturnType<typeof spellSearchOptions>
-interface EvaluationDependencies { calculate: SpellCalculator; mechanics?: SpellMechanicsCatalog }
+interface EvaluationDependencies { calculate: SpellCalculator; mechanics?: SpellMechanicsCatalog; effectRank?: (record: ClientSpellRecord) => number | null }
 
 export function catalogSummary(record: ClientSpellRecord, classes: SearchOptions['classes'], mechanics?: SpellMechanicsCatalog, level?: number): SpellSummary {
   const { id, name, rank, mana, category, subcategory, beneficial, target, castMs, recoveryMs, recastMs } = record
   return { id, name, rank, classes: record.classes, mana, category, subcategory, beneficial, target, castMs, recoveryMs, recastMs, description: clientSpellDescription(record, level),
-    learnedLevel: minimumSpellLevel(record.classes, classes), spellType: clientSpellType(record, mechanics), typeLabel: clientSpellTypeLabel(record, mechanics) }
+    learnedLevel: minimumSpellLevel(record.classes, classes), spellType: clientSpellType(record, mechanics), typeLabel: clientSpellTypeLabel(record, mechanics), era: spellEraLabel(record.name) }
 }
 function evaluate(record: ClientSpellRecord, row: SpellSummary, level: number, input: { calculate: SpellCalculator; metric?: SpellMetric }): void {
   row.calculations = record.effects.some((e) => [0, 79, 100, 101, 334].includes(e.spa))
@@ -91,16 +93,19 @@ function evaluationOptions(query: Record<string, unknown>, options: SearchOption
   const level = requested ? levelArg(query.level) : options.bestInLine ? levelArg(query.level ?? 50) : undefined
   return { all, level, calculate, metric: query.metric === undefined ? undefined : options.metric }
 }
-function evaluatePage(storage: SpellLibraryStorage, dataset: SpellDataset | null, rows: SpellSummary[], evaluation: ReturnType<typeof evaluationOptions>): void {
-  if (evaluation.all || evaluation.level === undefined || !dataset) return
+function evaluatePage(storage: SpellLibraryStorage, dataset: SpellDataset | null, rows: SpellSummary[], pageEval: { evaluation: ReturnType<typeof evaluationOptions>; effects: { level: number; rank: (record: ClientSpellRecord) => number | null } | null }): void {
+  const { evaluation, effects } = pageEval
+  if (!dataset) return
   for (const row of rows) {
     const record = storage.record(dataset.snapshotId, row.id)
-    if (record) evaluate(record, row, evaluation.level, evaluation)
+    if (!record) continue
+    if (evaluation.level !== undefined && !evaluation.all) evaluate(record, row, evaluation.level, evaluation)
+    if (effects) row.effects = spellBrowseEffectSlots(record, effects.level, effects.rank(record))
   }
 }
 /** Sort the complete filtered catalog in the query worker, then evaluate just the requested page when possible. */
 export function searchCatalog(storage: SpellLibraryStorage, dataset: SpellDataset | null, query: Record<string, unknown>, dependencies: EvaluationDependencies): SpellSearchResult {
-  const { calculate, mechanics } = dependencies, options = spellSearchOptions(query)
+  const { calculate, mechanics, effectRank } = dependencies, options = spellSearchOptions(query)
   const { page, pageSize } = pageArgs(query)
   const evaluation = evaluationOptions(query, options, calculate)
   const { matches, candidates, sourceRecords, ...facets } = collect(storage, dataset, options, { mechanics, evaluateRow: (record, row) => {
@@ -111,10 +116,12 @@ export function searchCatalog(storage: SpellLibraryStorage, dataset: SpellDatase
   const group = options.group === 'zero-mana' ? 'zeroMana' : options.group
   const rows = !summary || group === 'all' ? choices : summary.groups[group]
   const matching = group === 'all' ? matches : matches.filter((row) => resultGroup(row, options.metric) === group)
-  rows.sort((a, b) => compareSpellValues(spellBrowseSortValue(a, options.sortBy, options.selected),
-    spellBrowseSortValue(b, options.sortBy, options.selected), options.direction) || a.id - b.id)
+  rows.sort((a, b) => compareSpellValues(spellBrowseSortValue(a, options.sortBy, options.selected, options.classes),
+    spellBrowseSortValue(b, options.sortBy, options.selected, options.classes), options.direction) || a.id - b.id)
   const records = rows.slice((page - 1) * pageSize, page * pageSize)
-  evaluatePage(storage, dataset, records.flatMap((row) => [row, ...row.line?.alternatives ?? []]), evaluation)
+  const pageRows = records.flatMap((row) => [row, ...row.line?.alternatives ?? []])
+  const effects = query.includeEffects === true ? { level: levelArg(query.level), rank: effectRank ?? (() => null) } : null
+  evaluatePage(storage, dataset, pageRows, { evaluation, effects })
   return { dataset, total: rows.length, page, pageSize, records, ...facets,
     matchingRecords: matching.length,
     matchingTypes: [...new Set(matching.map((row) => row.typeLabel ?? row.spellType ?? ''))].sort(),

@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 import type { ClientSpellRecord, SpellChangeCounts, SpellChangeKind, SpellFieldDifference } from '../../shared/spellLibrary'
-import { INTERPRETED_SPELL_COLUMNS } from '../../shared/clientSpellParser'
+import { INTERPRETED_SPELL_COLUMNS, clientSpellColumnIndex, clientSpellColumnShift } from '../../shared/clientSpellParser'
 
 export function stableJson(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(stableJson).join(',')}]`
@@ -24,19 +24,40 @@ function changedKeys(a: Record<string, unknown>, b: Record<string, unknown>): st
   return [...new Set([...Object.keys(a), ...Object.keys(b)])]
     .sort().filter((key) => stableJson(a[key]) !== stableJson(b[key]))
 }
-function rawDifferences(before: ClientSpellRecord, after: ClientSpellRecord): SpellFieldDifference[] {
-  const result: SpellFieldDifference[] = []
+function pushRaw(result: SpellFieldDifference[], field: string, before: string | null | undefined, after: string | null | undefined): void {
+  if ((before ?? '') === (after ?? '')) return
+  result.push({ field, before: before ?? null, after: after ?? null, kind: 'raw-only' })
+}
+function legacyRawDifferences(before: ClientSpellRecord, after: ClientSpellRecord, result: SpellFieldDifference[]): void {
   for (let i = 0; i < 173; i++) {
     if (INTERPRETED_SPELL_COLUMNS.has(i)) continue
-    const oldIndex = i + (before.layout === 174 && i >= 74 ? 1 : 0)
-    const newIndex = i + (after.layout === 174 && i >= 74 ? 1 : 0)
+    const oldIndex = clientSpellColumnIndex(before.layout, i)
+    const newIndex = clientSpellColumnIndex(after.layout, i)
     if (before.rawFields[oldIndex] !== after.rawFields[newIndex]) result.push({
       field: `rawFields[${i}] (173-layout index)`, before: before.rawFields[oldIndex], after: after.rawFields[newIndex], kind: 'raw-only'
     })
   }
-  if (before.layout === 174 && after.layout === 174 && before.rawFields[74] !== after.rawFields[74]) {
-    result.push({ field: 'rawFields[74] (inserted column)', before: before.rawFields[74], after: after.rawFields[74], kind: 'raw-only' })
+}
+function wideRawDifferences(before: ClientSpellRecord, after: ClientSpellRecord, result: SpellFieldDifference[]): void {
+  if (before.layout !== 190 || after.layout !== 190) return
+  for (let i = 173; i <= 188; i++) {
+    if (before.rawFields[i] === after.rawFields[i]) continue
+    result.push({ field: `rawFields[${i}] (190-layout column)`, before: before.rawFields[i] ?? null, after: after.rawFields[i] ?? null, kind: 'raw-only' })
   }
+}
+function trailingRawDifferences(before: ClientSpellRecord, after: ClientSpellRecord, result: SpellFieldDifference[]): void {
+  if (before.layout !== after.layout) return
+  const end = Math.max(before.rawFields.length, after.rawFields.length)
+  for (let i = before.layout; i < end; i++) pushRaw(result, `rawFields[${i}] (trailing column)`, before.rawFields[i], after.rawFields[i])
+}
+function rawDifferences(before: ClientSpellRecord, after: ClientSpellRecord): SpellFieldDifference[] {
+  const result: SpellFieldDifference[] = []
+  legacyRawDifferences(before, after, result)
+  if (clientSpellColumnShift(before.layout) === 1 && clientSpellColumnShift(after.layout) === 1) {
+    pushRaw(result, 'rawFields[74] (inserted column)', before.rawFields[74], after.rawFields[74])
+  }
+  wideRawDifferences(before, after, result)
+  trailingRawDifferences(before, after, result)
   return result
 }
 function namedDifferences(before: ClientSpellRecord, after: ClientSpellRecord, parserChanged: boolean): SpellFieldDifference[] {

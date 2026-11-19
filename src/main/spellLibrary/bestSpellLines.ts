@@ -1,3 +1,4 @@
+import { clientSpellColumnIndex } from '../../shared/clientSpellParser'
 import { linesForClass, type SpellLine } from '../data/spellLineLookup'
 import { bestSpellLines, type SpellLineCandidate } from '../../shared/clientSpellLines'
 import { compareSpellValues, spellBrowseSortValue } from '../../shared/clientSpellBrowse'
@@ -25,18 +26,18 @@ function replacementIndex(code: SpellClass) {
 const REPLACEMENTS = new Map(SPELL_CLASSES.map((code) => [code, replacementIndex(code)]))
 
 function rawInteger(record: ClientSpellRecord, index: number): number | null {
-  const raw = record.rawFields[index + (record.layout === 174 ? 1 : 0)]?.trim()
+  const raw = record.rawFields[clientSpellColumnIndex(record.layout, index)]?.trim()
   if (!raw || !/^\d+$/.test(raw)) return null
   const value = Number(raw)
   return Number.isSafeInteger(value) ? value : null
 }
 
-/** Read the captured timer_id, not the recast duration. The optional column at
- * index 74 shifts both timer_id and the following discipline flag by one.
+/** Read the captured timer_id, not the recast duration. Layouts 174 and 190
+ * insert one column at index 74, which shifts timer_id and the discipline flag.
  * Source rows remain unchanged, including snapshots imported by parser v1.
  */
 export function capturedSpellTimer(record: ClientSpellRecord): string | null {
-  if (record.rawFields.length !== record.layout) return null
+  if (record.rawFields.length < record.layout) return null
   const id = rawInteger(record, 97), flag = rawInteger(record, 98)
   if (id === null || id === 0 || flag === null) return null
   return `${flag > 0 ? 'discipline' : 'spell'}:${id}`

@@ -7,6 +7,7 @@ import { useSearchText } from './useSearchText'
 import { SpellNameButton, SpellSortHeader, useSpellSort } from './SpellTableControls'
 import { useSpellPageReset, useSpellScroll, useSpellWorkspaceState } from './spellWorkspace'
 import { SpellRowRank } from './SpellRowRank'
+import { SpellRankSlider } from './SpellBrowseToolbar'
 import { SpellBrowseFilters } from './SpellBrowseFilters'
 import { browseFilterError, defaultBrowseFilters, type BrowseFilters } from './useSpellBrowse'
 
@@ -20,6 +21,7 @@ export function SpellByLevel({ classes, level, evaluation, selected, onOpen, onP
   useSpellScroll('by-level', !!data && !loading)
   return <Stack spacing={1.5} data-testid="spells-by-level">
     <SpellBrowseFilters {...state} categories={data?.categories ?? []} subcategories={data?.subcategories ?? []} controls={<ProgressionControls state={state} controls={controls} level={level} />} />
+    <SpellRankSlider />
     {error && <Alert severity="error">{error}</Alert>}{loading && <CircularProgress size={22} />}
     {!enabled && <Typography>Select classes or choose All to see spells.</Typography>}
     {enabled && <ProgressionResults state={state} classes={classes} selected={selected} onOpen={onOpen} onPreview={onPreview} onToggle={onToggle} />}
@@ -52,7 +54,7 @@ function useByLevel({ classes, level, evaluation, enabled }: { classes: SpellCla
   const [text, setText] = useSpellWorkspaceState('by-level-search', '')
   const [savedFilters, setFilters] = useSpellWorkspaceState('progression-filters', defaultBrowseFilters())
   const filters = { ...savedFilters, text }
-  const maximum = filters.max ?? String(view === 'at' ? level : through ?? Math.min(255, level + 10))
+  const maximum = filters.max === null || filters.max === '' ? String(view === 'at' ? level : through ?? Math.min(255, level + 10)) : filters.max
   const invalid = browseFilterError(filters, maximum)
   const sort = useSpellSort<SpellBrowseSort>('level', 'asc', 'by-level')
   const queryText = useSearchText(text), classKey = classes.join(',')

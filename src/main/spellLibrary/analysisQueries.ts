@@ -125,8 +125,8 @@ export class SpellAnalysisQueries {
         detectedRank: this.evaluation.detectedRank(dataset, record, context), rankEvidence: this.evaluation.rankEvidence(dataset, record, context),
         calculations: this.byLevelCalculations(record, learned, options.query, calculate) })
     }
-    rows.sort((a, b) => compareSpellValues(spellBrowseSortValue(a, options.filters.sortBy, options.filters.selected),
-      spellBrowseSortValue(b, options.filters.sortBy, options.filters.selected), options.filters.direction) || a.id - b.id)
+    rows.sort((a, b) => compareSpellValues(spellBrowseSortValue(a, options.filters.sortBy, options.filters.selected, options.filters.classes),
+      spellBrowseSortValue(b, options.filters.sortBy, options.filters.selected, options.filters.classes), options.filters.direction) || a.id - b.id)
     return { dataset, total: rows.length, page: options.page, pageSize: options.pageSize,
       records: rows.slice((options.page - 1) * options.pageSize, options.page * options.pageSize),
       categories: [...result.categories].sort(), subcategories: [...result.subcategories].sort(),

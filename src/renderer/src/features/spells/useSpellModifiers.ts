@@ -19,6 +19,7 @@ export function useSpellModifiers(): SpellModifiersState {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const turn = useRef(0)
+  const request = useRef(0)
   const writing = useRef(false)
   const pendingWrites = useRef<(() => Promise<void>)[]>([])
   const current = useRef(context)
@@ -56,16 +57,20 @@ export function useSpellModifiers(): SpellModifiersState {
     if (!previous) return
     setError(null)
     const selection = selectionTurn.current
-    const isCurrent = (): boolean => alive.current && selectionTurn.current === selection &&
+    const ticket = ++request.current
+    const isCurrent = (): boolean => alive.current && selectionTurn.current === selection && ticket === request.current &&
       (current.current === null || spellModifierProfileKey(current.current) === spellModifierProfileKey(previous))
-    const save = (): Promise<void> => saveSpellModifierPreferences(previous, preferences, {
-      read: () => window.eq.spellLibrary.modifierContext(),
-      write: (update) => window.eq.spellLibrary.updateModifiers(update), isCurrent
-    }).then(() => {
-      if (isCurrent()) { setError(null); refreshCurrent.current() }
-    }).catch((cause: unknown) => {
-      if (isCurrent()) setError(message(cause))
-    })
+    const save = (): Promise<void> => {
+      if (ticket !== request.current) return Promise.resolve()
+      return saveSpellModifierPreferences(previous, preferences, {
+        read: () => window.eq.spellLibrary.modifierContext(),
+        write: (update) => window.eq.spellLibrary.updateModifiers(update), isCurrent
+      }).then(() => {
+        if (isCurrent()) { setError(null); refreshCurrent.current() }
+      }).catch((cause: unknown) => {
+        if (isCurrent()) setError(message(cause))
+      })
+    }
     pendingWrites.current.push(save)
     if (writing.current) return
     writing.current = true

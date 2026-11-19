@@ -1,9 +1,10 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { parseClientSpellBundle } from '../src/shared/clientSpellParser'
+import { spellDifferences } from '../src/main/spellLibrary/differences'
 import { spellBundle, spellFields } from './fixtures/spell-library/synthetic'
 
-for (const layout of [173, 174] as const) {
+for (const layout of [173, 174, 190] as const) {
   test(`full ${layout}-column map joins strings, messages, effects and unmodified fields`, () => {
     const fields = spellFields(101, 'Test Beacon Rk. II', layout)
     fields[60] = 'opaque future value'
@@ -39,7 +40,18 @@ for (const layout of [173, 174] as const) {
     assert.equal(record.messages.fades, 'It fades.')
     assert.match(record.rawDescription, /<BR>/)
     assert.equal(record.description, "Deal 40 points, 5 targets, max 40.\nLasts instant; unknown #12.  'test'")
-    if (layout === 174) assert.equal(record.rawFields[74], '6789')
+    if (layout !== 173) assert.equal(record.rawFields[74], '6789')
+    if (layout === 190) {
+      assert.equal(record.rawFields.length, 190)
+      assert.equal(record.rawFields[189], fields[189])
+      assert.equal(record.effects[0].calc, 100)
+      assert.equal(record.effects[0].max, 40)
+      fields[180] = ''
+      const [blankColumn] = parseClientSpellBundle(spellBundle([fields.join('^')]))
+      assert.equal(blankColumn.layout, 190)
+      assert.equal(blankColumn.rawFields[180], '')
+      assert.equal(blankColumn.fields.resistMod, -15)
+    }
   })
 }
 
@@ -126,6 +138,68 @@ test('a fractional client duration cap is preserved without truncating or reject
   const record = parseClientSpellBundle(spellBundle([fields.join('^')]))[0]
   assert.equal(record.durationCap, 20.5)
   assert.equal(record.rawFields[12], '20.5')
+})
+
+test('layout 190 reuses the 174 scalar shift and does not reinterpret shared columns', () => {
+  const fields = spellFields(101, 'Test Beacon', 190)
+  assert.equal(fields.length, 190)
+  assert.equal(fields[79], '-15')
+  assert.equal(fields[82], '102')
+  assert.equal(fields[86], '900')
+  assert.equal(fields[87], '45')
+  assert.equal(fields[88], '46')
+  assert.equal(fields[144], '8')
+  assert.equal(fields[166], '901')
+  assert.match(fields[189], /^1\|79\|/)
+  const [older] = parseClientSpellBundle(spellBundle([spellFields(101, 'Test Beacon', 173).join('^')]))
+  const [newer] = parseClientSpellBundle(spellBundle([fields.join('^')]))
+  const diffs = spellDifferences(older, newer)
+  assert.deepEqual(diffs.map((diff) => diff.field), ['layout'])
+  assert.equal(diffs[0].kind, 'format')
+})
+
+test('a validated trailing column is kept and a short or unrecognized row fails', () => {
+  const trailed = spellFields(101, 'Test Beacon', 190)
+  trailed.push('optional-tail')
+  const [record] = parseClientSpellBundle(spellBundle([trailed.join('^')]))
+  assert.equal(record.layout, 190)
+  assert.equal(record.rawFields.at(-1), 'optional-tail')
+  assert.equal(record.fields.resistMod, -15)
+  assert.deepEqual(record.effects.map((effect) => [effect.slot, effect.base, effect.limit, effect.calc, effect.max]), [
+    [1, -40, 5, 100, 40],
+    [2, 0, 0, 100, 0]
+  ])
+  const missing = spellFields(102, 'Test Beacon', 190)
+  missing.pop()
+  assert.equal(missing.length, 189)
+  assert.throws(() => parseClientSpellBundle(spellBundle([missing.join('^')])), /unsupported row layout \(189 fields\)/)
+  const malformed = spellFields(103, 'Test Beacon', 190)
+  malformed[189] = '1|79|bad|0|100|0'
+  assert.throws(() => parseClientSpellBundle(spellBundle([spellFields().join('^'), malformed.join('^')])), /invalid number/)
+  const wider174 = spellFields(105, 'Test Beacon', 174)
+  wider174.push('optional-tail')
+  const [as174] = parseClientSpellBundle(spellBundle([wider174.join('^')]))
+  assert.equal(as174.layout, 174)
+  assert.equal(as174.rawFields.at(-1), 'optional-tail')
+  assert.equal(as174.fields.resistMod, -15)
+  assert.equal(as174.effects[0].base, -40)
+  const rubbish = new Array<string>(200).fill('0')
+  rubbish[0] = '104'
+  rubbish[1] = 'Rubbish Row'
+  assert.throws(() => parseClientSpellBundle(spellBundle([rubbish.join('^')])), /unsupported row layout \(200 fields\)/)
+})
+
+test('exact layouts accept a blank effect pack and trailing columns still need a validated pack', () => {
+  for (const layout of [173, 174, 190] as const) {
+    const fields = spellFields(101, 'Test Beacon', layout)
+    const slot = layout === 190 ? 189 : layout === 174 ? 173 : 172
+    fields[slot] = ''
+    const [record] = parseClientSpellBundle(spellBundle([fields.join('^')]))
+    assert.equal(record.layout, layout)
+    assert.deepEqual(record.effects, [])
+    fields.push('tail', 'more')
+    assert.throws(() => parseClientSpellBundle(spellBundle([fields.join('^')])), /unsupported row layout/)
+  }
 })
 
 test('empty sources, duplicate IDs and malformed or duplicate joined strings fail', () => {

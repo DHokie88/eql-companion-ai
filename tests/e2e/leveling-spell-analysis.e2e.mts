@@ -102,7 +102,7 @@ async function unlocksAndRouting(page: Page): Promise<void> {
   await page.locator('[data-testid="nav-leveling"]').click()
   await page.locator('[data-testid="new-at-level-spell-name"]').first().click()
   await page.locator('[data-testid="spells-detail-back"]').waitFor()
-  assert.match(await page.locator('[data-testid="spells-hp-values"]').innerText(), /80|70/)
+  assert.match(await page.locator('[data-testid="spells-hp-values"]').innerText(), /104|91/)
   await page.locator('[data-testid="spells-detail-back"]').click()
   await page.locator('[data-testid="leveling-view"]').waitFor()
 }

@@ -1,9 +1,13 @@
+import type { SpellBrowseEffectSlot } from './spellBrowseEffects'
+import type { SpellEraLabel, SpellEraFilter } from './spellBrowseEra'
+import type { BrowseRankGuard, BrowseRankSource } from './browseSpellRank'
 import type { SpellEvaluationOptions, SpellFocusOptions, SpellModifierApplied, SpellModifierContext, SpellModifierUpdate, SpellRankEvidence } from './spellModifiers'
 import type { SpellAnalysis, SpellAnalysisOptions, SpellByLevelQuery, SpellByLevelResult, SpellRankingsQuery, SpellRankingsResult, SpellRankingRow } from './spellAnalysis'
 /** Local client catalog contract. Source bytes and filesystem paths never cross this bridge. */
 export const SPELL_SOURCE_FILES = ['spells_us.txt', 'spells_us_str.txt', 'dbstr_us.txt'] as const
 export type SpellSourceFile = (typeof SPELL_SOURCE_FILES)[number]
-export const CLIENT_SPELL_PARSER_VERSION = '1'
+/** Bump when interpreted columns change so identical source bytes publish a new snapshot. */
+export const CLIENT_SPELL_PARSER_VERSION = '2'
 export const SPELL_CLASSES = ['WAR', 'CLR', 'PAL', 'RNG', 'SHD', 'DRU', 'MNK', 'BRD', 'ROG', 'SHM', 'NEC', 'WIZ', 'MAG', 'ENC', 'BST', 'BER'] as const
 export type SpellClass = (typeof SPELL_CLASSES)[number]
 export interface ClientSpellEffect { slot: number; spa: number; base: number; limit: number; calc: number; max: number }
@@ -12,7 +16,7 @@ export interface ClientSpellRecord {
   id: number
   name: string
   rank: string | null
-  layout: 173 | 174
+  layout: 173 | 174 | 190
   rawFields: string[]
   fields: Record<string, string | number | boolean | null>
   classes: ClientSpellClass[]
@@ -53,6 +57,16 @@ export interface SpellLibraryStatus {
   error: string | null
   storageBytes: number
 }
+/** Compact writer-failure copy: retry, and say when the last good catalog is still active. */
+export function spellLibraryErrorNotice(status: SpellLibraryStatus): { action: 'Retry'; summary: string; detail: string | null } | null {
+  if (status.phase !== 'error') return null
+  const line = status.error?.split(/\r?\n/).map((part) => part.trim()).find(Boolean) ?? ''
+  const detail = !line ? null : line.length > 180 ? `${line.slice(0, 177)}…` : line
+  const summary = status.dataset
+    ? `Refresh failed. Still using the last good catalog (${status.dataset.recordCount.toLocaleString()} spells).`
+    : 'Could not capture a spell baseline. Check the EQ installation, then retry.'
+  return { action: 'Retry', summary, detail }
+}
 export interface SpellQueryContext { snapshotId?: string }
 export const SPELL_BROWSE_SORTS = ['id', 'name', 'level', 'classes', 'category', 'subcategory', 'type', 'description', 'amount', 'mana', 'efficiency', 'selected', 'rate', 'cast', 'recovery', 'recast', 'duration', 'ticks', 'waves', 'targets', 'hits'] as const
 export type SpellBrowseSort = typeof SPELL_BROWSE_SORTS[number]
@@ -77,6 +91,11 @@ export interface SpellSearchQuery extends SpellQueryContext {
   direction?: SpellSortDirection
   selectedIds?: number[]
   evaluation?: SpellEvaluationOptions
+  /** Ask search, detail, and compare to use the shared browse rank path. */
+  browseRank?: boolean
+  era?: SpellEraFilter
+  /** Spell effects for the returned page only, including expanded line alternatives. */
+  includeEffects?: boolean
   text?: string
   classes?: SpellClass[]
   level?: number
@@ -86,7 +105,13 @@ export interface SpellSearchQuery extends SpellQueryContext {
   page?: number
   pageSize?: number
 }
-export type SpellSummary = Pick<ClientSpellRecord, 'id' | 'name' | 'rank' | 'classes' | 'mana' | 'category' | 'subcategory' | 'beneficial' | 'target'> & { calculations?: SpellCalculation[]; learnedLevel?: number | null; spellType?: SpellBrowseType; typeLabel?: string; castMs?: number; recoveryMs?: number; recastMs?: number; description?: string; detectedRank?: number | null; rankEvidence?: SpellRankEvidence | null; line?: { key: string; reason: string; alternatives: SpellSummary[] } }
+export interface SpellBrowseRankMetadata extends BrowseRankGuard {
+  rank: number
+  source: BrowseRankSource
+  label: string
+  owned: boolean
+}
+export type SpellSummary = Pick<ClientSpellRecord, 'id' | 'name' | 'rank' | 'classes' | 'mana' | 'category' | 'subcategory' | 'beneficial' | 'target'> & { calculations?: SpellCalculation[]; learnedLevel?: number | null; spellType?: SpellBrowseType; typeLabel?: string; castMs?: number; recoveryMs?: number; recastMs?: number; description?: string; detectedRank?: number | null; rankEvidence?: SpellRankEvidence | null; era?: SpellEraLabel; browseRank?: SpellBrowseRankMetadata; effects?: SpellBrowseEffectSlot[]; line?: { key: string; reason: string; alternatives: SpellSummary[] } }
 export interface SpellSearchResult {
   dataset: SpellDataset | null
   total: number
@@ -104,8 +129,8 @@ export interface SpellSearchResult {
   groupCounts?: { ranked: number; zeroMana: number; excluded: number }
   highlights?: { kind: 'efficiency' | 'amount' | 'rate'; record: SpellRankingRow | null }[]
 }
-export interface SpellDetailQuery extends SpellQueryContext { id: number; level?: number; evaluation?: SpellEvaluationOptions; analysis?: SpellAnalysisOptions }
-export interface SpellDetailResult { dataset: SpellDataset | null; record: ClientSpellRecord | null; calculations?: SpellCalculation[]; presentation?: import('./clientSpellDescriptions').SpellPresentation; rankEvidence?: SpellRankEvidence | null }
+export interface SpellDetailQuery extends SpellQueryContext { id: number; level?: number; evaluation?: SpellEvaluationOptions; analysis?: SpellAnalysisOptions; browseRank?: boolean; includeEffects?: boolean }
+export interface SpellDetailResult { dataset: SpellDataset | null; record: ClientSpellRecord | null; calculations?: SpellCalculation[]; presentation?: import('./clientSpellDescriptions').SpellPresentation; rankEvidence?: SpellRankEvidence | null; era?: SpellEraLabel; browseRank?: SpellBrowseRankMetadata; effects?: SpellBrowseEffectSlot[] }
 export type SpellMetric = 'damage' | 'healing'
 export interface SpellCalculation {
   analysis?: SpellAnalysis
@@ -127,8 +152,8 @@ export interface SpellCalculation {
   reasons: string[]
   restrictions: string[]
 }
-export interface SpellComparisonQuery extends SpellQueryContext { ids: number[]; level: number; metric: SpellMetric; evaluation?: SpellEvaluationOptions; analysis?: SpellAnalysisOptions }
-export interface SpellComparisonResult { dataset: SpellDataset | null; level: number; scope: string; results: SpellCalculation[]; rankEvidence?: Record<string, SpellRankEvidence | null> }
+export interface SpellComparisonQuery extends SpellQueryContext { ids: number[]; level: number; metric: SpellMetric; evaluation?: SpellEvaluationOptions; analysis?: SpellAnalysisOptions; browseRank?: boolean }
+export interface SpellComparisonResult { dataset: SpellDataset | null; level: number; scope: string; results: SpellCalculation[]; rankEvidence?: Record<string, SpellRankEvidence | null>; browseRank?: Record<string, SpellBrowseRankMetadata | null> }
 export interface SpellRankingQuery extends SpellQueryContext {
   evaluation?: SpellEvaluationOptions
   classes?: SpellClass[]

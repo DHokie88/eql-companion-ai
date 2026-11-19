@@ -38,6 +38,8 @@ export function requiredSnapshotArg(value: unknown): string {
 }
 export function spellId(value: unknown): number { return integerArg(value, 'spell ID', 0, 2147483647) }
 export function levelArg(value: unknown): number { return integerArg(value, 'level', 1, 255) }
+/** Browse learned-level bounds may be 0. Caster evaluation still uses `levelArg`. */
+export function spellLevelBound(value: unknown): number { return integerArg(value, 'spell level', 0, 255) }
 export function classesArg(value: unknown): SpellClass[] | undefined {
   if (value === undefined) return undefined
   if (!Array.isArray(value) || value.length > 16 || value.some((code) => !SPELL_CLASSES.includes(code as SpellClass))) {

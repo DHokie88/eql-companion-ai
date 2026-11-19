@@ -6,6 +6,8 @@ import { captureClientSpellBundle, CAPTURE_RETRY_DELAYS } from '../src/main/spel
 import { SpellLibraryWriter } from '../src/main/spellLibrary/writerWorker'
 import { spellInstallId } from '../src/main/spellLibrary/storage'
 import type { SpellCheckResult } from '../src/main/spellLibrary/workerProtocol'
+import { CLIENT_SPELL_PARSER_VERSION } from '../src/shared/spellLibrary'
+import { spellFields } from './fixtures/spell-library/synthetic'
 import { spellRow, storageFixture, syntheticCatalog, writeCatalog } from './spellLibrarySynthetic.mts'
 
 test('independent message and description edits are detected even with identical sizes and timestamps', async () => {
@@ -84,9 +86,35 @@ test('writer preserves active valid data after malformed refresh and records an 
     assert.equal(active.snapshotId, first.dataset.snapshotId)
     assert.equal(f.storage.observations(first.dataset.installId).observations[0].outcome, 'error')
     assert.equal(f.storage.observations(first.dataset.installId).observations[0].previousSnapshotId, first.dataset.snapshotId)
+    writeCatalog(f.root, syntheticCatalog([spellFields(7, 'Synthetic Next', 190)]))
+    const swapped = await writer.handle('check', { root: f.root, reason: 'manual' }) as SpellCheckResult
+    assert.equal(swapped.observation.outcome, 'changed')
+    assert.notEqual(swapped.dataset.snapshotId, first.dataset.snapshotId)
+    assert.equal(swapped.dataset.recordCount, 1)
+    const after = await writer.handle('active', { root: f.root }) as SpellCheckResult['dataset']
+    assert.equal(after.snapshotId, swapped.dataset.snapshotId)
     const status = await writer.handle('status', { root: join(f.directory, 'never-imported') }) as { installId: string; dataset: unknown }
     assert.equal(status.installId, spellInstallId(join(f.directory, 'never-imported')))
     assert.equal(status.dataset, null)
+  } finally { writer.close(); f.close() }
+})
+
+test('parser generation bump republishes identical source bytes as a new snapshot', async () => {
+  const f = storageFixture()
+  const writer = new SpellLibraryWriter(f.options, { wait: async () => undefined, retryDelays: [] })
+  try {
+    const catalog = syntheticCatalog()
+    writeCatalog(f.root, catalog)
+    const seeded = f.storage.publish({ root: f.root, reason: 'startup', parserVersion: '1', ...catalog })
+    const upgraded = await writer.handle('check', { root: f.root, reason: 'manual' }) as SpellCheckResult
+    assert.equal(CLIENT_SPELL_PARSER_VERSION, '2')
+    assert.equal(upgraded.dataset.parserVersion, '2')
+    assert.equal(upgraded.observation.outcome, 'parser-upgrade')
+    assert.equal(upgraded.dataset.contentId, seeded.dataset.contentId)
+    assert.notEqual(upgraded.dataset.snapshotId, seeded.dataset.snapshotId)
+    const again = await writer.handle('check', { root: f.root, reason: 'manual' }) as SpellCheckResult
+    assert.equal(again.observation.outcome, 'unchanged')
+    assert.equal(again.dataset.snapshotId, upgraded.dataset.snapshotId)
   } finally { writer.close(); f.close() }
 })
 

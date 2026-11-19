@@ -6,6 +6,7 @@ import { qualifyClientSpellFocus } from './clientSpellFocus'
 import { SpellModifierCatalog, type CatalogFocusSource } from './clientSpellModifierCatalog'
 import { rankedHpAmount, rankDotDuration, rankHpMana } from './clientSpellRankRules'
 import type { ClientSpellRecord, SpellCalculation, SpellClass, SpellMetric } from './spellLibrary'
+import { resolveBrowseRank } from './browseSpellRank'
 import type { SpellModifierApplied, SpellModifierContext } from './spellModifiers'
 import type { BardInstrumentEstimate } from './bardInstruments'
 import { bardEffectImpact, bardInstrumentAmount } from './bardSongRules'
@@ -13,6 +14,8 @@ import { bardEffectImpact, bardInstrumentAmount } from './bardSongRules'
 export { SpellModifierCatalog } from './clientSpellModifierCatalog'
 export interface SpellModifierEvaluation {
   rankOnly?: boolean
+  /** Browse, Compare, and detail share `resolveBrowseRank` instead of the equipment rank path. */
+  browseRank?: boolean
   level: number
   metric: SpellMetric
   classes: SpellClass[]
@@ -71,10 +74,20 @@ function equippedProjection(record: ClientSpellRecord, options: SpellModifierEva
   return { instant, perTick, ticks, total, perMana }
 }
 function equipmentFor(record: ClientSpellRecord, options: SpellModifierEvaluation, catalog: SpellModifierCatalog, ticks: number) {
-  if (options.rankOnly) return { focus: { focus: null, warnings: [], simulated: false }, instrument: null, warnings: [] }
+  // Client mode still takes the browse rank, but it does not invent a focus or instrument.
+  if (options.rankOnly || options.context.preferences.mode === 'client') return { focus: { focus: null, warnings: [], simulated: false }, instrument: null, warnings: [] }
   const focus = bestFocus(record, options, catalog, ticks)
   const instrument = catalog.instruments.resolve(record, options.context, options.level)
   return { focus, instrument, warnings: [...focus.warnings, ...instrumentWarnings(record, instrument)] }
+}
+function browsePreviewRank(browse: NonNullable<ReturnType<typeof resolveBrowseRank>>): { rank: number; source: 'detected' | 'simulated'; warnings: string[] } {
+  return { rank: browse.rank, source: browse.source === 'observed' ? 'detected' : 'simulated', warnings: [] }
+}
+function focusRange(input: { record: ClientSpellRecord; level: number; metric: SpellMetric; rank: number | null; inputs: { record: ClientSpellRecord; estimate: BardInstrumentEstimate | null }; focus: { minPct: number; maxPct: number } | null; baseline: number | null }): { min: number; max: number } | null {
+  const { record, level, metric, rank, inputs, focus, baseline } = input
+  if (!focus || baseline === null) return null
+  const total = (pct: number): number => rankDotDuration(calculateClientSpell(record, level, metric, transformFor(metric, rank, pct, inputs)), rank).total ?? 0
+  return { min: total(focus.minPct), max: total(focus.maxPct) }
 }
 function hybridWarnings(record: ClientSpellRecord): string[] {
   return record.durationFormula > 0 && record.effects.some((effect) => effect.spa === 79 && effect.base < 0)
@@ -87,20 +100,20 @@ function hybridWarnings(record: ClientSpellRecord): string[] {
 export function evaluateModifiedSpell(record: ClientSpellRecord, options: SpellModifierEvaluation, catalog: SpellModifierCatalog): SpellCalculation {
   const { level, metric, context } = options
   const baseline = calculateClientSpell(record, level, metric)
-  if (context.preferences.mode === 'client') return baseline
-  const rank = catalog.rank(record, context)
+  const browse = options.browseRank ? resolveBrowseRank(record, context, catalog) : null
+  if (!browse && context.preferences.mode === 'client') return baseline
+  const rank = browse ? browsePreviewRank(browse) : catalog.rank(record, context)
   const { focus, instrument, warnings: equipmentWarnings } = equipmentFor(record, options, catalog, baseline.ticks ?? 0)
   const inputs = { record, estimate: instrument }
   const pct = focus.focus?.pct ?? 0
   const warnings = [...new Set([...context.warnings, ...rank.warnings, ...equipmentWarnings, ...hybridWarnings(record)])]
   const result = rankHpMana(rankDotDuration(calculateClientSpell(record, level, metric, transformFor(metric, rank.rank, pct, inputs)), rank.rank), rank.rank)
-  const range = focus.focus && baseline.total !== null ? {
-    min: rankDotDuration(calculateClientSpell(record, level, metric, transformFor(metric, rank.rank, focus.focus.minPct, inputs)), rank.rank).total ?? 0,
-    max: rankDotDuration(calculateClientSpell(record, level, metric, transformFor(metric, rank.rank, focus.focus.maxPct, inputs)), rank.rank).total ?? 0
-  } : null
+  const range = focusRange({ record, level, metric, rank: rank.rank, inputs, focus: focus.focus, baseline: baseline.total })
   return withMetadata(baseline, result, options, {
     ...(options.rankOnly ? { rankOnly: true } : {}),
-    rank: rank.rank, rankSource: rank.source, focus: focus.focus, range,
+    rank: rank.rank, rankSource: rank.source,
+    ...(browse ? { resolvedRank: { rank: browse.rank, source: browse.source, label: browse.label, owned: browse.owned } } : {}),
+    focus: focus.focus, range,
     ...(instrument ? { instrument } : {}),
     equippedInstrument: equippedProjection(record, options, { instrument, rank: rank.rank, pct }),
     partial: warnings.length > 0, simulated: rank.source === 'simulated' || focus.simulated, warnings
