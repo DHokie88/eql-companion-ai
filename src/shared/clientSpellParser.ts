@@ -239,6 +239,24 @@ function resolveDescription(raw: string, record: ClientSpellRecord): string {
     })
 }
 
+const FLAG_EFFECTS = new Set(['Invisibility', 'SeeInvis', 'WaterBreathing', 'InvisVsUndead', 'InvisVsAnimals', 'Levitate', 'TrueNorth', 'FeignDeath', 'BindAffinity', 'DivineAura', 'InfraVision', 'UltraVision', 'Identify', 'WipeHateList', 'StopRain', 'Silence', 'AntiGate', 'Familiar', 'CancelMagic', 'Invisibility2', 'InvisVsUndead2', 'ImprovedInvisAnimals'])
+
+function namedEffectKind(name: string): 'reference' | 'flag' | 'bounds' | null {
+  if (/^(Summon|Illusion|Teleport|Translocate|WeaponProc|CallPet|Succor|Gate)/.test(name)) return 'reference'
+  if (name.startsWith('Limit') || name.startsWith('Ff_') || name.startsWith('FF')) return 'bounds'
+  if (FLAG_EFFECTS.has(name) || name.startsWith('Invis')) return 'flag'
+  return null
+}
+
+/** Secondary slots whose base, limit, or max is an ID, a flag, or a bound are not magnitudes. */
+export function clientSpellEffectValueKind(effect: ClientSpellEffect): 'amount' | 'reference' | 'flag' | 'bounds' {
+  const named = namedEffectKind(SPA_NAMES[effect.spa] ?? '')
+  if (named) return named
+  if (SPELL_ID_BASE.has(effect.spa) || SPELL_ID_LIMIT.has(effect.spa) || effect.spa === 288) return 'reference'
+  if (effect.spa === 148 || effect.spa === 149) return 'bounds'
+  return 'amount'
+}
+
 function spellReference(effect: ClientSpellEffect): number | null {
   if (SPELL_ID_BASE.has(effect.spa) && effect.base) return effect.base
   if (SPELL_ID_LIMIT.has(effect.spa) && effect.limit) return effect.limit

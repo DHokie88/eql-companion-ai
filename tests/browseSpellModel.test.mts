@@ -156,10 +156,29 @@ test('detail and compare use the same browse rank as search', () => {
   } finally { fixture.close() }
 })
 
+function assertHonestEffectSlots(slots: NonNullable<SpellSearchResult['records'][number]['effects']>): void {
+  assert.equal(slots[0].timing, 'instant')
+  assert.equal(slots[0].amount, 124)
+  const reference = slots.find((slot) => slot.spa === 85)
+  const resist = slots.find((slot) => slot.spa === 46)
+  const flag = slots.find((slot) => slot.spa === 12)
+  assert.equal(reference?.timing, 'raw')
+  assert.equal(reference?.amount, null)
+  assert.match(reference?.formula ?? '', /reference/)
+  assert.equal(reference ? spellBrowseEffectText(reference) : '', 'SPA 85 · Weapon Proc: raw 400')
+  assert.equal(resist?.timing, 'instant')
+  assert.equal(resist?.amount, 15)
+  assert.equal(flag?.timing, 'raw')
+  assert.equal(flag?.amount, null)
+  assert.match(flag?.formula ?? '', /Flag/)
+}
+
 test('browse rank changes, era admission, and effect slots stay on the shared query path', () => {
   const fixture = storageFixture()
   try {
-    const rows = [spellRow(1, 'Synthetic Bolt'), spellRow(2, 'Synthetic Ember'), spellRow(3, 'Synthetic Other')]
+    const bolt = spellRow(1, 'Synthetic Bolt')
+    bolt[172] = `${bolt[172]}$2|85|400|0|100|0$3|46|15|0|100|0$4|12|1|0|100|0`
+    const rows = [bolt, spellRow(2, 'Synthetic Ember'), spellRow(3, 'Synthetic Other')]
     const published = fixture.storage.publish({ root: fixture.root, reason: 'startup', parserVersion: '1', ...syntheticCatalog(rows) })
     const queries = new SpellLibraryQueries(fixture.storage)
     const modifiers = context()
@@ -183,6 +202,14 @@ test('browse rank changes, era admission, and effect slots stay on the shared qu
     const guard = byName['Synthetic Other'].browseRank!
     assert.equal(currentBrowseRank(guard, { characterKey: guard.characterKey, revision: guard.contextRevision, snapshotId: guard.snapshotId }), true)
     assert.equal(currentBrowseRank(guard, { characterKey: 'other', revision: guard.contextRevision, snapshotId: guard.snapshotId }), false)
+    const none = context({ character: null })
+    const open = read<SpellSearchResult>('search', { text: 'Synthetic Other', pageSize: 1 }, none)
+    const openRank = open.records[0].browseRank!
+    assert.equal(openRank.characterKey, '')
+    assert.equal(openRank.source, 'global')
+    assert.equal(currentBrowseRank(openRank, { characterKey: '', revision: openRank.contextRevision, snapshotId: openRank.snapshotId }), true)
+    assert.equal(currentBrowseRank(openRank, { characterKey: 'char', revision: openRank.contextRevision, snapshotId: openRank.snapshotId }), false)
+    assert.equal(currentBrowseRank(guard, { characterKey: '', revision: guard.contextRevision, snapshotId: guard.snapshotId }), false)
     const before = JSON.stringify(modifiers.preferences)
     const filtered = read<SpellSearchResult>('search', { era: 'current', pageSize: 5 })
     assert.equal(filtered.total, 3)
@@ -192,8 +219,7 @@ test('browse rank changes, era admission, and effect slots stay on the shared qu
     assert.equal(JSON.stringify(modifiers.preferences), before)
     assert.throws(() => read<SpellSearchResult>('search', { includeEffects: true, level: 0 }), /Invalid level/)
     const effects = read<SpellSearchResult>('search', { text: 'Synthetic Bolt', includeEffects: true, pageSize: 1 })
-    assert.equal(effects.records[0].effects?.[0].timing, 'instant')
-    assert.equal(effects.records[0].effects?.[0].amount, 124)
+    assertHonestEffectSlots(effects.records[0].effects ?? [])
     assert.throws(() => read<SpellSearchResult>('search', { sortBy: 'spa' }), /Invalid sort column/)
   } finally { fixture.close() }
 })

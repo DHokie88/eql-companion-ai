@@ -17,13 +17,18 @@ async function rankings(page: Page): Promise<void> {
   await choose(page, 'spells-target-count', '1 target')
   await page.getByTestId('spells-type-dd').click()
   await page.getByTestId('spells-group-ranked').click()
+  const efficiency = page.getByTestId('spells-sort-efficiency')
+  const efficiencySort = (): Promise<string | null> => efficiency.locator('..').getAttribute('aria-sort')
+  if (await efficiencySort() !== 'descending') {
+    await efficiency.click()
+    if (await efficiencySort() !== 'descending') await efficiency.click()
+  }
   assert.equal(await settle(async () => ({ count: await page.getByTestId('spells-record').count(),
     id: await page.getByTestId('spells-record').first().locator('td').first().innerText(), loading: await page.getByLabel('Searching spells').count() }),
-    (value) => value.count === 40 && value.id === '145' && value.loading === 0).then((value) => value.id), '145')
-  const efficiency = page.getByTestId('spells-sort-efficiency')
+    (value) => value.count === 40 && value.id === '402' && value.loading === 0).then((value) => value.id), '402')
   assert.equal(await efficiency.locator('..').getAttribute('aria-sort'), 'descending')
   const first = await page.getByTestId('spells-record').first().locator('td').first().innerText()
-  assert.equal(first, '145', 'the most efficient spell comes from the end of the full source catalog')
+  assert.equal(first, '402', 'uniform mana, so the level-60 120-damage row beats the level-12 84-damage row at rank I')
   await page.getByRole('button', { name: 'Go to page 2', exact: true }).click()
   await settle(() => page.getByTestId('spells-record').count(), (n) => n === 9)
   const id = await page.getByTestId('spells-record').first().locator('td').first().innerText()
@@ -77,7 +82,7 @@ async function areaAndCompare(page: Page): Promise<void> {
   await choose(page, 'compare-reference', 'Lava Storm (302)')
   assert.match(await page.getByTestId('spells-calculation').first().innerText(), /\+20 \(\+23\.81%\) vs reference/)
   await page.getByTestId('spells-calculation').first().getByText('How this was calculated', { exact: true }).click()
-  assert.match(await page.getByTestId('spells-compare').innerText(), /Cycle = cast 2.5s \+ max/)
+  assert.match(await page.getByTestId('spells-compare').innerText(), /Cycle = cast 2.45s \+ max/)
 }
 async function levelsAndEffects(page: Page): Promise<void> {
   await page.getByTestId('spells-tab-by-level').click()

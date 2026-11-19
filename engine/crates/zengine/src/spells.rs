@@ -270,7 +270,10 @@ mod tests {
         );
         fields.pop();
         std::fs::write(&spells_path, fields.join("^")).unwrap();
-        assert!(ClientSpells::captured(spells_path.clone(), dbstr_path.clone(), "short".into()).is_err());
+        assert!(
+            ClientSpells::captured(spells_path.clone(), dbstr_path.clone(), "short".into())
+                .is_err()
+        );
         let mut legacy = vec!["0".to_string(); 172];
         legacy[0] = "1".to_string();
         legacy[1] = "Legacy Short".to_string();

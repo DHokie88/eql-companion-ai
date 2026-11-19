@@ -33,11 +33,17 @@ export function useSpellModifiers(): SpellModifiersState {
     const invalidate = (): number => ++turn.current
     const refresh = (clear: boolean): void => {
       const ticket = invalidate()
+      const seenRequest = request.current
+      const seenSelection = selectionTurn.current
       if (clear) setContext(null)
       setLoading(true)
       setError(null)
       void window.eq.spellLibrary.modifierContext().then((next) => {
-        if (alive && turn.current === ticket) { current.current = next; setContext(next); setLoading(false) }
+        if (!alive || turn.current !== ticket) return
+        // A key burst already published a newer preview. Applying this snapshot would
+        // make the last step look unchanged and leave the intermediate rank saved.
+        if (request.current !== seenRequest && selectionTurn.current === seenSelection) { setLoading(false); return }
+        current.current = next; setContext(next); setLoading(false)
       }).catch((cause: unknown) => {
         if (alive && turn.current === ticket) { setError(message(cause)); setLoading(false) }
       })
@@ -56,6 +62,10 @@ export function useSpellModifiers(): SpellModifiersState {
     const previous = current.current
     if (!previous) return
     setError(null)
+    // Publish before the IPC write so the next key diffs against this step, not the pre-burst rank.
+    const optimistic = { ...previous, preferences }
+    current.current = optimistic
+    setContext(optimistic)
     const selection = selectionTurn.current
     const ticket = ++request.current
     const isCurrent = (): boolean => alive.current && selectionTurn.current === selection && ticket === request.current &&
@@ -64,7 +74,10 @@ export function useSpellModifiers(): SpellModifiersState {
       if (ticket !== request.current) return Promise.resolve()
       return saveSpellModifierPreferences(previous, preferences, {
         read: () => window.eq.spellLibrary.modifierContext(),
-        write: (update) => window.eq.spellLibrary.updateModifiers(update), isCurrent
+        write: (update) => {
+          if (!isCurrent()) throw new Error('Spell modifier selection changed; your preview was not applied to the new selection. Please try again.')
+          return window.eq.spellLibrary.updateModifiers(update)
+        }, isCurrent
       }).then(() => {
         if (isCurrent()) { setError(null); refreshCurrent.current() }
       }).catch((cause: unknown) => {

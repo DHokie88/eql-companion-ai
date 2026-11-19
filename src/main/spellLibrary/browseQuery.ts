@@ -77,11 +77,11 @@ function matchesTraits(record: ClientSpellRecord, options: SearchOptions, mechan
   if (options.mana === 'free' && record.mana !== 0) return false
   return options.mana !== 'cost' || record.mana > 0
 }
-export function matchesSpellSearch(record: ClientSpellRecord, options: SearchOptions, mechanics?: SpellMechanicsCatalog): boolean {
+export function matchesSpellSearch(record: ClientSpellRecord, options: SearchOptions, mechanics?: SpellMechanicsCatalog, ambiguous?: ReadonlySet<string>): boolean {
   if (options.text && !matchesText(record, options.text)) return false
   if (options.category && record.category !== options.category) return false
   if (options.subcategory && record.subcategory !== options.subcategory) return false
   if (options.effect !== undefined && !record.effects.some((slot) => slot.spa === options.effect)) return false
-  if (options.era && !spellEraAdmits(spellEraLabel(record.name), options.era)) return false
+  if (options.era && !spellEraAdmits(spellEraLabel(record.name, ambiguous), options.era)) return false
   return matchesLevel(record, options) && matchesTraits(record, options, mechanics)
 }

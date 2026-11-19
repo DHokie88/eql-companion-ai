@@ -22,10 +22,13 @@ function typeMetric(type: BrowseFilters['type']): SpellMetric | null {
 function browseType(type: BrowseFilters['type']): SpellBrowseType | undefined {
   return type.startsWith('aoe') ? 'aoe' : type || undefined
 }
-function adjustCategorySort(sort: ReturnType<typeof useSpellSort<SpellBrowseSort>>, category: string | null, subcategory: string | null): void {
-  if (category && subcategory && ['category', 'subcategory'].includes(sort.field)) sort.selectSort('name', 'asc')
-  else if (category && sort.field === 'category') sort.selectSort('subcategory', sort.direction)
-  else if (!category && sort.field === 'subcategory') sort.selectSort('category', sort.direction)
+function adjustCategorySort(sort: { field: SpellBrowseSort; direction: 'asc' | 'desc'; selectSort: (field: SpellBrowseSort, direction: 'asc' | 'desc') => void }, category: string | null, subcategory: string | null): void {
+  const next = category && subcategory && ['category', 'subcategory'].includes(sort.field) ? { field: 'name' as const, direction: 'asc' as const }
+    : category && sort.field === 'category' ? { field: 'subcategory' as const, direction: sort.direction }
+      : !category && sort.field === 'subcategory' ? { field: 'category' as const, direction: sort.direction }
+        : null
+  if (!next || (sort.field === next.field && sort.direction === next.direction)) return
+  sort.selectSort(next.field, next.direction)
 }
 export function browseFilterError(filters: BrowseFilters, maximum: string): string | null {
   const levels = [filters.min, maximum].filter((value) => value !== '')
@@ -43,11 +46,12 @@ export function browseCategory(filters: BrowseFilters, data?: import('@shared/sp
 function useVisibleSort(input: { sort: ReturnType<typeof useSpellSort<SpellBrowseSort>>; filters: BrowseFilters; metric: SpellMetric; columns: BrowseDisplayField[]; data?: import('@shared/spellLibrary').SpellSearchResult | null }): void {
   const { sort, filters, metric, columns, data } = input
   const category = browseCategory(filters, data)
-  useEffect(() => { adjustCategorySort(sort, category, filters.subcategory) }, [category, filters.subcategory, sort])
+  const { field: sortField, direction: sortDirection, selectSort: chooseSort } = sort
+  useEffect(() => { adjustCategorySort({ field: sortField, direction: sortDirection, selectSort: chooseSort }, category, filters.subcategory) }, [category, filters.subcategory, sortField, sortDirection, chooseSort])
   const fields = browseColumns(metric, !category ? 'both' : filters.subcategory ? 'none' : 'subcategory', columns, hideUniformTypeColumn(filters.type, data?.matchingTypes)).map((column) => column.field).join(',')
   useEffect(() => {
-    if (!fields.split(',').includes(sort.field) && !['category', 'subcategory'].includes(sort.field)) sort.selectSort('name', 'asc')
-  }, [fields, sort])
+    if (!fields.split(',').includes(sortField) && !['category', 'subcategory'].includes(sortField) && sortField !== 'name') chooseSort('name', 'asc')
+  }, [fields, sortField, chooseSort])
 }
 
 export function useSpellBrowse({ classes, level, autoMax, allSpells, evaluation, selected, analysis, bestInLine = false, enabled = true }: {

@@ -1,4 +1,5 @@
-import { useEffect, useState, type JSX } from 'react'
+import { useEffect, useRef, useState, type JSX } from 'react'
+import { flushSync } from 'react-dom'
 import { Box, FormControlLabel, Slider, Stack, Switch, Typography } from '@mui/material'
 import { romanRank } from '@shared/spellLines'
 import { selectSpellPreviewRank, toggleShowMine } from '@shared/spellPreviewControls'
@@ -16,10 +17,21 @@ function sliderRank(rank: number | null | undefined, fallback: number | null | u
 /** The server rank lags a key burst. Hold the last chosen step until that save lands. */
 function usePendingRank(stored: number, error: string | null): { rank: number; choose: (next: number) => void } {
   const [pending, setPending] = useState<number | null>(null)
+  const chosen = useRef<number | null>(null)
   useEffect(() => {
-    if (pending !== null && (pending === stored || error !== null)) setPending(null)
-  }, [pending, stored, error])
-  return { rank: pending ?? stored, choose: setPending }
+    if (chosen.current === null) return
+    if (error !== null || chosen.current === stored) {
+      chosen.current = null
+      setPending(null)
+    }
+  }, [stored, error])
+  return {
+    rank: pending ?? stored,
+    choose(next: number) {
+      chosen.current = next
+      flushSync(() => setPending(next))
+    }
+  }
 }
 
 /** Discrete I–X preview. Gear's upgrade slider is the spacing reference and is left unchanged. */
@@ -33,7 +45,7 @@ export function SpellRankSlider(): JSX.Element | null {
   return <Stack direction="row" gap={1} alignItems="center" data-testid="spells-rank-slider" sx={{ minWidth: 0 }}>
     <Typography variant="caption" color="text.secondary" sx={{ flexShrink: 0 }}>Spell rank</Typography>
     <Box sx={{ width: 220, flexShrink: 0, px: 1 }}>
-      <Slider size="small" min={1} max={10} step={1} marks={RANK_MARKS} value={pending.rank} color="primary" data-testid="spells-global-rank" aria-label="Spell rank" valueLabelDisplay="off" disabled={state.loading} sx={{ py: 0.5, color: 'primary.main' }} onChange={(_event, value) => {
+      <Slider size="small" min={1} max={10} step={1} marks={RANK_MARKS} value={pending.rank} color="primary" data-testid="spells-global-rank" aria-label="Spell rank" valueLabelDisplay="off" sx={{ py: 0.5, color: 'primary.main' }} onChange={(_event, value) => {
         const next = typeof value === 'number' ? value : value[0]
         pending.choose(next)
         state.update(selectSpellPreviewRank(context.preferences, next))

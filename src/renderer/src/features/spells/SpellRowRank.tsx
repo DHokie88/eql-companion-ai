@@ -44,7 +44,7 @@ function rowRankView(input: { context: NonNullable<ReturnType<typeof useSpellRan
   const { context, browseRank, snapshotId, id, name } = input
   if (!context) return displayedRank(null, null, 1)
   const override = spellMoteOverride(context.preferences, { id, name })
-  const live = currentRowRank(browseRank, { characterKey: context.character?.key ?? null, revision: context.revision ?? null, snapshotId })
+  const live = currentRowRank(browseRank, { characterKey: context.character?.key ?? '', revision: context.revision ?? null, snapshotId })
   const global = context.preferences.browse?.rank ?? context.preferences.emulation.rank
   return displayedRank(live, override, global)
 }

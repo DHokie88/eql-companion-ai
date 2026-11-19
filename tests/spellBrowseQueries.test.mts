@@ -2,15 +2,16 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { SpellLibraryQueries } from '../src/main/spellLibrary/queries'
 import { clientSpellType, compareSpellValues, minimumSpellLevel, sortSpellCalculations } from '../src/shared/clientSpellBrowse'
-import { SPELL_BROWSE_SORTS, type SpellSearchQuery, type SpellSearchResult } from '../src/shared/spellLibrary'
+import { SPELL_BROWSE_SORTS, type SpellDetailResult, type SpellSearchQuery, type SpellSearchResult } from '../src/shared/spellLibrary'
 import { spellRow, storageFixture, syntheticCatalog } from './spellLibrarySynthetic.mts'
 
 function fixture(rows: string[][]) {
   const f = storageFixture()
   const published = f.storage.publish({ root: f.root, reason: 'startup', parserVersion: '1', ...syntheticCatalog(rows) })
   const queries = new SpellLibraryQueries(f.storage)
-  return { ...f, search(query: SpellSearchQuery = {}) {
-    return queries.handle('search', { installId: published.dataset.installId, query }) as SpellSearchResult
+  const installId = published.dataset.installId
+  return { ...f, installId, queries, search(query: SpellSearchQuery = {}) {
+    return queries.handle('search', { installId, query }) as SpellSearchResult
   } }
 }
 function ids(result: SpellSearchResult): number[] { return result.records.map((r) => r.id) }
@@ -276,5 +277,21 @@ test('current and preview keep unknown spells and still exclude later eras', () 
     assert.deepEqual(preview.records.map((row) => row.era), ['unknown', 'classic', 'kunark'])
     assert.equal(f.search({ era: 'current', text: 'Abolish Enchantment', allSpells: true }).total, 0)
     assert.equal(f.search({ era: 'preview', text: 'Abolish Enchantment', allSpells: true }).total, 0)
+  } finally { f.close() }
+})
+
+test('a duplicated display name does not inherit an era from the shared name', () => {
+  const rows = [spellRow(1, 'Leach'), spellRow(2, 'leach'), spellRow(3, 'Synthetic Bolt'), spellRow(4, 'Abolish Enchantment')]
+  const f = fixture(rows)
+  try {
+    const current = f.search({ era: 'current', allSpells: true, pageSize: 10 })
+    assert.deepEqual(ids(current), [1, 2, 3])
+    assert.deepEqual(current.records.map((row) => row.era), ['unknown', 'unknown', 'unknown'])
+    const preview = f.search({ era: 'preview', allSpells: true, pageSize: 10 })
+    assert.deepEqual(preview.records.filter((row) => row.id === 1 || row.id === 2).map((row) => row.era), ['unknown', 'unknown'])
+    assert.equal(f.search({ era: 'current', text: 'Abolish Enchantment', allSpells: true }).total, 0)
+    const detail = f.queries.handle('detail', { installId: f.installId, query: { id: 1 } }) as SpellDetailResult
+    assert.equal(detail.era, 'unknown')
+    assert.equal(detail.record?.name, 'Leach')
   } finally { f.close() }
 })

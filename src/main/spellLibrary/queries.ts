@@ -14,7 +14,7 @@ import { integerArg, objectArgs, stringArg } from './workerProtocol'
 import { classesArg, levelArg, metricArg, optionalText, pageArgs, queryObject, requiredSnapshotArg, snapshotArg, spellId } from './queryValidation'
 import type { SpellModifierContext } from '../../shared/spellModifiers'
 import { spellBrowseEffectSlots } from '../../shared/spellBrowseEffects'
-import { spellEraLabel } from './spellBrowseEraTable'
+import { cachedAmbiguousSpellNames, spellEraLabel } from './spellBrowseEraTable'
 import type { SpellByLevelResult, SpellRankingsResult } from '../../shared/spellAnalysis'
 import { clientSpellSlowSummary } from '../../shared/clientSpellDescriptions'
 
@@ -165,7 +165,7 @@ export class SpellLibraryQueries {
       dataset, record,
       presentation: this.detailPresentation({ dataset, record, query, context, level }),
       rankEvidence: this.detailEvidence(dataset, record, context),
-      ...this.detailEra(record),
+      ...this.detailEra(dataset, record),
       ...this.detailRank(dataset, record, query, context),
       ...(effects ? { effects } : {}),
       ...(calculations ? { calculations } : {})
@@ -180,9 +180,9 @@ export class SpellLibraryQueries {
     if (!record || !dataset) return null
     return this.evaluation.rankEvidence(dataset, record, context)
   }
-  private detailEra(record: ClientSpellRecord | null): { era: ReturnType<typeof spellEraLabel> } | undefined {
-    if (!record) return undefined
-    return { era: spellEraLabel(record.name) }
+  private detailEra(dataset: SpellDataset | null, record: ClientSpellRecord | null): { era: ReturnType<typeof spellEraLabel> } | undefined {
+    if (!record || !dataset) return undefined
+    return { era: spellEraLabel(record.name, cachedAmbiguousSpellNames(dataset.snapshotId, this.storage.records(dataset.snapshotId))) }
   }
   private detailRank(dataset: SpellDataset | null, record: ClientSpellRecord | null, query: Record<string, unknown>, context: unknown) {
     if (query.browseRank !== true || !record || !dataset) return undefined
