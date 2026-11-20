@@ -70,7 +70,7 @@ export interface DiscoveryProbes {
 }
 
 /** The character-log filename the game writes: `eqlog_<Char>_<server>.txt`. */
-const EQLOG_RE = /^eqlog_.+\.txt$/i
+export const CHARACTER_LOG_NAME = /^eqlog_([^_]+)_(.+)\.txt$/i
 
 /**
  * THE OUTCOME OF READING A LOGS DIR — three answers, never two (JOS-82).
@@ -96,14 +96,22 @@ export type LogsDirRead =
   | { ok: false; reason: 'unreadable'; code: string }
 
 /**
- * List a Logs dir and count its `eqlog_*.txt` files, distinguishing a FAILED read from an empty
- * one. `existsSync` is not consulted first: a single `readdirSync` answers both questions and
- * cannot race between them (a dir can vanish between the two calls), and ENOENT is exactly the
- * "missing" answer.
+ * List a Logs dir and count valid regular character-log files, distinguishing a FAILED listing
+ * from an empty one. The listing itself answers whether the directory is missing; individual
+ * files that vanish or become inaccessible before their stat are skipped without hiding others.
  */
 export function readLogsDir(logsDir: string): LogsDirRead {
   try {
-    return { ok: true, count: readdirSync(logsDir).filter((f) => EQLOG_RE.test(f)).length }
+    const count = readdirSync(logsDir).filter((file) => {
+      if (!CHARACTER_LOG_NAME.test(file)) return false
+      try {
+        return statSync(join(logsDir, file)).isFile()
+      } catch {
+        // A candidate can vanish or become inaccessible after listing; keep healthy logs.
+        return false
+      }
+    }).length
+    return { ok: true, count }
   } catch (err) {
     const code = (err as NodeJS.ErrnoException | undefined)?.code
     // ENOENT (nothing there) and ENOTDIR (a FILE where a directory was expected) are both

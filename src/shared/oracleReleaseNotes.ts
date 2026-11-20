@@ -21,6 +21,14 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.24.1',
+    date: '2026-11-20',
+    entries: [
+      { kind: 'fixed', text: 'Character discovery skips malformed, missing, and unreadable log entries and keeps the most recent usable log.' },
+      { kind: 'fixed', text: 'Inventory and achievements imports use the active character’s own exports. Gear and worn-focus previews clear stale data when switching characters.' }
+    ]
+  },
+  {
     version: '0.24.0',
     date: '2026-11-20',
     entries: [

@@ -1,8 +1,9 @@
-import { existsSync, readdirSync, statSync } from 'fs'
+import { readdirSync, statSync } from 'fs'
 import { basename, join } from 'path'
 import type { CharacterRef } from '../../shared/types'
 import { clearEqDiscoveredRoot, getEqDiscoveredRoot, getEqInstallDir, setEqDiscoveredRoot } from '../store'
 import {
+  CHARACTER_LOG_NAME,
   EQ_ROOT,
   countCharacterLogs,
   dirHasCharacterLogs,
@@ -257,10 +258,30 @@ export function eqLogsDir(): string {
 
 /** Parse "eqlog_<Character>_<server>.txt" into a CharacterRef. */
 export function parseLogName(logPath: string): CharacterRef | null {
-  const m = /^eqlog_(.+?)_(.+?)\.txt$/i.exec(basename(logPath))
+  const m = CHARACTER_LOG_NAME.exec(basename(logPath))
   if (!m) return null
-  const lastPlayed = existsSync(logPath) ? statSync(logPath).mtimeMs : undefined
-  return { name: m[1], server: m[2], logPath, lastPlayed }
+  return { name: m[1], server: m[2], logPath, lastPlayed: mtimeOf(logPath) }
+}
+
+/** A regular file's mtime, or undefined if missing, inaccessible or another filesystem kind. */
+function mtimeOf(path: string): number | undefined {
+  try {
+    const stat = statSync(path)
+    return stat.isFile() ? stat.mtimeMs : undefined
+  } catch {
+    return undefined
+  }
+}
+
+/** An unreadable or missing Logs directory has no discoverable character logs. */
+function characterLogFiles(logsDir: string): string[] {
+  try {
+    return readdirSync(logsDir)
+  } catch {
+    // Readers that only need available characters can return an empty list.
+    // Settings reports the filesystem error separately through readLogsDir.
+    return []
+  }
 }
 
 /** Stable id for a character (used to key per-character progress). */
@@ -271,11 +292,9 @@ export function characterId(c: CharacterRef): string {
 /** All detected character logs, most-recently-played first. */
 export function listCharacters(): CharacterRef[] {
   const logsDir = eqLogsDir()
-  if (!existsSync(logsDir)) return []
-  return readdirSync(logsDir)
-    .filter((f) => /^eqlog_.+\.txt$/i.test(f))
+  return characterLogFiles(logsDir)
     .map((f) => parseLogName(join(logsDir, f)))
-    .filter((c): c is CharacterRef => c !== null)
+    .filter((c): c is CharacterRef => c?.lastPlayed !== undefined)
     .sort((a, b) => (b.lastPlayed ?? 0) - (a.lastPlayed ?? 0))
 }
 
@@ -288,18 +307,12 @@ export function listCharacters(): CharacterRef[] {
  */
 export function resolveActiveCharacter(): CharacterRef | null {
   const override = process.env.EQ_LOG_PATH
-  if (override && existsSync(override)) {
-    return parseLogName(override) ?? { name: 'Unknown', server: 'unknown', logPath: override }
+  if (override) {
+    const named = parseLogName(override)
+    if (named?.lastPlayed !== undefined) return named
+    if (named === null && mtimeOf(override) !== undefined) {
+      return { name: 'Unknown', server: 'unknown', logPath: override }
+    }
   }
-  const logsDir = eqLogsDir()
-  if (!existsSync(logsDir)) return null
-
-  const candidates = readdirSync(logsDir)
-    .filter((f) => /^eqlog_.+\.txt$/i.test(f))
-    .map((f) => join(logsDir, f))
-    .map((p) => ({ p, mtime: statSync(p).mtimeMs }))
-    .sort((a, b) => b.mtime - a.mtime)
-
-  if (candidates.length === 0) return null
-  return parseLogName(candidates[0].p)
+  return listCharacters()[0] ?? null
 }
