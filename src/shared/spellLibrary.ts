@@ -152,8 +152,11 @@ export interface SpellCalculation {
   reasons: string[]
   restrictions: string[]
 }
-export interface SpellComparisonQuery extends SpellQueryContext { ids: number[]; level: number; metric: SpellMetric; evaluation?: SpellEvaluationOptions; analysis?: SpellAnalysisOptions; browseRank?: boolean; includeSummary?: boolean; includeEffects?: boolean }
-export interface SpellComparisonResult { dataset: SpellDataset | null; level: number; scope: string; results: SpellCalculation[]; rankEvidence?: Record<string, SpellRankEvidence | null>; browseRank?: Record<string, SpellBrowseRankMetadata | null>; summaries?: Record<string, SpellSummary> }
+export interface SpellComparisonQuery extends SpellQueryContext { ids: number[]; level: number; metric: import('./spellCompareMetric').SpellCompareMetricChoice; evaluation?: SpellEvaluationOptions; analysis?: SpellAnalysisOptions; browseRank?: boolean; includeSummary?: boolean; includeEffects?: boolean }
+export interface SpellComparisonSummary extends SpellSummary {
+  presentation?: Pick<import('./clientSpellDescriptions').SpellPresentation, 'duration' | 'effects'>
+}
+export interface SpellComparisonResult { dataset: SpellDataset | null; level: number; scope: string; results: SpellCalculation[]; metric?: import('./spellCompareMetric').SpellCompareMetric; rankEvidence?: Record<string, SpellRankEvidence | null>; browseRank?: Record<string, SpellBrowseRankMetadata | null>; summaries?: Record<string, SpellComparisonSummary> }
 export interface SpellRankingQuery extends SpellQueryContext {
   evaluation?: SpellEvaluationOptions
   classes?: SpellClass[]

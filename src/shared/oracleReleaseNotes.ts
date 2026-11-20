@@ -21,6 +21,14 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.22.0',
+    date: '2026-11-20',
+    entries: [
+      { kind: 'new', text: 'Choose a column preset in Browse, Compare or Progression. Edit the Direct damage, Rain / area damage, Damage over time, Healing, Buffs, Debuffs and Utility presets in Preferences under Spell columns.', fromReport: true },
+      { kind: 'new', text: 'Compare starts in Auto and picks the most common spell type in your selection. You can choose Damage, Healing, Buffs, Debuffs or Utility. Effect comparisons show base client effects and duration.', fromReport: true }
+    ]
+  },
+  {
     version: '0.21.2',
     date: '2026-11-20',
     entries: [

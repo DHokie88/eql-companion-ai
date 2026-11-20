@@ -9,6 +9,7 @@ import type { SpellAnalysisOptions, SpellRankingCategory } from '@shared/spellAn
 import { browseColumns, DEFAULT_BROWSE_COLUMNS, hideUniformTypeColumn, type BrowseDisplayField } from './spellBrowseColumns'
 import type { BrowseEra } from './SpellBrowseToolbar'
 import { effectiveBrowseMax } from './spellLevelRange'
+import { filterColumnPreset, useSpellColumnSelection } from './spellColumnPresets'
 
 export interface BrowseFilters {
   text: string; min: string; max: string | null; category: string; subcategory: string; effect: string
@@ -63,7 +64,8 @@ export function useSpellBrowse({ classes, level, autoMax, allSpells, evaluation,
   const sort = useSpellSort<SpellBrowseSort>('efficiency', 'desc', 'id')
   const [group, setGroup] = useSpellWorkspaceState<NonNullable<SpellSearchQuery['group']>>('browse-group', 'all')
   const [metric, setMetric] = useSpellWorkspaceState<SpellMetric>('browse-metric', 'damage')
-  const [columns, setColumns] = useSpellWorkspaceState<BrowseDisplayField[]>('browse-visible-columns', DEFAULT_BROWSE_COLUMNS)
+  const columnSelection = useSpellColumnSelection('browse-visible-columns', DEFAULT_BROWSE_COLUMNS, filterColumnPreset(filters))
+  const { columns } = columnSelection
   const [era, setEra] = useSpellWorkspaceState<BrowseEra>('browse-era', 'current')
   const queryText = useSearchText(filters.text)
   const includeEffects = columns.includes('spa')
@@ -98,5 +100,5 @@ export function useSpellBrowse({ classes, level, autoMax, allSpells, evaluation,
     setFilters((current) => ({ ...current, type: category, hpFilter: '' })); setMetric(typeMetric(category) ?? 'damage')
     setGroup('ranked'); selectSort('efficiency', 'desc'); setPage(1)
   }, [setFilters, setMetric, setGroup, selectSort, setPage])
-  return { ...result, filters, maximum, change, reset, page, setPage, sort, invalid, group, setGroup, metric, setMetric, columns, setColumns, bestInLine, focusCategory, era, setEra }
+  return { ...result, ...columnSelection, filters, maximum, change, reset, page, setPage, sort, invalid, group, setGroup, metric, setMetric, bestInLine, focusCategory, era, setEra }
 }

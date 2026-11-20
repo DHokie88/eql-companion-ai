@@ -1,7 +1,7 @@
 import type {
   ClientSpellRecord, SpellBeforeAfterResult, SpellChangesResult, SpellComparisonResult,
   SpellDataset, SpellHistoryResult, SpellRankingResult, SpellSearchResult, SpellSummary,
-  SpellTimelineResult, SpellCalculation, SpellMetric
+  SpellTimelineResult, SpellCalculation, SpellMetric, SpellComparisonSummary
 } from '../../shared/spellLibrary'
 import { WorkerSpellEvaluation, spellEvaluationScope, type SpellCalculator } from './workerEvaluation'
 import { catalogSummary, searchCatalog } from './searchCatalog'
@@ -16,7 +16,9 @@ import type { SpellModifierContext } from '../../shared/spellModifiers'
 import { spellBrowseEffectSlots } from '../../shared/spellBrowseEffects'
 import { cachedAmbiguousSpellNames, spellEraLabel } from './spellBrowseEraTable'
 import type { SpellByLevelResult, SpellRankingsResult } from '../../shared/spellAnalysis'
-import { clientSpellSlowSummary } from '../../shared/clientSpellDescriptions'
+import { clientSpellSlowSummary, describeClientSpell } from '../../shared/clientSpellDescriptions'
+import { guessSpellCompareMetric, hitPointMetric, SPELL_COMPARE_METRICS, type SpellCompareMetric } from '../../shared/spellCompareMetric'
+import { choiceArg } from './analysisValidation'
 
 /** Cached arithmetic survives identical exports; displayed evidence still follows the latest export. */
 function refreshInstrumentProvenance<T extends SpellSearchResult>(result: T, context?: SpellModifierContext): T {
@@ -187,30 +189,34 @@ export class SpellLibraryQueries {
     if (!wants || !record || level === undefined) return undefined
     return hpCalculations(record, level, calculate)
   }
-  private comparedSpells(dataset: SpellDataset, request: { ids: number[]; level: number; metric: SpellMetric; query: Record<string, unknown>; context: unknown; calculate: SpellCalculator }) {
-    const { ids, level, metric, query, context, calculate } = request
+  private comparedSpells(dataset: SpellDataset, request: { records: ClientSpellRecord[]; level: number; metric: SpellCompareMetric; query: Record<string, unknown>; context: unknown; calculate: SpellCalculator }) {
+    const { records, level, metric, query, context, calculate } = request
     const results: SpellCalculation[] = []
     const rankEvidence: NonNullable<SpellComparisonResult['rankEvidence']> = {}
     const browseRank: NonNullable<SpellComparisonResult['browseRank']> = {}
-    const summaries: Record<string, SpellSummary> = {}
-    const buildSummary = query.includeSummary === true && ids.length > 0 ? this.comparisonSummary(dataset, level, query, context) : null
-    for (const id of ids) {
-      const record = this.storage.record(dataset.snapshotId, id)
-      if (!record) continue
+    const summaries: Record<string, SpellComparisonSummary> = {}
+    const hp = hitPointMetric(metric)
+    const buildSummary = query.includeSummary === true && records.length > 0 ? this.comparisonSummary(dataset, level, query, context) : null
+    for (const record of records) {
+      const { id } = record
       const effectSummary = clientSpellSlowSummary(record, level)
-      results.push({ ...calculate(record, level, metric), ...(effectSummary ? { effectSummary } : {}) })
+      results.push({ ...calculate(record, level, hp ?? (record.beneficial ? 'healing' : 'damage')), ...(effectSummary ? { effectSummary } : {}) })
       rankEvidence[String(id)] = this.evaluation.rankEvidence(dataset, record, context)
       if (query.browseRank === true) browseRank[String(id)] = this.evaluation.browseMetadata(dataset, record, context)
-      if (buildSummary) summaries[String(id)] = buildSummary(record)
+      if (buildSummary) summaries[String(id)] = buildSummary(record, hp === null)
     }
     return { results, rankEvidence, browseRank, summaries }
   }
   private comparisonSummary(dataset: SpellDataset, level: number, query: Record<string, unknown>, context: unknown) {
     const mechanics = this.evaluation.mechanics(dataset)
     const ambiguous = cachedAmbiguousSpellNames(dataset.snapshotId, this.storage.recordNames(dataset.snapshotId))
-    return (record: ClientSpellRecord): SpellSummary => {
-      const summary = catalogSummary(record, [], { mechanics, level, ambiguous })
+    return (record: ClientSpellRecord, showPresentation: boolean): SpellComparisonSummary => {
+      const summary: SpellComparisonSummary = catalogSummary(record, [], { mechanics, level, ambiguous })
       if (query.includeEffects === true) summary.effects = spellBrowseEffectSlots(record, level, this.effectRank(dataset, record, query, context))
+      if (showPresentation) {
+        const { duration, effects } = describeClientSpell(record, level)
+        summary.presentation = { duration, effects: effects.filter((effect) => !effect.neutral) }
+      }
       return summary
     }
   }
@@ -232,12 +238,16 @@ export class SpellLibraryQueries {
     if (!Array.isArray(query.ids) || query.ids.length > 4) throw new Error('Compare at most four spells')
     const ids = [...new Set(query.ids.map(spellId))]
     const level = levelArg(query.level)
-    const metric = metricArg(query.metric)
+    const choice = choiceArg(query.metric, 'spell metric', ['auto', ...SPELL_COMPARE_METRICS])
     const dataset = this.dataset(installId, query)
     return this.remember({ method: 'compare', installId, dataset, query, context }, () => {
-      const calculate = this.evaluation.calculator(dataset, query, context)
-      const compared = dataset ? this.comparedSpells(dataset, { ids, level, metric, query, context, calculate }) : { results: [], rankEvidence: {}, browseRank: {}, summaries: {} }
-      return { dataset, level, scope: spellEvaluationScope(query), results: compared.results, rankEvidence: compared.rankEvidence,
+      const records = dataset ? ids.map((id) => this.storage.record(dataset.snapshotId, id)).filter((record) => record !== null) : []
+      const metric = choice === 'auto' ? guessSpellCompareMetric(records) : choice
+      const hp = hitPointMetric(metric)
+      const calculate = this.evaluation.calculator(dataset, hp ? query : { ...query, analysis: undefined }, context)
+      const compared = dataset ? this.comparedSpells(dataset, { records, level, metric, query, context, calculate }) : { results: [], rankEvidence: {}, browseRank: {}, summaries: {} }
+      const scope = hp ? spellEvaluationScope(query) : 'Base client effects and duration at the selected level.'
+      return { dataset, level, metric, scope, results: compared.results, rankEvidence: compared.rankEvidence,
         ...(query.browseRank === true ? { browseRank: compared.browseRank } : {}), ...(query.includeSummary === true ? { summaries: compared.summaries } : {}) }
     })
   }

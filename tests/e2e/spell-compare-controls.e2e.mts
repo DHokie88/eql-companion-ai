@@ -83,6 +83,29 @@ async function compareControls(page: Page): Promise<void> {
   await emptyComparison(page)
 }
 
+async function compareMetricAndPreset(page: Page): Promise<void> {
+  await page.getByTestId('nav-preferences').click()
+  await page.getByTestId('prefs-rail-spell-columns').click()
+  await choose(page, 'pref-spell-preset-select', 'Debuffs')
+  const era = page.getByTestId('pref-spell-preset-column-era').getByRole('checkbox')
+  assert.equal(await era.isChecked(), false)
+  await era.check()
+  await page.getByTestId('nav-spells').click()
+  await page.getByTestId('spells-tab-browse').click()
+  await selectSpell(page, 738)
+  await page.getByTestId('spells-tab-compare').click()
+  await settle(() => page.getByTestId('spells-metric').innerText(), (text) => text.includes('Auto · Debuffs'))
+  assert.match(await page.getByTestId('compare-effect-list-738').innerText(), /Slows attacks by 30%/)
+  assert.equal(await page.getByRole('columnheader', { name: 'Effect duration', exact: true }).count(), 1)
+  await choose(page, 'spells-column-preset', 'Debuffs')
+  assert.equal(await page.getByRole('columnheader', { name: 'Era', exact: true }).count(), 1)
+  await choose(page, 'spells-metric', 'Healing')
+  await page.getByRole('button', { name: 'One-target full cast', exact: true }).waitFor()
+  assert.equal(await page.getByRole('columnheader', { name: 'Effect duration', exact: true }).count(), 0)
+  await choose(page, 'spells-metric', 'Auto')
+  await page.getByTestId('compare-effect-list-738').waitFor()
+}
+
 buildIfStale()
 const staged = stageFixture('e2e-combat.log'), count = stageAnalysisSources(staged)
 const launch = await launchOnFixture(staged)
@@ -100,6 +123,7 @@ try {
   await page.getByTestId('spells-group-all').click()
   for (const id of [201, 301, 302, 738]) await selectSpell(page, id)
   await compareControls(page)
-  console.log('PASS Compare: visible remove controls, selected-reference fallback, slow percentages, clear all, preserved ranks and empty selection after tab roundtrip.')
+  await compareMetricAndPreset(page)
+  console.log('PASS Compare: removal, reference, ranks, automatic and manual metrics, saved column presets and base effect comparisons.')
 } catch (error) { await dumpArtifacts(page, 'spell-compare-controls-failure'); throw error }
 finally { await launch.close(); await staged.dispose() }

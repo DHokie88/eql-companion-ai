@@ -28,6 +28,35 @@ function fixture(rows: string[][], description?: string) {
 }
 const ids = (result: { records: { id: number }[] }): number[] => result.records.map((r) => r.id)
 
+test('Compare guesses from selected spell types, keeps ties in selection order, and honors manual choices', () => {
+  const damage = spellRow(1, 'Bolt')
+  const heal = spellRow(2, 'Heal'); heal[28] = '1'; heal[172] = '1|79|150|0|100|0'
+  const buff = spellRow(3, 'Ward'); buff[28] = '1'; buff[11] = '3'; buff[12] = '5'; buff[172] = '1|1|20|0|100|0'
+  const slow = spellRow(4, 'Slow'); slow[11] = '3'; slow[12] = '5'; slow[172] = '1|11|70|0|100|0'
+  const utility = spellRow(5, 'Utility'); utility[28] = '1'; utility[172] = '1|31|1|0|100|0'
+  const secondHeal = [...heal]; secondHeal[0] = '6'; secondHeal[1] = 'Second heal'
+  const f = fixture([damage, heal, buff, slow, utility, secondHeal])
+  try {
+    const compare = (ids: number[], metric = 'auto'): SpellComparisonResult =>
+      f.call('compare', { ids, level: 50, metric, analysis: single, includeSummary: true })
+    assert.equal(compare([1, 2, 6]).metric, 'healing')
+    assert.equal(compare([1, 2]).metric, 'damage')
+    assert.equal(compare([2, 1]).metric, 'healing')
+    assert.equal(compare([2]).results[0].total, 150)
+    const ward = compare([3])
+    assert.equal(ward.metric, 'buffs')
+    assert.match(ward.summaries?.['3'].presentation?.duration ?? '', /ticks/)
+    assert.match(ward.summaries?.['3'].presentation?.effects[0].text ?? '', /Increases armor class/)
+    const debuff = compare([4])
+    assert.equal(debuff.metric, 'debuffs')
+    assert.match(debuff.summaries?.['4'].presentation?.effects[0].text ?? '', /Slows attacks by 30%/)
+    assert.equal(compare([5]).metric, 'utility')
+    assert.equal(compare([2], 'damage').metric, 'damage')
+    assert.equal(compare([2], 'damage').results[0].total, null)
+    assert.throws(() => compare([2], 'random'), /Invalid spell metric/)
+  } finally { f.close() }
+})
+
 test('paid ordinary four/eight-target client spells rank by damage per mana instead of being excluded', () => {
   const f = fixture(ordinaryAoeRows())
   try {

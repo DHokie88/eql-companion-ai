@@ -131,6 +131,7 @@ import { buffTrustSection } from './BuffTrustSetting'
 // Same arrangement again (JOS-123): the Appearance section names itself beside the card that
 // renders its first item. See ./TextSizeSetting.tsx.
 import { appearanceSection } from './TextSizeSetting'
+import { spellColumnPresetSection } from './SpellColumnPresetSetting'
 // Same arrangement again (JOS-139): what the X does — the app keeps running in the tray, or it
 // quits — names its own section beside the card that renders it. See ./CloseToTraySetting.tsx.
 import { windowSection } from './CloseToTraySetting'
@@ -415,6 +416,7 @@ function buildSections({ version, status, onSendFeedback, onWhatsNew }: SectionI
     },
     wikiDatasetSection(),
     buildStrategiesSection(),
+    spellColumnPresetSection(),
     // Directly under Updates, which is where a person who just read the version number is
     // standing when they wonder what it changed (JOS-73).
     whatsNewSection(),

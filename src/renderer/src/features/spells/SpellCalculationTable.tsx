@@ -1,7 +1,7 @@
 import type { JSX } from 'react'
 import { Box, Button, IconButton, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
-import type { SpellBrowseSort, SpellCalculation, SpellMetric, SpellSummary } from '@shared/spellLibrary'
+import type { SpellBrowseSort, SpellCalculation, SpellComparisonSummary } from '@shared/spellLibrary'
 import { sortSpellCalculations, type SpellCalculationSort } from '@shared/clientSpellBrowse'
 import { amount, efficiencyAmount, wholeAmount, EstimateAmount } from './SpellEstimate'
 import { SpellCastSummary } from './SpellCastSummary'
@@ -13,23 +13,33 @@ import type { SpellRankEvidence } from '@shared/spellModifiers'
 import { SpellRowRank } from './SpellRowRank'
 import { SpellDataCell } from './SpellBrowseTable'
 import { selectableBrowseColumns, type BrowseDisplayField } from './spellBrowseColumns'
+import { hitPointMetric, type SpellCompareMetric } from '@shared/spellCompareMetric'
 
 type CompareSort = SpellCalculationSort | SpellBrowseSort
-interface CompareColumn { field: CompareSort | 'era' | 'spa'; label: string; numeric?: boolean; extra?: boolean }
+interface CompareColumn { field: CompareSort | 'era' | 'spa' | 'effect-duration' | 'effects'; label: string; numeric?: boolean; extra?: boolean }
 export const DEFAULT_COMPARE_COLUMNS: BrowseDisplayField[] = ['amount', 'mana', 'efficiency', 'rate']
 const coreFields = new Map<BrowseDisplayField, SpellCalculationSort>([['amount', 'total'], ['mana', 'mana'], ['efficiency', 'perMana'], ['rate', 'rate']])
 
-export function compareColumns(chosen: BrowseDisplayField[], metric: SpellMetric): CompareColumn[] {
+const hpOnly = new Set<BrowseDisplayField>(['amount', 'efficiency', 'rate', 'duration', 'ticks', 'waves', 'hits', 'targets'])
+export function compareColumns(chosen: BrowseDisplayField[], metric: SpellCompareMetric): CompareColumn[] {
+  const hp = hitPointMetric(metric)
   return [
-    { field: 'name', label: 'Spell' }, { field: 'instant', label: 'Instant', numeric: true }, { field: 'perTick', label: 'Per tick × ticks', numeric: true },
-    ...selectableBrowseColumns(metric).filter(({ field }) => chosen.includes(field)).map(({ field, label }): CompareColumn => {
+    { field: 'name', label: 'Spell' },
+    ...(hp ? hpCompareColumns : effectCompareColumns),
+    ...selectableBrowseColumns(hp ?? 'damage').filter(({ field }) => chosen.includes(field) && (hp !== null || !hpOnly.has(field))).map(({ field, label }): CompareColumn => {
       const core = coreFields.get(field)
       return core ? { field: core, label, numeric: true } : { field: field as CompareColumn['field'], label, extra: true }
     }),
-    { field: 'scope', label: 'Scope / exclusions' }
+    ...(hp ? scopeCompareColumn : [])
   ]
 }
-type ComparisonSummaries = Record<string, SpellSummary>
+const hpCompareColumns: CompareColumn[] = [{ field: 'instant', label: 'Instant', numeric: true }, { field: 'perTick', label: 'Per tick × ticks', numeric: true }]
+const effectCompareColumns: CompareColumn[] = [{ field: 'effects', label: 'Effects' }, { field: 'effect-duration', label: 'Effect duration' }]
+const scopeCompareColumn: CompareColumn[] = [{ field: 'scope', label: 'Scope / exclusions' }]
+type ComparisonSummaries = Record<string, SpellComparisonSummary>
+function isSortColumn(field: CompareColumn['field']): field is CompareSort {
+  return field !== 'era' && field !== 'spa' && field !== 'selected' && field !== 'effects' && field !== 'effect-duration'
+}
 export function SpellCalculationTable({ rows, summaries = {}, columns, onOpen, onRemove, referenceId, rankEvidence, browseRank }: {
   rows: SpellCalculation[]; summaries?: ComparisonSummaries; columns: CompareColumn[]
   onOpen: (id: number) => void; onRemove?: (id: number) => void; referenceId?: number
@@ -39,11 +49,11 @@ export function SpellCalculationTable({ rows, summaries = {}, columns, onOpen, o
   const sorted = sortSpellCalculations(rows, sort.field, sort.direction, summaries)
   const reference = rows.find((row) => row.id === referenceId)
   return <Box sx={{ overflowX: 'auto' }}><Table size="small" sx={{ '& .MuiTableCell-root': { px: 1 } }}><TableHead><TableRow>
-    {columns.map(({ field, label, numeric }) => field === 'era' || field === 'spa' || field === 'selected' ? <TableCell key={field}>{label}</TableCell> : <SpellSortHeader key={field} field={field} label={label} numeric={numeric} sort={sort} />)}
+    {columns.map(({ field, label, numeric }) => isSortColumn(field) ? <SpellSortHeader key={field} field={field} label={label} numeric={numeric} sort={sort} /> : <TableCell key={field}>{label}</TableCell>)}
   </TableRow></TableHead><TableBody>{sorted.map((row) => <CalculationRow key={row.id} row={row} summary={summaries[String(row.id)]} columns={columns} evidence={rankEvidence?.[String(row.id)]} browseRank={browseRank?.[String(row.id)]} onOpen={onOpen} onRemove={onRemove} reference={reference} />)}</TableBody></Table></Box>
 }
 interface CalculationRowProps {
-  row: SpellCalculation; summary?: SpellSummary; columns: CompareColumn[]; onOpen: (id: number) => void; onRemove?: (id: number) => void
+  row: SpellCalculation; summary?: SpellComparisonSummary; columns: CompareColumn[]; onOpen: (id: number) => void; onRemove?: (id: number) => void
   reference?: SpellCalculation; evidence?: SpellRankEvidence | null; browseRank?: SpellBrowseRankMetadata | null
 }
 function CalculationRow({ row, summary, columns, onOpen, onRemove, reference, evidence, browseRank }: CalculationRowProps): JSX.Element {
@@ -53,10 +63,18 @@ function CalculationRow({ row, summary, columns, onOpen, onRemove, reference, ev
     const { field } = column
     if (field === 'name') return <SpellIdentityCell key={field} row={row} summary={summary} evidence={evidence} browseRank={browseRank} onOpen={onOpen} onRemove={separateRemove ? undefined : onRemove} />
     if (field === 'selected') return <TableCell key={field}>{onRemove && <Button size="small" aria-label={`Remove ${row.name} from comparison`} onClick={() => onRemove(row.id)} data-testid={`spells-remove-${row.id}`}>Remove</Button>}</TableCell>
+    if (field === 'effect-duration') return <TableCell key={field}>{summary?.presentation?.duration ?? '-'}</TableCell>
+    if (field === 'effects') return <EffectComparisonCell key={field} summary={summary} />
     if (column.extra) return <TableCell key={field}>{summary ? <SpellDataCell field={field as BrowseDisplayField} record={{ ...summary, calculations: [row] }} /> : '-'}</TableCell>
     return <CalculationValueCell key={field} field={field} row={row} differences={differences} />
   })}
   </TableRow>
+}
+function EffectComparisonCell({ summary }: { summary?: SpellComparisonSummary }): JSX.Element {
+  const effects = summary?.presentation?.effects ?? []
+  return <TableCell data-testid={`compare-effect-list-${summary?.id ?? 'unknown'}`} sx={{ minWidth: 200 }}>
+    {effects.length ? effects.map(({ slot, text }) => <Typography key={slot} variant="body2">{text}</Typography>) : '-'}
+  </TableCell>
 }
 interface CalculationValueProps {
   field: CompareColumn['field']; row: SpellCalculation; differences: ReturnType<typeof spellComparisonDifferences> | null
@@ -81,7 +99,7 @@ function SpellIdentityCell({ row, summary, onOpen, onRemove, evidence, browseRan
   </Box><SpellRowRank id={row.id} name={row.name} evidence={evidence} browseRank={browseRank} />
     {summary && <Typography variant="caption" display="block" color="text.secondary"><SpellDataCell field="classes" record={summary} /></Typography>}
     {rain && <Typography variant="caption" display="block" color="text.secondary">Rain · {rain.waves} waves max · {rain.hitCap} hits max</Typography>}
-    {row.effectSummary && <Typography variant="body2" data-testid={`compare-effects-${row.id}`} sx={{ whiteSpace: 'normal', maxWidth: 260 }}>Base: {row.effectSummary}</Typography>}
+    {row.effectSummary && !summary?.presentation && <Typography variant="body2" data-testid={`compare-effects-${row.id}`} sx={{ whiteSpace: 'normal', maxWidth: 260 }}>Base: {row.effectSummary}</Typography>}
   </TableCell>
 }
 function PeriodicCell({ row }: { row: SpellCalculation }): JSX.Element {

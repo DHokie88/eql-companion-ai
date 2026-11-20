@@ -14,6 +14,7 @@ import type { SpellAnalysisOptions } from '@shared/spellAnalysis'
 import { BrowseColumnPicker } from './SpellBrowseAnalysis'
 import { browseColumns, type BrowseDisplayField } from './spellBrowseColumns'
 import { SpellDataCell } from './SpellBrowseTable'
+import { filterColumnPreset, useSpellColumnSelection } from './spellColumnPresets'
 
 const PROGRESSION_LEVELS = { min: 1, max: 255 }
 const PROGRESSION_COLUMNS: BrowseDisplayField[] = ['id', 'description', 'category', 'mana', 'selected']
@@ -29,7 +30,7 @@ export function SpellByLevel({ classes, level, evaluation, analysis, selected, o
   useSpellScroll('by-level', !!data && !loading)
   return <Stack spacing={1.5} data-testid="spells-by-level">
     <SpellBrowseFilters {...state} levelLimits={PROGRESSION_LEVELS} categories={data?.categories ?? []} subcategories={data?.subcategories ?? []}
-      controls={<ProgressionControls state={state} controls={controls} />} columns={<BrowseColumnPicker metric={state.metric} columns={state.columns} setColumns={state.setColumns} columnCount={state.columns.length + 5} />} />
+      controls={<ProgressionControls state={state} controls={controls} />} columns={<BrowseColumnPicker {...state} columnCount={state.columns.length + 5} />} />
     <SpellRankSlider />
     {error && <Alert severity="error">{error}</Alert>}{loading && <CircularProgress size={22} />}
     {!enabled && <Typography>Select classes or choose All to see spells.</Typography>}
@@ -60,7 +61,6 @@ function useByLevel({ classes, level: detectedLevel, evaluation, analysis, selec
   classes: SpellClass[]; level: number; evaluation: SpellEvaluationOptions; analysis: SpellAnalysisOptions; selected: number[]; enabled: boolean
 }) {
   const [view, setView] = useSpellWorkspaceState<'at' | 'upcoming'>('by-level-view', 'at')
-  const [columns, setColumns] = useSpellWorkspaceState<BrowseDisplayField[]>('progression-columns', PROGRESSION_COLUMNS)
   const [page, setPage] = useSpellWorkspaceState('by-level-page', 1)
   const [text, setText] = useSpellWorkspaceState('by-level-search', '')
   const [savedFilters, setFilters] = useSpellWorkspaceState('progression-filters', defaultBrowseFilters())
@@ -68,6 +68,7 @@ function useByLevel({ classes, level: detectedLevel, evaluation, analysis, selec
   const level = range.min ?? detectedLevel
   const maximum = String(Math.max(level, range.max ?? Math.min(255, detectedLevel + 10)))
   const filters = { ...savedFilters, text, min: String(level), max: maximum }
+  const columnSelection = useSpellColumnSelection('progression-columns', PROGRESSION_COLUMNS, filterColumnPreset(filters))
   const invalid = browseFilterError(filters, maximum)
   const sort = useSpellSort<SpellBrowseSort>('level', 'asc', 'by-level')
   const queryText = useSearchText(text), classKey = classes.join(',')
@@ -75,7 +76,7 @@ function useByLevel({ classes, level: detectedLevel, evaluation, analysis, selec
   useSpellPageReset(`${classKey}:${level}:${maximum}:${view}:${sort.field}:${sort.direction}:${selectedKey}`, setPage)
   const { category, subcategory, effect, type, polarity, mana, hpFilter } = filters
   const metric = hpFilter === 'healing' || type === 'heal' || type === 'hot' ? 'healing' as const : 'damage' as const
-  const includeEffects = columns.includes('spa')
+  const includeEffects = columnSelection.columns.includes('spa')
   const load = useCallback(() => {
     if (invalid) return Promise.reject(new Error(invalid))
     return window.eq.spellLibrary.byLevel({ classes: classKey ? classKey.split(',') as SpellClass[] : [], level,
@@ -87,14 +88,14 @@ function useByLevel({ classes, level: detectedLevel, evaluation, analysis, selec
   const change = <K extends keyof BrowseFilters>(key: K, value: BrowseFilters[K]): void => {
     if (key === 'text') setText(String(value))
     else if (key === 'min' || key === 'max') setRange((previous) => ({ ...previous, [key]: Number(value) }))
-    else setFilters((previous) => ({ ...previous, [key]: value, ...(key === 'category' ? { subcategory: '' } : {}) }))
+    else setFilters((previous) => ({ ...previous, [key]: value, ...(key === 'category' ? { subcategory: '' } : {}), ...(key === 'type' ? { hpFilter: '' } : key === 'hpFilter' ? { type: '' } : {}) }))
     setPage(1)
   }
   const reset = (): void => { setFilters(defaultBrowseFilters()); setRange(FOLLOW_PROGRESSION_LEVELS); setText(''); setPage(1) }
   const followCharacter = range.min !== null ? () => {
     setRange(({ max }) => ({ min: null, max: max !== null && max >= detectedLevel ? max : null })); setPage(1)
   } : undefined
-  return { ...useLibraryQuery(load, undefined, enabled), view, setView, level, followCharacter, page, setPage, sort, filters, maximum, invalid, change, reset, columns, setColumns, metric }
+  return { ...useLibraryQuery(load, undefined, enabled), ...columnSelection, view, setView, level, followCharacter, page, setPage, sort, filters, maximum, invalid, change, reset, metric }
 }
 function ByLevelTable({ records, selected, sort, columns, onOpen, onPreview, onToggle }: {
   records: SpellSummary[]; selected: number[]; sort: ReturnType<typeof useSpellSort<SpellBrowseSort>>
