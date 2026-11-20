@@ -145,9 +145,9 @@ function ChangedSpellRow({ pair, change, expanded, onToggle, technicalExpanded }
         data-testid={`spells-history-spell-${id}`} size="small" sx={{ px: 0, textTransform: 'none', textAlign: 'left' }}>
         {name} <Typography component="span" variant="caption" color="text.secondary" sx={{ ml: 0.75 }}>#{id}</Typography>
       </Button></TableCell>
-      <TableCell>{classes?.length ? classes.map(({ code, level }) => `${code} ${level}`).join(' · ') : '—'}</TableCell>
+      <TableCell>{classes?.length ? classes.map(({ code, level }) => `${code} ${level}`).join(' · ') : '-'}</TableCell>
       <TableCell><Chip label={CHANGE_LABELS[kind]} color={color} size="small" variant="outlined" /></TableCell>
-      <TableCell>{fields.length ? fields.slice(0, 3).join(', ') + (fields.length > 3 ? ` +${fields.length - 3}` : '') : '—'}</TableCell>
+      <TableCell>{fields.length ? fields.slice(0, 3).join(', ') + (fields.length > 3 ? ` +${fields.length - 3}` : '') : '-'}</TableCell>
     </TableRow>
     {expanded && <TableRow><TableCell colSpan={4} sx={{ p: { xs: 1, sm: 2.5 }, bgcolor: 'background.paper' }}>
       <SpellUpdateFieldChanges pair={pair} id={id} technicalExpanded={technicalExpanded} />

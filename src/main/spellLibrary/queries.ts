@@ -9,6 +9,7 @@ import { SEARCH_QUERY_FIELDS } from './browseQuery'
 import { SpellAnalysisQueries } from './analysisQueries'
 import { SpellQueryCache } from './queryCache'
 import { changeKind, spellDifferences } from './differences'
+import { SpellClientChangelog, type SpellUpdateFilters } from './clientChangelog'
 import { SpellLibraryStorage } from './storage'
 import { integerArg, objectArgs, stringArg } from './workerProtocol'
 import { classesArg, levelArg, metricArg, optionalText, pageArgs, queryObject, requiredSnapshotArg, snapshotArg, spellId } from './queryValidation'
@@ -32,6 +33,20 @@ function refreshInstrumentProvenance<T extends SpellSearchResult>(result: T, con
     }
   }
   return result
+}
+
+function booleanOption(value: unknown, name: string): boolean {
+  if (value === undefined) return false
+  if (typeof value !== 'boolean') throw new Error(`Invalid ${name}`)
+  return value
+}
+
+function clientUpdateFilters(query: Record<string, unknown>): SpellUpdateFilters {
+  const section = query.section ?? 'spells'
+  if (section !== 'spells' && section !== 'raw' && section !== 'format') throw new Error('Invalid spell update section')
+  const text = optionalText(query.text, 'spell search')?.toLowerCase()
+  const id = query.id === undefined ? undefined : spellId(query.id)
+  return { ...pageArgs(query), section, text, classes: classesArg(query.classes), id }
 }
 
 export function spellSummary(record: ClientSpellRecord): SpellSummary {
@@ -74,9 +89,11 @@ export class SpellLibraryQueries {
   private evaluation: WorkerSpellEvaluation
   private analysis: SpellAnalysisQueries
   private cache = new SpellQueryCache()
+  private changelog: SpellClientChangelog
   constructor(readonly storage: SpellLibraryStorage) {
     this.evaluation = new WorkerSpellEvaluation(storage)
     this.analysis = new SpellAnalysisQueries(storage, this.evaluation)
+    this.changelog = new SpellClientChangelog(storage)
   }
   handle(method: string, input: unknown): unknown {
     const args = objectArgs(input)
@@ -283,9 +300,11 @@ export class SpellLibraryQueries {
     return { datasetId: dataset.snapshotId, ...this.evaluation.catalog(dataset).focusOptions(text, page) }
   }
   private history(installId: string, input: unknown): SpellHistoryResult {
-    const query = queryObject(input, ['page', 'pageSize'])
+    const query = queryObject(input, ['page', 'pageSize', 'updatesOnly'])
     const { page, pageSize } = pageArgs(query)
-    const observations = this.storage.observations(installId, page, pageSize)
+    const observations = booleanOption(query.updatesOnly, 'updates-only option')
+      ? this.storage.clientUpdates(installId, page, pageSize)
+      : this.storage.observations(installId, page, pageSize)
     const status = this.storage.status(installId)
     return { dataset: status.dataset, snapshots: this.storage.snapshots(installId), observations: observations.observations,
       totalObservations: observations.total, storageBytes: status.storageBytes }
@@ -295,10 +314,13 @@ export class SpellLibraryQueries {
       this.storage.dataset(installId, requiredSnapshotArg(query.afterSnapshotId))]
   }
   private changes(installId: string, input: unknown): SpellChangesResult {
-    const query = queryObject(input, ['beforeSnapshotId', 'afterSnapshotId', 'page', 'pageSize', 'id'])
+    const query = queryObject(input, ['beforeSnapshotId', 'afterSnapshotId', 'page', 'pageSize', 'id', 'clientUpdate', 'section', 'text', 'classes'])
+    const [before, after] = this.pair(installId, query)
+    if (booleanOption(query.clientUpdate, 'client update option')) {
+      return { dataset: this.storage.active(installId), before, after, ...this.changelog.changes(before, after, clientUpdateFilters(query)) }
+    }
     const { page, pageSize } = pageArgs(query)
     const id = query.id === undefined ? undefined : spellId(query.id)
-    const [before, after] = this.pair(installId, query)
     const prior = new Map(Array.from(this.storage.records(before.snapshotId), (record) => [record.id, record]))
     const changes: SpellChangesResult['changes'] = []
     let total = 0
@@ -319,9 +341,12 @@ export class SpellLibraryQueries {
     return { dataset: this.storage.active(installId), before, after, total, changes }
   }
   private beforeAfter(installId: string, input: unknown): SpellBeforeAfterResult {
-    const query = queryObject(input, ['id', 'beforeSnapshotId', 'afterSnapshotId'])
+    const query = queryObject(input, ['id', 'beforeSnapshotId', 'afterSnapshotId', 'clientUpdate'])
     const id = spellId(query.id)
     const [prior, next] = this.pair(installId, query)
+    if (booleanOption(query.clientUpdate, 'client update option')) {
+      return { dataset: this.storage.active(installId), ...this.changelog.detail(prior, next, id) }
+    }
     const before = this.storage.record(prior.snapshotId, id), after = this.storage.record(next.snapshotId, id)
     return { dataset: this.storage.active(installId), before, after,
       differences: spellDifferences(before, after, prior.parserVersion !== next.parserVersion) }

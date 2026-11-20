@@ -328,12 +328,17 @@ function namedFields(raw: string[], shift: number, id: number): Record<string, s
   return fields
 }
 
+function validatedSpellId(rawId: string, name: string): number {
+  const id = integer(rawId, 'spells_us.txt ID')
+  if (!rawId.trim() || id < 0 || !name?.trim()) throw new Error('missing or invalid spell ID/name')
+  return id
+}
+
 function parseRecord(line: string): ClientSpellRecord {
   const rawFields = line.split('^')
   const layout = detectLayout(rawFields)
-  const id = integer(rawFields[0], 'spells_us.txt ID')
   const name = rawFields[1]
-  if (!rawFields[0].trim() || id < 0 || !name.trim()) throw new Error('spells_us.txt: missing or invalid spell ID/name')
+  const id = validatedSpellId(rawFields[0], name)
   const shift = clientSpellColumnShift(layout)
   const fields = namedFields(rawFields, shift, id)
   const n = (key: string): number => Number(fields[key])
@@ -375,15 +380,48 @@ function enrichNames(record: ClientSpellRecord, strings: Map<string, string>): v
   fields.durationText = durationText(record.durationFormula, record.durationCap)
 }
 
+function spellRowError(error: unknown, line: number): Error {
+  const reason = error instanceof Error ? error.message.replace(/^spells_us\.txt: /, '') : String(error)
+  return new Error(`spells_us.txt row ${line}: ${reason}`)
+}
+
+/** Index archived rows without holding a full catalog of parsed records in memory. */
+export function indexClientSpellBundle(sources: Record<SpellSourceFile, string>) {
+  const messages = parseMessages(sources['spells_us_str.txt'])
+  const strings = parseStrings(sources['dbstr_us.txt'])
+  const rows = new Map<number, { line: string; number: number }>()
+  const names = new Map<number, string>()
+  sourceLines(sources['spells_us.txt'], 'spells_us.txt', true).forEach((line, index) => {
+    if (!line) return
+    const [rawId, name] = line.split('^', 2)
+    try {
+      const id = validatedSpellId(rawId, name)
+      if (rows.has(id)) throw new Error(`duplicate spell ID ${id}`)
+      rows.set(id, { line, number: index + 1 })
+      names.set(id, name)
+    } catch (error) { throw spellRowError(error, index + 1) }
+  })
+  return {
+    ids: (): IterableIterator<number> => rows.keys(),
+    record(id: number): ClientSpellRecord | null {
+      const row = rows.get(id)
+      if (!row) return null
+      try {
+        const record = parseRecord(row.line)
+        record.messages = messages.get(id) ?? {}
+        enrichRecord(record, strings, names)
+        return record
+      } catch (error) { throw spellRowError(error, row.number) }
+    }
+  }
+}
+
 export function parseClientSpellBundle(sources: Record<SpellSourceFile, string>): ClientSpellRecord[] {
   const messages = parseMessages(sources['spells_us_str.txt'])
   const strings = parseStrings(sources['dbstr_us.txt'])
   const records = sourceLines(sources['spells_us.txt'], 'spells_us.txt', true).flatMap((line, index) => {
     if (!line) return []
-    try { return [parseRecord(line)] } catch (error) {
-      const reason = error instanceof Error ? error.message.replace(/^spells_us\.txt: /, '') : String(error)
-      throw new Error(`spells_us.txt row ${index + 1}: ${reason}`)
-    }
+    try { return [parseRecord(line)] } catch (error) { throw spellRowError(error, index + 1) }
   })
   const names = new Map<number, string>()
   for (const record of records) {

@@ -126,16 +126,18 @@ export class SpellLibraryStorage {
     this.statement('INSERT OR IGNORE INTO source_files(hash,bytes,compressed_bytes) VALUES(?,?,?)')
       .run(hash, bytes.length, statSync(target).size)
   }
+  readArchivedSource(hash: string): Buffer {
+    if (!/^[a-f0-9]{64}$/.test(hash)) throw new Error('Invalid archived source hash')
+    const bytes = gunzipSync(readFileSync(join(this.storageDir, 'sources', `${hash}.gz`)))
+    if (sourceHash(bytes) !== hash) throw new Error('Archived source failed its integrity check')
+    return bytes
+  }
   private materializeSources(dataset: SpellDataset): string {
     const directory = join(this.storageDir, 'materialized', `${dataset.snapshotId}-${randomUUID()}`)
     mkdirSync(directory, { recursive: true })
     try {
       for (const name of SPELL_SOURCE_FILES) {
-        const hash = dataset.hashes[name]
-        if (!/^[a-f0-9]{64}$/.test(hash)) throw new Error('Invalid archived source hash')
-        const bytes = gunzipSync(readFileSync(join(this.storageDir, 'sources', `${hash}.gz`)))
-        if (sourceHash(bytes) !== hash) throw new Error('Archived source failed its integrity check')
-        writeFileSync(join(directory, name), bytes, { flag: 'wx' })
+        writeFileSync(join(directory, name), this.readArchivedSource(dataset.hashes[name]), { flag: 'wx' })
       }
       return directory
     } catch (error) { rmSync(directory, { recursive: true, force: true }); throw error }
@@ -240,6 +242,18 @@ export class SpellLibraryStorage {
     const total = Number(this.statement('SELECT count(*) AS n FROM observations WHERE install_id=?').get(installId)?.n ?? 0)
     const values = this.statement('SELECT * FROM observations WHERE install_id=? ORDER BY id DESC LIMIT ? OFFSET ?').all(installId, pageSize, (page - 1) * pageSize)
     return { total, observations: values.map((value) => observationFromRow(value as unknown as ObservationRow)) }
+  }
+  clientUpdates(installId: string, page: number, pageSize: number): ReturnType<SpellLibraryStorage['observations']> {
+    const updates = `
+      FROM observations o
+      JOIN snapshots previous ON previous.id = o.previous_snapshot_id
+      JOIN snapshots current ON current.id = o.snapshot_id
+      WHERE o.install_id = ? AND previous.content_id <> current.content_id
+    `
+    const total = Number(this.statement(`SELECT count(*) AS n ${updates}`).get(installId)?.n ?? 0)
+    const rows = this.statement(`SELECT o.* ${updates} ORDER BY o.id DESC LIMIT ? OFFSET ?`)
+      .all(installId, pageSize, (page - 1) * pageSize)
+    return { total, observations: rows.map((row) => observationFromRow(row as unknown as ObservationRow)) }
   }
   *allObservations(installId: string): Generator<SpellObservation> {
     for (const value of this.statement('SELECT * FROM observations WHERE install_id=? ORDER BY id').iterate(installId)) {

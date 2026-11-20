@@ -22,7 +22,7 @@ function interpretedFields(record: ClientSpellRecord): Record<string, unknown> {
 }
 function changedKeys(a: Record<string, unknown>, b: Record<string, unknown>): string[] {
   return [...new Set([...Object.keys(a), ...Object.keys(b)])]
-    .sort().filter((key) => stableJson(a[key]) !== stableJson(b[key]))
+    .sort().filter((key) => a[key] !== b[key] && stableJson(a[key]) !== stableJson(b[key]))
 }
 function pushRaw(result: SpellFieldDifference[], field: string, before: string | null | undefined, after: string | null | undefined): void {
   if ((before ?? '') === (after ?? '')) return

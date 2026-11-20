@@ -21,6 +21,14 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.23.0',
+    date: '2026-11-20',
+    entries: [
+      { kind: 'new', text: 'Spells History lists captured client updates by the time Oracle first saw them. Open an update to see added, changed and removed spells, filter by name or class, and view old and new field values.', fromReport: true },
+      { kind: 'changed', text: 'Spell updates compare both captures with the same parser. Raw fields, layout changes and routine checks are available in expandable details.' }
+    ]
+  },
+  {
     version: '0.22.2',
     date: '2026-11-20',
     entries: [

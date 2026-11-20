@@ -33,10 +33,10 @@ export function readableHistoryField(field: string): string {
 }
 
 function storedValue(value: unknown): string {
-  if (value === null || value === undefined) return '—'
+  if (value === null || value === undefined) return '-'
   if (typeof value === 'string') return value || 'Empty'
   if (typeof value === 'number' || typeof value === 'boolean') return String(value)
-  return JSON.stringify(value) ?? '—'
+  return JSON.stringify(value) ?? '-'
 }
 
 function recordListValue(key: string, record: ClientSpellRecord): string | null {
@@ -59,7 +59,7 @@ const NAMED_VALUE: Record<string, string> = {
 }
 
 function recordValue(field: string, record: ClientSpellRecord | null, fallback: unknown): string {
-  if (!record) return '—'
+  if (!record) return '-'
   const key = fieldKey(field)
   const named = NAMED_VALUE[key]
   if (named && record.fields[named] !== undefined) return storedValue(record.fields[named])
@@ -91,13 +91,12 @@ function interpretedRows(data: SpellBeforeAfterResult): DisplayDifference[] {
 
 function technicalValue(field: string, value: unknown): string {
   if (field === 'layout' && typeof value === 'number') return `${value} columns`
-  return JSON.stringify(value) ?? '—'
+  return JSON.stringify(value) ?? '-'
 }
 
 function technicalRows(data: SpellBeforeAfterResult): DisplayDifference[] {
   if (data.before && data.after) {
-    // eslint-disable-next-line eqc/no-domain-munging -- The complete diff feeds both the player view and its technical disclosure.
-    return data.differences.filter((diff) => diff.kind === 'raw-only' || diff.kind === 'format').map(({ field, before, after }) => ({
+    return (data.technicalDifferences ?? []).map(({ field, before, after }) => ({
       label: readableHistoryField(field), before: technicalValue(field, before), after: technicalValue(field, after)
     }))
   }
@@ -105,8 +104,8 @@ function technicalRows(data: SpellBeforeAfterResult): DisplayDifference[] {
   if (!record) return []
   const side = data.before ? 'before' : 'after'
   return [
-    { label: 'File layout', before: '—', after: '—', [side]: `${record.layout} columns` },
-    ...record.rawFields.map((value, index) => ({ label: `Column ${index}`, before: '—', after: '—', [side]: JSON.stringify(value) }))
+    { label: 'File layout', before: '-', after: '-', [side]: `${record.layout} columns` },
+    ...record.rawFields.map((value, index) => ({ label: `Column ${index}`, before: '-', after: '-', [side]: JSON.stringify(value) }))
   ]
 }
 

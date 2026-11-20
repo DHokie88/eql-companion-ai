@@ -192,24 +192,45 @@ export interface SpellHistoryResult {
   totalObservations: number
   storageBytes: number
 }
-export interface SpellHistoryQuery { page?: number; pageSize?: number }
+export interface SpellHistoryQuery { page?: number; pageSize?: number; updatesOnly?: boolean }
 export type SpellChangeKind = 'added' | 'removed' | 'interpreted' | 'raw-only' | 'format' | 'parser-upgrade'
 export interface SpellFieldDifference { field: string; before: unknown; after: unknown; kind: SpellChangeKind }
-export interface SpellChangeSummary { id: number; name: string; kind: SpellChangeKind; fields: number }
-export interface SpellChangesQuery { beforeSnapshotId: string; afterSnapshotId: string; page?: number; pageSize?: number; id?: number }
+export interface SpellChangeSummary {
+  id: number
+  name: string
+  kind: SpellChangeKind
+  fields: number
+  classes?: ClientSpellClass[]
+  changedFields?: string[]
+}
+export type SpellUpdateSection = 'spells' | 'raw' | 'format'
+export interface SpellUpdateCounts { added: number; changed: number; removed: number; rawOnly: number; formatOnly: number }
+export interface SpellChangesQuery {
+  beforeSnapshotId: string
+  afterSnapshotId: string
+  page?: number
+  pageSize?: number
+  id?: number
+  clientUpdate?: boolean
+  section?: SpellUpdateSection
+  text?: string
+  classes?: SpellClass[]
+}
 export interface SpellChangesResult {
   dataset: SpellDataset | null
   before: SpellDataset | null
   after: SpellDataset | null
   total: number
   changes: SpellChangeSummary[]
+  updateCounts?: SpellUpdateCounts
 }
-export interface SpellBeforeAfterQuery { id: number; beforeSnapshotId: string; afterSnapshotId: string }
+export interface SpellBeforeAfterQuery { id: number; beforeSnapshotId: string; afterSnapshotId: string; clientUpdate?: boolean }
 export interface SpellBeforeAfterResult {
   dataset: SpellDataset | null
   before: ClientSpellRecord | null
   after: ClientSpellRecord | null
   differences: SpellFieldDifference[]
+  technicalDifferences?: SpellFieldDifference[]
 }
 export interface SpellTimelineQuery { id: number }
 export interface SpellTimelineResult { dataset: SpellDataset | null; entries: { observation: SpellObservation; record: SpellSummary | null }[] }
