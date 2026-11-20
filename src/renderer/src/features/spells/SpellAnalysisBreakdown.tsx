@@ -1,7 +1,7 @@
 import type { JSX } from 'react'
 import { Accordion, AccordionSummary, AccordionDetails, Alert, Box, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
 import type { SpellCalculation } from '@shared/spellLibrary'
-import { amount, wholeAmount, EstimateExplanation } from './SpellEstimate'
+import { amount, wholeAmount, EstimateExplanation, modeledCycleTiming } from './SpellEstimate'
 
 export function SpellAnalysisBreakdown({ calculation }: { calculation: SpellCalculation }): JSX.Element {
   const analysis = calculation.analysis
@@ -35,6 +35,9 @@ function RainBreakdown({ calculation }: { calculation: SpellCalculation }): JSX.
 function Timing({ calculation }: { calculation: SpellCalculation }): JSX.Element | null {
   const timing = calculation.analysis?.timing
   if (!timing) return null
-  return <Stack spacing={0.5}><Typography variant="caption">Cycle = cast {timing.castMs / 1000}s + max(recovery {timing.recoveryMs / 1000}s, recast {timing.recastMs / 1000}s, delivery {timing.deliveryMs === null ? '?' : timing.deliveryMs / 1000}s) = {timing.cycleMs === null ? '?' : timing.cycleMs / 1000}s.</Typography>
-    <Typography variant="caption">Modeled cycle {calculation.metric === 'damage' ? 'DPS' : 'HPS'}: {wholeAmount(timing.rate)}. {timing.reason} These are modeled casting cycles, not measured combat output or a rotation simulation.</Typography></Stack>
+  return <Stack spacing={0.5}>
+    {timing.cycleMs !== null && <Typography variant="caption">Cycle = {modeledCycleTiming(timing)}</Typography>}
+    <Typography variant="caption">Modeled {calculation.metric === 'damage' ? 'DPS' : 'HPS'} for repeating this spell = {wholeAmount(timing.rate)}. {timing.reason}</Typography>
+    <Typography variant="caption">The estimate treats spell recast, global recovery and effect delivery as overlapping waits. It uses the longest wait so ticks and waves can finish.</Typography>
+  </Stack>
 }

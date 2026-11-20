@@ -3,7 +3,7 @@ import { Box, IconButton, Table, TableBody, TableCell, TableHead, TableRow, Tool
 import CloseIcon from '@mui/icons-material/Close'
 import type { SpellBrowseSort, SpellCalculation, SpellComparisonSummary } from '@shared/spellLibrary'
 import { sortSpellCalculations, type SpellCalculationSort } from '@shared/clientSpellBrowse'
-import { amount, efficiencyAmount, wholeAmount, EstimateAmount } from './SpellEstimate'
+import { amount, efficiencyAmount, EstimateAmount, ModeledRate } from './SpellEstimate'
 import { SpellCastSummary } from './SpellCastSummary'
 import { SpellAnalysisBreakdown } from './SpellAnalysisBreakdown'
 import { spellComparisonDifferences, type SpellDifference } from '@shared/spellAnalysisPresentation'
@@ -21,7 +21,7 @@ interface CompareColumn {
   label: string; numeric?: boolean; extra?: boolean
 }
 export const DEFAULT_COMPARE_COLUMNS: BrowseDisplayField[] = [
-  'rank', 'classes', 'remove', 'instant', 'perTick', 'amount', 'mana', 'efficiency', 'rate', 'scope', 'effects'
+  'rank', 'classes', 'remove', 'instant', 'perTick', 'amount', 'mana', 'efficiency', 'rate', 'recast', 'scope', 'effects'
 ]
 const coreFields = new Map<BrowseDisplayField, SpellCalculationSort>([
   ['amount', 'total'], ['mana', 'mana'], ['efficiency', 'perMana'], ['rate', 'rate'], ['instant', 'instant'], ['perTick', 'perTick']
@@ -101,7 +101,7 @@ function ComparisonMetricCell({ field, row, differences }: CalculationValueProps
   if (field === 'total') return <TableCell align="right"><EstimateAmount calculation={row} compact /><SpellCastSummary calculation={row} compact />{differences && <Delta value={differences.amount} />}</TableCell>
   if (field === 'mana') return <TableCell align="right">{row.mana}{differences && <Delta value={differences.mana} />}</TableCell>
   if (field === 'perMana') return <TableCell align="right">{row.mana === 0 ? 'Zero mana' : efficiencyAmount(row.perMana)}{differences && <Delta value={differences.efficiency} />}</TableCell>
-  return <TableCell align="right">{wholeAmount(row.analysis?.timing.rate ?? null)}{differences && <Delta value={differences.rate} />}</TableCell>
+  return <TableCell align="right"><ModeledRate calculation={row} />{differences && <Delta value={differences.rate} />}</TableCell>
 }
 function RemoveSpell({ row, onRemove }: Pick<CalculationRowProps, 'row' | 'onRemove'>): JSX.Element | null {
   if (!onRemove) return null

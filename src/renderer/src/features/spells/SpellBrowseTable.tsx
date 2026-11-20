@@ -3,7 +3,7 @@ import { Box, Button, IconButton, Stack, Table, TableBody, TableCell, TableHead,
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import type { SpellBrowseSort, SpellMetric, SpellSummary } from '@shared/spellLibrary'
 import { spellBrowseEffectText } from '@shared/spellBrowseEffects'
-import { amount, efficiencyAmount, wholeAmount, EstimateAmount } from './SpellEstimate'
+import { amount, efficiencyAmount, EstimateAmount, ModeledRate } from './SpellEstimate'
 import { SpellNameButton, SpellSortHeader, type useSpellSort } from './SpellTableControls'
 import { SpellRowRank } from './SpellRowRank'
 import { SpellCastSummary } from './SpellCastSummary'
@@ -55,7 +55,8 @@ function TextCell({ record, field }: Pick<CellProps, 'record' | 'field'>): JSX.E
   if (field === 'classes') return <>{record.classes.length ? record.classes.map((c) => `${c.code} ${c.level}`).join(' · ') : 'Internal / NPC'}</>
   if (field === 'description') return <Typography variant="body2" sx={{ minWidth: 220, maxWidth: 420, whiteSpace: 'normal', lineHeight: 1.6 }}>{record.description ?? '-'}</Typography>
   if (field === 'type') return <>{record.typeLabel ?? record.spellType?.toUpperCase() ?? '-'}</>
-  return <>{field === 'rate' ? wholeAmount(browseTimingValue(record, field)) : amount(browseTimingValue(record, field))}</>
+  if (field === 'rate') return <ModeledRate calculation={record.calculations?.[0]} />
+  return <>{amount(browseTimingValue(record, field))}</>
 }
 export function SpellBrowseTable({ records, selected, sort, categoryDisplay = 'both', metric = 'damage', columns = DEFAULT_BROWSE_COLUMNS, uniformType = false, onOpen, onToggle }: {
   records: SpellSummary[]; selected: number[]; sort: ReturnType<typeof useSpellSort<SpellBrowseSort>>
