@@ -24,7 +24,8 @@ import {
   type AchievementsSource,
   type ClassUnlockClaim
 } from '../../shared/outputs/achievements'
-import type { OutputKindId } from '../../shared/outputs/kinds'
+import { outputKind, ownsOutputFile, type OutputKindId } from '../../shared/outputs/kinds'
+import { logWarn } from '../errorLog'
 import { parseOutput, type OutputParseResult } from './kinds'
 import { outputStatus, type OutputCharacter } from './registry'
 
@@ -67,22 +68,36 @@ export interface LoadedOutput {
 /**
  * Find + read + parse a kind's dump for a character. Null when there is no such file.
  *
+ * Character-scoped imports only use exports from that character. The default scope also
+ * permits the newest export for callers that only need file discovery.
+ *
  * The find + the mtime both come from `outputStatus`, so "where is it" and "how old is it" have
  * exactly ONE answer in this process — the same one the UI's freshness line is rendering.
  */
 export function loadOutput(
   id: OutputKindId,
   characterName?: string,
-  server?: string
+  server?: string,
+  scope: 'any' | 'character' = 'any'
 ): LoadedOutput | null {
   const character: OutputCharacter = { name: characterName, server }
   const status = outputStatus(id, character)
   if (status.path === null || status.updatedAt === null) return null
+  if (scope === 'character' && !ownsOutputFile(outputKind(id), status.path, characterName, server)) return null
+  let text: string
+  try {
+    text = readFileSync(status.path, 'utf8')
+  } catch (err) {
+    // EQ can replace or lock the dump after discovery. Treat that race as a missing dump so a
+    // startup read cannot prevent the character's engine from attaching.
+    logWarn(`[everquest-companion] Could not read ${id} dump: ${status.path}`, err)
+    return null
+  }
   return {
     kind: id,
     path: status.path,
     loadedAt: status.updatedAt,
-    result: parseOutput(id, readFileSync(status.path, 'utf8'))
+    result: parseOutput(id, text)
   }
 }
 
@@ -108,7 +123,7 @@ export function loadInventoryDump(
   characterName?: string,
   server?: string
 ): LoadedInventoryDump | null {
-  const loaded = loadOutput('inventory', characterName, server)
+  const loaded = loadOutput('inventory', characterName, server, 'character')
   if (!loaded) return null
   const { result } = loaded
   // The registry types this narrowing honestly: an unsupported kind never yields data.
@@ -142,7 +157,7 @@ export function loadAchievements(
   server?: string,
   now: () => number = Date.now
 ): LoadedAchievements | null {
-  const loaded = loadOutput('achievements', characterName, server)
+  const loaded = loadOutput('achievements', characterName, server, 'character')
   if (!loaded) return null
   const { result } = loaded
   if (!result.ok || result.data.kind !== 'achievements') return null

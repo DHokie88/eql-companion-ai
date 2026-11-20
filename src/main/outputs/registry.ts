@@ -46,7 +46,8 @@ export interface OutputCharacter {
 /** The file's mtime as an ISO string, or null when it is gone between the listing and the stat. */
 function mtimeIso(path: string): string | null {
   try {
-    return new Date(statSync(path).mtimeMs).toISOString()
+    const stat = statSync(path)
+    return stat.isFile() ? new Date(stat.mtimeMs).toISOString() : null
   } catch {
     // The dump was deleted (or the drive vanished) in the microseconds since discovery listed
     // it. That is "no dump", not an error to render.

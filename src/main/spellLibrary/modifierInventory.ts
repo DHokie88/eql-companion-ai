@@ -1,5 +1,4 @@
-import { basename } from 'node:path'
-import { outputFileNames, outputKind } from '../../shared/outputs/kinds'
+import { outputKind, ownsOutputFile } from '../../shared/outputs/kinds'
 import type { InventoryDump } from '../../shared/outputs/inventory'
 import type { SpellModifierContext } from '../../shared/spellModifiers'
 import type { ItemDbFile } from '../itemsDb'
@@ -16,8 +15,7 @@ type Inventory = SpellModifierContext['inventory']
 function missing(): Inventory { return { state: 'missing', exportedAt: null, candidates: [], warnings: [] } }
 
 function ownsInventory(path: string, character: { name: string; server: string }): boolean {
-  const names = outputFileNames(outputKind('inventory'), character.name, character.server)
-  return names.some((name) => name.toLowerCase() === basename(path).toLowerCase())
+  return ownsOutputFile(outputKind('inventory'), path, character.name, character.server)
 }
 
 /** The generic output reader falls back to another character's newest dump; estimates never do. */

@@ -8,13 +8,15 @@
 //
 // MEMOIZED ON THE DUMP'S OWN IDENTITY, exactly the way `gearOwnership` is (src/main/ipc/planner.ts
 // carries that argument in full): path plus mtime identify the file completely, a rewrite moves the
-// mtime, a character switch moves the path, and nothing anywhere has to remember to invalidate it.
+// mtime. Discovery may retain another character's fallback path after a switch, so ownership is
+// checked before every cache hit and an unowned fallback clears the cache.
 //
 // TWO HANDLERS READ IT — the planner's inventory payload and the spell card's `spells:detail` — so
 // the resolution happens once. Two copies of it could credit two different items for one spell, and
 // the whole point of the card is to name the item the readout's marker is talking about.
 
 import { loadInventoryDump, outputStatus } from '../outputs'
+import { outputKind, ownsOutputFile } from '../../shared/outputs/kinds'
 import { getActiveCharacter } from '../session'
 import { COMMITTED_ITEMS, committedFocusLines, wornFocusFor } from './wornFocusIndex'
 import type { WornFocus } from '../../shared/wornFocus'
@@ -23,18 +25,19 @@ let resolved: { path: string; loadedAt: string; focus: WornFocus[] } | null = nu
 
 /** The active character's worn focus effects. An empty array when there is no dump to read. */
 export function currentWornFocus(): WornFocus[] {
-  const character = getActiveCharacter()
-  const status = outputStatus('inventory', { name: character?.name, server: character?.server })
-  if (status.path === null || status.updatedAt === null) {
+  const { name, server } = getActiveCharacter() ?? {}
+  const status = outputStatus('inventory', { name, server })
+  if (status.path === null || status.updatedAt === null ||
+    !ownsOutputFile(outputKind('inventory'), status.path, name, server)) {
     resolved = null
     return []
   }
   if (resolved !== null && resolved.path === status.path && resolved.loadedAt === status.updatedAt) {
     return resolved.focus
   }
-  // `loadInventoryDump` re-resolves the same status, so the two can never disagree about WHICH file
-  // was folded — and a dump that vanished between the stat and the read is simply no dump.
-  const loaded = loadInventoryDump(character?.name, character?.server)
+  // The loader resolves again and checks ownership itself; a dump that vanished or became
+  // unavailable between the status check and the read is simply no dump.
+  const loaded = loadInventoryDump(name, server)
   if (!loaded) {
     resolved = null
     return []

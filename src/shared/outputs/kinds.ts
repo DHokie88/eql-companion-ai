@@ -251,6 +251,22 @@ export function outputFileNames(
   return names
 }
 
+/**
+ * Whether a discovered dump belongs to this character. Discovery may display anybody's newest
+ * file, but loaders whose results are saved under a character must refuse another's dump.
+ * An unnamed character retains the discovery fallback; the legacy serverless filename remains
+ * accepted, while a filename that states a different server is never owned.
+ */
+export function ownsOutputFile(
+  def: OutputKindDef,
+  path: string,
+  characterName?: string,
+  server?: string
+): boolean {
+  const file = (path.split(/[\\/]/).pop() ?? '').toLowerCase()
+  return !characterName || outputFileNames(def, characterName, server).some((name) => name.toLowerCase() === file)
+}
+
 /** Does this filename belong to this kind? Case-insensitive, as the rest of the matching is. */
 export function isOutputFileName(def: OutputKindDef, file: string): boolean {
   return file.toLowerCase().endsWith(`-${def.fileKind}.txt`.toLowerCase())
