@@ -21,6 +21,13 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.24.0',
+    date: '2026-11-20',
+    entries: [
+      { kind: 'new', text: 'Respawn timers can auto-adjust from qualifying kill gaps when you enable the option for a watched mob. The wiki estimate is used while the timer is waiting for observations.' }
+    ]
+  },
+  {
     version: '0.23.2',
     date: '2026-11-20',
     entries: [

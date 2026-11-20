@@ -2,7 +2,7 @@
 
 use super::{RespawnModule, RespawnPrefs, RespawnRow, RespawnWatchPref};
 use crate::event::Event;
-use crate::EqModule;
+use crate::{Defines, EqModule};
 
 /// The zone line the stay begins with. Every timestamp below is derived from this one, so the
 /// arithmetic in the assertions reads instead of being a set of magic epochs.
@@ -24,6 +24,7 @@ fn watching_the_knight() -> RespawnPrefs {
             key: "a vis ghoul knight".to_owned(),
             display: "a vis ghoul knight".to_owned(),
             custom_sec: Some(CUSTOM_SEC),
+            auto_adjust: false,
         }],
     }
 }
@@ -138,4 +139,27 @@ fn a_confirmation_with_nothing_to_confirm_is_refused_rather_than_invented() {
     assert!(!m.confirm_sighting("no such row"));
     assert_eq!(m.revision(), rev, "a refusal publishes nothing");
     assert_eq!(only_row(&m).basis, "death");
+}
+
+#[test]
+fn auto_adjust_follows_later_shorter_gaps_and_roundtrips_preferences() {
+    let mut m = RespawnModule::new(NOW, watching_the_knight());
+    m.on_event(&ev(&zone(T_ZONE)), false);
+    m.on_event(&ev(&death(1, T_DEATH)), false);
+    m.on_event(&ev(&death(2, T_DEATH + 160_000)), false);
+    let before = only_row(&m);
+    assert_eq!(before.estimate_ms, Some(CUSTOM_SEC * 1000));
+    m.define(&serde_json::json!({"watches": [{"key": "a vis ghoul knight", "display": "a vis ghoul knight", "customSec": 270, "autoAdjust": true}]}));
+    let first = only_row(&m);
+    assert_eq!(first.estimate_ms, Some(160_000));
+    assert!(first.auto_adjust);
+    assert_eq!(first.source, "observed");
+    assert_eq!(first.custom_ms, None);
+    m.on_event(&ev(&death(3, T_DEATH + 310_000)), false);
+    assert_eq!(only_row(&m).estimate_ms, Some(150_000));
+    let pref_json = serde_json::to_value(&m.prefs).unwrap();
+    let restored = RespawnPrefs::read(&pref_json).unwrap();
+    assert!(restored.watches[0].auto_adjust);
+    m.define(&serde_json::json!({"watches": [{"key": "a vis ghoul knight", "display": "a vis ghoul knight", "customSec": 270}]}));
+    assert_eq!(only_row(&m).estimate_ms, Some(270_000));
 }

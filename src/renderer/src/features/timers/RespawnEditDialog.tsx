@@ -140,7 +140,7 @@ export function RespawnEditDialog({
   row: RespawnRow
   open: boolean
   onClose: () => void
-  onSetCustom: (key: string, display: string, sec?: number) => void
+  onSetCustom: (key: string, display: string, sec?: number, autoAdjust?: boolean) => void
 }): JSX.Element {
   const [draft, setDraft] = useState(() => prefillOf(row))
   // RE-PREFILL ON EACH OPENING, and never while it is open. The row underneath re-renders once a
@@ -187,6 +187,14 @@ export function RespawnEditDialog({
           </Box>
           <WikiLine row={row} page={row.wikiPage ?? data?.page} />
           <CalculatedLine row={row} />
+          <Typography variant="caption" color="text.secondary">
+            Auto-adjust follows your shortest qualifying kill gap, ignoring the wiki floor. A gap includes your delay killing the mob, so it is an upper bound, not an exact spawn time.
+          </Typography>
+          {!row.autoAdjust && (
+            <Button size="small" variant="outlined" data-testid="respawn-edit-auto" onClick={() => { onSetCustom(row.key, row.display, undefined, true); onClose() }}>
+              Auto-adjust from kill gaps
+            </Button>
+          )}
           <Box>
             <TextField
               size="small"
@@ -211,7 +219,7 @@ export function RespawnEditDialog({
       <DialogActions>
         {/* THE WAY BACK, and only where there is something to go back FROM: a row the user has not
             overruled has no override to clear, and a control that can only be a no-op is noise. */}
-        {respawnOverridden(row) && (
+        {(respawnOverridden(row) || row.autoAdjust) && (
           <Button size="small" color="inherit" data-testid="respawn-edit-clear" onClick={clear}>
             Use calculated
           </Button>

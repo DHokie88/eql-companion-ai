@@ -8,7 +8,7 @@
 //! and a schema edit that lands without regenerating turns the protocol-codegen staleness
 //! test red on this side and tests/protocolSchema.test.mts red on the other.
 //!
-//! schema-digest: sha256:cadf31311e94675996c7099d4a826ee4eb940030735e73a5026c91569892664e
+//! schema-digest: sha256:1c34b0bdaa8b52d0c337caee659d287bb33df6fb9c4d1d380e205b11e3cc9c92
 #![allow(missing_docs, clippy::all, clippy::pedantic)]
 
 /// Error types.
@@ -8873,6 +8873,10 @@ pub struct RespawnPrefs {
 ///    "key"
 ///  ],
 ///  "properties": {
+///    "autoAdjust": {
+///      "description": "Follow the smallest qualifying kill gap without applying the wiki floor.",
+///      "type": "boolean"
+///    },
 ///    "customSec": {
 ///      "description": "The user's own respawn, in SECONDS. Absent means `use what you learn`, which is a different statement from zero.",
 ///      "type": "integer"
@@ -8891,6 +8895,13 @@ pub struct RespawnPrefs {
 /// </details>
 #[derive(::serde::Deserialize, ::serde::Serialize, Clone, Debug)]
 pub struct RespawnWatch {
+    ///Follow the smallest qualifying kill gap without applying the wiki floor.
+    #[serde(
+        rename = "autoAdjust",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub auto_adjust: ::std::option::Option<bool>,
     ///The user's own respawn, in SECONDS. Absent means `use what you learn`, which is a different statement from zero.
     #[serde(
         rename = "customSec",

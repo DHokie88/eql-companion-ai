@@ -28,6 +28,9 @@
 //! fold it survives into `snapshot()`, so a recorder pins it to an instant derived from the log —
 //! the only way the pin means the same thing on both sides.
 
+mod estimate;
+
+use estimate::resolve_respawn;
 use crate::event::Event;
 use crate::jsmap::JsMap;
 use crate::EqModule;
@@ -124,6 +127,9 @@ pub struct RespawnRow {
     /// The number the user typed, when they typed one.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub custom_ms: Option<i64>,
+    /// Whether the player follows observed gaps without the wiki floor.
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    pub auto_adjust: bool,
     /// What the committed wiki data says, verbatim.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub wiki_text: Option<String>,
@@ -162,6 +168,8 @@ pub struct RespawnWatchPref {
     /// The user's own respawn, in SECONDS. Rung 1; absent means "use what you learn".
     #[serde(skip_serializing_if = "Option::is_none")]
     pub custom_sec: Option<i64>,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub auto_adjust: bool,
 }
 
 /// `DEFAULT_RESPAWN_PREFS` is an empty list and that is the shipped default: tracking is opt-in per
@@ -227,6 +235,7 @@ impl RespawnPrefs {
                 .filter(|s| s.is_finite())
                 .map(|s| s as i64)
                 .filter(|s| (MIN_SEC..=MAX_SEC).contains(s));
+            let auto_adjust = w.get("autoAdjust").and_then(Value::as_bool) == Some(true);
             watches.push(RespawnWatchPref {
                 display: if display.is_empty() {
                     key.clone()
@@ -234,7 +243,8 @@ impl RespawnPrefs {
                     display
                 },
                 key,
-                custom_sec,
+                custom_sec: if auto_adjust { None } else { custom_sec },
+                auto_adjust,
             });
             if watches.len() >= MAX_WATCHES {
                 break;
@@ -279,38 +289,6 @@ fn base_of(h: &MobHistory) -> i64 {
         Some(c) if c > h.last_ts => c,
         _ => h.last_ts,
     }
-}
-
-/// `resolveRespawn` — the estimate ladder. Rung 2 is FLOORED by rung 3 rather than averaged with it
-/// (the smallest gap you measured is an upper bound, so the wiki lifting it is a correction); rung
-/// 1 is never floored, because the user is looking at the spawn and the wiki describes another
-/// server.
-fn resolve_respawn(
-    custom_ms: Option<i64>,
-    observed_ms: Option<i64>,
-    samples: i64,
-    wiki_ms: Option<i64>,
-) -> (Option<i64>, &'static str) {
-    if let Some(c) = custom_ms {
-        if c > 0 {
-            return (Some(c), "custom");
-        }
-    }
-    if let Some(o) = observed_ms {
-        if o > 0 && samples > 0 {
-            let floored = match wiki_ms {
-                Some(w) => o.max(w),
-                None => o,
-            };
-            return (Some(floored), "observed");
-        }
-    }
-    if let Some(w) = wiki_ms {
-        if w > 0 {
-            return (Some(w), "wiki");
-        }
-    }
-    (None, "none")
 }
 
 /// The names a typed event states, and which family stated them. The groups ARE the four
@@ -525,7 +503,8 @@ impl RespawnModule {
         let custom_ms = self.watch_of(&h.key)?;
         let wiki_row = wiki().get(&h.key);
         let wiki_ms = wiki_row.and_then(|w| w.seconds).map(|s| s * 1000);
-        let (estimate_ms, source) = resolve_respawn(custom_ms, h.min_gap_ms, h.samples, wiki_ms);
+        let auto_adjust = self.watch_index.get(&h.key).is_some_and(|w| w.auto_adjust);
+        let (estimate_ms, source) = resolve_respawn(custom_ms, h.min_gap_ms, h.samples, wiki_ms, auto_adjust);
         let base = base_of(h);
         let mut row = RespawnRow {
             id: format!("{}::{}", id_key(&h.zone), h.key),
@@ -547,6 +526,7 @@ impl RespawnModule {
             observed_ms: h.min_gap_ms,
             gaps_ms: None,
             custom_ms,
+            auto_adjust,
             wiki_text: wiki_row.map(|w| w.text.clone()),
             wiki_ms,
             // The page those words came from, so the edit modal can link to it: quoting a source

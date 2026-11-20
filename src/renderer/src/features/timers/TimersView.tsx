@@ -117,9 +117,9 @@ import {
 type Scope = 'zone' | 'all'
 
 /** Add or update one watch, leaving the rest of the list alone. */
-function withWatch(prefs: RespawnPrefs, key: string, display: string, customSec?: number): RespawnPrefs {
+function withWatch(prefs: RespawnPrefs, key: string, display: string, choice?: { customSec?: number; autoAdjust?: boolean }): RespawnPrefs {
   const rest = prefs.watches.filter((w) => w.key !== key)
-  const entry = customSec === undefined ? { key, display } : { key, display, customSec }
+  const entry = choice?.autoAdjust ? { key, display, autoAdjust: true } : choice?.customSec === undefined ? { key, display } : { key, display, customSec: choice.customSec }
   return { ...prefs, watches: [...rest, entry] }
 }
 
@@ -251,7 +251,7 @@ function ClocksPanel({
   /** Round 4: the row's own way out, handed down so the clock carries it instead of a list. */
   onUnwatch: (key: string) => void
   /** Round 7: rung 1, typed on the clock — the other half of what the retired list used to hold. */
-  onSetCustom: (key: string, display: string, sec?: number) => void
+  onSetCustom: (key: string, display: string, sec?: number, autoAdjust?: boolean) => void
 }): JSX.Element {
   if (rows.length === 0) {
     return (
@@ -426,8 +426,8 @@ export default function TimersView(): JSX.Element {
     [setPrefs]
   )
   const onSetCustom = useCallback(
-    (key: string, display: string, sec?: number) => {
-      setPrefs(withWatch(prefsRef.current, key, display, sec))
+    (key: string, display: string, sec?: number, autoAdjust?: boolean) => {
+      setPrefs(withWatch(prefsRef.current, key, display, { customSec: sec, autoAdjust }))
     },
     [setPrefs]
   )

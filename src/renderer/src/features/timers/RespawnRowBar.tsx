@@ -365,7 +365,7 @@ export function RespawnRowBar({
    * Rung 1, edited on the clock it changes. Same contract again — no writer, no edit icon. Round 7
    * spent this on a bare seconds field; round 9 spends it on the modal, and it is the SAME write.
    */
-  onSetCustom?: (key: string, display: string, sec?: number) => void
+  onSetCustom?: (key: string, display: string, sec?: number, autoAdjust?: boolean) => void
 }): JSX.Element {
   const r = respawnReading(row, nowMs)
   const basis = respawnBasisLabel(row)

@@ -1322,6 +1322,10 @@
         "customSec": {
           "description": "The user's own respawn, in SECONDS. Absent means `use what you learn`, which is a different statement from zero.",
           "type": "integer"
+        },
+        "autoAdjust": {
+          "description": "Follow the smallest qualifying kill gap without applying the wiki floor.",
+          "type": "boolean"
         }
       },
       "required": [
