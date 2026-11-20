@@ -3,6 +3,8 @@ import { LEVEL_MAX } from '../leveling/viewedLevel'
 /** Browse eligibility steppers stop at the Leveling tab's ceiling, not the parser's 255. */
 export const BROWSE_LEVEL_MIN = 0
 export const BROWSE_LEVEL_MAX = LEVEL_MAX
+export interface SpellLevelLimits { min: number; max: number }
+const BROWSE_LIMITS: SpellLevelLimits = { min: BROWSE_LEVEL_MIN, max: BROWSE_LEVEL_MAX }
 
 export type BrowseLevelSource = 'who' | 'stated' | 'fallback'
 
@@ -35,20 +37,19 @@ export function effectiveBrowseMax(automatic: number, minimum: string): number {
 }
 
 /** Arrow steps reject a move that would leave the band or invert Min and Max. */
-export function stepBrowseLevel(current: number, delta: number, other: number, side: 'min' | 'max'): number {
+export function stepBrowseLevel(current: number, delta: number, { other, side, limits = BROWSE_LIMITS }: { other: number; side: 'min' | 'max'; limits?: SpellLevelLimits }): number {
   const next = current + delta
-  if (!Number.isInteger(next) || next < BROWSE_LEVEL_MIN || next > BROWSE_LEVEL_MAX) return current
+  if (!Number.isInteger(next) || next < limits.min || next > limits.max) return current
   if (side === 'min' && next > other) return current
   if (side === 'max' && next < other) return current
   return next
 }
 
 /** Whole numbers commit. Values above the ceiling clamp. An inverted draft is rejected and left invalid. */
-export function commitBrowseLevel(draft: string, other: number, side: 'min' | 'max'): { ok: true; value: number } | { ok: false; error: string } {
+export function commitBrowseLevel(draft: string, other: number, side: 'min' | 'max', limits = BROWSE_LIMITS): { ok: true; value: number } | { ok: false; error: string } {
   const text = draft.trim()
   if (!/^\d+$/.test(text)) return { ok: false, error: 'Enter a whole spell level.' }
-  let value = Number(text)
-  if (value > BROWSE_LEVEL_MAX) value = BROWSE_LEVEL_MAX
+  const value = Math.max(limits.min, Math.min(Number(text), limits.max))
   if (side === 'min' && value > other) return { ok: false, error: 'Minimum spell level must not exceed maximum spell level.' }
   if (side === 'max' && value < other) return { ok: false, error: 'Minimum spell level must not exceed maximum spell level.' }
   return { ok: true, value }

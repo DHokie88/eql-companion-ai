@@ -4,6 +4,7 @@ import { SpellLibraryQueries } from '../src/main/spellLibrary/queries'
 import { clientSpellType, compareSpellValues, minimumSpellLevel, sortSpellCalculations } from '../src/shared/clientSpellBrowse'
 import { SPELL_BROWSE_SORTS, type SpellDetailResult, type SpellSearchQuery, type SpellSearchResult } from '../src/shared/spellLibrary'
 import { spellRow, storageFixture, syntheticCatalog } from './spellLibrarySynthetic.mts'
+import type { SpellByLevelResult } from '../src/shared/spellAnalysis'
 
 function fixture(rows: string[][]) {
   const f = storageFixture()
@@ -205,6 +206,24 @@ test('matching categories describe the full filtered catalog, never only the vis
   try {
     assert.deepEqual(f.search({ type: 'dd', pageSize: 1 }).matchingCategories, ['Damage', 'Direct'])
     assert.deepEqual(f.search({ type: 'dd', category: 'Damage', pageSize: 1 }).matchingCategories, ['Damage'])
+  } finally { f.close() }
+})
+
+test('Progression range includes both bounds and groups class eligibility within the selected range', () => {
+  const shared = spellRow(2, 'Shared spell')
+  shared[47] = '8'
+  shared[38] = '3'
+  const row = (id: number, level: number): string[] => {
+    const fields = spellRow(id, `Spell ${id}`)
+    fields[47] = String(level)
+    return fields
+  }
+  const f = fixture([row(1, 7), shared, row(3, 12), row(4, 13)])
+  try {
+    const range = (throughLevel: number): SpellByLevelResult => f.queries.handle('byLevel', { installId: f.installId, query: { level: 8, throughLevel, view: 'range' } }) as SpellByLevelResult
+    const result = range(12)
+    assert.deepEqual(result.records.map(({ id, learnedLevel }) => [id, learnedLevel]), [[2, 8], [3, 12]])
+    assert.deepEqual(range(8).records.map((record) => record.id), [2])
   } finally { f.close() }
 })
 

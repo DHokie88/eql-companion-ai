@@ -40,7 +40,7 @@ test('ordinary one-target client calculations retain baseline amounts, zero mana
     assert.deepEqual(withoutAnalysis, baseline)
     assert.equal(result.analysis.singleTargetTotal, baseline.total)
     assert.equal(result.analysis.contextRevision, null)
-    assert.equal(result.analysis.modelVersion, '9')
+    assert.equal(result.analysis.modelVersion, '10')
   }
 })
 
@@ -177,6 +177,30 @@ test('rain explains potential opportunities per wave for every pack size and nev
   assert.equal(unknown.analysis.waveHits, null)
   assert.equal(unknown.analysis.deliveryKind, 'unverified')
   assert.equal(unknown.analysis.perHitTotal, null)
+})
+
+test('one enemy in a rain pack gets one hit per modeled wave without changing the pack budget', () => {
+  const record = rain()
+  for (const [targets, hits] of [[1, 3], [2, 2], [3, 2], [4, 1], [10, 1]]) {
+    const result = analyze(record, { analysis: { scope: 'single', targets, rainWithinPack: true } })
+    assert.deepEqual([result.analysis.requestedTargets, result.analysis.effectiveTargets, result.analysis.hits], [targets, 1, hits])
+    assert.deepEqual(result.analysis.waveHits, Array(hits).fill(1))
+    assert.equal(result.total, hits * 100)
+    assert.equal(result.analysis.singleTargetTotal, 300, 'the solo baseline still gets three hits')
+    assert.equal(analyze(record, pack(targets)).total, targets === 1 ? 300 : 400)
+  }
+  assert.equal(analyze(area(8), { analysis: { scope: 'single', targets: 2, rainWithinPack: true } }).total, 100)
+})
+
+test('compatible rain descriptions and landing messages corroborate client wave timing and hit budgets', () => {
+  const described = rain({ name: 'Unlisted storm', description: 'Damage every three seconds. The waves cease after damaging %T targets.' })
+  const landing = rain({ name: 'Unlisted poison', messages: { on_you: 'Poison rains down on you.' } })
+  for (const record of [described, landing]) {
+    const plan = analyze(record, pack(2)).analysis
+    assert.equal(plan.deliveryKind, 'rain')
+    assert.deepEqual(plan.waveHits, [2, 2])
+    assert.equal(analyze({ ...record, durationFormula: 4, durationCap: 5 }, pack(2)).analysis.deliveryKind, 'unverified')
+  }
 })
 
 test('rain applies per-hit modifiers before waves and scales its displayed baseline and focus range', () => {

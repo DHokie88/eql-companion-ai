@@ -21,6 +21,18 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.21.2',
+    date: '2026-11-20',
+    entries: [
+      { kind: 'fixed', text: 'The Targets tooltip closes when you open the target menu.', fromReport: true },
+      { kind: 'changed', text: 'Spells Browse has an optional Era column. Turn it on from Columns.', fromReport: true },
+      { kind: 'fixed', text: 'Rain comparisons use the selected pack size for one enemy and for the whole pack. With two targets, a modeled rain hits one enemy twice and the pack four times.', fromReport: true },
+      { kind: 'changed', text: 'Rain comparisons show the wave and hit limits. Target previews now support packs of up to 10 enemies. Compatible rain spells can also be recognized from client descriptions and landing messages.', fromReport: true },
+      { kind: 'changed', text: 'Progression starts at your detected level. At level follows Min spell level, and Upcoming shows every level from Min through Max, inclusive.', fromReport: true },
+      { kind: 'changed', text: 'Compare and Progression now offer the same optional spell columns as Browse. Each tab remembers its own choices.', fromReport: true }
+    ]
+  },
+  {
     version: '0.21.1',
     date: '2026-11-19',
     entries: [

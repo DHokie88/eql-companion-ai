@@ -4,7 +4,8 @@ import type { SpellCalculation } from '@shared/spellLibrary'
 import type { SpellAnalysis } from '@shared/spellAnalysis'
 
 function rainTargets(analysis: SpellAnalysis): string {
-  const targets = analysis.scenario.scope === 'single' ? 1 : analysis.requestedTargets
+  const targets = analysis.requestedTargets
+  if (analysis.scenario.scope === 'single' && targets !== 1) return targets === 'maximum' ? 'One enemy in a max pack' : `One enemy in a ${targets}-target pack`
   return targets === 'maximum' ? 'Max pack' : `${targets} target${targets === 1 ? '' : 's'}`
 }
 export function SpellCastSummary({ calculation, align = 'center', compact = false }: { calculation: SpellCalculation; align?: 'left' | 'center'; compact?: boolean }): JSX.Element | null {
@@ -26,7 +27,7 @@ function ExpandedRainSummary({ id, analysis, align }: { id: number; analysis: Sp
 
 function CompactRainSummary({ id, analysis }: { id: number; analysis: SpellAnalysis }): JSX.Element | null {
   if (analysis.deliveryKind !== 'rain' || analysis.perHitTotal === null || analysis.hits === null) return null
-  return <Tooltip disableInteractive title={`${rainTargets(analysis)}. Hits by wave: ${analysis.waveHits?.join(' + ') ?? 'unknown'}. The ${analysis.hitCap ?? 'unknown'}-hit budget is shared across the cast; hits need not split evenly.`}>
+  return <Tooltip disableInteractive title={`${rainTargets(analysis)}. Hits by wave: ${analysis.waveHits?.join(' + ') ?? 'unknown'}. The ${analysis.hitCap ?? 'unknown'}-hit budget is shared across the cast. A partial wave may hit a different enemy.`}>
     <Typography variant="caption" color="text.secondary" display="block" sx={{ whiteSpace: 'nowrap' }} data-testid={`rain-summary-${id}`}>{analysis.scenario.scope === 'pack' && analysis.requestedTargets === 'maximum' ? 'max ' : ''}{analysis.perHitTotal.toLocaleString(undefined, { maximumFractionDigits: 3 })} × {analysis.hits}</Typography>
   </Tooltip>
 }

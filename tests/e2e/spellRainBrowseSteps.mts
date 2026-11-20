@@ -34,7 +34,7 @@ export async function browseRainChecks(page: Page): Promise<void> {
   await page.getByTestId('spells-detail-back').click()
   assert.equal(await page.getByTestId('spells-search').inputValue(), '302')
   assert.equal(await rainAmount(page), '84')
-  await choose(page, 'spells-target-count', '8 targets')
+  await choose(page, 'spells-target-count', '10 targets')
   assert.equal(await settle(() => rainAmount(page), (value) => value === '84'), '84')
   assert.equal(await settle(() => row.getByTestId('rain-summary-302').innerText(), (value) => value === '21 × 4'), '21 × 4')
   await choose(page, 'spells-target-count', '4 targets')

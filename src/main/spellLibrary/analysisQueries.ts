@@ -1,15 +1,16 @@
 import type { SpellMechanicsCatalog } from '../../shared/clientSpellMechanics'
 import type { ClientSpellRecord, SpellDataset, SpellSummary } from '../../shared/spellLibrary'
 import { SPELL_ANALYSIS_MODEL_VERSION, type SpellAnalysisSort, type SpellByLevelResult, type SpellRankingRow, type SpellRankingsResult } from '../../shared/spellAnalysis'
-import { compareSpellValues, matchesSpellType, minimumSpellLevel, spellBrowseSortValue } from '../../shared/clientSpellBrowse'
+import { compareSpellValues, matchesSpellType, spellBrowseSortValue } from '../../shared/clientSpellBrowse'
 import { analysisArg, ANALYSIS_SORTS, choiceArg, RANKING_CATEGORIES } from './analysisValidation'
-import { matchesSpellSearch, SEARCH_QUERY_FIELDS, spellSearchOptions } from './browseQuery'
+import { matchesSpellSearch, SEARCH_QUERY_FIELDS, spellSearchLearnedLevel, spellSearchOptions } from './browseQuery'
 import { catalogSummary } from './searchCatalog'
 import { cachedAmbiguousSpellNames } from './spellBrowseEraTable'
 import { levelArg, pageArgs, queryObject } from './queryValidation'
 import type { SpellModifierContext } from '../../shared/spellModifiers'
 import type { SpellLibraryStorage } from './storage'
 import type { SpellCalculator, WorkerSpellEvaluation } from './workerEvaluation'
+import { spellBrowseEffectSlots } from '../../shared/spellBrowseEffects'
 
 interface RankingGroups { ranked: SpellRankingRow[]; zeroMana: SpellRankingRow[]; excluded: SpellRankingRow[] }
 
@@ -63,15 +64,15 @@ function byLevelOptions(input: unknown) {
   const query = queryObject(input, [...SEARCH_QUERY_FIELDS, 'view', 'throughLevel'])
   const base = spellSearchOptions({ ...query, sortBy: query.sortBy ?? 'level' })
   const level = levelArg(query.level)
-  const view = choiceArg(query.view, 'level view', ['at', 'upcoming'] as const)
+  const view = choiceArg(query.view, 'level view', ['at', 'upcoming', 'range'] as const)
   const requestedEnd = levelArg(query.throughLevel ?? Math.min(255, level + 10))
   const throughLevel = view === 'at' ? level : requestedEnd
   if (throughLevel < level) throw new Error('Through level must not precede the selected level')
-  const start = view === 'at' ? level : level + 1
+  const start = view === 'upcoming' ? level + 1 : level
   const min = Math.max(start, base.minLevel ?? start)
   const max = Math.min(throughLevel, base.maxLevel ?? throughLevel)
   const empty = min > max
-  const filters = { ...base, allLevels: true, minLevel: min, maxLevel: max }
+  const filters = { ...base, allLevels: true, minLevel: min, maxLevel: max, levelsInRange: view === 'range' }
   return { query, level, throughLevel, empty, filters, ...pageArgs({ ...query, pageSize: query.pageSize ?? 40 }) }
 }
 
@@ -88,7 +89,7 @@ export class SpellAnalysisQueries {
     rows.sort((a, b) => compareSpellValues(sortValue(a, options.sortBy), sortValue(b, options.sortBy), options.direction) || a.id - b.id)
     const eligible = [...groups.ranked, ...groups.zeroMana]
     const pageRows = rows.slice((options.page - 1) * options.pageSize, options.page * options.pageSize)
-    if (dataset && options.query.browseRank === true) this.attachBrowseRanks(dataset, pageRows, context)
+    if (dataset) this.attachPageMetadata(dataset, pageRows, options.query, context)
     return { dataset, total: rows.length, page: options.page, pageSize: options.pageSize,
       records: pageRows, categories: [...result.categories].sort(), subcategories: [...result.subcategories].sort(), counts: result.counts,
       groupCounts: { ranked: groups.ranked.length, zeroMana: groups.zeroMana.length, excluded: groups.excluded.length },
@@ -125,9 +126,9 @@ export class SpellAnalysisQueries {
       for (const record of this.storage.records(dataset.snapshotId)) {
         facets(record, options.filters, result)
         if (!matchesSpellSearch(record, options.filters, mechanics, ambiguous)) continue
-        const learned = minimumSpellLevel(record.classes, options.filters.classes)
+        const learned = spellSearchLearnedLevel(record, options.filters)
         if (learned === null) continue
-        rows.push({ ...catalogSummary(record, options.filters.classes, { mechanics, level: learned, ambiguous }),
+        rows.push({ ...catalogSummary(record, options.filters.classes, { mechanics, level: learned, ambiguous }), learnedLevel: learned,
           detectedRank: this.evaluation.detectedRank(dataset, record, context), rankEvidence: this.evaluation.rankEvidence(dataset, record, context),
           calculations: this.byLevelCalculations(record, learned, options.query, calculate) })
       }
@@ -135,16 +136,19 @@ export class SpellAnalysisQueries {
     rows.sort((a, b) => compareSpellValues(spellBrowseSortValue(a, options.filters.sortBy, options.filters.selected, options.filters.classes),
       spellBrowseSortValue(b, options.filters.sortBy, options.filters.selected, options.filters.classes), options.filters.direction) || a.id - b.id)
     const pageRows = rows.slice((options.page - 1) * options.pageSize, options.page * options.pageSize)
-    if (dataset && options.query.browseRank === true) this.attachBrowseRanks(dataset, pageRows, context)
+    if (dataset) this.attachPageMetadata(dataset, pageRows, options.query, context)
     return { dataset, total: rows.length, page: options.page, pageSize: options.pageSize,
       records: pageRows, categories: [...result.categories].sort(), subcategories: [...result.subcategories].sort(),
       level: options.level, throughLevel: options.throughLevel, contextRevision: (context as SpellModifierContext | undefined)?.revision ?? null }
   }
 
-  private attachBrowseRanks(dataset: SpellDataset, rows: SpellSummary[], context: unknown): void {
+  private attachPageMetadata(dataset: SpellDataset, rows: SpellSummary[], query: Record<string, unknown>, context: unknown): void {
+    if (query.browseRank !== true && query.includeEffects !== true) return
     for (const row of rows) {
       const record = this.storage.record(dataset.snapshotId, row.id)
-      if (record) row.browseRank = this.evaluation.browseMetadata(dataset, record, context) ?? undefined
+      if (!record) continue
+      if (query.browseRank === true) row.browseRank = this.evaluation.browseMetadata(dataset, record, context) ?? undefined
+      if (query.includeEffects === true) row.effects = spellBrowseEffectSlots(record, row.learnedLevel ?? 1, row.browseRank?.rank ?? null)
     }
   }
 

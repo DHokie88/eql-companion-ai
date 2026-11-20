@@ -4,7 +4,7 @@ import type {
   SpellTimelineResult, SpellCalculation, SpellMetric
 } from '../../shared/spellLibrary'
 import { WorkerSpellEvaluation, spellEvaluationScope, type SpellCalculator } from './workerEvaluation'
-import { searchCatalog } from './searchCatalog'
+import { catalogSummary, searchCatalog } from './searchCatalog'
 import { SEARCH_QUERY_FIELDS } from './browseQuery'
 import { SpellAnalysisQueries } from './analysisQueries'
 import { SpellQueryCache } from './queryCache'
@@ -192,6 +192,8 @@ export class SpellLibraryQueries {
     const results: SpellCalculation[] = []
     const rankEvidence: NonNullable<SpellComparisonResult['rankEvidence']> = {}
     const browseRank: NonNullable<SpellComparisonResult['browseRank']> = {}
+    const summaries: Record<string, SpellSummary> = {}
+    const buildSummary = query.includeSummary === true && ids.length > 0 ? this.comparisonSummary(dataset, level, query, context) : null
     for (const id of ids) {
       const record = this.storage.record(dataset.snapshotId, id)
       if (!record) continue
@@ -199,8 +201,18 @@ export class SpellLibraryQueries {
       results.push({ ...calculate(record, level, metric), ...(effectSummary ? { effectSummary } : {}) })
       rankEvidence[String(id)] = this.evaluation.rankEvidence(dataset, record, context)
       if (query.browseRank === true) browseRank[String(id)] = this.evaluation.browseMetadata(dataset, record, context)
+      if (buildSummary) summaries[String(id)] = buildSummary(record)
     }
-    return { results, rankEvidence, browseRank }
+    return { results, rankEvidence, browseRank, summaries }
+  }
+  private comparisonSummary(dataset: SpellDataset, level: number, query: Record<string, unknown>, context: unknown) {
+    const mechanics = this.evaluation.mechanics(dataset)
+    const ambiguous = cachedAmbiguousSpellNames(dataset.snapshotId, this.storage.recordNames(dataset.snapshotId))
+    return (record: ClientSpellRecord): SpellSummary => {
+      const summary = catalogSummary(record, [], { mechanics, level, ambiguous })
+      if (query.includeEffects === true) summary.effects = spellBrowseEffectSlots(record, level, this.effectRank(dataset, record, query, context))
+      return summary
+    }
   }
   private effectRank(dataset: SpellDataset | null, record: ClientSpellRecord, query: Record<string, unknown>, context: unknown): number | null {
     if (!dataset) return null
@@ -216,7 +228,7 @@ export class SpellLibraryQueries {
     return this.remember({ method: 'detail', installId, dataset, query, context }, () => this.detailBody(dataset, id, query, context))
   }
   private compare(installId: string, input: unknown, context: unknown): SpellComparisonResult {
-    const query = queryObject(input, ['snapshotId', 'ids', 'level', 'metric', 'evaluation', 'analysis', 'browseRank'])
+    const query = queryObject(input, ['snapshotId', 'ids', 'level', 'metric', 'evaluation', 'analysis', 'browseRank', 'includeSummary', 'includeEffects'])
     if (!Array.isArray(query.ids) || query.ids.length > 4) throw new Error('Compare at most four spells')
     const ids = [...new Set(query.ids.map(spellId))]
     const level = levelArg(query.level)
@@ -224,8 +236,9 @@ export class SpellLibraryQueries {
     const dataset = this.dataset(installId, query)
     return this.remember({ method: 'compare', installId, dataset, query, context }, () => {
       const calculate = this.evaluation.calculator(dataset, query, context)
-      const compared = dataset ? this.comparedSpells(dataset, { ids, level, metric, query, context, calculate }) : { results: [], rankEvidence: {}, browseRank: {} }
-      return { dataset, level, scope: spellEvaluationScope(query), results: compared.results, rankEvidence: compared.rankEvidence, ...(query.browseRank === true ? { browseRank: compared.browseRank } : {}) }
+      const compared = dataset ? this.comparedSpells(dataset, { ids, level, metric, query, context, calculate }) : { results: [], rankEvidence: {}, browseRank: {}, summaries: {} }
+      return { dataset, level, scope: spellEvaluationScope(query), results: compared.results, rankEvidence: compared.rankEvidence,
+        ...(query.browseRank === true ? { browseRank: compared.browseRank } : {}), ...(query.includeSummary === true ? { summaries: compared.summaries } : {}) }
     })
   }
   private rank(installId: string, input: unknown, context: unknown): SpellRankingResult {

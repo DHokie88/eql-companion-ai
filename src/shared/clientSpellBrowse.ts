@@ -124,12 +124,20 @@ function analysisSortValue(record: SpellSummary, field: SpellBrowseSort): number
   return values[field] ?? null
 }
 
-export type SpellCalculationSort = 'name' | 'instant' | 'perTick' | 'total' | 'mana' | 'perMana' | 'scope' | 'rate'
+const CALCULATION_SORTS = ['name', 'instant', 'perTick', 'total', 'mana', 'perMana', 'scope', 'rate'] as const
+export type SpellCalculationSort = typeof CALCULATION_SORTS[number]
 function calculationSortValue(row: SpellCalculation, column: SpellCalculationSort): string | number | null {
   if (column === 'rate') return row.analysis?.timing.rate ?? null
   return column === 'scope' ? [...row.reasons, ...row.restrictions].join(' ') : row[column]
 }
 /** Presentation ordering for an already-selected comparison or globally-ranked result group. */
-export function sortSpellCalculations(rows: SpellCalculation[], field: SpellCalculationSort, direction: SpellSortDirection): SpellCalculation[] {
-  return [...rows].sort((a, b) => compareSpellValues(calculationSortValue(a, field), calculationSortValue(b, field), direction) || a.id - b.id)
+export function sortSpellCalculations(rows: SpellCalculation[], field: SpellCalculationSort | SpellBrowseSort, direction: SpellSortDirection, summaries?: Readonly<Record<string, SpellSummary>>): SpellCalculation[] {
+  const native = CALCULATION_SORTS.some((column) => column === field)
+  const selected = new Set<number>()
+  const value = (row: SpellCalculation) => {
+    if (native) return calculationSortValue(row, field as SpellCalculationSort)
+    const summary = summaries?.[String(row.id)]
+    return summary ? spellBrowseSortValue({ ...summary, calculations: [row] }, field as SpellBrowseSort, selected) : null
+  }
+  return [...rows].sort((a, b) => compareSpellValues(value(a), value(b), direction) || a.id - b.id)
 }

@@ -24,10 +24,17 @@ function compatibleRain(record: ClientSpellRecord): boolean {
     && damaging && !unsupported
 }
 
+function clientRainEvidence(record: ClientSpellRecord): string | null {
+  if (record.aoeDurationMs !== RESEARCH_WINDOW_MS) return null
+  if (/every (?:3|three) seconds\b[\s\S]*?after damaging %T (?:creatures|targets)\b/i.test(record.description ?? '')) return 'client description'
+  if ([record.messages.on_you, record.messages.on_other].some((message) => /\brains? down\b/i.test(message ?? ''))) return 'client landing message'
+  return null
+}
+
 function mechanicsIdentity(record: ClientSpellRecord): string {
   return JSON.stringify([
     record.name, record.target, record.beneficial, record.classes, record.effects,
-    record.durationFormula, record.durationCap, record.aoeDurationMs, record.fields.aeMaxTargets
+    record.durationFormula, record.durationCap, record.aoeDurationMs, record.fields.aeMaxTargets, clientRainEvidence(record)
   ])
 }
 
@@ -47,7 +54,7 @@ export class SpellMechanicsCatalog {
     for (const record of records) {
       if (this.identities.has(record.id)) throw new Error(`Duplicate catalog spell ID ${record.id}.`)
       this.identities.set(record.id, mechanicsIdentity(record))
-      if (!RESEARCHED_RAIN.has(record.name) || !compatibleRain(record)) continue
+      if (!compatibleRain(record) || (!RESEARCHED_RAIN.has(record.name) && !clientRainEvidence(record))) continue
       const group = candidates.get(record.name) ?? []
       group.push(record)
       candidates.set(record.name, group)
@@ -55,10 +62,11 @@ export class SpellMechanicsCatalog {
     for (const [name, matches] of candidates) {
       if (matches.length !== 1) continue
       const page = RESEARCHED_RAIN.get(name)
-      if (!page) continue
-      this.bindings.set(matches[0].id, {
-        waves: page.waves, hitCap: RESEARCH_HIT_CAP, deliveryMs: RESEARCH_WINDOW_MS, reason: null,
-        capSource: `Captured client whole-cast hit budget ${RESEARCH_HIT_CAP}, validated against researched ${page.waves}-wave rain behavior.`
+      const record = matches[0], waves = page?.waves ?? 3
+      const evidence = page ? 'researched rain behavior' : clientRainEvidence(record)
+      this.bindings.set(record.id, {
+        waves, hitCap: RESEARCH_HIT_CAP, deliveryMs: RESEARCH_WINDOW_MS, reason: null,
+        capSource: `Captured client whole-cast hit budget ${RESEARCH_HIT_CAP}. ${waves}-wave rain supported by the ${evidence} and wave window.`
       })
     }
   }

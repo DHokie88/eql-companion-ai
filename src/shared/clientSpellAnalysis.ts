@@ -7,7 +7,7 @@ import { isAreaTarget, SpellMechanicsCatalog } from './clientSpellMechanics'
 import { SPELL_ANALYSIS_MODEL_VERSION } from './spellAnalysis'
 import { analysisContributions, analysisTiming, scaleAnalysisCalculation } from './clientSpellAnalysisDetails'
 import type { ClientSpellRecord, SpellCalculation, SpellClass, SpellMetric } from './spellLibrary'
-import type { SpellAnalysis, SpellAnalysisOptions } from './spellAnalysis'
+import type { SpellAnalysis, SpellAnalysisOptions, SpellTargetCount } from './spellAnalysis'
 import type { SpellModifierContext } from './spellModifiers'
 import type { ClientSpellMechanics } from './clientSpellMechanics'
 
@@ -38,13 +38,24 @@ function packHits(requested: number, mechanics: ClientSpellMechanics): { effecti
   return { effectiveTargets, hits: effectiveTargets }
 }
 
+function focusedRainScenario(base: AnalysisScenario, requested: SpellTargetCount, mechanics: ClientSpellMechanics): AnalysisScenario {
+  const targets = requested === 'maximum' ? mechanics.hitCap : requested
+  if (targets === null || mechanics.hitCap === null || targets < 1) return base
+  // Give the chosen enemy one hit per wave while the pack still has a budget.
+  // On a partial final wave the server may hit a different enemy.
+  return { ...base, requestedTargets: requested, hits: Math.min(mechanics.waves, Math.ceil(mechanics.hitCap / targets)) }
+}
+
 function scenarioFor(record: ClientSpellRecord, options: ClientSpellAnalysisOptions, mechanics: ClientSpellMechanics): AnalysisScenario {
   const singleHits = Math.min(mechanics.waves, mechanics.hitCap ?? mechanics.waves)
   const base: AnalysisScenario = {
     scope: 'one-target full cast', requestedTargets: 1, effectiveTargets: 1, singleHits,
     hits: singleHits, capSource: mechanics.capSource, warnings: [], reason: mechanics.reason
   }
-  if (options.metric === 'healing' || options.analysis.scope === 'single' || !isAreaTarget(record.target)) return base
+  if (options.metric === 'healing' || !isAreaTarget(record.target)) return base
+  if (options.analysis.scope === 'single') {
+    return options.analysis.rainWithinPack && mechanics.waves > 1 ? focusedRainScenario(base, options.analysis.targets, mechanics) : base
+  }
   const maximum = options.analysis.targets === 'maximum'
   const targetCap = mechanics.hitCap
   const requested = maximum ? targetCap : options.analysis.targets
@@ -77,6 +88,7 @@ function calculationFor(record: ClientSpellRecord, options: ClientSpellAnalysisO
  */
 function rainWaveHits(mechanics: ClientSpellMechanics, scenario: AnalysisScenario): number[] | null {
   if (scenario.reason || mechanics.waves <= 1 || scenario.hits === null) return null
+  if (scenario.scope === 'one-target full cast') return Array<number>(scenario.hits).fill(1)
   const targets = scenario.requestedTargets === 'maximum' ? mechanics.hitCap : scenario.requestedTargets
   if (targets === null) return null
   let remaining = scenario.hits

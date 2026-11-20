@@ -14,14 +14,16 @@ test('automatic Max uses the latest /who, then the stated level, and never treat
 })
 
 test('browse level edits clamp, reject inversion, and keep whole numbers', () => {
-  assert.equal(stepBrowseLevel(0, -1, 65, 'min'), 0)
-  assert.equal(stepBrowseLevel(65, 1, 0, 'max'), 65)
-  assert.equal(stepBrowseLevel(25, 1, 25, 'min'), 25)
-  assert.equal(stepBrowseLevel(10, 1, 25, 'min'), 11)
+  assert.equal(stepBrowseLevel(0, -1, { other: 65, side: 'min' }), 0)
+  assert.equal(stepBrowseLevel(65, 1, { other: 0, side: 'max' }), 65)
+  assert.equal(stepBrowseLevel(25, 1, { other: 25, side: 'min' }), 25)
+  assert.equal(stepBrowseLevel(10, 1, { other: 25, side: 'min' }), 11)
   assert.deepEqual(commitBrowseLevel('70', 0, 'max'), { ok: true, value: 65 })
   assert.deepEqual(commitBrowseLevel('26', 25, 'min'), { ok: false, error: 'Minimum spell level must not exceed maximum spell level.' })
   assert.deepEqual(commitBrowseLevel('1.5', 65, 'max'), { ok: false, error: 'Enter a whole spell level.' })
   assert.deepEqual(commitBrowseLevel('0', 65, 'min'), { ok: true, value: 0 })
+  assert.equal(stepBrowseLevel(65, 1, { other: 1, side: 'max', limits: { min: 1, max: 255 } }), 66)
+  assert.deepEqual(commitBrowseLevel('100', 8, 'max', { min: 1, max: 255 }), { ok: true, value: 100 })
 })
 
 test('a new lower automatic maximum does not invert a manually edited range', () => {

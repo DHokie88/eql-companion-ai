@@ -1,6 +1,6 @@
 import type { SpellBrowseSort, SpellMetric, SpellSummary } from '@shared/spellLibrary'
 
-export type BrowseDisplayField = SpellBrowseSort | 'rank' | 'spa'
+export type BrowseDisplayField = SpellBrowseSort | 'rank' | 'spa' | 'era'
 
 export const BROWSE_EXTRA_COLUMNS: { field: BrowseDisplayField; label: string }[] = [
   { field: 'cast', label: 'Cast (s)' }, { field: 'recovery', label: 'Recovery (s)' }, { field: 'recast', label: 'Recast (s)' },
@@ -19,7 +19,7 @@ export const DEFAULT_BROWSE_COLUMNS: SpellBrowseSort[] = ['id', 'category', 'typ
 export function selectableBrowseColumns(metric: SpellMetric): BrowseColumn[] {
   const metricLabel = metric === 'damage' ? 'Damage' : 'Healing'
   return [
-    { field: 'id', label: 'ID' }, { field: 'description', label: 'Description' }, { field: 'category', label: 'Category / subcategory' },
+    { field: 'id', label: 'ID' }, { field: 'era', label: 'Era' }, { field: 'description', label: 'Description' }, { field: 'category', label: 'Category / subcategory' },
     { field: 'type', label: 'Type' }, { field: 'amount', label: metricLabel }, { field: 'mana', label: 'Mana' },
     { field: 'efficiency', label: `${metricLabel}/Mana` }, { field: 'rate', label: metric === 'damage' ? 'Modeled DPS' : 'Modeled HPS' },
     ...BROWSE_EXTRA_COLUMNS, { field: 'spa', label: 'SPA' }, { field: 'selected', label: 'Compare' }
@@ -55,8 +55,8 @@ function analysisTiming(record: SpellSummary, field: BrowseDisplayField): number
   return null
 }
 export function browseTimingValue(record: SpellSummary, field: BrowseDisplayField): number | null {
-  const rawFields: Partial<Record<SpellBrowseSort, 'castMs' | 'recoveryMs' | 'recastMs'>> = { cast: 'castMs', recovery: 'recoveryMs', recast: 'recastMs' }
-  const rawField = field === 'rank' || field === 'spa' ? undefined : rawFields[field]
+  const rawFields: Partial<Record<BrowseDisplayField, 'castMs' | 'recoveryMs' | 'recastMs'>> = { cast: 'castMs', recovery: 'recoveryMs', recast: 'recastMs' }
+  const rawField = rawFields[field]
   if (rawField) return seconds(evaluatedTiming(record)[rawField])
   return analysisTiming(record, field)
 }

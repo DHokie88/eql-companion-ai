@@ -1,5 +1,5 @@
 import { Fragment, type JSX, type ReactNode, useCallback } from 'react'
-import { Alert, Box, Button, CircularProgress, Pagination, Stack, Tab, Tabs, Table, TableBody, TableCell, TableHead, TableRow, TextField, Tooltip, Typography } from '@mui/material'
+import { Alert, Box, Button, CircularProgress, Pagination, Stack, Tab, Tabs, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography } from '@mui/material'
 import type { SpellBrowseSort, SpellClass, SpellSummary } from '@shared/spellLibrary'
 import type { SpellEvaluationOptions } from '@shared/spellModifiers'
 import { useLibraryQuery } from './useLibraryQuery'
@@ -10,21 +10,30 @@ import { SpellRowRank } from './SpellRowRank'
 import { SpellRankSlider } from './SpellBrowseToolbar'
 import { SpellBrowseFilters } from './SpellBrowseFilters'
 import { browseFilterError, defaultBrowseFilters, type BrowseFilters } from './useSpellBrowse'
+import type { SpellAnalysisOptions } from '@shared/spellAnalysis'
+import { BrowseColumnPicker } from './SpellBrowseAnalysis'
+import { browseColumns, type BrowseDisplayField } from './spellBrowseColumns'
+import { SpellDataCell } from './SpellBrowseTable'
 
-export function SpellByLevel({ classes, level, evaluation, selected, onOpen, onPreview, onToggle, controls, enabled = true }: {
+const PROGRESSION_LEVELS = { min: 1, max: 255 }
+const PROGRESSION_COLUMNS: BrowseDisplayField[] = ['id', 'description', 'category', 'mana', 'selected']
+const FOLLOW_PROGRESSION_LEVELS: { min: number | null; max: number | null } = { min: null, max: null }
+
+export function SpellByLevel({ classes, level, evaluation, analysis, selected, onPreview, onToggle, controls, enabled = true }: {
   classes: SpellClass[]; level: number; evaluation: SpellEvaluationOptions; selected: number[]
-  onOpen: (id: number) => void; onPreview: (id: number, level: number) => void; onToggle: (id: number) => void
+  analysis: SpellAnalysisOptions; onPreview: (id: number, level: number) => void; onToggle: (id: number) => void
   controls?: ReactNode; enabled?: boolean
 }): JSX.Element {
-  const state = useByLevel({ classes, level, evaluation, enabled })
+  const state = useByLevel({ classes, level, evaluation, analysis, selected, enabled })
   const { data, error, loading } = state
   useSpellScroll('by-level', !!data && !loading)
   return <Stack spacing={1.5} data-testid="spells-by-level">
-    <SpellBrowseFilters {...state} categories={data?.categories ?? []} subcategories={data?.subcategories ?? []} controls={<ProgressionControls state={state} controls={controls} level={level} />} />
+    <SpellBrowseFilters {...state} levelLimits={PROGRESSION_LEVELS} categories={data?.categories ?? []} subcategories={data?.subcategories ?? []}
+      controls={<ProgressionControls state={state} controls={controls} />} columns={<BrowseColumnPicker metric={state.metric} columns={state.columns} setColumns={state.setColumns} columnCount={state.columns.length + 5} />} />
     <SpellRankSlider />
     {error && <Alert severity="error">{error}</Alert>}{loading && <CircularProgress size={22} />}
     {!enabled && <Typography>Select classes or choose All to see spells.</Typography>}
-    {enabled && <ProgressionResults state={state} classes={classes} selected={selected} onOpen={onOpen} onPreview={onPreview} onToggle={onToggle} />}
+    {enabled && <ProgressionResults state={state} classes={classes} selected={selected} onOpen={(id) => onPreview(id, state.level)} onPreview={onPreview} onToggle={onToggle} />}
   </Stack>
 }
 function ProgressionResults({ state, classes, selected, onOpen, onPreview, onToggle }: {
@@ -35,58 +44,83 @@ function ProgressionResults({ state, classes, selected, onOpen, onPreview, onTog
   if (!data) return null
   return <>
     <Tooltip disableInteractive title="These lists show class eligibility, not ownership or availability. Preview evaluates the spell at its eligible level."><Typography variant="caption">{data.total.toLocaleString()} spells · {classes.length ? classes.join(' / ') : 'All classes'}</Typography></Tooltip>
-    <ByLevelTable records={data.records} selected={selected} sort={sort} onOpen={onOpen} onPreview={onPreview} onToggle={onToggle} />
+    <ByLevelTable records={data.records} selected={selected} sort={sort} columns={browseColumns(state.metric, 'both', state.columns)} onOpen={onOpen} onPreview={onPreview} onToggle={onToggle} />
     {!data.total && <Typography>No spells become eligible in this range.</Typography>}
     {data.total > 40 && <Pagination page={page} count={Math.ceil(data.total / 40)} onChange={(_e, value) => setPage(value)} />}
   </>
 }
-function ProgressionControls({ state, controls, level }: { state: ReturnType<typeof useByLevel>; controls?: ReactNode; level: number }): JSX.Element {
-  const { view, setView, through, setThrough, setPage } = state
+function ProgressionControls({ state, controls }: { state: ReturnType<typeof useByLevel>; controls?: ReactNode }): JSX.Element {
+  const { view, setView, level, setPage, followCharacter } = state
   return <Stack spacing={1}>{controls}<Stack direction="row" gap={1} flexWrap="wrap" alignItems="center">
     <Tabs value={view} onChange={(_e, value: typeof view) => { setView(value); setPage(1) }}><Tab value="at" label={`At level ${level}`} /><Tab value="upcoming" label="Upcoming" /></Tabs>
-    {view === 'upcoming' && <TextField size="small" label="Through level" type="number" value={through ?? Math.min(255, level + 10)} onChange={(e) => { setThrough(Number(e.target.value)); setPage(1) }} slotProps={{ htmlInput: { min: level + 1, max: 255, 'data-testid': 'by-level-through' } }} sx={{ width: 160 }} />}
+    {followCharacter && <Button size="small" onClick={followCharacter}>Use character level</Button>}
   </Stack></Stack>
 }
-function useByLevel({ classes, level, evaluation, enabled }: { classes: SpellClass[]; level: number; evaluation: SpellEvaluationOptions; enabled: boolean }) {
+function useByLevel({ classes, level: detectedLevel, evaluation, analysis, selected, enabled }: {
+  classes: SpellClass[]; level: number; evaluation: SpellEvaluationOptions; analysis: SpellAnalysisOptions; selected: number[]; enabled: boolean
+}) {
   const [view, setView] = useSpellWorkspaceState<'at' | 'upcoming'>('by-level-view', 'at')
-  const [through, setThrough] = useSpellWorkspaceState<number | null>('by-level-through', null)
+  const [columns, setColumns] = useSpellWorkspaceState<BrowseDisplayField[]>('progression-columns', PROGRESSION_COLUMNS)
   const [page, setPage] = useSpellWorkspaceState('by-level-page', 1)
   const [text, setText] = useSpellWorkspaceState('by-level-search', '')
   const [savedFilters, setFilters] = useSpellWorkspaceState('progression-filters', defaultBrowseFilters())
-  const filters = { ...savedFilters, text }
-  const maximum = filters.max === null || filters.max === '' ? String(view === 'at' ? level : through ?? Math.min(255, level + 10)) : filters.max
+  const [range, setRange] = useSpellWorkspaceState('progression-level-range', FOLLOW_PROGRESSION_LEVELS)
+  const level = range.min ?? detectedLevel
+  const maximum = String(Math.max(level, range.max ?? Math.min(255, detectedLevel + 10)))
+  const filters = { ...savedFilters, text, min: String(level), max: maximum }
   const invalid = browseFilterError(filters, maximum)
   const sort = useSpellSort<SpellBrowseSort>('level', 'asc', 'by-level')
   const queryText = useSearchText(text), classKey = classes.join(',')
-  useSpellPageReset(`${classKey}:${level}:${view}:${sort.field}:${sort.direction}`, setPage)
-  const { category, subcategory, effect, type, polarity, mana, min } = filters
+  const selectedKey = sort.field === 'selected' ? selected.join(',') : ''
+  useSpellPageReset(`${classKey}:${level}:${maximum}:${view}:${sort.field}:${sort.direction}:${selectedKey}`, setPage)
+  const { category, subcategory, effect, type, polarity, mana, hpFilter } = filters
+  const metric = hpFilter === 'healing' || type === 'heal' || type === 'hot' ? 'healing' as const : 'damage' as const
+  const includeEffects = columns.includes('spa')
   const load = useCallback(() => {
     if (invalid) return Promise.reject(new Error(invalid))
     return window.eq.spellLibrary.byLevel({ classes: classKey ? classKey.split(',') as SpellClass[] : [], level,
-      throughLevel: through ?? Math.min(255, level + 10), view, page, pageSize: 40, evaluation, browseRank: true, text: queryText, sortBy: sort.field, direction: sort.direction,
+      throughLevel: view === 'at' ? level : Number(maximum), view: 'range', page, pageSize: 40, evaluation, analysis, includeEffects, browseRank: true, text: queryText,
+      sortBy: sort.field, direction: sort.direction, selectedIds: selectedKey ? selectedKey.split(',').map(Number) : undefined,
       category: category || undefined, subcategory: subcategory || undefined, effect: effect ? Number(effect) : undefined,
-      type: type || undefined, polarity: polarity || undefined, mana: mana || undefined, minLevel: min ? Number(min) : undefined, maxLevel: maximum ? Number(maximum) : undefined })
-  }, [classKey, level, through, view, page, evaluation, queryText, sort.field, sort.direction, category, subcategory, effect, type, polarity, mana, min, maximum, invalid])
+      type: type || undefined, polarity: polarity || undefined, mana: mana || undefined, hpFilter: hpFilter || undefined })
+  }, [classKey, level, view, page, evaluation, analysis, includeEffects, queryText, sort.field, sort.direction, selectedKey, category, subcategory, effect, type, polarity, mana, hpFilter, maximum, invalid])
   const change = <K extends keyof BrowseFilters>(key: K, value: BrowseFilters[K]): void => {
     if (key === 'text') setText(String(value))
+    else if (key === 'min' || key === 'max') setRange((previous) => ({ ...previous, [key]: Number(value) }))
     else setFilters((previous) => ({ ...previous, [key]: value, ...(key === 'category' ? { subcategory: '' } : {}) }))
     setPage(1)
   }
-  const reset = (): void => { setFilters(defaultBrowseFilters()); setText(''); setPage(1) }
-  return { ...useLibraryQuery(load, undefined, enabled), view, setView, through, setThrough, page, setPage, sort, filters, maximum, invalid, change, reset }
+  const reset = (): void => { setFilters(defaultBrowseFilters()); setRange(FOLLOW_PROGRESSION_LEVELS); setText(''); setPage(1) }
+  const followCharacter = range.min !== null ? () => {
+    setRange(({ max }) => ({ min: null, max: max !== null && max >= detectedLevel ? max : null })); setPage(1)
+  } : undefined
+  return { ...useLibraryQuery(load, undefined, enabled), view, setView, level, followCharacter, page, setPage, sort, filters, maximum, invalid, change, reset, columns, setColumns, metric }
 }
-function ByLevelTable({ records, selected, sort, onOpen, onPreview, onToggle }: {
+function ByLevelTable({ records, selected, sort, columns, onOpen, onPreview, onToggle }: {
   records: SpellSummary[]; selected: number[]; sort: ReturnType<typeof useSpellSort<SpellBrowseSort>>
+  columns: ReturnType<typeof browseColumns>
   onOpen: (id: number) => void; onPreview: (id: number, level: number) => void; onToggle: (id: number) => void
 }): JSX.Element {
   return <Box sx={{ overflowX: 'auto' }}><Table size="small" aria-label="Client spell eligibility by level"><TableHead><TableRow>
-    {([{ field: 'level', label: 'Level' }, { field: 'id', label: 'ID' }, { field: 'name', label: 'Spell / description' }, { field: 'classes', label: 'Class/Level' }, { field: 'category', label: 'Category' }, { field: 'mana', label: 'Mana' }] as const).map((c) => <SpellSortHeader key={c.field} {...c} sort={sort} />)}<TableCell>Actions</TableCell>
+    <SpellSortHeader field="level" label="Level" sort={sort} />
+    {columns.map(({ field, label }) => field === 'rank' || field === 'spa' || field === 'era' ? <TableCell key={field}>{label}</TableCell> : <SpellSortHeader key={field} field={field} label={label} sort={sort} />)}
+    <TableCell>Actions</TableCell>
   </TableRow></TableHead><TableBody>{records.map((r, index) => <Fragment key={r.id}>
-    {sort.field === 'level' && (index === 0 || records[index - 1].learnedLevel !== r.learnedLevel) && <TableRow><TableCell colSpan={7} sx={{ bgcolor: 'action.hover' }}><Typography variant="subtitle2">Eligible at level {r.learnedLevel ?? 'unknown'}</Typography></TableCell></TableRow>}
+    {sort.field === 'level' && (index === 0 || records[index - 1].learnedLevel !== r.learnedLevel) && <TableRow><TableCell colSpan={columns.length + 2} sx={{ bgcolor: 'action.hover' }}><Typography variant="subtitle2">Eligible at level {r.learnedLevel ?? 'unknown'}</Typography></TableCell></TableRow>}
     <TableRow data-testid="by-level-record" data-spell-id={r.id}>
-    <TableCell>{r.learnedLevel ?? '-'}</TableCell><TableCell>{r.id}</TableCell><TableCell sx={{ minWidth: 210 }}><SpellNameButton id={r.id} onOpen={onOpen}>{r.name}</SpellNameButton>
-      <SpellRowRank id={r.id} name={r.name} evidence={r.rankEvidence} browseRank={r.browseRank} /><Typography variant="caption" display="block">{r.description?.slice(0, 220)}</Typography></TableCell>
-    <TableCell>{r.classes.map((c) => `${c.code} ${c.level}`).join(' · ')}</TableCell><TableCell>{r.category}<Typography variant="caption" display="block">{r.subcategory}</Typography></TableCell><TableCell>{r.calculations?.[0]?.mana ?? r.mana}</TableCell>
-    <TableCell><Button size="small" disabled={r.learnedLevel == null} onClick={() => onPreview(r.id, r.learnedLevel ?? 1)} data-testid={`by-level-preview-${r.id}`}>Preview at {r.learnedLevel}</Button><Button size="small" disabled={!selected.includes(r.id) && selected.length >= 4} onClick={() => onToggle(r.id)} data-testid={`by-level-compare-${r.id}`}>{selected.includes(r.id) ? 'Selected' : 'Add to Compare'}</Button></TableCell>
+    <TableCell>{r.learnedLevel ?? '-'}</TableCell>
+    {columns.map(({ field }) => <TableCell key={field} sx={field === 'name' ? { minWidth: 180 } : undefined}>
+      <ProgressionCell field={field} record={r} selected={selected} onOpen={onOpen} onToggle={onToggle} />
+    </TableCell>)}
+    <TableCell><Button size="small" disabled={r.learnedLevel == null} onClick={() => onPreview(r.id, r.learnedLevel ?? 1)} data-testid={`by-level-preview-${r.id}`}>Preview at {r.learnedLevel}</Button></TableCell>
   </TableRow></Fragment>)}</TableBody></Table></Box>
+}
+
+function ProgressionCell({ field, record, selected, onOpen, onToggle }: {
+  field: BrowseDisplayField; record: SpellSummary; selected: number[]; onOpen: (id: number) => void; onToggle: (id: number) => void
+}): JSX.Element {
+  if (field === 'name') return <SpellNameButton id={record.id} onOpen={onOpen}>{record.name}</SpellNameButton>
+  if (field === 'rank') return <SpellRowRank id={record.id} name={record.name} browseRank={record.browseRank} readOnly />
+  if (field === 'selected') return <Button size="small" disabled={!selected.includes(record.id) && selected.length >= 4} onClick={() => onToggle(record.id)} data-testid={`by-level-compare-${record.id}`}>{selected.includes(record.id) ? 'Selected' : 'Add to Compare'}</Button>
+  return <SpellDataCell record={record} field={field} />
 }

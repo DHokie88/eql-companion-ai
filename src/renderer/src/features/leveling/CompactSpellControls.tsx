@@ -1,7 +1,7 @@
 import type { JSX } from 'react'
 import { Alert, Chip, MenuItem, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
 import type { SpellRankingCategory } from '@shared/spellAnalysis'
-import { spellPreviewTargets } from '@shared/spellAnalysis'
+import { SPELL_PREVIEW_MAX_TARGETS, spellPreviewTargets } from '@shared/spellAnalysis'
 import type { SpellValueMode } from '@shared/spellModifiers'
 import type { SpellModifiersState } from '../spells/useSpellModifiers'
 
@@ -22,7 +22,7 @@ export function CompactSpellControls({ state, category }: { state: SpellModifier
       {preferences.mode === 'emulate' && <Chip size="small" variant="outlined" label="Simulated" sx={{ alignSelf: 'flex-start' }} />}
       {category === 'aoe' && <TextField select label="AOE targets" size="small" value={spellPreviewTargets(preferences.targets)} disabled={disabled} data-testid="best-spells-targets"
         onChange={(event) => update({ ...preferences, targets: Number(event.target.value) })}>
-        {Array.from({ length: 8 }, (_, index) => index + 1).map((count) => <MenuItem key={count} value={count}>{count} targets</MenuItem>)}
+        {Array.from({ length: SPELL_PREVIEW_MAX_TARGETS }, (_, index) => index + 1).map((count) => <MenuItem key={count} value={count}>{count} targets</MenuItem>)}
       </TextField>}
       {preferences.mode === 'emulate' && <Typography variant="caption" color="text.secondary">Uses your shared emulation settings. Open Spells to edit ranks and focus.</Typography>}
     </>}

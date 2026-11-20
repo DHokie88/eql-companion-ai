@@ -2,11 +2,11 @@ import type { JSX } from 'react'
 import { Checkbox, FormControl, InputLabel, ListItemText, MenuItem, Select, Tab, Tabs } from '@mui/material'
 import type { SpellMetric, SpellSearchQuery, SpellSearchResult } from '@shared/spellLibrary'
 import { browseColumns, selectableBrowseColumns, type BrowseDisplayField, type CategoryDisplay } from './spellBrowseColumns'
-export function BrowseColumnPicker({ metric, columns, setColumns, display = 'both', uniformType = false }: {
+export function BrowseColumnPicker({ metric, columns, setColumns, display = 'both', uniformType = false, columnCount }: {
   metric: SpellMetric; columns: BrowseDisplayField[]; setColumns: (columns: BrowseDisplayField[]) => void
-  display?: CategoryDisplay; uniformType?: boolean
+  display?: CategoryDisplay; uniformType?: boolean; columnCount?: number
 }): JSX.Element {
-  const shown = browseColumns(metric, display, columns, uniformType).length
+  const shown = columnCount ?? browseColumns(metric, display, columns, uniformType).length
   return <FormControl size="small" sx={{ width: 130, ml: 'auto' }}><InputLabel id="browse-columns-label">Columns</InputLabel>
       <Select multiple labelId="browse-columns-label" label="Columns" value={columns} renderValue={() => `${shown} shown`} data-testid="spells-columns" onChange={(e) => setColumns(e.target.value as BrowseDisplayField[])}>
         <MenuItem disabled>Spell, Rank, and Class/Level always shown</MenuItem>

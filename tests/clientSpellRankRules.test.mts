@@ -59,6 +59,6 @@ test('rank costs and timing share the category model without raising zero reuse'
   assert.equal(rankHpTiming({ ...d, recoveryMs: 1500 }, 'damage', 5).recoveryMs, 1300, 'recovery ties round down')
   assert.equal(rankHpTiming({ ...d, recoveryMs: -1 }, 'damage', 5).recoveryMs, -1, 'invalid client timing stays available for exclusion')
 })
-test('old maximum and oversized target preferences become eight-enemy preview scenarios', () => {
-  assert.deepEqual([undefined, 'maximum', 100, 8, 4, 1].map((n) => spellPreviewTargets(n as number | 'maximum' | undefined)), [4, 8, 8, 8, 4, 1])
+test('old maximum and oversized target preferences become ten-enemy preview scenarios', () => {
+  assert.deepEqual([undefined, 'maximum', 100, 10, 8, 4, 1].map((n) => spellPreviewTargets(n as number | 'maximum' | undefined)), [4, 10, 10, 10, 8, 4, 1])
 })

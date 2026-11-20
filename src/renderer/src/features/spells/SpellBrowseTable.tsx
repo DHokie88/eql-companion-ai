@@ -2,6 +2,7 @@ import { Fragment, type JSX } from 'react'
 import { Box, Button, IconButton, Stack, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import type { SpellBrowseSort, SpellMetric, SpellSummary } from '@shared/spellLibrary'
+import { spellEraCaption } from '@shared/spellBrowseEra'
 import { spellBrowseEffectText } from '@shared/spellBrowseEffects'
 import { amount, efficiencyAmount, wholeAmount, EstimateAmount } from './SpellEstimate'
 import { SpellNameButton, SpellSortHeader, type useSpellSort } from './SpellTableControls'
@@ -19,10 +20,10 @@ function NameCell({ record, expanded, toggleLine, onOpen }: CellProps): JSX.Elem
   return <Stack direction="row" alignItems="center" gap={0.5} flexWrap="wrap"><SpellNameButton id={record.id} onOpen={onOpen}>{record.name}</SpellNameButton>
       {record.line && <Tooltip title={`${record.line.alternatives.length} alternatives. ${record.line.reason}`}><IconButton size="small" aria-label={`Alternatives for ${record.name}`} aria-expanded={expanded} onClick={toggleLine} data-testid={`spells-expand-${record.id}`}><ExpandMoreIcon sx={{ transform: expanded ? 'rotate(180deg)' : undefined }} /></IconButton></Tooltip>}</Stack>
 }
-function CategoryCell({ record, display }: CellProps): JSX.Element {
+function CategoryCell({ record, display }: Pick<CellProps, 'record' | 'display'>): JSX.Element {
   return <>{display === 'subcategory' ? record.subcategory || '-' : record.category || 'Uncategorized'}{display === 'both' && record.subcategory && <Typography variant="caption" display="block" color="text.secondary">{record.subcategory}</Typography>}</>
 }
-function CalculationCell({ record, field }: CellProps): JSX.Element {
+function CalculationCell({ record, field }: Pick<CellProps, 'record' | 'field'>): JSX.Element {
   const calculation = record.calculations?.[0]
   if (field === 'efficiency') return <>{record.mana === 0 ? '-' : efficiencyAmount(calculation?.perMana ?? null)}</>
   return <>{calculation ? <><EstimateAmount calculation={calculation} compact /><SpellCastSummary calculation={calculation} compact /></> : '-'}</>
@@ -31,24 +32,20 @@ function CompareCell({ record, selected, onToggle }: CellProps): JSX.Element {
   const active = selected.includes(record.id)
   return <Button size="small" variant={active ? 'contained' : 'outlined'} disabled={!active && selected.length >= 4} onClick={() => onToggle(record.id)} data-testid={`spells-compare-${record.id}`}>{active ? 'Selected' : 'Add'}</Button>
 }
-function identityCell(props: CellProps): JSX.Element | null {
+function SpellCell(props: CellProps): JSX.Element {
   const { record, field } = props
-  if (field === 'id') return <>{record.id}</>
   if (field === 'name') return <NameCell {...props} />
   if (field === 'rank') return <SpellRowRank id={record.id} name={record.name} browseRank={record.browseRank} readOnly />
-  if (field === 'spa') return <SpaCell record={record} />
-  return null
-}
-function metricCell(props: CellProps): JSX.Element | null {
-  const { record, field } = props
-  if (field === 'category' || field === 'subcategory') return <CategoryCell {...props} />
-  if (field === 'amount' || field === 'efficiency') return <CalculationCell {...props} />
-  if (field === 'mana') return <>{record.calculations?.[0]?.mana ?? record.mana}</>
   if (field === 'selected') return <CompareCell {...props} />
-  return null
+  return <SpellDataCell record={record} field={field} display={props.display} />
 }
-function SpellCell(props: CellProps): JSX.Element {
-  return identityCell(props) ?? metricCell(props) ?? <TextCell record={props.record} field={props.field} />
+export function SpellDataCell({ record, field, display = 'both' }: Pick<CellProps, 'record' | 'field'> & { display?: CategoryDisplay }): JSX.Element {
+  if (field === 'id') return <>{record.id}</>
+  if (field === 'spa') return <SpaCell record={record} />
+  if (field === 'category' || field === 'subcategory') return <CategoryCell record={record} display={display} />
+  if (field === 'amount' || field === 'efficiency') return <CalculationCell record={record} field={field} />
+  if (field === 'mana') return <>{record.calculations?.[0]?.mana ?? record.mana}</>
+  return <TextCell record={record} field={field} />
 }
 function SpaCell({ record }: { record: SpellSummary }): JSX.Element {
   const slots = record.effects ?? []
@@ -57,6 +54,7 @@ function SpaCell({ record }: { record: SpellSummary }): JSX.Element {
 }
 function TextCell({ record, field }: Pick<CellProps, 'record' | 'field'>): JSX.Element {
   if (field === 'classes') return <>{record.classes.length ? record.classes.map((c) => `${c.code} ${c.level}`).join(' · ') : 'Internal / NPC'}</>
+  if (field === 'era') return <>{spellEraCaption(record.era ?? 'unknown')}</>
   if (field === 'description') return <Typography variant="body2" sx={{ minWidth: 220, maxWidth: 420, whiteSpace: 'normal', lineHeight: 1.6 }}>{record.description ?? '-'}</Typography>
   if (field === 'type') return <>{record.typeLabel ?? record.spellType?.toUpperCase() ?? '-'}</>
   return <>{field === 'rate' ? wholeAmount(browseTimingValue(record, field)) : amount(browseTimingValue(record, field))}</>
@@ -78,7 +76,7 @@ export function SpellBrowseTable({ records, selected, sort, filters, metric = 'd
       }} onOpen={onOpen} onToggle={onToggle} />
     </TableCell>)}
   </TableRow>
-  const plain = new Set<BrowseDisplayField>(['rank', 'spa'])
+  const plain = new Set<BrowseDisplayField>(['rank', 'spa', 'era'])
   const scroll = visible.some((column) => column.field === 'spa' || column.field === 'description')
   return <Box sx={{ overflowX: 'auto' }} data-testid="spells-table-scroll"><Table size="small" aria-label="Spell catalog" sx={{ tableLayout: 'fixed', width: '100%', minWidth: scroll ? totalWidth : '100%', '& .MuiTableCell-root': { px: 1, py: 1, fontVariantNumeric: 'tabular-nums' } }}><colgroup>{visible.map((column) => <col key={column.field} style={{ width: `${100 * browseColumnWidth(column.field) / totalWidth}%` }} />)}</colgroup><TableHead><TableRow>
     {visible.map((column) => plain.has(column.field)

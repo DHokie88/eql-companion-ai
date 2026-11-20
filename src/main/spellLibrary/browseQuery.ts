@@ -55,10 +55,16 @@ export function spellSearchOptions(query: Record<string, unknown>) {
     direction: optionalChoice<SpellSortDirection>(query.direction, 'sort direction', ['asc', 'desc']) ?? 'asc', selected: new Set(selection(query.selectedIds))
   }
 }
-type SearchOptions = ReturnType<typeof spellSearchOptions>
+type SearchOptions = ReturnType<typeof spellSearchOptions> & { levelsInRange?: boolean }
+
+export function spellSearchLearnedLevel(record: ClientSpellRecord, options: SearchOptions): number | null {
+  const low = options.minLevel ?? 0, high = options.maxLevel ?? 255
+  const entries = options.levelsInRange ? record.classes.filter(({ level }) => level >= low && level <= high) : record.classes
+  return minimumSpellLevel(entries, options.classes)
+}
 
 function matchesLevel(record: ClientSpellRecord, options: SearchOptions): boolean {
-  const learned = minimumSpellLevel(record.classes, options.classes)
+  const learned = spellSearchLearnedLevel(record, options)
   const ceiling = options.maxLevel ?? (options.allLevels || options.allSpells ? undefined : options.level)
   // Null is unknown or NPC. A minimum of 0 does not promote that absence into a learned level.
   if (learned === null) return options.classes.length === 0 && options.minLevel === undefined && ceiling === undefined

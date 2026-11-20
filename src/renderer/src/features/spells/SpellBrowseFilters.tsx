@@ -3,6 +3,7 @@ import { Button, FormControl, InputLabel, MenuItem, Paper, Select, Stack, TextFi
 import type { SpellBrowseType } from '@shared/spellLibrary'
 import type { BrowseFilters } from './useSpellBrowse'
 import { SpellLevelBounds } from './SpellLevelBounds'
+import type { SpellLevelLimits } from './spellLevelRange'
 
 function ChoiceFilter({ name, label, value, options, onChange, compact = false }: {
   name: string; label: string; value: string; options: { value: string; label: string }[]; onChange: (value: string) => void; compact?: boolean
@@ -34,16 +35,16 @@ interface Props {
   filters: BrowseFilters; maximum: string; categories: string[]; subcategories: string[]; invalid: string | null
   change: <K extends keyof BrowseFilters>(key: K, value: BrowseFilters[K]) => void; reset: () => void
   hideTypes?: boolean; controls?: ReactNode; columns?: ReactNode; typeOptions?: { value: SpellBrowseType; label: string }[]
-  characterKey?: string; levelCaption?: string
+  characterKey?: string; levelCaption?: string; levelLimits?: SpellLevelLimits
 }
-export function SpellBrowseFilters({ filters, maximum, categories, subcategories, change, reset, invalid, hideTypes = false, controls, columns, characterKey = '', levelCaption }: Props): JSX.Element {
+export function SpellBrowseFilters({ filters, maximum, categories, subcategories, change, reset, invalid, hideTypes = false, controls, columns, characterKey = '', levelCaption, levelLimits }: Props): JSX.Element {
   const min = /^\d+$/.test(filters.min) ? Number(filters.min) : 0
   const max = /^\d+$/.test(maximum) ? Number(maximum) : 0
   return <Paper variant="outlined" sx={{ p: 2, bgcolor: 'background.paper', borderRadius: 2 }} data-testid="spells-filter-panel"><Stack spacing={2}>
     <Stack direction="row" gap={1} flexWrap="wrap" alignItems="flex-start">
       <TextField size="small" label="Spell name or ID" value={filters.text} slotProps={{ htmlInput: { 'data-testid': 'spells-search' } }} onChange={(e) => change('text', e.target.value)} sx={{ minWidth: 230, flexGrow: 1 }} />
       <Tooltip title="Eligibility across the selected classes. Min 0 includes an explicit level-less class row. A missing or ineligible level stays unknown. Caster level, from the character's stated level, is separate and drives calculated strength.">
-        <span><SpellLevelBounds min={min} max={max} characterKey={characterKey} caption={levelCaption} onMin={(value) => change('min', String(value))} onMax={(value) => change('max', String(value))} /></span>
+        <span><SpellLevelBounds min={min} max={max} characterKey={characterKey} caption={levelCaption} onMin={(value) => change('min', String(value))} onMax={(value) => change('max', String(value))} limits={levelLimits} /></span>
       </Tooltip>
       <Button onClick={reset} data-testid="spells-reset-filters" sx={{ mt: 0.5 }}>Reset filters</Button>
     </Stack>

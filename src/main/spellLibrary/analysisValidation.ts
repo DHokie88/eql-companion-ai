@@ -7,9 +7,11 @@ export function targetCountArg(value: unknown): SpellTargetCount {
 }
 export function analysisArg(value: unknown): SpellAnalysisOptions | undefined {
   if (value === undefined) return undefined
-  const options = queryObject(value, ['scope', 'targets'])
+  const options = queryObject(value, ['scope', 'targets', 'rainWithinPack'])
   if (options.scope !== 'single' && options.scope !== 'pack') throw new Error('Invalid spell analysis scope')
-  return { scope: options.scope, targets: targetCountArg(options.targets) }
+  const { rainWithinPack } = options
+  if (rainWithinPack !== undefined && typeof rainWithinPack !== 'boolean') throw new Error('Invalid rainWithinPack')
+  return { scope: options.scope, targets: targetCountArg(options.targets), ...(rainWithinPack ? { rainWithinPack } : {}) }
 }
 export function choiceArg<T extends string>(value: unknown, name: string, choices: readonly T[]): T {
   if (typeof value !== 'string' || !choices.includes(value as T)) throw new Error(`Invalid ${name}`)

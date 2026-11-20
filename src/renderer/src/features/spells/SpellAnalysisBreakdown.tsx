@@ -12,7 +12,7 @@ export function SpellAnalysisBreakdown({ calculation }: { calculation: SpellCalc
         <Typography variant="body2">{analysis.scope} · evaluated at level {analysis.level} · model {analysis.modelVersion}</Typography>
         <RainBreakdown calculation={calculation} />
         <Typography variant="caption">Requested targets {analysis.requestedTargets}; effective targets {analysis.effectiveTargets ?? 'unknown'}; waves {analysis.waves ?? 'unknown'}; total hits {analysis.hits ?? 'unknown'}; hit cap {analysis.hitCap ?? 'unknown'}. {analysis.capSource}</Typography>
-        <Typography variant="caption">One-target full cast {amount(analysis.singleTargetTotal)} · aggregate pack total {amount(analysis.packTotal)}.</Typography>
+        <Typography variant="caption">Solo full cast {amount(analysis.singleTargetTotal)} · aggregate pack total {amount(analysis.packTotal)}.</Typography>
         {analysis.warnings.map((warning) => <Alert key={warning} severity="warning">{warning}</Alert>)}
         <Timing calculation={calculation} />
         <Box sx={{ overflowX: 'auto' }}><Table size="small" aria-label="Spell effect contributions"><TableHead><TableRow>{['Slot / SPA', 'Base at level', 'After mote', 'After instrument', 'After focus', 'Ticks', 'Hits', 'Contribution'].map((label) => <TableCell key={label}>{label}</TableCell>)}</TableRow></TableHead>

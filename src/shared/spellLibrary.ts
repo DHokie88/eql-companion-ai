@@ -152,8 +152,8 @@ export interface SpellCalculation {
   reasons: string[]
   restrictions: string[]
 }
-export interface SpellComparisonQuery extends SpellQueryContext { ids: number[]; level: number; metric: SpellMetric; evaluation?: SpellEvaluationOptions; analysis?: SpellAnalysisOptions; browseRank?: boolean }
-export interface SpellComparisonResult { dataset: SpellDataset | null; level: number; scope: string; results: SpellCalculation[]; rankEvidence?: Record<string, SpellRankEvidence | null>; browseRank?: Record<string, SpellBrowseRankMetadata | null> }
+export interface SpellComparisonQuery extends SpellQueryContext { ids: number[]; level: number; metric: SpellMetric; evaluation?: SpellEvaluationOptions; analysis?: SpellAnalysisOptions; browseRank?: boolean; includeSummary?: boolean; includeEffects?: boolean }
+export interface SpellComparisonResult { dataset: SpellDataset | null; level: number; scope: string; results: SpellCalculation[]; rankEvidence?: Record<string, SpellRankEvidence | null>; browseRank?: Record<string, SpellBrowseRankMetadata | null>; summaries?: Record<string, SpellSummary> }
 export interface SpellRankingQuery extends SpellQueryContext {
   evaluation?: SpellEvaluationOptions
   classes?: SpellClass[]

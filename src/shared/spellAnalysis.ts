@@ -1,12 +1,13 @@
 import type { SpellCalculation, SpellSearchQuery, SpellSearchResult, SpellSummary } from './spellLibrary'
 
-export const SPELL_ANALYSIS_MODEL_VERSION = '9'
+export const SPELL_ANALYSIS_MODEL_VERSION = '10'
+export const SPELL_PREVIEW_MAX_TARGETS = 10
 export type SpellTargetCount = number | 'maximum'
-/** UI scenarios stay within an eight-enemy pack, including older saved preferences. */
+/** Preview pack size is independent of each spell's captured hit cap. */
 export function spellPreviewTargets(value: SpellTargetCount | undefined): number {
-  return value === 'maximum' ? 8 : Math.max(1, Math.min(8, Math.trunc(value ?? 4)))
+  return value === 'maximum' ? SPELL_PREVIEW_MAX_TARGETS : Math.max(1, Math.min(SPELL_PREVIEW_MAX_TARGETS, Math.trunc(value ?? 4)))
 }
-export interface SpellAnalysisOptions { scope: 'single' | 'pack'; targets: SpellTargetCount }
+export interface SpellAnalysisOptions { scope: 'single' | 'pack'; targets: SpellTargetCount; rainWithinPack?: boolean }
 export const DEFAULT_SPELL_ANALYSIS: SpellAnalysisOptions = { scope: 'single', targets: 4 }
 export type SpellRankingCategory = 'dd' | 'dot' | 'aoe' | 'heal' | 'hot'
 export type SpellAnalysisSort = 'id' | 'name' | 'level' | 'amount' | 'mana' | 'efficiency' | 'rate' | 'cast' | 'recovery' | 'recast' | 'duration' | 'ticks' | 'waves' | 'targets' | 'hits'
@@ -38,7 +39,7 @@ export interface SpellRankingsResult extends Omit<SpellSearchResult, 'records'> 
   highlights: { kind: 'efficiency' | 'amount' | 'rate'; record: SpellRankingRow | null }[]
   contextRevision: string | null; modelVersion: string; level: number
 }
-export interface SpellByLevelQuery extends SpellSearchQuery { level: number; throughLevel?: number; view: 'at' | 'upcoming' }
+export interface SpellByLevelQuery extends SpellSearchQuery { level: number; throughLevel?: number; view: 'at' | 'upcoming' | 'range' }
 export interface SpellByLevelResult extends SpellSearchResult { level: number; throughLevel: number; contextRevision: string | null }
 export interface SpellLibraryFocus {
   tab: 'browse' | 'rankings' | 'compare' | 'by-level'; level?: number; category?: SpellRankingCategory

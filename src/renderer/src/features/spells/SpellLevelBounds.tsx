@@ -3,9 +3,10 @@ import { IconButton, Stack, TextField, Typography } from '@mui/material'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { commitBrowseLevel, stepBrowseLevel } from './spellLevelRange'
+import type { SpellLevelLimits } from './spellLevelRange'
 
-function LevelStepper({ label, value, other, side, testId, characterKey, onCommit }: {
-  label: string; value: number; other: number; side: 'min' | 'max'; testId: string; characterKey: string; onCommit: (value: number) => void
+function LevelStepper({ label, value, other, side, testId, characterKey, onCommit, limits }: {
+  label: string; value: number; other: number; side: 'min' | 'max'; testId: string; characterKey: string; onCommit: (value: number) => void; limits?: SpellLevelLimits
 }): JSX.Element {
   const [draft, setDraft] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -13,7 +14,7 @@ function LevelStepper({ label, value, other, side, testId, characterKey, onCommi
   const shown = draft ?? String(value)
   const commit = (): void => {
     if (draft === null) return
-    const result = commitBrowseLevel(draft, other, side)
+    const result = commitBrowseLevel(draft, other, side, limits)
     if (!result.ok) { setError(result.error); return }
     setError(null)
     setDraft(null)
@@ -21,7 +22,7 @@ function LevelStepper({ label, value, other, side, testId, characterKey, onCommi
   }
   const step = (delta: number): void => {
     const base = draft !== null && /^\d+$/.test(draft.trim()) ? Number(draft.trim()) : value
-    const next = stepBrowseLevel(base, delta, other, side)
+    const next = stepBrowseLevel(base, delta, { other, side, limits })
     setDraft(null)
     setError(null)
     if (next !== value) onCommit(next)
@@ -36,13 +37,13 @@ function LevelStepper({ label, value, other, side, testId, characterKey, onCommi
   </Stack>
 }
 
-export function SpellLevelBounds({ min, max, characterKey, caption, onMin, onMax }: {
-  min: number; max: number; characterKey: string; caption?: string; onMin: (value: number) => void; onMax: (value: number) => void
+export function SpellLevelBounds({ min, max, characterKey, caption, onMin, onMax, limits }: {
+  min: number; max: number; characterKey: string; caption?: string; onMin: (value: number) => void; onMax: (value: number) => void; limits?: SpellLevelLimits
 }): JSX.Element {
   return <Stack gap={0.25} data-testid="spells-level-bounds">
     <Stack direction="row" gap={1} alignItems="flex-start" flexWrap="wrap">
-      <LevelStepper label="Min spell level" value={min} other={max} side="min" testId="spells-min-level" characterKey={characterKey} onCommit={onMin} />
-      <LevelStepper label="Max spell level" value={max} other={min} side="max" testId="spells-max-level" characterKey={characterKey} onCommit={onMax} />
+      <LevelStepper label="Min spell level" value={min} other={max} side="min" testId="spells-min-level" characterKey={characterKey} onCommit={onMin} limits={limits} />
+      <LevelStepper label="Max spell level" value={max} other={min} side="max" testId="spells-max-level" characterKey={characterKey} onCommit={onMax} limits={limits} />
     </Stack>
     {caption && <Typography variant="caption" color="text.secondary" data-testid="spells-level-source">{caption}</Typography>}
   </Stack>
