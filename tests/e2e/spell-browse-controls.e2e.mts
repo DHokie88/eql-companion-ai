@@ -59,6 +59,7 @@ async function progressionColumns(page: Page): Promise<void> {
   await page.getByTestId('by-level-record').first().waitFor()
   await page.getByTestId('spells-tab-browse').click()
   await page.getByTestId('spells-tab-by-level').click()
+  await table.waitFor()
   assert.deepEqual((await table.getByRole('columnheader').allTextContents()).map((value) => value.trim()), ['Spell'])
 }
 
