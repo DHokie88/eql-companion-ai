@@ -14,7 +14,7 @@ function SpellColumnPresetSetting(): JSX.Element {
       {SPELL_COLUMN_PRESETS.map(({ id, label }) => <MenuItem key={id} value={id}>{label}</MenuItem>)}
     </TextField>
     <Stack direction="row" useFlexGap flexWrap="wrap" gap={0.5}>
-      {selectableBrowseColumns(preset === 'healing' ? 'healing' : 'damage').map(({ field, label }) => <FormControlLabel key={field} label={label}
+      {selectableBrowseColumns(preset === 'healing' ? 'healing' : 'damage', 'presets').map(({ field, label }) => <FormControlLabel key={field} label={label}
         control={<Checkbox size="small" checked={columns.includes(field)} onChange={(_event, checked) => saveSpellColumnPreset(preset, checked ? [...columns, field] : columns.filter((column) => column !== field))} />}
         data-testid={`pref-spell-preset-column-${field}`} sx={{ width: 190 }} />)}
     </Stack>

@@ -15,7 +15,6 @@ import { integerArg, objectArgs, stringArg } from './workerProtocol'
 import { classesArg, levelArg, metricArg, optionalText, pageArgs, queryObject, requiredSnapshotArg, snapshotArg, spellId } from './queryValidation'
 import type { SpellModifierContext } from '../../shared/spellModifiers'
 import { spellBrowseEffectSlots } from '../../shared/spellBrowseEffects'
-import { cachedAmbiguousSpellNames, spellEraLabel } from './spellBrowseEraTable'
 import type { SpellByLevelResult, SpellRankingsResult } from '../../shared/spellAnalysis'
 import { clientSpellSlowSummary, describeClientSpell } from '../../shared/clientSpellDescriptions'
 import { guessSpellCompareMetric, hitPointMetric, SPELL_COMPARE_METRICS, type SpellCompareMetric } from '../../shared/spellCompareMetric'
@@ -174,7 +173,6 @@ export class SpellLibraryQueries {
       dataset, record,
       presentation: this.detailPresentation({ dataset, record, query, context, level }),
       rankEvidence: this.detailEvidence(dataset, record, context),
-      ...this.detailEra(dataset, record),
       ...this.detailRank(dataset, record, query, context),
       ...(effects ? { effects } : {}),
       ...(calculations ? { calculations } : {})
@@ -188,10 +186,6 @@ export class SpellLibraryQueries {
   private detailEvidence(dataset: SpellDataset | null, record: ClientSpellRecord | null, context: unknown) {
     if (!record || !dataset) return null
     return this.evaluation.rankEvidence(dataset, record, context)
-  }
-  private detailEra(dataset: SpellDataset | null, record: ClientSpellRecord | null): { era: ReturnType<typeof spellEraLabel> } | undefined {
-    if (!record || !dataset) return undefined
-    return { era: spellEraLabel(record.name, cachedAmbiguousSpellNames(dataset.snapshotId, this.storage.recordNames(dataset.snapshotId))) }
   }
   private detailRank(dataset: SpellDataset | null, record: ClientSpellRecord | null, query: Record<string, unknown>, context: unknown) {
     if (query.browseRank !== true || !record || !dataset) return undefined
@@ -226,9 +220,8 @@ export class SpellLibraryQueries {
   }
   private comparisonSummary(dataset: SpellDataset, level: number, query: Record<string, unknown>, context: unknown) {
     const mechanics = this.evaluation.mechanics(dataset)
-    const ambiguous = cachedAmbiguousSpellNames(dataset.snapshotId, this.storage.recordNames(dataset.snapshotId))
     return (record: ClientSpellRecord, showPresentation: boolean): SpellComparisonSummary => {
-      const summary: SpellComparisonSummary = catalogSummary(record, [], { mechanics, level, ambiguous })
+      const summary: SpellComparisonSummary = catalogSummary(record, [], { mechanics, level })
       if (query.includeEffects === true) summary.effects = spellBrowseEffectSlots(record, level, this.effectRank(dataset, record, query, context))
       if (showPresentation) {
         const { duration, effects } = describeClientSpell(record, level)

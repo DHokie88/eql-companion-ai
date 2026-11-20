@@ -1,14 +1,12 @@
 import type { SpellMechanicsCatalog } from '../../shared/clientSpellMechanics'
 import { SPELL_BROWSE_SORTS, type ClientSpellRecord, type SpellBrowseSort, type SpellBrowseType, type SpellSortDirection } from '../../shared/spellLibrary'
 import { matchesSpellType, minimumSpellLevel } from '../../shared/clientSpellBrowse'
-import { spellEraAdmits, type SpellEraFilter } from '../../shared/spellBrowseEra'
 import { classesArg, levelArg, optionalText, spellLevelBound } from './queryValidation'
-import { spellEraLabel } from './spellBrowseEraTable'
 import { integerArg } from './workerProtocol'
 import { clientSpellDescription } from '../../shared/clientSpellDescriptions'
 
 export const SEARCH_QUERY_FIELDS = ['snapshotId', 'text', 'classes', 'level', 'category', 'subcategory', 'effect', 'allSpells', 'allLevels',
-  'minLevel', 'maxLevel', 'type', 'polarity', 'mana', 'sortBy', 'direction', 'selectedIds', 'page', 'pageSize', 'evaluation', 'analysis', 'group', 'metric', 'includeHighlights', 'bestInLine', 'hpFilter', 'era', 'includeEffects', 'browseRank']
+  'minLevel', 'maxLevel', 'type', 'polarity', 'mana', 'sortBy', 'direction', 'selectedIds', 'page', 'pageSize', 'evaluation', 'analysis', 'group', 'metric', 'includeHighlights', 'bestInLine', 'hpFilter', 'includeEffects', 'browseRank']
 
 function optionalChoice<T extends string>(value: unknown, name: string, choices: readonly T[]): T | undefined {
   if (value === undefined) return undefined
@@ -50,7 +48,6 @@ export function spellSearchOptions(query: Record<string, unknown>) {
     hpFilter: optionalChoice(query.hpFilter, 'HP filter', ['damage', 'healing'] as const),
     ...resultOptions(query),
     polarity: optionalChoice(query.polarity, 'polarity', ['beneficial', 'detrimental'] as const),
-    era: optionalChoice<SpellEraFilter>(query.era, 'era', ['current', 'preview', 'unknown', 'all']),
     mana: optionalChoice(query.mana, 'mana filter', ['free', 'cost'] as const),
     sortBy: optionalChoice<SpellBrowseSort>(query.sortBy, 'sort column', SPELL_BROWSE_SORTS) ?? 'id',
     direction: optionalChoice<SpellSortDirection>(query.direction, 'sort direction', ['asc', 'desc']) ?? 'asc', selected: new Set(selection(query.selectedIds))
@@ -84,11 +81,10 @@ function matchesTraits(record: ClientSpellRecord, options: SearchOptions, mechan
   if (options.mana === 'free' && record.mana !== 0) return false
   return options.mana !== 'cost' || record.mana > 0
 }
-export function matchesSpellSearch(record: ClientSpellRecord, options: SearchOptions, mechanics?: SpellMechanicsCatalog, ambiguous?: ReadonlySet<string>): boolean {
+export function matchesSpellSearch(record: ClientSpellRecord, options: SearchOptions, mechanics?: SpellMechanicsCatalog): boolean {
   if (options.text && !matchesText(record, options.text)) return false
   if (options.category && record.category !== options.category) return false
   if (options.subcategory && record.subcategory !== options.subcategory) return false
   if (options.effect !== undefined && !record.effects.some((slot) => slot.spa === options.effect)) return false
-  if (options.era && !spellEraAdmits(spellEraLabel(record.name, ambiguous), options.era)) return false
   return matchesLevel(record, options) && matchesTraits(record, options, mechanics)
 }

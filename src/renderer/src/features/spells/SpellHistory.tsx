@@ -6,6 +6,7 @@ import { useLibraryQuery } from './useLibraryQuery'
 import { useSpellLibraryStatus } from './libraryState'
 import { LibrarySpellDetail } from './LibrarySpellDetail'
 import { SpellUpdateChanges } from './SpellUpdateChanges'
+import { HistoryColumnPicker, HISTORY_COLUMN_LABELS, useHistoryColumns } from './SpellHistoryColumns'
 
 function FieldChanges({ id, before, after }: { id: number; before: string; after: string }): JSX.Element {
   const load = useCallback(() => window.eq.spellLibrary.beforeAfter({ id, beforeSnapshotId: before, afterSnapshotId: after }), [id, before, after])
@@ -19,11 +20,32 @@ function FieldChanges({ id, before, after }: { id: number; before: string; after
 function SnapshotChanges({ before, after, onOpen }: { before: string; after: string; onOpen: (id: number) => void }): JSX.Element {
   const [page, setPage] = useState(1)
   const [id, setId] = useState<number | null>(null)
+  const selection = useHistoryColumns('snapshot')
+  const { columns } = selection
   const load = useCallback(() => window.eq.spellLibrary.changes({ beforeSnapshotId: before, afterSnapshotId: after, page, pageSize: 40 }), [before, after, page])
   const { data, error, loading } = useLibraryQuery(load)
   return <Stack spacing={1}>
     {loading && <CircularProgress size={20} />}{error && <Alert severity="error">{error}</Alert>}
-    {data && <><Typography>{data.total.toLocaleString()} spell differences</Typography><Box sx={{ overflowX: 'auto' }}><Table size="small"><TableHead><TableRow><TableCell>ID / name</TableCell><TableCell>Change</TableCell><TableCell>Fields</TableCell><TableCell /></TableRow></TableHead><TableBody>{data.changes.map((c) => <TableRow key={c.id}><TableCell><Button size="small" onClick={() => setId(c.id)}>{c.id} · {c.name}</Button></TableCell><TableCell>{c.kind}</TableCell><TableCell>{c.fields}</TableCell><TableCell><Button size="small" onClick={() => onOpen(c.id)}>Current record</Button></TableCell></TableRow>)}</TableBody></Table></Box>{data.total > 40 && <Pagination page={page} count={Math.ceil(data.total / 40)} onChange={(_e, p) => { setPage(p); setId(null) }} />}</>}
+    {data && <>
+      <Stack direction="row" alignItems="center" gap={2} flexWrap="wrap">
+        <Typography>{data.total.toLocaleString()} spell differences</Typography>
+        <HistoryColumnPicker {...selection} />
+      </Stack>
+      <Box sx={{ overflowX: 'auto' }}><Table size="small" aria-label="Snapshot spell differences">
+        <TableHead><TableRow>
+          <TableCell>Spell</TableCell>
+          {columns.map((column) => <TableCell key={column}>{HISTORY_COLUMN_LABELS[column]}</TableCell>)}
+        </TableRow></TableHead>
+        <TableBody>{data.changes.map((change) => <TableRow key={change.id}>
+          <TableCell component="th" scope="row"><Button size="small" onClick={() => setId(change.id)}>{change.name}</Button></TableCell>
+          {columns.includes('id') && <TableCell>{change.id}</TableCell>}
+          {columns.includes('change') && <TableCell>{change.kind}</TableCell>}
+          {columns.includes('fields') && <TableCell>{change.fields}</TableCell>}
+          {columns.includes('current') && <TableCell><Button size="small" onClick={() => onOpen(change.id)}>Current record</Button></TableCell>}
+        </TableRow>)}</TableBody>
+      </Table></Box>
+      {data.total > 40 && <Pagination page={page} count={Math.ceil(data.total / 40)} onChange={(_e, p) => { setPage(p); setId(null) }} />}
+    </>}
     {id !== null && <FieldChanges key={`${before}:${after}:${id}`} id={id} before={before} after={after} />}
   </Stack>
 }

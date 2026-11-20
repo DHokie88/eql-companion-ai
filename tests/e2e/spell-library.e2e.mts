@@ -170,6 +170,18 @@ try {
   await historyUpdate.first().click()
   const spellChange = page.getByTestId('spells-history-spell-101')
   await spellChange.waitFor()
+  const changedTable = page.getByRole('table', { name: 'Changed spells', exact: true })
+  await page.getByTestId('spells-history-columns').getByRole('combobox').click()
+  for (const label of ['ID', 'Class/Level', 'Change', 'Fields']) {
+    await page.getByRole('option', { name: label, exact: true }).click()
+  }
+  await page.keyboard.press('Escape')
+  assert.deepEqual(await changedTable.locator('thead th').allTextContents(), ['Spell'])
+  await historyUpdate.first().click()
+  await changedTable.waitFor({ state: 'hidden' })
+  await historyUpdate.first().click()
+  await changedTable.waitFor()
+  assert.deepEqual(await changedTable.locator('thead th').allTextContents(), ['Spell'], 'History saves a Spell-only view')
   const nameFilter = page.getByTestId('spells-history-name')
   await nameFilter.fill('No matching name')
   await spellChange.waitFor({ state: 'hidden' })

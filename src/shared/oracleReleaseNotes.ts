@@ -21,6 +21,14 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.23.1',
+    date: '2026-11-20',
+    entries: [
+      { kind: 'changed', text: 'The Spells catalog uses captured client records without guessed era labels or era filters.', fromReport: true },
+      { kind: 'fixed', text: 'Spell name is the only required column in Browse, Compare, Progression and History spell lists. Every other column can be shown or hidden.', fromReport: true }
+    ]
+  },
+  {
     version: '0.23.0',
     date: '2026-11-20',
     entries: [

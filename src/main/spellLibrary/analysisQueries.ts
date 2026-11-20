@@ -5,7 +5,6 @@ import { compareSpellValues, matchesSpellType, spellBrowseSortValue } from '../.
 import { analysisArg, ANALYSIS_SORTS, choiceArg, RANKING_CATEGORIES } from './analysisValidation'
 import { matchesSpellSearch, SEARCH_QUERY_FIELDS, spellSearchLearnedLevel, spellSearchOptions } from './browseQuery'
 import { catalogSummary } from './searchCatalog'
-import { cachedAmbiguousSpellNames } from './spellBrowseEraTable'
 import { levelArg, pageArgs, queryObject } from './queryValidation'
 import type { SpellModifierContext } from '../../shared/spellModifiers'
 import type { SpellLibraryStorage } from './storage'
@@ -103,15 +102,13 @@ export class SpellAnalysisQueries {
     const mechanics = dataset ? this.evaluation.mechanics(dataset) : undefined
     const groups: RankingGroups = { ranked: [], zeroMana: [], excluded: [] }
     const result = { groups, categories: new Set<string>(), subcategories: new Set<string>(), counts: { dd: 0, dot: 0, aoe: 0, heal: 0, hot: 0 } }
-    const records = dataset ? [...this.storage.records(dataset.snapshotId)] : []
-    const ambiguous = dataset ? cachedAmbiguousSpellNames(dataset.snapshotId, records) : undefined
-    for (const record of records) {
+    for (const record of dataset ? this.storage.records(dataset.snapshotId) : []) {
       facets(record, options.filters, result)
-      if (!matchesSpellSearch(record, options.filters, mechanics, ambiguous)) continue
+      if (!matchesSpellSearch(record, options.filters, mechanics)) continue
       countCategories(record, result.counts, mechanics)
       if (!matchesSpellType(record, options.category, mechanics)) continue
       const calculation = calculate(record, options.level, record.beneficial ? 'healing' : 'damage')
-      addRow(groups, { ...catalogSummary(record, options.filters.classes, { mechanics, level: options.level, ambiguous }), rankEvidence: this.evaluation.rankEvidence(dataset, record, context), calculation, calculations: [calculation] })
+      addRow(groups, { ...catalogSummary(record, options.filters.classes, { mechanics, level: options.level }), rankEvidence: this.evaluation.rankEvidence(dataset, record, context), calculation, calculations: [calculation] })
     }
     return result
   }
@@ -122,13 +119,12 @@ export class SpellAnalysisQueries {
     const calculate = this.evaluation.calculator(dataset, options.query, context)
     const rows: SpellSummary[] = [], result = { categories: new Set<string>(), subcategories: new Set<string>() }
     if (dataset && !options.empty) {
-      const ambiguous = cachedAmbiguousSpellNames(dataset.snapshotId, this.storage.recordNames(dataset.snapshotId))
       for (const record of this.storage.records(dataset.snapshotId)) {
         facets(record, options.filters, result)
-        if (!matchesSpellSearch(record, options.filters, mechanics, ambiguous)) continue
+        if (!matchesSpellSearch(record, options.filters, mechanics)) continue
         const learned = spellSearchLearnedLevel(record, options.filters)
         if (learned === null) continue
-        rows.push({ ...catalogSummary(record, options.filters.classes, { mechanics, level: learned, ambiguous }), learnedLevel: learned,
+        rows.push({ ...catalogSummary(record, options.filters.classes, { mechanics, level: learned }), learnedLevel: learned,
           detectedRank: this.evaluation.detectedRank(dataset, record, context), rankEvidence: this.evaluation.rankEvidence(dataset, record, context),
           calculations: this.byLevelCalculations(record, learned, options.query, calculate) })
       }

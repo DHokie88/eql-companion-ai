@@ -105,10 +105,6 @@ export class SpellLibraryStorage {
       yield JSON.parse(value.record as string) as ClientSpellRecord
     }
   }
-  *recordNames(snapshotId: string): Generator<{ name: string }> {
-    const names = this.statement("SELECT json_extract(r.record, '$.name') AS name FROM members m JOIN revisions r ON r.id=m.revision_id WHERE m.snapshot_id=?")
-    for (const value of names.iterate(snapshotId)) if (typeof value.name === 'string') yield { name: value.name }
-  }
   record(snapshotId: string, id: number): ClientSpellRecord | null {
     const value = this.statement('SELECT r.record FROM members m JOIN revisions r ON r.id=m.revision_id WHERE m.snapshot_id=? AND m.spell_id=?').get(snapshotId, id)
     return value ? JSON.parse(value.record as string) as ClientSpellRecord : null

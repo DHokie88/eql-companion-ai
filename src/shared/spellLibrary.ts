@@ -1,5 +1,4 @@
 import type { SpellBrowseEffectSlot } from './spellBrowseEffects'
-import type { SpellEraLabel, SpellEraFilter } from './spellBrowseEra'
 import type { BrowseRankGuard, BrowseRankSource } from './browseSpellRank'
 import type { SpellEvaluationOptions, SpellFocusOptions, SpellModifierApplied, SpellModifierContext, SpellModifierUpdate, SpellRankEvidence } from './spellModifiers'
 import type { SpellAnalysis, SpellAnalysisOptions, SpellByLevelQuery, SpellByLevelResult, SpellRankingsQuery, SpellRankingsResult, SpellRankingRow } from './spellAnalysis'
@@ -93,7 +92,6 @@ export interface SpellSearchQuery extends SpellQueryContext {
   evaluation?: SpellEvaluationOptions
   /** Ask search, detail, and compare to use the shared browse rank path. */
   browseRank?: boolean
-  era?: SpellEraFilter
   /** Spell effects for the returned page only, including expanded line alternatives. */
   includeEffects?: boolean
   text?: string
@@ -111,7 +109,7 @@ export interface SpellBrowseRankMetadata extends BrowseRankGuard {
   label: string
   owned: boolean
 }
-export type SpellSummary = Pick<ClientSpellRecord, 'id' | 'name' | 'rank' | 'classes' | 'mana' | 'category' | 'subcategory' | 'beneficial' | 'target'> & { calculations?: SpellCalculation[]; learnedLevel?: number | null; spellType?: SpellBrowseType; typeLabel?: string; castMs?: number; recoveryMs?: number; recastMs?: number; description?: string; detectedRank?: number | null; rankEvidence?: SpellRankEvidence | null; era?: SpellEraLabel; browseRank?: SpellBrowseRankMetadata; effects?: SpellBrowseEffectSlot[]; line?: { key: string; reason: string; alternatives: SpellSummary[] } }
+export type SpellSummary = Pick<ClientSpellRecord, 'id' | 'name' | 'rank' | 'classes' | 'mana' | 'category' | 'subcategory' | 'beneficial' | 'target'> & { calculations?: SpellCalculation[]; learnedLevel?: number | null; spellType?: SpellBrowseType; typeLabel?: string; castMs?: number; recoveryMs?: number; recastMs?: number; description?: string; detectedRank?: number | null; rankEvidence?: SpellRankEvidence | null; browseRank?: SpellBrowseRankMetadata; effects?: SpellBrowseEffectSlot[]; line?: { key: string; reason: string; alternatives: SpellSummary[] } }
 export interface SpellSearchResult {
   dataset: SpellDataset | null
   total: number
@@ -130,7 +128,7 @@ export interface SpellSearchResult {
   highlights?: { kind: 'efficiency' | 'amount' | 'rate'; record: SpellRankingRow | null }[]
 }
 export interface SpellDetailQuery extends SpellQueryContext { id: number; level?: number; evaluation?: SpellEvaluationOptions; analysis?: SpellAnalysisOptions; browseRank?: boolean; includeEffects?: boolean }
-export interface SpellDetailResult { dataset: SpellDataset | null; record: ClientSpellRecord | null; calculations?: SpellCalculation[]; presentation?: import('./clientSpellDescriptions').SpellPresentation; rankEvidence?: SpellRankEvidence | null; era?: SpellEraLabel; browseRank?: SpellBrowseRankMetadata; effects?: SpellBrowseEffectSlot[] }
+export interface SpellDetailResult { dataset: SpellDataset | null; record: ClientSpellRecord | null; calculations?: SpellCalculation[]; presentation?: import('./clientSpellDescriptions').SpellPresentation; rankEvidence?: SpellRankEvidence | null; browseRank?: SpellBrowseRankMetadata; effects?: SpellBrowseEffectSlot[] }
 export type SpellMetric = 'damage' | 'healing'
 export interface SpellCalculation {
   analysis?: SpellAnalysis

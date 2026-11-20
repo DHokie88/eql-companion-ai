@@ -279,38 +279,14 @@ test('Class/Level sorts the full result by class and numeric requirement before 
   } finally { f.close() }
 })
 
-test('current and preview keep unknown spells and still exclude later eras', () => {
-  const rows = [
-    spellRow(1, 'Synthetic Bolt'),
-    spellRow(2, 'Leach'),
-    spellRow(3, 'Abscond'),
-    spellRow(4, 'Abolish Enchantment')
-  ]
-  const f = fixture(rows)
+test('Browse searches all captured spell names and keeps distinct IDs for duplicate names', () => {
+  const f = fixture([spellRow(1, 'Leach'), spellRow(2, 'leach'), spellRow(3, 'Abscond'), spellRow(4, 'Abolish Enchantment')])
   try {
-    const current = f.search({ era: 'current', allSpells: true, pageSize: 10 })
-    assert.deepEqual(ids(current), [1, 2])
-    assert.deepEqual(current.records.map((row) => row.era), ['unknown', 'classic'])
-    const preview = f.search({ era: 'preview', allSpells: true, pageSize: 10 })
-    assert.deepEqual(ids(preview), [1, 2, 3])
-    assert.deepEqual(preview.records.map((row) => row.era), ['unknown', 'classic', 'kunark'])
-    assert.equal(f.search({ era: 'current', text: 'Abolish Enchantment', allSpells: true }).total, 0)
-    assert.equal(f.search({ era: 'preview', text: 'Abolish Enchantment', allSpells: true }).total, 0)
-  } finally { f.close() }
-})
-
-test('a duplicated display name does not inherit an era from the shared name', () => {
-  const rows = [spellRow(1, 'Leach'), spellRow(2, 'leach'), spellRow(3, 'Synthetic Bolt'), spellRow(4, 'Abolish Enchantment')]
-  const f = fixture(rows)
-  try {
-    const current = f.search({ era: 'current', allSpells: true, pageSize: 10 })
-    assert.deepEqual(ids(current), [1, 2, 3])
-    assert.deepEqual(current.records.map((row) => row.era), ['unknown', 'unknown', 'unknown'])
-    const preview = f.search({ era: 'preview', allSpells: true, pageSize: 10 })
-    assert.deepEqual(preview.records.filter((row) => row.id === 1 || row.id === 2).map((row) => row.era), ['unknown', 'unknown'])
-    assert.equal(f.search({ era: 'current', text: 'Abolish Enchantment', allSpells: true }).total, 0)
+    assert.deepEqual(ids(f.search({ allSpells: true, pageSize: 10 })), [1, 2, 3, 4])
+    assert.deepEqual(ids(f.search({ text: 'Leach', allSpells: true })), [1, 2])
+    assert.equal(f.search({ text: 'Abolish Enchantment', allSpells: true }).total, 1)
     const detail = f.queries.handle('detail', { installId: f.installId, query: { id: 1 } }) as SpellDetailResult
-    assert.equal(detail.era, 'unknown')
     assert.equal(detail.record?.name, 'Leach')
+    assert.equal(Object.hasOwn(detail, 'era'), false)
   } finally { f.close() }
 })

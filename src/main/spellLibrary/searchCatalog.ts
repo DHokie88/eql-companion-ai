@@ -10,16 +10,15 @@ import { clientSpellDescription } from '../../shared/clientSpellDescriptions'
 import { spellBrowseEffectSlots } from '../../shared/spellBrowseEffects'
 import { spellLineCandidate, type SpellLineCandidate } from '../../shared/clientSpellLines'
 import { bestCatalogSpellLines } from './bestSpellLines'
-import { cachedAmbiguousSpellNames, spellEraLabel } from './spellBrowseEraTable'
 
 const CALCULATED_SORTS = new Set(['amount', 'efficiency', 'rate', 'cast', 'recovery', 'recast', 'duration', 'ticks', 'waves', 'targets', 'hits'])
 type SearchOptions = ReturnType<typeof spellSearchOptions>
 interface EvaluationDependencies { calculate: SpellCalculator; mechanics?: SpellMechanicsCatalog; effectRank?: (record: ClientSpellRecord) => number | null }
 
-export function catalogSummary(record: ClientSpellRecord, classes: SearchOptions['classes'], facts: { mechanics?: SpellMechanicsCatalog; level?: number; ambiguous?: ReadonlySet<string> } = {}): SpellSummary {
+export function catalogSummary(record: ClientSpellRecord, classes: SearchOptions['classes'], facts: { mechanics?: SpellMechanicsCatalog; level?: number } = {}): SpellSummary {
   const { id, name, rank, mana, category, subcategory, beneficial, target, castMs, recoveryMs, recastMs } = record
   return { id, name, rank, classes: record.classes, mana, category, subcategory, beneficial, target, castMs, recoveryMs, recastMs, description: clientSpellDescription(record, facts.level),
-    learnedLevel: minimumSpellLevel(record.classes, classes), spellType: clientSpellType(record, facts.mechanics), typeLabel: clientSpellTypeLabel(record, facts.mechanics), era: spellEraLabel(record.name, facts.ambiguous) }
+    learnedLevel: minimumSpellLevel(record.classes, classes), spellType: clientSpellType(record, facts.mechanics), typeLabel: clientSpellTypeLabel(record, facts.mechanics) }
 }
 function evaluate(record: ClientSpellRecord, row: SpellSummary, level: number, input: { calculate: SpellCalculator; metric?: SpellMetric }): void {
   row.calculations = record.effects.some((e) => [0, 79, 100, 101, 334].includes(e.spa))
@@ -39,15 +38,14 @@ function collect(storage: SpellLibraryStorage, dataset: SpellDataset | null, opt
   const matches: SpellSummary[] = [], categories = new Set<string>(), subcategories = new Set<string>(), types = new Set<string>()
   const candidates = new Map<number, SpellLineCandidate>()
   const sourceRecords = new Map<number, ClientSpellRecord>()
-  const ambiguous = dataset ? cachedAmbiguousSpellNames(dataset.snapshotId, storage.recordNames(dataset.snapshotId)) : undefined
   const untyped = { ...options, type: undefined }
   for (const record of dataset ? storage.records(dataset.snapshotId) : []) {
     if (record.category) categories.add(record.category)
     if (record.subcategory && (!options.category || record.category === options.category)) subcategories.add(record.subcategory)
-    if (!matchesSpellSearch(record, untyped, input.mechanics, ambiguous)) continue
-    const row = catalogSummary(record, options.classes, { mechanics: input.mechanics, level: options.level, ambiguous })
+    if (!matchesSpellSearch(record, untyped, input.mechanics)) continue
+    const row = catalogSummary(record, options.classes, { mechanics: input.mechanics, level: options.level })
     addTypes(row, types)
-    if (options.type && !matchesSpellSearch(record, options, input.mechanics, ambiguous)) continue
+    if (options.type && !matchesSpellSearch(record, options, input.mechanics)) continue
     input.evaluateRow(record, row)
     addCandidate(record, row, candidates, options)
     if (options.bestInLine) sourceRecords.set(record.id, record)

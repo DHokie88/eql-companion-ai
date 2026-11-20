@@ -1,6 +1,8 @@
 import type { SpellBrowseSort, SpellMetric, SpellSummary } from '@shared/spellLibrary'
 
-export type BrowseDisplayField = SpellBrowseSort | 'rank' | 'spa' | 'era'
+export type BrowseDisplayField = SpellBrowseSort | 'rank' | 'spa'
+  | 'preview' | 'remove' | 'instant' | 'perTick' | 'scope' | 'effects' | 'effect-duration'
+export type SpellColumnView = 'browse' | 'progression' | 'compare-hp' | 'compare-effects' | 'presets'
 
 export const BROWSE_EXTRA_COLUMNS: { field: BrowseDisplayField; label: string }[] = [
   { field: 'cast', label: 'Cast (s)' }, { field: 'recovery', label: 'Recovery (s)' }, { field: 'recast', label: 'Recast (s)' },
@@ -15,34 +17,62 @@ export function browseColumnWidth(field: BrowseDisplayField): number {
     type: 92, amount: 96, mana: 70, efficiency: 92, rate: 110, selected: 100, description: 280, spa: 240 }
   return widths[field] ?? 90
 }
-export const DEFAULT_BROWSE_COLUMNS: SpellBrowseSort[] = ['id', 'category', 'type', 'amount', 'mana', 'efficiency', 'rate', 'selected']
-export function selectableBrowseColumns(metric: SpellMetric): BrowseColumn[] {
+export const DEFAULT_BROWSE_COLUMNS: BrowseDisplayField[] = ['id', 'rank', 'classes', 'category', 'type', 'amount', 'mana', 'efficiency', 'rate', 'selected']
+const identityColumns: BrowseColumn[] = [
+  { field: 'rank', label: 'Rank' }, { field: 'classes', label: 'Class/Level' }
+]
+const progressionColumns: BrowseColumn[] = [{ field: 'level', label: 'Level' }, { field: 'preview', label: 'Preview' }]
+const compareHpColumns: BrowseColumn[] = [
+  { field: 'instant', label: 'Instant' }, { field: 'perTick', label: 'Per tick × ticks' }, { field: 'scope', label: 'Scope / exclusions' }
+]
+const compareEffectsColumns: BrowseColumn[] = [{ field: 'effects', label: 'Effects' }, { field: 'effect-duration', label: 'Effect duration' }]
+const compareRemove: BrowseColumn = { field: 'remove', label: 'Remove' }
+const hpOnly = new Set<BrowseDisplayField>(['amount', 'efficiency', 'rate', 'duration', 'ticks', 'waves', 'hits', 'targets'])
+
+export function selectableBrowseColumns(metric: SpellMetric, view: SpellColumnView = 'browse'): BrowseColumn[] {
   const metricLabel = metric === 'damage' ? 'Damage' : 'Healing'
-  return [
-    { field: 'id', label: 'ID' }, { field: 'era', label: 'Era' }, { field: 'description', label: 'Description' }, { field: 'category', label: 'Category / subcategory' },
+  const common: BrowseColumn[] = [
+    { field: 'id', label: 'ID' }, ...identityColumns, { field: 'description', label: 'Description' }, { field: 'category', label: 'Category / subcategory' },
     { field: 'type', label: 'Type' }, { field: 'amount', label: metricLabel }, { field: 'mana', label: 'Mana' },
     { field: 'efficiency', label: `${metricLabel}/Mana` }, { field: 'rate', label: metric === 'damage' ? 'Modeled DPS' : 'Modeled HPS' },
-    ...BROWSE_EXTRA_COLUMNS, { field: 'spa', label: 'SPA' }, { field: 'selected', label: 'Compare' }
+    ...BROWSE_EXTRA_COLUMNS, { field: 'spa', label: 'SPA' }
   ]
+  const selectable: BrowseColumn[] = [...common, { field: 'selected', label: 'Compare' }]
+  if (view === 'browse') return selectable
+  if (view === 'progression') return [...progressionColumns, ...selectable]
+  if (view === 'compare-hp') return [compareRemove, ...common, ...compareHpColumns, compareEffectsColumns[0]]
+  if (view === 'compare-effects') return [compareRemove, ...common.filter(({ field }) => !hpOnly.has(field)), ...compareEffectsColumns]
+  return [...selectable, ...progressionColumns, compareRemove, ...compareHpColumns, ...compareEffectsColumns]
 }
 /** Type leaves the table only while an explicit type filter makes every displayed label the same. Column prefs stay put. */
 export function hideUniformTypeColumn(explicitType: string, labels: readonly string[] | undefined): boolean {
   if (!explicitType) return false
   return new Set((labels ?? []).filter(Boolean)).size <= 1
 }
-export function browseColumns(metric: SpellMetric, display: CategoryDisplay, visible: BrowseDisplayField[], uniformType = false): BrowseColumn[] {
-  const choices = selectableBrowseColumns(metric).filter((column) => visible.includes(column.field))
-  const columns: BrowseColumn[] = [
-    ...choices.filter((c) => c.field === 'id'), { field: 'name', label: 'Spell' }, { field: 'rank', label: 'Rank' }, { field: 'classes', label: 'Class/Level' }
-  ]
-  for (const column of choices.filter((c) => c.field !== 'id')) {
-    if (column.field === 'category') {
-      if (display !== 'none') columns.push({ field: display === 'both' ? 'category' : 'subcategory', label: display === 'both' ? 'Category' : 'Subcategory' })
-    } else if (column.field === 'spa') columns.push(column)
-    else if (column.field !== 'type' || !uniformType) columns.push(column)
+export function browseColumns(
+  metric: SpellMetric, display: CategoryDisplay, visible: BrowseDisplayField[],
+  { uniformType = false, view = 'browse' }: { uniformType?: boolean; view?: 'browse' | 'progression' } = {}
+): BrowseColumn[] {
+  const choices = selectableBrowseColumns(metric, view).filter(({ field }) => visible.includes(field))
+  const beforeName = new Set<BrowseDisplayField>(['level', 'id'])
+  const columns: BrowseColumn[] = [...choices.filter(({ field }) => beforeName.has(field)), { field: 'name', label: 'Spell' }]
+  for (const column of choices) {
+    if (beforeName.has(column.field) || column.field === 'preview') continue
+    const shown = visibleBrowseColumn(column, display, uniformType)
+    if (shown) columns.push(shown)
   }
+  const preview = choices.find(({ field }) => field === 'preview')
+  if (preview) columns.push(preview)
   return columns
 }
+
+function visibleBrowseColumn(column: BrowseColumn, display: CategoryDisplay, uniformType: boolean): BrowseColumn | null {
+  if (column.field === 'type' && uniformType) return null
+  if (column.field !== 'category') return column
+  if (display === 'none') return null
+  return display === 'both' ? { field: 'category', label: 'Category' } : { field: 'subcategory', label: 'Subcategory' }
+}
+
 function analysisTiming(record: SpellSummary, field: BrowseDisplayField): number | null {
   const calculation = record.calculations?.[0], analysis = calculation?.analysis
   if (!analysis || !calculation) return null
