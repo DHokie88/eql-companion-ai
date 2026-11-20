@@ -1,4 +1,19 @@
-# AGENTS.md — EQ Legends Companion
+# AGENTS.md — EQ Oracle
+
+## Completion and Git synchronization
+
+- Finish the authorized work, including appropriate checks and documentation;
+  do not leave a task half done merely because an agent's turn is ending.
+- Before finishing, inspect Git status and the target branch, commit the work
+  that belongs to the task, and push the verified commit to its existing tracking
+  remote with an ordinary non-force push. Separate push approval is not needed.
+- Preserve unrelated changes, secrets, private runtime data, and explicit
+  acceptance or deployment boundaries. Do not commit credentials or ignored
+  personal data just to make a tree look clean.
+- If blocked or interrupted, preserve the work and report what is unfinished,
+  checks, exact branch and revision, Git status, push status, and the next step.
+  Never claim a task is complete when checks or the push did not succeed.
+
 
 Fork startup gate: every fork code change must pass `npm run build` and
 `npm run test:startup` on Windows before it is considered verified. The startup
@@ -43,7 +58,7 @@ archive. Layout: `src/main` (Node), `src/preload`, `src/renderer`,
 `src/shared`, `tests/`, `scripts/`. Per-surface detail:
 docs/agents-archive.md.
 
-- Repo: `C:\Users\jackt\EQ Zera\app` (public: github.com/Zeratfule/EQ-Zera).
+- Repo: `/home/andrew/eql-companion-ai` on aw, `Z:\eql-companion-ai` from AORUS. Origin: `github.com/DHokie88/eql-companion-ai`. This fork is EQ Oracle and is Andrew's. Upstream is EQ Zera at `github.com/Zeratfule/EQ-Zera`, which is not this project.
 - Game log: `C:\Users\Public\Daybreak Game Company\Installed Games\EverQuest
   Legends\Logs\eqlog_<Char>_<server>.txt` — but the path is auto-discovered +
   Settings-overridable now; NEVER hardcode, route through
