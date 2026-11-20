@@ -28,10 +28,14 @@ import CheckroomIcon from '@mui/icons-material/Checkroom'
 import FeedbackIcon from '@mui/icons-material/Feedback'
 import AssignmentIcon from '@mui/icons-material/Assignment'
 import TravelExploreIcon from '@mui/icons-material/TravelExplore'
+import ArticleIcon from '@mui/icons-material/Article'
 // Dev-only, and its import goes with it: MUI's icon packages declare `sideEffects: false`, so
 // an icon whose only use sits inside a `false &&` branch is tree-shaken out with the branch.
 import RuleFolderIcon from '@mui/icons-material/RuleFolder'
 import UpdateChip from './UpdateChip'
+// The Patch Notes row's unread count: a component of its own, so a push re-renders the badge and
+// not the drawer.
+import { PatchNotesBadge } from '../features/patchnotes/PatchNotesNotice'
 import { OWNER_TOOLS } from '../devFlags'
 import type { PrefsRouting } from '../appRouting'
 import { GEAR_AREA_VIEWS, VIEW_LABELS, loadGearTab, type View } from '../appViews'
@@ -125,6 +129,7 @@ const ROWS: NavRow[] = [
   // Respawn clocks (JOS-194) sit beside Buffs because both tabs are the same shape of answer —
   // a list of things counting down — and a player checking one is usually checking the other.
   { view: 'timers', icon: <TimerIcon /> },
+  { view: 'patchnotes', icon: <ArticleIcon />, badge: <PatchNotesBadge /> }
 ]
 
 /** Bottom-aligned, outside ROWS — it is not a feature view and never moves. */

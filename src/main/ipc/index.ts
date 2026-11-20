@@ -61,6 +61,8 @@ import { registerPresenceIpc } from './presence'
 import { registerQuestPinsIpc } from './questPins'
 import { registerCraftIpc } from './craft'
 import { registerReleaseNotesIpc } from './releaseNotes'
+// EverQuest Legends patch notes: the developer's posted notes, fetched by main and cached on disk.
+import { registerPatchNotesIpc } from './patchNotes'
 import { registerRosterIpc } from './roster'
 import { registerShareIpc } from './share'
 // …and the same bundle carried to the user's OTHER PC as ciphertext (docs/plans/settings-sync.md).
@@ -73,6 +75,8 @@ import { registerSyncIpc } from './sync'
 import { registerPhoneIpc } from './phone'
 import { registerSoundsIpc } from './sounds'
 import { registerSpeechIpc } from './speech'
+// The in-game UI skin (docs/plans/eql-ui-skin.md): build, status and removal of uifiles/EQZera.
+import { registerUiSkinIpc } from './uiSkin'
 import { registerTelemetryIpc } from './telemetry'
 import { registerUiScaleIpc } from './uiScale'
 // The celebration toast's producer channel. It lives beside the window it feeds (src/main/toast.ts)
@@ -99,6 +103,7 @@ import { registerRendererBrokerIpc } from '../dataServer/rendererBroker'
 // is running, the reason it will not start when it will not, and the retry button. A leaf here
 // rather than beside the broker because the retry reaches the composition root — see its header.
 import { registerEngineLaunchIpc } from './engine'
+import { registerLuclinIpc } from './luclinModels'
 // WHO DRAWS THE CON CARD (JOS-496, boundary verdict 2). Under serve the engine resolves the card
 // and `dataServer/conCardServe.ts` opens the window, so the TypeScript hook — which today calls
 // synchronously into Electron from inside the fold — stands down. Composed HERE and passed as a
@@ -166,6 +171,8 @@ export function registerIpc(): void {
   registerResistIpc()
   registerUiScaleIpc()
   registerReleaseNotesIpc()
+  registerUiSkinIpc()
+  registerPatchNotesIpc()
   // Registered in EVERY build, and a no-op in a packaged one — the refusal lives inside the
   // handler rather than around this call, so it is a decision a test can watch being made.
   // See ./dev.ts.
@@ -178,4 +185,5 @@ export function registerIpc(): void {
   // Registered in every build for the third time and the same reason (JOS-503): the state these
   // answer with is most interesting precisely on the launches where there is no engine at all.
   registerEngineLaunchIpc()
+  registerLuclinIpc()
 }

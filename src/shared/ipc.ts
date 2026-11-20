@@ -1347,6 +1347,51 @@ export const IPC = {
   // launch (spawn contract rule 5), so this is a fresh token, port and epoch world. Returns void.
   engineRetry: 'engine:retry',
 
+  // ---- Luclin character models + the Play button (shared/luclinModels.ts) ----
+  // renderer -> main. Prefs get/set (set re-validated through `mergeLuclinPrefs`); `check` reads
+  // GlobalLoad.txt and, with keep-applied on, re-applies a launcher revert (LuclinStatus | null);
+  // apply / revert / shortcut answer LuclinResult; play / openLauncher answer a PlayResult.
+  luclinPrefsGet: 'luclin:prefsGet',
+  luclinPrefsSet: 'luclin:prefsSet',
+  luclinCheck: 'luclin:check',
+  luclinApply: 'luclin:apply',
+  luclinRevert: 'luclin:revert',
+  luclinPlay: 'luclin:play',
+  luclinOpenLauncher: 'luclin:openLauncher',
+  luclinShortcut: 'luclin:shortcut',
+  // main -> renderer: a Play started OUTSIDE the window (tray menu, desktop shortcut) finished.
+  // Payload: the PlayResult, so the Overview button can say what happened.
+  onLuclinPlayed: 'luclin:played',
+  // ---- the in-game UI skin (src/main/uiSkin/, docs/plans/eql-ui-skin.md) -------------------
+  // No path crosses any of these: main resolves <EQ root>/uifiles itself.
+  // renderer -> main: UiSkinView (state, last build, accepted, building).
+  uiSkinStatus: 'uiSkin:status',
+  // renderer -> main: remember the accepted use-at-your-own-risk notice. Returns UiSkinView.
+  uiSkinAccept: 'uiSkin:accept',
+  // renderer -> main: build or rebuild uifiles/EQZera; refused before acceptance.
+  // Returns UiSkinBuildResult.
+  uiSkinBuild: 'uiSkin:build',
+  // renderer -> main: delete uifiles/EQZera, and only a folder carrying EQ Zera's manifest.
+  // Returns UiSkinView.
+  uiSkinRemove: 'uiSkin:remove',
+  // main -> renderer, PUSH to the asking window during a build: UiSkinProgress.
+  onUiSkinProgress: 'uiSkin:progress',
+  // ---- EverQuest Legends patch notes (src/main/patchNotes; shared/patchNotes.ts) ----
+  // renderer -> main: the whole PatchNotesView (list, unread count, notice, switch state).
+  patchNotesGet: 'patchNotes:get',
+  // renderer -> main: one downloaded article by page name, or null.
+  patchNotesArticle: 'patchNotes:article',
+  // renderer -> main: the "Check now" button. Resolves to the view once the check has finished.
+  patchNotesCheck: 'patchNotes:check',
+  // renderer -> main: mark one note read (a page name) or all of them (null). Returns the view.
+  patchNotesMarkRead: 'patchNotes:markRead',
+  // renderer -> main: the launch-check switch. Returns the view.
+  patchNotesSetEnabled: 'patchNotes:setEnabled',
+  // renderer -> main: the launch notice was seen or closed. Returns the view.
+  patchNotesDismissNotice: 'patchNotes:dismissNotice',
+  // main -> renderer: the view changed (a check progressed, a note was read). Payload: PatchNotesView.
+  onPatchNotes: 'patchNotes:changed',
+
   // ---- misc pushes ----
   onLine: 'log:line',
   onCharacter: 'log:character',

@@ -326,6 +326,10 @@ function projectSpellRow(sourceFields: string[]): string[] | null {
  * Parse the whole file. ~74k rows; measured around 350 ms on the owner's machine, which is
  * exactly why the caller runs it on a worker thread (JOS-371: no synchronous multi-MB work on the
  * thread that tails the log).
+ *
+ * The owner's current client file (C:\Users\andrew\EQL\spells_us.txt, 2026-11) is 190 fields.
+ * Smiting Strike's -250 sits at field 79 and the packed slots at field 189. projectSpellRow
+ * restores the legacy indexes. The earlier 174-field November shift is not this file.
  */
 export function parseSpellsUs(text: string): SpellResistTable {
   const table: SpellResistTable = {}

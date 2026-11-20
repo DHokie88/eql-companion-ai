@@ -56,6 +56,8 @@ import { initAwayAlerts, stopAwayAlerts } from './awayAlerts'
 // The phone link (docs/plans/phone-link.md). Arms NOTHING unless the switch is already on, and
 // never under EQ_E2E - the origin is dark there, so a headless run cannot open a socket at all.
 import { initPhone, stopPhone } from './phone'
+// EverQuest Legends patch notes: one launch check of www.everquestlegends.com, after the window is up.
+import { initPatchNotes } from './patchNotes'
 import { provisionDefaultPacks } from './provisionPacks'
 import { removedPackIds } from './storeSoundPacks'
 import { startTailing, stopSession } from './session'
@@ -66,6 +68,9 @@ import { topmostStats } from './topmost'
 // The notification-area icon and the close interceptor (JOS-139). Its own module beside windows.ts
 // for the reason stated in its header; the composition root only decides WHEN it is armed.
 import { installCloseToTray } from './tray'
+// Luclin character models + the Play button: a desktop shortcut starts EQ Zera with `--play`.
+import { argvWantsPlay, luclinCheck } from './luclin/service'
+import { playFromOutside } from './ipc/luclinModels'
 // The overlays' two independent-mode flags, made to agree before any window can read either of
 // them (JOS-408). See storeOverlayIndependent.ts for why it runs here and nowhere else.
 import { reconcileOverlayIndependentOnce } from './storeOverlayIndependent'
@@ -213,7 +218,13 @@ if (!gotSingleInstanceLock) {
   // change; the brief's suggested `if (!w.isVisible()) w.show()` would have been the same call
   // behind a guard. Not something the harness can drive (a second instance is a second launch,
   // and E2E skips the lock outright), so it is on the hands-on list for the packaged build.
-  app.on('second-instance', () => {
+  app.on('second-instance', (_e, argv) => {
+    // The Luclin desktop shortcut: re-apply and start the game, and leave the window where it is.
+    if (argvWantsPlay(argv)) {
+      logInfo('[everquest-companion] luclin: --play from a second launch')
+      playFromOutside('luclin')
+      return
+    }
     const mainWindow = getMainWindow()
     if (!mainWindow) return
     // The OTHER deliberate foreground move (JOS-427; its twin is windowControls.ts `focusView`).
@@ -301,6 +312,11 @@ if (!gotSingleInstanceLock) {
     // to be in place before anything can ask this process to quit. It creates no icon under
     // EQ_E2E, where a close still closes; everything else about the app is unchanged either way.
     installCloseToTray()
+    // LaunchPad puts GlobalLoad.txt back on every run; with keep-applied on, put the models back.
+    // Then a `--play` first launch (the desktop shortcut while EQ Zera was closed) starts the game.
+    void luclinCheck().then(() => {
+      if (!E2E && argvWantsPlay(process.argv)) playFromOutside('luclin')
+    })
     // `replayDone` is the LONG one on a real log (a full historical scan), so it is marked when
     // the session's promise settles — with the event count, because "6 s" means something very
     // different for 40k events than for 1.1M. `tailAttached` is marked immediately after the
@@ -428,6 +444,11 @@ if (!gotSingleInstanceLock) {
     // …and the phone link, on the same terms: one store read when it is off, which is the default
     // install, and no timer, no socket and no room until somebody switches it on.
     initPhone()
+
+    // …and the EverQuest Legends patch notes: a few seconds after this, one GET of the index and at
+    // most five article pages, one at a time, unless the Preferences switch is off. Dark under
+    // EQ_E2E unless the harness names a loopback stub (src/main/patchNotes/net.ts).
+    initPatchNotes()
 
     // The performance HUD (docs/plans/perf-profiling.md P1). Costs one store read when it is
     // off — which is the default install: with `perfHud.enabled` false no timer is created at

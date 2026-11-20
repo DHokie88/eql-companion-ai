@@ -15,11 +15,22 @@ export type { ReleaseEntry, ReleaseEntryKind, ReleaseNote, WhatsNewState, WhatsN
 
 export const UPSTREAM_BASE = {
   project: 'EQ-Zera',
-  version: '1.26.1',
-  commit: '780c7afb3fe71f65db2cd8ae9d8c191b8ecc9db4'
+  version: '1.28.0',
+  commit: '61029a77297584e2bbb6f18ab0b5096eefb03094'
 } as const
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
+  {
+    version: '0.26.0',
+    date: '2026-11-20',
+    entries: [
+      { kind: 'new', text: 'Press Play on the Overview or in the tray to start EverQuest Legends. Opt into Luclin character models per race in Preferences, Game. Play puts them back when the launcher reverts them. This changes a game file Daybreak does not support, so it is off until you accept the risk.' },
+      { kind: 'new', text: 'Patch Notes lists the EverQuest Legends developers’ patch and hotfix notes. They download on launch, stay readable offline, and a new note shows an unread badge. Turn the launch check off in Preferences, Patch notes.' },
+      { kind: 'new', text: 'The Character tab can draw Kerra, with all ten skin tones, and the Half Dark Elf.' },
+      { kind: 'new', text: 'Preferences can build an optional in-game UI skin on the game’s Modern layout. Type /loadskin EQZera 1 in game to switch. It is built on your PC from your own game files and is off until you build it.' },
+      { kind: 'changed', text: 'Item, mob, quest and spell data includes the EQ Legends wiki through November 15, including Castle Nektropos, Lake Nerius and the Nektropos Undercrofts.' }
+    ]
+  },
   {
     version: '0.25.0',
     date: '2026-11-20',

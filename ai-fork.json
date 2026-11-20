@@ -1,14 +1,14 @@
 {
   "project": "eql-companion-ai",
   "created": "2026-10-13",
-  "status": "EQ Oracle desktop with upstream 1.26.1 integrated; AI implementation pending",
+  "status": "EQ Oracle desktop with upstream 1.28.0 integrated; AI implementation pending",
   "fork_repository": "https://github.com/DHokie88/eql-companion-ai",
   "baseline": {
     "repository": "https://github.com/Zeratfule/EQ-Zera",
-    "tag": "v1.26.1",
-    "commit": "780c7afb3fe71f65db2cd8ae9d8c191b8ecc9db4",
-    "branch": "ai-foundation",
-    "reason": "Desktop data and bug fixes integrated through upstream 1.26.1; separate native mobile project excluded by user direction."
+    "tag": "v1.28.0",
+    "commit": "61029a77297584e2bbb6f18ab0b5096eefb03094",
+    "branch": "eqo",
+    "reason": "Desktop features and wiki data integrated through upstream 1.28.0. Oracle kept its own resist-file reader because the current client spells_us.txt is the 190-field layout. Separate native mobile project excluded by user direction."
   },
   "secondary": {
     "repository": "https://github.com/brianmontanaweb/everquest-companion",

@@ -91,6 +91,8 @@ import { perfBridge } from './perf'
 // The two graphics-compatibility switches (JOS-40), spread in below for the same file-size
 // reason as perfBridge. Shapes live beside their normalizer in shared/graphicsPrefs.ts.
 import { graphicsBridge } from './graphics'
+// Luclin character models + the Play button (./luclinModels.ts), same file-size reason.
+import { luclinBridge } from './luclinModels'
 // The buff externals allowlist (JOS-140), spread in below for the same file-size reason. Shape
 // and normalizer live together in shared/buffTrust.ts.
 import { buffTrustBridge } from './buffTrust'
@@ -109,10 +111,14 @@ import { engineBridge } from './engine'
 // What's new (JOS-73): the one store key behind the release-notes panel and its teaser strip.
 // The NOTES are committed source the renderer imports directly — see ./releaseNotes.ts.
 import { releaseNotesBridge } from './releaseNotes'
+// The EverQuest Legends patch notes (main fetches and caches them) - see ./patchNotesApi.ts.
+import { patchNotesBridge } from './patchNotesApi'
 // "Post celebrations to Discord" (./celebrationPost.ts), split out for the same file-mass reason.
 // PREFERENCES ONLY: the messages are sent by main off the one function every celebration card
 // already passes through, so there is no door here a renderer could post through.
 import { celebrationPostBridge } from './celebrationPost'
+// The in-game UI skin card's four calls and its progress push (./uiSkin.ts).
+import { uiSkinBridge } from './uiSkin'
 // The DEV-ONLY triage surface (see the banner above its methods, below). Types only — the
 // contract lives in src/shared so main, preload and the renderer name one definition.
 import type {
@@ -303,6 +309,8 @@ const api = {
   ...perfBridge,
   // …and the two graphics-compatibility switches (./graphics.ts), for the same reason.
   ...graphicsBridge,
+  // …and Luclin character models + the Play button (./luclinModels.ts), likewise.
+  ...luclinBridge,
   // …and the buff externals allowlist (./buffTrust.ts), likewise.
   ...buffTrustBridge,
   ...respawnBridge,
@@ -317,8 +325,11 @@ const api = {
   ...engineBridge,
   // …and the two what's-new methods (./releaseNotes.ts), for the same file-size reason.
   ...releaseNotesBridge,
+  ...patchNotesBridge,
   // …and the celebration-post preferences (./celebrationPost.ts), likewise.
   ...celebrationPostBridge,
+  // …and the in-game UI skin (./uiSkin.ts), likewise.
+  ...uiSkinBridge,
 
   /**
    * Is this the headless integration-test channel (`EQ_E2E=1`, src/main/e2e.ts)?

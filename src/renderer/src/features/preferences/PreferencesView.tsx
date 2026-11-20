@@ -28,7 +28,8 @@
 // Sections:
 //   Game     — EverQuest install-folder discovery/override (effective path + how it
 //             resolved + a folder picker + character-log validation). Lives in
-//             ./EqFolderSetting.tsx, like Updates does — this file only names it.
+//             ./EqFolderSetting.tsx, like Updates does — this file only names it. Since the
+//             Luclin character models card joined it, the descriptor is ./GameSection.tsx.
 //   Appearance — how big things are drawn and how see-through the floating windows are (JOS-123,
 //             JOS-405, JOS-407, named and reshaped by JOS-408). TWO items: `In-app text size`, the
 //             main window's zoom as an A− / A+ over the five-stop ladder, applied on the press; and
@@ -87,19 +88,18 @@
 import { type JSX, useCallback, useDeferredValue, useMemo, useState } from 'react'
 import { Box, List, ListItemButton, ListItemText, TextField, Typography } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
-import SportsEsportsIcon from '@mui/icons-material/SportsEsports'
 import SystemUpdateAltIcon from '@mui/icons-material/SystemUpdateAlt'
 import RecordVoiceOverIcon from '@mui/icons-material/RecordVoiceOver'
 import IosShareIcon from '@mui/icons-material/IosShare'
 import FeedbackIcon from '@mui/icons-material/Feedback'
-import PrivacyTipIcon from '@mui/icons-material/PrivacyTip'
 import LayersIcon from '@mui/icons-material/Layers'
 import { ExportSettingsSetting, ImportSettingsSetting } from '../profiles/ProfileSharing'
 import { ClassComboSetting } from '../profiles/ClassComboPanel'
 import { UpdateSetting, VersionSetting, useUpdateStatus, type SectionInputs } from './UpdateSetting'
 import { buildStrategiesSection } from './BuildStrategiesSetting'
 import { wikiDatasetSection } from './WikiDatasetSetting'
-import { EqFolderSetting } from './EqFolderSetting'
+// The Game section (install folder + Luclin models) names itself beside its cards. See ./GameSection.tsx.
+import { gameSection } from './GameSection'
 // Combat: whose damage the meters show (JOS-115) + where the pet's sits. Its own file with its own
 // descriptor, same ceiling and same answer as PerfSetting and GraphicsSetting.
 import { combatSection } from './CombatSection'
@@ -117,7 +117,7 @@ import { AlertBannerSetting } from './AlertBannerSetting'
 import { ConCardSetting } from './ConCardSetting'
 // Cursor ring: another descriptor that lives beside its own card, same ceiling, same answer.
 import { cursorRingSection } from './CursorRingSetting'
-import { TelemetrySetting } from './TelemetrySetting'
+import { analyticsSection } from './TelemetrySetting'
 // Performance is the one section whose DESCRIPTOR lives with its card rather than here: this
 // file sits at the 400-code-line factoring ceiling, and the section's own file is the honest
 // place for the label, icon and search keywords that name it. See ./PerfSetting.tsx.
@@ -141,6 +141,8 @@ import { whatsNewSection } from '../whatsnew/WhatsNewPanel'
 // Same arrangement again (JOS-198): the credit for the bundled wiki art names its own section
 // beside the card that renders it. See ./ThanksSetting.tsx for why it is a section at all.
 import { thanksSection } from './ThanksSetting'
+// Same arrangement again: the EverQuest Legends patch notes launch switch. See ./PatchNotesSetting.tsx.
+import { patchNotesSection } from './PatchNotesSetting'
 // Same arrangement again (owner, 2026-09-10): where your character card gets posted - today one
 // Discord channel webhook - names its own section beside the card that renders it.
 import { sharingSection } from './SharingSetting'
@@ -151,6 +153,9 @@ import { syncSection } from './SyncSetting'
 // Same arrangement again: which alerts ALSO reach a connected Discord channel while nobody is at
 // the keyboard names its own section beside its card. See ./AwayAlertsSetting.tsx.
 import { awayAlertsSection } from './AwayAlertsSetting'
+// Same arrangement again (docs/plans/eql-ui-skin.md): the EQ Zera in-game UI skin names its own
+// section beside its card. See ./UiSkinSetting.tsx.
+import { uiSkinSection } from './UiSkinSetting'
 // The section CARD and the arrival pulse live together in their own file — same ceiling, same
 // answer as PerfSetting's descriptor: split, don't widen the threshold.
 import PrefSectionBlock, { FILL_COLUMN_SX, FILL_ROOT_SX, FILL_ROW_SX, paneFills, useLandedSection } from './PrefSectionBlock'
@@ -289,31 +294,6 @@ function overlaysSection(): PrefSection {
   }
 }
 
-/**
- * Usage analytics (docs/plans/usage-analytics.md). Its own factory for the same reason the two
- * above are — `buildSections` sits against the 100-code-line ceiling.
- *
- * It is a SECTION rather than a line inside another one because of what it contains: the switch
- * is one control, but the payload viewer beside it is the whole privacy claim made checkable,
- * and that does not belong tucked under "Updates".
- */
-function analyticsSection(): PrefSection {
-  return {
-    id: 'analytics',
-    label: 'Usage analytics',
-    icon: <PrivacyTipIcon fontSize="small" />,
-    items: [
-      {
-        id: 'telemetry',
-        label: 'Anonymous usage counts',
-        keywords:
-          'telemetry analytics usage privacy tracking opt out optout data collect anonymous id rotate payload send stats metrics',
-        content: <TelemetrySetting />
-      }
-    ]
-  }
-}
-
 /** What `buildSections` needs from the view. An OBJECT rather than four positional parameters:
  *  the repo's `max-params` ceiling is 4 and the fourth argument was the one that would have hit
  *  it, but the real reason is that "version" and "the way to the release notes" are two halves of
@@ -321,23 +301,14 @@ function analyticsSection(): PrefSection {
 /** The whole settings table, in render order. Rebuilt only when its inputs change. */
 function buildSections({ version, status, onSendFeedback, onWhatsNew }: SectionInputs): PrefSection[] {
   return [
-    {
-      id: 'game',
-      label: 'Game',
-      icon: <SportsEsportsIcon fontSize="small" />,
-      items: [
-        {
-          id: 'eq-folder',
-          label: 'EverQuest install folder',
-          keywords: 'path directory logs eqlog character detect override install location',
-          content: <EqFolderSetting />
-        }
-      ]
-    },
+    gameSection(),
     // SECOND IN THE RAIL, ahead of everything about the game (JOS-123). A person who opens
     // Preferences because they can barely read the app has to find this one, and the rail is
     // itself drawn at the size they are complaining about.
     appearanceSection(),
+    // The in-game UI skin: the game's own windows, so it sits with Game and Appearance (Appearance
+    // keeps second place, above).
+    uiSkinSection(),
     combatSection(),
     overlaysSection(),
     // Right after the overlays, because the promise this switch makes is about them: closing the
@@ -420,6 +391,8 @@ function buildSections({ version, status, onSendFeedback, onWhatsNew }: SectionI
     // Directly under Updates, which is where a person who just read the version number is
     // standing when they wonder what it changed (JOS-73).
     whatsNewSection(),
+    // …and the game's own notes, which are the other thing "what changed" can mean.
+    patchNotesSection(),
     analyticsSection(),
     perfSection(),
     {
@@ -452,11 +425,7 @@ function sectionKeys(sections: PrefSection[]): Record<string, string> {
   return m
 }
 
-function filterSections(
-  sections: PrefSection[],
-  keys: Record<string, string>,
-  q: string
-): PrefSection[] {
+function filterSections(sections: PrefSection[], keys: Record<string, string>, q: string): PrefSection[] {
   if (!q) return sections
   return sections
     .map((s) => {

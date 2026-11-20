@@ -150,7 +150,7 @@ test('NO SHIPPED CODE CAN NAME POWERSHELL — the watcher launches nothing at al
 })
 
 /**
- * The modules allowed to launch a process. TWO, each with its argument stated here, which is the
+ * The modules allowed to launch a process. THREE (the third argued just below), each with its argument stated here, which is the
  * bargain this file's header offers: a ticket that genuinely needs to launch something adds itself
  * with its reason in the same breath.
  *
@@ -185,7 +185,22 @@ test('NO SHIPPED CODE CAN NAME POWERSHELL — the watcher launches nothing at al
 // SSH identity to call one fixed refresh-control program. It accepts only
 // request/status and a fixed force flag, never source text or renderer shell
 // arguments. oracleRefresh.test.mts verifies command closure and cancellation.
-const SPAWNERS = new Set(['main/triage/store.ts', 'main/dataServer/engineHost.ts', 'main/oracle/provider.ts', 'main/oracle/refreshTransport.ts'])
+/*
+ * `main/luclin/launch.ts` is the PLAY BUTTON. It starts the game the player asked to play:
+ *   * TWO NAMED BINARIES, from a closed table in that file: `<EQ root>\eqgame.exe patchme` and
+ *     `<EQ root>\LaunchPad.exe`. The root is `effectiveEqRoot()`; nothing is renderer-supplied.
+ *   * EXPLICIT ARGS, `shell: false`, never a command line; never PowerShell (the first test).
+ *   * ONLY ON A CLICK (Play, the tray item, or the user's own `--play` shortcut). Whether the game
+ *     is running is NOT asked by enumerating processes: it is an in-process file-lock probe in
+ *     service.ts, so no `tasklist`/`wmic` ever ships.
+ */
+const SPAWNERS = new Set([
+  'main/triage/store.ts',
+  'main/dataServer/engineHost.ts',
+  'main/oracle/provider.ts',
+  'main/oracle/refreshTransport.ts',
+  'main/luclin/launch.ts'
+])
 
 /** Every module specifier a file imports or re-exports. */
 function importSpecifiers(file: string): string[] {

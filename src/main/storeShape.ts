@@ -24,6 +24,7 @@ import type { ShareLinkRecord } from '../shared/shareLinks'
 import type { DiscordChannel } from '../shared/discordChannels'
 import type { CelebrationPostPrefs } from '../shared/celebrationPost'
 import type { AwayAlertsPrefs } from '../shared/awayAlerts'
+import type { LuclinPrefs } from '../shared/luclinModels'
 import type { WindowBounds } from './store'
 import type { BazaarWatchlist } from '../shared/bazaarWatch'
 
@@ -433,4 +434,27 @@ export interface StoreShape {
    * every field and drops a pairing whose ids are not the shapes this app mints.
    */
   phone?: StoredPhonePrefs
+
+  /**
+   * LUCLIN CHARACTER MODELS (shared/luclinModels.ts): the card's switch, the chosen races, the
+   * keep-it-applied option, and whether the user left the edit applied (so a LaunchPad revert is
+   * recognisable). ADDITIVE + OPTIONAL: no schema bump, no migration; `mergeLuclinPrefs` defaults
+   * every field and the feature ships OFF.
+   */
+  luclinModels?: LuclinPrefs
+  /**
+   * THE IN-GAME UI SKIN's one remembered answer (src/main/storeUiSkin.ts): the player accepted the
+   * use-at-your-own-risk notice before their first build. ADDITIVE + OPTIONAL: absent reads as
+   * "not yet", which is exactly what every store written before this key existed means.
+   */
+  uiSkinAccepted?: boolean
+  /**
+   * EVERQUEST LEGENDS PATCH NOTES (src/main/patchNotes.ts): whether a launch asks
+   * www.everquestlegends.com for new notes. `{ enabled }`.
+   *
+   * ADDITIVE + OPTIONAL => no schema bump, no migration (the `overlaySnap` carve-out). Absent reads
+   * as ON, the shipped default; an older build ignores the key. The notes are a cache file of their
+   * own, not settings.
+   */
+  patchNotes?: { enabled: boolean }
 }
