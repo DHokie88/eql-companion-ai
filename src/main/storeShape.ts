@@ -25,6 +25,7 @@ import type { DiscordChannel } from '../shared/discordChannels'
 import type { CelebrationPostPrefs } from '../shared/celebrationPost'
 import type { AwayAlertsPrefs } from '../shared/awayAlerts'
 import type { WindowBounds } from './store'
+import type { BazaarWatchlist } from '../shared/bazaarWatch'
 
 /**
  * One character's tail position at the last clean shutdown (JOS-57 scope addition). `at` is a wall
@@ -56,6 +57,8 @@ export interface StoredPhonePrefs {
 }
 
 export interface StoreShape {
+  bazaarWatch?: BazaarWatchlist
+  alertBazaarSeed?: boolean
   /**
    * Schema version of THIS file (src/main/storeMigrations.ts). Absent ⇒ pre-framework ⇒ 1.
    * Every persisted-shape change bumps CURRENT_SCHEMA_VERSION and ships a migration in the

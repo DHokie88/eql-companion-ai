@@ -97,5 +97,132 @@
         "Upstream promotional website changes"
       ]
     }
-  ]
+  ],
+  "tertiary": {
+    "repository": "https://github.com/kaltinril/everquest-companion",
+    "tag": "community-0.1.0-test.30",
+    "commit": "ab9d6279e7beb029cecffa319d166ead9961c1cf",
+    "merge_status": "Selected ownership/discovery safeguards, Bazaar, Sky overlay and combat read improvements adapted; remaining capabilities tracked in wave2 report. No whole-repository merge."
+  },
+  "upstream_tracking": {
+    "policy": "Fetch and compare; adapt bounded capabilities on branches. Never automatically merge or replace Oracle custom behavior.",
+    "sources": [
+      {
+        "name": "EQ-Zera",
+        "repository": "https://github.com/Zeratfule/EQ-Zera",
+        "remote": "upstream",
+        "branch": "main",
+        "commit": "780c7afb3fe71f65db2cd8ae9d8c191b8ecc9db4",
+        "tag": "v1.26.1",
+        "watch_ref": "refs/heads/main"
+      },
+      {
+        "name": "brianmontanaweb",
+        "repository": "https://github.com/brianmontanaweb/everquest-companion",
+        "remote": "brianmontanaweb",
+        "branch": "main",
+        "commit": "ad6857f2d5286291d23ed6975b46212805cb0d78",
+        "tag": "v1.17.0",
+        "release_commit": "5e301216fdd1eed692230d9c29677d21b2703db9",
+        "revision_note": "Tracked main head is newer than v1.17.0; tag and selected head are distinct.",
+        "watch_ref": "refs/heads/main"
+      },
+      {
+        "name": "kaltinril",
+        "repository": "https://github.com/kaltinril/everquest-companion",
+        "remote": "community",
+        "branch": "main_community",
+        "commit": "ab9d6279e7beb029cecffa319d166ead9961c1cf",
+        "tag": "community-0.1.0-test.30",
+        "watch_ref": "refs/heads/main_community"
+      }
+    ],
+    "codeweaver": {
+      "workspace": "/home/andrew/codeweave-eqo-community-20261022",
+      "spec": "composition.toml",
+      "evidence_spec": "docs/upgrades/community-20261022-wave2-codeweave.toml",
+      "primary_base": "467a03af866ab64d00f93976d38475c258475ea1",
+      "automatic_execution": false,
+      "windows_qualification_required": true,
+      "implementation_commit": "8cd23de1f3e37d32f42c5bb627a74cf23f4e1594",
+      "integrated_commit": "def15972a27be3222bde77b59fcaafca25fa68be",
+      "watch_evidence": "docs/upgrades/community-20261022-watch.json",
+      "operator_support_plan": "docs/plans/multi-upstream-operator-support.md (Codeweaver repository)",
+      "remote": null,
+      "operator_lessons_commit": "4e4c34acd0686abcd897813e6231bb8d1fc3a46e",
+      "operator_lessons_head": "cc764a75f077a95f54e478d54fe0df9d673531ef",
+      "analysis_candidate_ref": "codeweave/community-review-20261022",
+      "analysis_candidate_commit": "6824656bc4898d98616d03120464e5caa2455270",
+      "candidate_accepted": false
+    },
+    "protected_behaviors": [
+      "Oracle identity and local profiles",
+      "Versioned Spells and deterministic modifier/instrument calculations",
+      "Gear priorities and column preferences",
+      "Sky inventory and progress behavior",
+      "Disabled telemetry and updater",
+      "Live game files and running sessions"
+    ],
+    "refresh": "Fetch the three named remotes, inspect new commits and releases, deliberately advance pins in an external spec, then regenerate Codeweaver evidence. No watcher or scheduler is enabled.",
+    "inactivity_policy": {
+      "days": 60,
+      "clock": "Watched branch HEAD committer timestamp in UTC",
+      "primary_exempt": true,
+      "unknown_activity": "Remain active with UNKNOWN observation",
+      "retired": "No automatic probes/fetch/lazy-network reads until manual reenable",
+      "scheduler_installed": false
+    }
+  },
+  "community_integration_wave2": {
+    "version": "0.10.0",
+    "donor_commit": "ab9d6279e7beb029cecffa319d166ead9961c1cf",
+    "report": "docs/upgrades/community-20261022-wave2.md",
+    "branch": "integration/community-safe-20261022",
+    "review_base": "review/eqo-baseline-20261022",
+    "pull_request": "https://github.com/DHokie88/eql-companion-ai/pull/1",
+    "implemented": [
+      "Bazaar Rust module, normal tab, analytics, quotes, filters, CSV and watch alerts",
+      "Optional starred Sky quest overlay with shared counts and character/world isolation",
+      "Combat request coalescing and last-valid snapshot display across damage/heal consumers",
+      "Discovery filesystem-race guards",
+      "Bazaar compatibility with Oracle engine checkpoints"
+    ],
+    "future_hold": "Live log monitoring latency/page-refresh redesign: explicitly deferred by Andrew until current integration completes",
+    "council": "Hermes executes routine final tests; Codex reviews failures and integration. Managed council repo policy currently registers hermes-custom only.",
+    "implementation_commit": "6824656bc4898d98616d03120464e5caa2455270",
+    "verification": {
+      "candidate_commit": "6824656bc4898d98616d03120464e5caa2455270",
+      "typescript_units": {
+        "passed": 5365,
+        "skipped": 24,
+        "failed": 0
+      },
+      "rust": {
+        "passed": 491,
+        "ignored": 1
+      },
+      "codeweaver": {
+        "passed": 369,
+        "supported_toolchain": "system Node/npm",
+        "profile_toolchain_gap": "relative npm shim inside hidden home sandbox"
+      },
+      "windows_feature_gates": {
+        "startup": "PASS in normal desktop worktree with rebuilt engine/UI",
+        "bazaar": {
+          "status": "PASS",
+          "checks": 19
+        },
+        "sky_overlay": {
+          "status": "PASS",
+          "checks": 23
+        },
+        "combat_dashboard": {
+          "status": "PASS",
+          "checks": 241
+        },
+        "hermes_build_static_release_factoring": "PASS",
+        "execution_boundary": "SSH cursor/ACL/GPU failures retained separately; interactive desktop qualification passed without suppressing assertions."
+      }
+    }
+  }
 }

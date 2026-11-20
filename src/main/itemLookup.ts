@@ -44,6 +44,7 @@ import { buildQuestItemIndex } from './questItemIndex'
 import { buildItemDbIndex, itemKey, knowledgeFromDb, type ItemDbEntry, type ItemDbFile } from './itemsDb'
 import { mergeWikiItems } from './wikiDatasetCodec'
 import { activeWikiCache, ensureWikiDatasetLoaded } from './wikiDataset'
+import { marksOf, type ItemMarks } from '../shared/itemKnowledge'
 import { heldClickySpells as clickySpells } from './itemClickies'
 import type { HeldCounts, ItemKnowledge, ItemQuestUse, PoskyData, QuestData } from '../shared/types'
 
@@ -519,4 +520,16 @@ export function prefetchItem(name: string): void {
   })().catch(() => {
     /* prefetch errors are silent — the interactive lookup will retry + surface state */
   })
+}
+
+/** List-row marks from the session's item database and local quest sources. Missing names
+ *  are omitted. This uses the installed dataset without a per-item network request. */
+export async function itemMarks(names: readonly string[]): Promise<Record<string, ItemMarks>> {
+  await ensureWikiDatasetLoaded()
+  const out: Record<string, ItemMarks> = {}
+  for (const name of names) {
+    const fromDb = dbKnowledge(cacheKey(name), normalizeItemName(name))
+    if (fromDb) out[name] = marksOf(mergeLocal(fromDb, localKnowledge(name)))
+  }
+  return out
 }

@@ -17,6 +17,7 @@
 
 import { ipcRenderer } from 'electron'
 import { IPC } from '../shared/ipc'
+import type { BazaarWatchlist } from '../shared/bazaarWatch'
 import type { ExaltPlan, PlannerDonor, PlannerItemHit } from '../shared/planner/types'
 import type { PlannerInventory } from '../shared/planner/inventorySlots'
 import type { GearIndexPayload } from '../shared/planner/gear'
@@ -25,6 +26,9 @@ import type { OwnershipPayload } from '../shared/planner/ownership'
 import type { WishList } from '../shared/planner/wishlist'
 
 export const plannerApi = {
+  getBazaarWatch: (): Promise<BazaarWatchlist> => ipcRenderer.invoke(IPC.bazaarWatchGet),
+  setBazaarWatch: (list: BazaarWatchlist): Promise<BazaarWatchlist> => ipcRenderer.invoke(IPC.bazaarWatchSet, list),
+  saveBazaarCsv: (text: string, name: string): Promise<string | null> => ipcRenderer.invoke(IPC.bazaarSaveCsv, text, name),
   // ---- exaltation planner (docs/plans/exaltation-planner.md §4.1, §6) ----
 
   /** Every effect the committed item corpus states, one row per (item, effect) — ~1.5k rows,

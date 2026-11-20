@@ -32,6 +32,7 @@ pub mod lane;
 pub mod message_overlay;
 pub mod modules;
 pub mod overlay_file;
+mod publish;
 pub mod session;
 pub mod spell_facts;
 /// The client's spell table (`spells_us.txt`), parsed. Pure over a string; the file and the
@@ -39,7 +40,9 @@ pub mod spell_facts;
 /// the client table can be replayed, shipped and re-estimated without one.
 pub mod spells_us;
 mod wiring;
+mod wiring_order;
 pub use wiring::{registered, ClusterDeps, PersistedState};
+pub use wiring_order::WIRING_ORDER;
 
 use event::Event;
 use serde_json::{json, Value};
@@ -213,6 +216,14 @@ pub trait EqModule {
         None
     }
 
+    /// A separately published lightweight projection of the same module, when available.
+    fn alias_cursor(&self) -> Option<(&'static str, i64)> {
+        None
+    }
+    fn alias_snapshot(&self, _id: &str) -> Option<Value> {
+        None
+    }
+
     /// The live `/con`s this module saw while folding the event it was just handed.
     ///
     /// A hand-back rather than a callback, like [`EqModule::take_fires`]. One producer
@@ -277,43 +288,6 @@ pub trait Defines {
     /// last thing the user actually said.
     fn define(&mut self, payload: &Value);
 }
-
-/// Registration order is bus delivery order — `src/main/modules/wiring.ts` `ordered`, verbatim.
-///
-/// Spelled in full rather than as "the ones we have ported", so an unimplemented module is a fact
-/// the code states. The parity harness reads `missing()` off it and names every absent module,
-/// rather than comparing a subset and reporting green.
-pub const WIRING_ORDER: &[&str] = &[
-    "combo",
-    "roster",
-    "loot",
-    "turnins",
-    "classUnlocks",
-    "kills",
-    "respawn",
-    "progression",
-    "leveling",
-    "character",
-    "outputFiles",
-    "spellSets",
-    "itemTiers",
-    "observedSpellRanks",
-    "alerts",
-    "buffs",
-    "buffTimers",
-    "consider",
-    "resist",
-    // The five surfaces the log could always have answered and nothing published (Z Engine,
-    // 2026-09-08). Appended rather than slotted beside their kin: registration order is bus
-    // delivery order, and none of these is read by any module that folds after it, so the end of
-    // the list is where a new module belongs until something needs it earlier.
-    "hails",
-    "faction",
-    "coin",
-    "skills",
-    "deaths",
-    "eventFeed",
-];
 
 /// The registered modules, in delivery order, and the dispatch loop over them.
 #[derive(Default)]
@@ -497,19 +471,6 @@ impl Registry {
         self.mods.iter().find_map(|m| m.as_event_feed())
     }
 
-    /// Every registered module's published cursor, in delivery order. See
-    /// [`EqModule::published_seq`] for why it is not `snapshot()["seq"]`.
-    ///
-    /// A module answering `None` is absent from this list rather than present with a zero: the
-    /// serve loop announces a change, and a module that states no cursor has said nothing that
-    /// could have changed.
-    pub fn published_seqs(&self) -> Vec<(&'static str, i64)> {
-        self.mods
-            .iter()
-            .filter_map(|m| m.published_seq().map(|seq| (m.id(), seq)))
-            .collect()
-    }
-
     /// Every live `/con` any module saw since the last drain, in registration order. Empty for
     /// every historical fold — see [`EqModule::take_cons`].
     pub fn take_cons(&mut self) -> Vec<modules::consider::ConEvent> {
@@ -535,21 +496,6 @@ impl Registry {
         for m in &mut self.mods {
             m.install_knowledge(k);
         }
-    }
-
-    /// One module's published snapshot, by the id it answers to — `{ "seq": …, "state": … }`, the
-    /// pair the goldens join on.
-    ///
-    /// `None` for a name nothing registered, and that is the answer rather than an absence to paper
-    /// over: an empty state would be a lie about a module that does not exist. A `WIRING_ORDER`
-    /// name this build did not register answers `None` too.
-    ///
-    /// A linear scan over at most twenty entries, made once per request rather than once per event.
-    pub fn snapshot_of(&self, id: &str) -> Option<Value> {
-        self.mods
-            .iter()
-            .find(|m| m.id() == id)
-            .map(|m| m.snapshot())
     }
 
     /// Push one family of app knowledge into the module that owns it.

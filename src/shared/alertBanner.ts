@@ -28,6 +28,7 @@
 // Pure + dependency-free (types only), so `npm test` exercises every rule here with no Electron.
 
 import type { AlertDef, AlertTriggerPrimitive, AppSignal } from './alertTypes'
+import { applyCaptures } from './alertCaptures'
 
 // ---- the kind's own config knobs -------------------------------------------------------
 //
@@ -171,8 +172,9 @@ export type BannerDef = Pick<AlertDef, 'name' | 'bannerText'>
  * Returns null only when there is nothing truthful to print (a def with a blank name and no
  * override), in which case no banner is sent at all.
  */
-export function alertBannerText(def: BannerDef): string | null {
-  return cappedText(def.bannerText, MAX_BANNER_CHARS) ?? cappedText(def.name, MAX_BANNER_CHARS) ?? null
+export function alertBannerText(def: BannerDef, captures?: Record<string, string>): string | null {
+  const override = def.bannerText === undefined ? undefined : applyCaptures(def.bannerText, captures)
+  return cappedText(override, MAX_BANNER_CHARS) ?? cappedText(def.name, MAX_BANNER_CHARS) ?? null
 }
 
 /**
@@ -189,7 +191,8 @@ const CELEBRATED_SIGNAL: Record<AppSignal, boolean> = {
   // Both wish-list signals draw a card of their own ('wishDrop' carries the looted item, 'wishZone'
   // names what drops where you are standing), so neither owes the banner a second sentence.
   wishDrop: true,
-  wishZone: true
+  wishZone: true,
+  bazaarWatch: false
 }
 
 const isCelebrated = (t: AlertTriggerPrimitive): boolean => t.type === 'app' && CELEBRATED_SIGNAL[t.signal]

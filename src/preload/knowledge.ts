@@ -13,6 +13,7 @@
 
 import { ipcRenderer } from 'electron'
 import { IPC } from '../shared/ipc'
+import type { ItemMarks } from '../shared/itemKnowledge'
 import type { ItemKnowledge, MobKnowledge, SpellCatalog } from '../shared/types'
 import type { MobResistCell, MobResistProfile, ResistAxis } from '../shared/resistTypes'
 import type { ResistPrefs } from '../shared/resistPrefs'
@@ -21,6 +22,7 @@ import type { LevelUnlockData } from '../shared/levelUnlocks'
 import type { SpellDetail } from '../shared/spellDetail'
 
 export const knowledgeBridge = {
+  itemMarks: (names: string[]): Promise<Record<string, ItemMarks>> => ipcRenderer.invoke(IPC.itemsMarks, names),
   /** Suggested-alerts wizard (Task #38): the searchable spell catalog + live usage. */
   getSpellCatalog: (): Promise<SpellCatalog> => ipcRenderer.invoke(IPC.spellsCatalog),
   /**

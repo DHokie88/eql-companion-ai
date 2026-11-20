@@ -54,6 +54,7 @@ import { registerOutputsIpc } from './outputs'
 import { registerPerfIpc } from './perf'
 import { registerPlannerIpc } from './planner'
 import { registerWikiDatasetIpc } from './wikiDataset'
+import { registerBazaarWatchIpc } from './bazaarWatch'
 import { registerPresenceIpc } from './presence'
 // The QUEST TRACKER's read/write pair (EQ Zera) — one more per-character document beside the
 // planner's three, in a leaf of its own for the reason every other leaf in this folder is one.
@@ -143,6 +144,7 @@ export function registerIpc(): void {
   registerSpellLibraryIpc()
   registerPlannerIpc()
   registerWikiDatasetIpc()
+  registerBazaarWatchIpc()
   registerMapsIpc()
   registerPresenceIpc()
   registerQuestPinsIpc()

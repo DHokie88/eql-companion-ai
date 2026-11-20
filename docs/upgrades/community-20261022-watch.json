@@ -1,0 +1,61 @@
+{
+  "inactivity_days": 60,
+  "schema_version": 1,
+  "sources": {
+    "EQ-Zera": {
+      "checked_at": "2026-10-22T15:22:36.621842+00:00",
+      "commit_timestamp": 1792342511,
+      "identity": {
+        "location": "https://github.com/Zeratfule/EQ-Zera.git",
+        "ref": "780c7afb3fe71f65db2cd8ae9d8c191b8ecc9db4",
+        "watch_ref": "refs/heads/main"
+      },
+      "last_observed_activity_at": "2026-10-18T16:55:11+00:00",
+      "observation_status": "KNOWN",
+      "observed_head": "780c7afb3fe71f65db2cd8ae9d8c191b8ecc9db4",
+      "reason": "tracked branch updated within 60 days",
+      "status": "ACTIVE",
+      "tracked_ref": "refs/heads/main"
+    },
+    "brianmontanaweb": {
+      "checked_at": "2026-10-22T15:22:36.621842+00:00",
+      "commit_timestamp": 1790285736,
+      "identity": {
+        "location": "https://github.com/brianmontanaweb/everquest-companion.git",
+        "ref": "ad6857f2d5286291d23ed6975b46212805cb0d78",
+        "watch_ref": "refs/heads/main"
+      },
+      "last_observed_activity_at": "2026-09-24T21:35:36+00:00",
+      "observation_status": "KNOWN",
+      "observed_head": "ad6857f2d5286291d23ed6975b46212805cb0d78",
+      "reason": "tracked branch updated within 60 days",
+      "status": "ACTIVE",
+      "tracked_ref": "refs/heads/main"
+    },
+    "kaltinril": {
+      "checked_at": "2026-10-22T15:22:36.621842+00:00",
+      "commit_timestamp": 1792660181,
+      "identity": {
+        "location": "https://github.com/kaltinril/everquest-companion.git",
+        "ref": "ab9d6279e7beb029cecffa319d166ead9961c1cf",
+        "watch_ref": "refs/heads/main_community"
+      },
+      "last_observed_activity_at": "2026-10-22T09:09:41+00:00",
+      "observation_status": "KNOWN",
+      "observed_head": "ab9d6279e7beb029cecffa319d166ead9961c1cf",
+      "reason": "tracked branch updated within 60 days",
+      "status": "ACTIVE",
+      "tracked_ref": "refs/heads/main_community"
+    },
+    "oracle": {
+      "identity": {
+        "location": "/home/andrew/codeweave-eqo-community-20261022/sources/oracle",
+        "ref": "467a03af866ab64d00f93976d38475c258475ea1",
+        "watch_ref": null
+      },
+      "reason": "primary product is never retired",
+      "status": "PRIMARY"
+    }
+  },
+  "updated_at": "2026-10-22T15:22:36.621842+00:00"
+}

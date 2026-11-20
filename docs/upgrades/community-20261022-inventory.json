@@ -1,0 +1,187 @@
+{
+  "date": "2026-10-22",
+  "oracle_repository": "https://github.com/DHokie88/eql-companion-ai",
+  "oracle_base": "467a03af866ab64d00f93976d38475c258475ea1",
+  "method": "git tree/diff between exact snapshots; file counts measure difference, not missing features or safe patches. No history merge used.",
+  "sources": [
+    {
+      "name": "EQ-Zera",
+      "repository": "https://github.com/Zeratfule/EQ-Zera",
+      "remote": "upstream",
+      "branch": "main",
+      "commit": "780c7afb3fe71f65db2cd8ae9d8c191b8ecc9db4",
+      "tag": "v1.26.1",
+      "git_tree": "1e645d390329e7e7e3ff452732dab1bc4795aec1",
+      "changed_paths": 416,
+      "areas": {
+        "src/main": {
+          "added": 0,
+          "modified": 29,
+          "removed": 32
+        },
+        "src/preload": {
+          "added": 0,
+          "modified": 2,
+          "removed": 1
+        },
+        "src/renderer": {
+          "added": 0,
+          "modified": 39,
+          "removed": 49
+        },
+        "src/shared": {
+          "added": 0,
+          "modified": 16,
+          "removed": 27
+        },
+        "engine": {
+          "added": 0,
+          "modified": 6,
+          "removed": 4
+        },
+        "protocol": {
+          "added": 0,
+          "modified": 1,
+          "removed": 0
+        },
+        "tests": {
+          "added": 0,
+          "modified": 37,
+          "removed": 52
+        },
+        "scripts": {
+          "added": 0,
+          "modified": 7,
+          "removed": 0
+        },
+        ".github": {
+          "added": 0,
+          "modified": 2,
+          "removed": 0
+        }
+      },
+      "source_dependencies_different_from_oracle": {}
+    },
+    {
+      "name": "brianmontanaweb",
+      "repository": "https://github.com/brianmontanaweb/everquest-companion",
+      "remote": "brianmontanaweb",
+      "branch": "main",
+      "commit": "ad6857f2d5286291d23ed6975b46212805cb0d78",
+      "tag": "v1.17.0",
+      "git_tree": "685eaa0a1ebb454fe132b3a11091cfa6d19cda67",
+      "changed_paths": 2816,
+      "areas": {
+        "src/main": {
+          "added": 2,
+          "modified": 239,
+          "removed": 77
+        },
+        "src/preload": {
+          "added": 0,
+          "modified": 19,
+          "removed": 10
+        },
+        "src/renderer": {
+          "added": 8,
+          "modified": 435,
+          "removed": 142
+        },
+        "src/shared": {
+          "added": 1,
+          "modified": 141,
+          "removed": 66
+        },
+        "engine": {
+          "added": 1,
+          "modified": 87,
+          "removed": 52
+        },
+        "protocol": {
+          "added": 0,
+          "modified": 2,
+          "removed": 0
+        },
+        "tests": {
+          "added": 11,
+          "modified": 469,
+          "removed": 138
+        },
+        "scripts": {
+          "added": 4,
+          "modified": 515,
+          "removed": 134
+        },
+        ".github": {
+          "added": 0,
+          "modified": 0,
+          "removed": 2
+        }
+      },
+      "source_dependencies_different_from_oracle": {},
+      "release_commit": "5e301216fdd1eed692230d9c29677d21b2703db9",
+      "revision_note": "Tracked main head is newer than v1.17.0; tag and selected head are distinct."
+    },
+    {
+      "name": "kaltinril",
+      "repository": "https://github.com/kaltinril/everquest-companion",
+      "remote": "community",
+      "branch": "main_community",
+      "commit": "ab9d6279e7beb029cecffa319d166ead9961c1cf",
+      "tag": "community-0.1.0-test.30",
+      "git_tree": "63bef7638b8b4b44b802b2d10a06df823c4999af",
+      "changed_paths": 2671,
+      "areas": {
+        "src/main": {
+          "added": 72,
+          "modified": 115,
+          "removed": 77
+        },
+        "src/preload": {
+          "added": 7,
+          "modified": 7,
+          "removed": 10
+        },
+        "src/renderer": {
+          "added": 210,
+          "modified": 231,
+          "removed": 141
+        },
+        "src/shared": {
+          "added": 121,
+          "modified": 72,
+          "removed": 66
+        },
+        "engine": {
+          "added": 54,
+          "modified": 100,
+          "removed": 52
+        },
+        "protocol": {
+          "added": 0,
+          "modified": 3,
+          "removed": 0
+        },
+        "tests": {
+          "added": 242,
+          "modified": 188,
+          "removed": 138
+        },
+        "scripts": {
+          "added": 147,
+          "modified": 51,
+          "removed": 259
+        },
+        ".github": {
+          "added": 2,
+          "modified": 0,
+          "removed": 2
+        }
+      },
+      "source_dependencies_different_from_oracle": {
+        "@tesseract.js-data/eng": "1.0.0",
+        "tesseract.js": "7.0.0"
+      }
+    }
+  ]
+}

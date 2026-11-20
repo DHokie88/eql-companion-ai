@@ -76,6 +76,7 @@ test('every kind gets the zone style its own renderer sensor implies', () => {
     // `OverlayContent` with the same `capture` wiring, so its counts and its named list stay
     // click-through while pinned and only the header strip and the scroll grip ask for the mouse.
     run: 'chrome',
+    skyQuests: 'chrome',
     // The LIST kinds hold capture over their whole window while hovered (`onMouseEnter={onEnter}`
     // on the root) — overlayScale.tsx calls it the same trade taken at the other extreme.
     events: 'window',

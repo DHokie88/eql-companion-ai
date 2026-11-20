@@ -21,13 +21,14 @@ import {
 // set of events a trigger can match (Task #47 — this absorbs the previously hand-maintained,
 // already-stale list which was missing buff/cast/cc kinds entirely).
 const EVENT_KINDS: readonly LogEventKind[] = ALL_LOG_EVENT_KINDS
-const APP_SIGNALS: AppSignal[] = ['bossDefeat', 'questComplete', 'wishDrop', 'wishZone']
+const APP_SIGNALS: AppSignal[] = ['bossDefeat', 'questComplete', 'wishDrop', 'wishZone', 'bazaarWatch']
 
 const APP_SIGNAL_LABEL: Record<AppSignal, string> = {
   bossDefeat: 'Raid target defeated',
   questComplete: 'Quest completed',
   wishDrop: 'Wished item dropped',
-  wishZone: 'Wished items drop in this zone'
+  wishZone: 'Wished items drop in this zone',
+  bazaarWatch: 'Bazaar watchlist match'
 }
 
 interface ConditionFieldProps {

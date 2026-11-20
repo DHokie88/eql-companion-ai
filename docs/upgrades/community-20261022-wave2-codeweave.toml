@@ -1,0 +1,68 @@
+schema_version = 2
+
+[product]
+name = "eq-oracle-three-upstreams"
+mode = "improve"
+distribution = "personal"
+primary = "oracle"
+state_dir = ".codeweave"
+overlay_replace = false
+verification = [["npm", "run", "typecheck"], ["npm", "run", "lint"], ["npm", "run", "build"], ["npm", "run", "test:startup"]]
+verification_timeout_seconds = 600
+acceptance_scenarios = [
+ "A selected character never inherits another character or server's inventory or achievements.",
+ "An unreadable output dump cannot prevent desktop startup.",
+ "Preserve Oracle identity, versioned spells, custom modifier calculations, Gear priorities, Sky progress, disabled telemetry/updater, local profiles and live sessions.",
+ "Windows build, units and launcher startup must pass before qualification; Linux analysis is evidence only."
+]
+
+[sources.oracle]
+location = "sources/oracle"
+ref = "467a03af866ab64d00f93976d38475c258475ea1"
+role = "primary"
+require_clean = true
+license_allow = ["FSL-1.1-MIT", "MIT", "ISC", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "Unlicense"]
+
+[sources.EQ-Zera]
+watch_ref = "refs/heads/main"
+location = "https://github.com/Zeratfule/EQ-Zera.git"
+ref = "780c7afb3fe71f65db2cd8ae9d8c191b8ecc9db4"
+role = "idea"
+require_clean = false
+license_allow = ["FSL-1.1-MIT", "MIT", "ISC", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "Unlicense"]
+
+[sources.brianmontanaweb]
+watch_ref = "refs/heads/main"
+location = "https://github.com/brianmontanaweb/everquest-companion.git"
+ref = "ad6857f2d5286291d23ed6975b46212805cb0d78"
+role = "idea"
+require_clean = false
+license_allow = ["FSL-1.1-MIT", "MIT", "ISC", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "Unlicense"]
+
+[sources.kaltinril]
+watch_ref = "refs/heads/main_community"
+location = "https://github.com/kaltinril/everquest-companion.git"
+ref = "ab9d6279e7beb029cecffa319d166ead9961c1cf"
+role = "idea"
+require_clean = false
+license_allow = ["FSL-1.1-MIT", "MIT", "ISC", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "Unlicense"]
+
+[[capabilities]]
+name = "character-output-isolation"
+problem = "Newest-anybody dump discovery can credit a selected character with another character's inventory or achievements; read races can escape startup."
+outcome = "Loaders refuse foreign dumps while retaining discovery/status fallback and unnamed browsing; transient read failures return no dump."
+query = ["ownsOutputFile", "loadInventoryDump", "loadAchievements", "loadOutput"]
+sources = ["EQ-Zera", "brianmontanaweb", "kaltinril"]
+primary_paths = ["src/main/outputs", "src/shared/outputs", "tests"]
+destination = "src/main/outputs"
+max_candidates = 3
+
+[[capabilities]]
+name = "community-roadmap"
+problem = "Community releases include large features absent from Oracle and overlapping fixes that must not replace Oracle custom behavior."
+outcome = "Prioritize isolated capabilities with exact provenance and engine, IPC, persistence and Windows validation boundaries."
+query = ["bazaar", "gaps", "factions", "logArchive", "respawn", "spellsUs", "loot"]
+sources = ["EQ-Zera", "brianmontanaweb", "kaltinril"]
+primary_paths = ["src/main", "src/shared", "src/renderer/src/features", "engine/crates", "protocol"]
+destination = "src/main"
+max_candidates = 3

@@ -25,6 +25,14 @@ const ACCENT = PALETTE.accent
 /** The "head row" sentinel — one definition, shared with the main view (dashboardData). */
 const LIVE = LIVE_SELECTION
 
+/** A floating status never takes space away from the retained meter rows. */
+function OverlayUpdating({ show }: { show: boolean }): JSX.Element | null {
+  if (!show) return null
+  return <div role="status" data-testid="overlay-combat-updating"
+    style={{ position: 'absolute', top: 42, right: 8, zIndex: 2, fontSize: 10,
+      color: withAlpha(PALETTE.text, 0.7), pointerEvents: 'none' }}>Updating…</div>
+}
+
 function fmtDur(sec: number): string {
   const s = Math.max(0, Math.round(sec))
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
@@ -220,7 +228,7 @@ export default function OverlayMeter(): JSX.Element {
   const [zoneSelection, setZoneSelection] = useState<string>('zone')
   const selection = isFight ? fightId : zoneSelection
 
-  const snap = useOverlayCombat(selection === LIVE ? undefined : selection)
+  const { snap, updating } = useOverlayCombat(selection === LIVE ? undefined : selection)
   const { locked, bgAlpha, textScale, drill, hovering, patch, setDrill, toggleLock, capture, dragRegion, noDrag } =
     useOverlayChrome()
   // WHOSE damage (docs/plans/group-model.md §2). ONE app-wide preference since JOS-115: the
@@ -273,6 +281,7 @@ export default function OverlayMeter(): JSX.Element {
         // scaled content pane resolves against the window and is then zoomed (overlayScale).
         width: '100%',
         height: '100%',
+        position: 'relative',
         display: 'flex',
         flexDirection: 'column',
         fontFamily: 'Inter, "Segoe UI", Roboto, system-ui, sans-serif',
@@ -307,6 +316,7 @@ export default function OverlayMeter(): JSX.Element {
         actions={newSession ? [share, newSession] : [share]}
         chrome={{ locked, hovering, dragRegion, noDrag, toggleLock, capture }}
       />
+      <OverlayUpdating show={updating} />
 
       {/* Bars + mini drill-down. Locked mode RENDERS the remembered drill (the pinned "damage by
           type" breakdown the user plays with) but hands MeterBars no setter, so there are no

@@ -99,7 +99,7 @@ export type LogEventKind =
  * Both are fired by `features/wishlist/useWishAlerts.ts`, the one always-mounted place that can
  * see either.
  */
-export type AppSignal = 'bossDefeat' | 'questComplete' | 'wishDrop' | 'wishZone'
+export type AppSignal = 'bossDefeat' | 'questComplete' | 'wishDrop' | 'wishZone' | 'bazaarWatch'
 
 /**
  * A PRIMITIVE alert trigger — the three original shapes:

@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import type { CombatSnapshot } from '@shared/combat'
+import { useLayoutEffect, useRef, useState } from 'react'
+import { createCombatFeed, subscribeCombatFeed, type CombatFeed, type CombatFeedView } from '../features/combat/combatFeed'
 
 /**
  * Views the main-process combat engine for a floating overlay (Task #52; per-kind in Task #54).
@@ -18,25 +18,21 @@ import type { CombatSnapshot } from '@shared/combat'
  * That fold is gone from the engine entirely; pet layout is `petRows.meterPanel`'s job now, on
  * both surfaces (owner ruling, 2026-08-04).
  */
-export function useOverlayCombat(selectedId: string | undefined): CombatSnapshot | null {
-  const [snap, setSnap] = useState<CombatSnapshot | null>(null)
+export function useOverlayCombat(selectedId: string | undefined): CombatFeedView {
+  const [view, setView] = useState<CombatFeedView>({ snap: null, updating: false })
+  const feed = useRef<CombatFeed | null>(null)
 
-  useEffect(() => {
-    let alive = true
-    const tick = async (): Promise<void> => {
-      // maxSegments modest: the overlay's selector lists recent fights, but the payload stays small.
-      const s = await window.eqOverlay.getCombatSnapshot({ selectedId, maxSegments: 30 })
-      if (alive) setSnap(s)
-    }
-    void tick()
-    const off = window.eqOverlay.onCombatActivity(() => void tick())
-    const iv = setInterval(() => void tick(), 1000)
-    return () => {
-      alive = false
-      off()
-      clearInterval(iv)
-    }
+  useLayoutEffect(() => {
+    const current = createCombatFeed((opts) => window.eqOverlay.getCombatSnapshot(opts), setView)
+    feed.current = current
+    const stop = subscribeCombatFeed(window.eqOverlay, current)
+    return () => { feed.current = null; stop() }
+  }, [])
+
+  useLayoutEffect(() => {
+    // Modest selector payload; overlays never request a timeline.
+    feed.current?.configure({ selectedId, maxSegments: 30 })
   }, [selectedId])
 
-  return snap
+  return view
 }

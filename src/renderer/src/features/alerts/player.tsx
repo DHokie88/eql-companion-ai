@@ -118,7 +118,7 @@ function effectiveVolume(def: AlertDef): number {
  */
 function showAlertBanner(def: AlertDef, firing?: Pick<FiredAlert, 'spell' | 'captures' | 'dueAt'>): void {
   if (!alertShowsOnScreen(def)) return
-  const text = alertBannerText(def)
+  const text = alertBannerText(def, firing?.captures)
   if (!text) return
   const ts = Date.now()
   const payload: AlertBannerPayload = { id: `${def.id}:${String(ts)}`, alertId: def.id, ts, text }
@@ -201,7 +201,7 @@ export function previewAlertNow(def: AlertDef): void {
  * name) is reported to main via appFired so the module's recent-fires history —
  * the single source of truth — records the signal with meaningful matched text.
  */
-export function fireAppSignal(signal: AppSignal, context = ''): void {
+export function fireAppSignal(signal: AppSignal, context = '', captures?: Record<string, string>): void {
   const now = Date.now()
   for (const def of defs) {
     if (!def.enabled) continue
@@ -210,7 +210,7 @@ export function fireAppSignal(signal: AppSignal, context = ''): void {
     const last = appCooldown.get(def.id)
     if (last !== undefined && now - last < cd) continue
     appCooldown.set(def.id, now)
-    playAlertNow(def)
+    playAlertNow(def, captures ? { captures } : undefined)
     // Route the fire through main so history stays the single source of truth.
     window.eq.appFired(def.id, context)
   }

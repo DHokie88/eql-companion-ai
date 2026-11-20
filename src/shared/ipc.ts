@@ -569,6 +569,10 @@ export const IPC = {
   // renderer -> main: look up an item's lore/quest knowledge (local posky-first, then a
   // cached, politely-throttled wiki lookup). Returns ItemKnowledge.
   itemsLookup: 'items:lookup',
+  itemsMarks: 'items:marks',
+  bazaarWatchGet: 'bazaar:watch:get',
+  bazaarWatchSet: 'bazaar:watch:set',
+  bazaarSaveCsv: 'bazaar:saveCsv',
 
   // ---- wiki dataset (Preferences > Wiki data) ----
   // renderer -> main: current session status. No arguments. A refresh writes the next

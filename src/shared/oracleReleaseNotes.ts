@@ -21,6 +21,15 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.25.0',
+    date: '2026-11-20',
+    entries: [
+      { kind: 'new', text: 'Bazaar tracks offers from your trade chat. Browse asking prices and price history by item and tier, export quotes to CSV, and set watches for new matches. A very large history shows the newest rows.' },
+      { kind: 'new', text: 'Follow starred Plane of Sky quests in an optional overlay. It updates even with the Sky tab closed and uses the same inventory, log, or combined counts as the tab.' },
+      { kind: 'changed', text: 'The Combat dashboard and damage and healing overlays combine overlapping refreshes. They keep the last valid numbers visible while updating and clear them when the selected fight or character changes.' }
+    ]
+  },
+  {
     version: '0.24.1',
     date: '2026-11-20',
     entries: [

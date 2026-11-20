@@ -146,7 +146,7 @@ export default function HealMeter(): JSX.Element {
   const [zoneSelection, setZoneSelection] = useState<string>('zone')
   const selection = isFight ? fightId : zoneSelection
 
-  const snap = useOverlayCombat(selection === LIVE ? undefined : selection)
+  const { snap, updating } = useOverlayCombat(selection === LIVE ? undefined : selection)
   const { locked, bgAlpha, textScale, drill, hovering, patch, setDrill, toggleLock, capture, dragRegion, noDrag } =
     useOverlayChrome()
   const now = Date.now()
@@ -183,6 +183,7 @@ export default function HealMeter(): JSX.Element {
         // against the window and then zoomed (overlayScale).
         width: '100%',
         height: '100%',
+        position: 'relative',
         display: 'flex',
         flexDirection: 'column',
         fontFamily: 'Inter, "Segoe UI", Roboto, system-ui, sans-serif',
@@ -208,6 +209,7 @@ export default function HealMeter(): JSX.Element {
         select={{ rows: selectRows, value: selection, onChange: selectSegment, accent: HEAL_GOLD }}
         chrome={{ locked, hovering, dragRegion, noDrag, toggleLock, capture }}
       />
+      <HealUpdating show={updating} />
 
       {/* Bars + mini drill-down. Locked mode RENDERS the remembered drill read-only (no setter ⇒
           no click targets, no cursors, no back chevron) so the window stays click-through. */}
@@ -231,6 +233,14 @@ export default function HealMeter(): JSX.Element {
       {!locked && <HealFooter bgAlpha={bgAlpha} textScale={textScale} patch={patch} noDrag={noDrag} />}
     </div>
   )
+}
+
+/** The same read status as the damage meter, without taking height from its rows. */
+function HealUpdating({ show }: { show: boolean }): JSX.Element | null {
+  if (!show) return null
+  return <div role="status" data-testid="overlay-combat-updating"
+    style={{ position: 'absolute', top: 42, right: 8, zIndex: 2, fontSize: 10,
+      color: withAlpha(PALETTE.text, 0.7), pointerEvents: 'none' }}>Updating…</div>
 }
 
 /** Footer controls — interactive mode only: bg-alpha slider + text size. Chrome, so unscaled and

@@ -115,6 +115,7 @@ pub fn registered(deps: ClusterDeps) -> Registry {
     r.register(Box::new(modules::buff_timers::BuffTimersModule::new(core)));
     r.register(Box::new(modules::consider::ConsiderModule::new()));
     r.register(Box::new(modules::resist::ResistModule::new()));
+    r.register(Box::new(modules::bazaar::BazaarModule::new()));
     r.register(Box::new(modules::hails::HailsModule::new()));
     r.register(Box::new(modules::faction::FactionModule::new()));
     r.register(Box::new(modules::coin::CoinModule::new()));
