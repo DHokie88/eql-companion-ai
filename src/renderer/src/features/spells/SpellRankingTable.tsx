@@ -9,7 +9,7 @@ import { SpellRowRank } from './SpellRowRank'
 import { SpellCastSummary } from './SpellCastSummary'
 
 const BASIC: { field: SpellAnalysisSort; label: string }[] = [{ field: 'id', label: 'ID' }, { field: 'name', label: 'Spell' }, { field: 'level', label: 'Level' }, { field: 'amount', label: 'Full amount' }, { field: 'mana', label: 'Mana' }, { field: 'efficiency', label: 'Amount / mana' }, { field: 'rate', label: 'Modeled cycle DPS/HPS' }]
-const OPTIONAL: { field: SpellAnalysisSort; label: string }[] = [{ field: 'cast', label: 'Cast (s)' }, { field: 'recovery', label: 'Recovery (s)' }, { field: 'recast', label: 'Recast (s)' }, { field: 'duration', label: 'Delivery (s)' }, { field: 'ticks', label: 'Ticks' }, { field: 'waves', label: 'Waves' }, { field: 'targets', label: 'Targets' }, { field: 'hits', label: 'Hits' }]
+const OPTIONAL: { field: SpellAnalysisSort; label: string }[] = [{ field: 'cast', label: 'Cast (s)' }, { field: 'recast', label: 'Recast (s)' }, { field: 'recovery', label: 'Global recovery (s)' }, { field: 'duration', label: 'Delivery (s)' }, { field: 'ticks', label: 'Ticks' }, { field: 'waves', label: 'Waves' }, { field: 'targets', label: 'Targets' }, { field: 'hits', label: 'Hits' }]
 function extraValue(row: SpellRankingRow, field: SpellAnalysisSort): number | null {
   const a = row.calculation.analysis
   if (!a) return null

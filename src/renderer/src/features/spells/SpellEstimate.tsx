@@ -1,6 +1,7 @@
 import type { JSX } from 'react'
 import { Chip, Stack, Tooltip, Typography } from '@mui/material'
 import type { SpellCalculation } from '@shared/spellLibrary'
+import type { SpellAnalysisTiming } from '@shared/spellAnalysis'
 import { SpellCastSummary } from './SpellCastSummary'
 
 export function amount(value: number | null): string {
@@ -28,13 +29,54 @@ export function EstimateAmount({ calculation, compact = false }: { calculation: 
 function CompactEstimateAmount({ calculation }: { calculation: SpellCalculation }): JSX.Element {
   const modifier = calculation.modifiers
   const title = [
-    modifier?.rankOnly ? 'Client-based spell value with the selected or observed mote rank. Equipment focus and instruments are excluded here; see spell details for equipment estimates.' : '',
-    modifier ? `Base ${amount(modifier.baseline.total)}; displayed ${amount(calculation.total)}.` : '',
+    fullCastEstimate(calculation),
+    baseEffectEstimate(calculation),
+    modifier?.rankOnly ? 'Equipment estimates are available in spell details.' : '',
     modifier?.range ? `Focus roll ${amount(modifier.range.min)} - ${amount(modifier.range.max)}.` : '',
-    ...(modifier?.warnings ?? []), ...(calculation.analysis?.warnings ?? []), ...calculation.reasons,
-    'Open spell details for inputs and calculation scope.'
+    ...new Set([...(modifier?.warnings ?? []), ...(calculation.analysis?.warnings ?? []), ...calculation.reasons])
   ].filter(Boolean).join(' ')
-  return <Tooltip disableInteractive title={title}><Typography variant="body2" data-testid={`spells-amount-${calculation.id}-${calculation.metric}`} sx={{ whiteSpace: 'nowrap' }}>{wholeAmount(calculation.total)}</Typography></Tooltip>
+  return <Tooltip disableInteractive describeChild title={title}>
+    <Typography tabIndex={0} variant="body2" data-testid={`spells-amount-${calculation.id}-${calculation.metric}`} sx={{ whiteSpace: 'nowrap' }}>{wholeAmount(calculation.total)}</Typography>
+  </Tooltip>
+}
+
+function fullCastEstimate(calculation: SpellCalculation): string {
+  const { analysis, total, perTick, ticks, instant } = calculation
+  if (total === null) return 'Full-cast estimate unavailable.'
+  const scope = analysis?.scope === 'aggregate pack total' ? 'across the target pack' : 'on one target'
+  const hits = analysis?.hits ?? 1
+  const perHit = analysis?.perHitTotal
+  const summary = `${amount(total)} ${calculation.metric} per full cast ${scope}.`
+  if (hits > 1 && perHit != null) return `${summary} ${amount(perHit)} per hit × ${hits} modeled hits.`
+  if (perTick && ticks) return `${summary} ${amount(perTick)} per tick × ${ticks} ticks${instant ? ` + ${amount(instant)} instant` : ''}.`
+  return summary
+}
+
+function baseEffectEstimate(calculation: SpellCalculation): string {
+  const { analysis, modifiers } = calculation
+  if (calculation.total === null) return ''
+  if (!modifiers?.rank || !analysis) return ''
+  const rank = rankLabel(modifiers.rank)
+  const contribution = analysis.contributions.length === 1 ? analysis.contributions[0] : null
+  if (contribution?.clientAmount == null || contribution.afterRank === null) {
+    return `Level ${analysis.level}, mote rank ${rank}. Base full-cast amount ${amount(modifiers.baseline.total)} in the same target scope.`
+  }
+  const unit = contribution.periodic ? 'per tick' : 'per hit'
+  return `At level ${analysis.level}, base effect ${amount(contribution.clientAmount)} ${unit} → ${amount(contribution.afterRank)} ${unit} at mote rank ${rank}.`
+}
+
+export function modeledCycleTiming(timing: SpellAnalysisTiming): string {
+  return `cast ${timing.castMs / 1000}s + max(recast ${timing.recastMs / 1000}s, global recovery ${timing.recoveryMs / 1000}s, delivery ${timing.deliveryMs === null ? '?' : `${timing.deliveryMs / 1000}s`}) = ${timing.cycleMs === null ? '?' : `${timing.cycleMs / 1000}s`}.`
+}
+
+export function ModeledRate({ calculation }: { calculation?: SpellCalculation }): JSX.Element {
+  const timing = calculation?.analysis?.timing
+  if (!calculation || !timing) return <>-</>
+  if (timing.rate === null || timing.cycleMs === null) return <>{wholeAmount(timing.rate)}</>
+  const title = `${amount(calculation.total)} per cast ÷ ${timing.cycleMs / 1000}s per cycle. ${modeledCycleTiming(timing)} The model treats those waits as overlapping.`
+  return <Tooltip disableInteractive describeChild title={title}>
+    <Typography tabIndex={0} variant="body2" data-testid={`spells-rate-${calculation.id}-${calculation.metric}`}>{wholeAmount(timing.rate)}</Typography>
+  </Tooltip>
 }
 
 export function EstimateBadges({ calculation }: { calculation: SpellCalculation }): JSX.Element | null {

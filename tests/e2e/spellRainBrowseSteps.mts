@@ -21,7 +21,12 @@ export async function browseRainChecks(page: Page): Promise<void> {
     assert.equal(await settle(() => rainAmount(page), (value) => value === expected), expected)
     const compact = `21 × ${targets === 1 ? 3 : 4}`
     assert.equal(await settle(() => row.getByTestId('rain-summary-302').innerText(), (value) => value === compact), compact)
-    assert.doesNotMatch(await row.getByTestId('spells-amount-302-damage').innerText(), /Partial|Range|→/)
+    const display = row.getByTestId('spells-amount-302-damage')
+    assert.doesNotMatch(await display.innerText(), /Partial|Range|→/)
+    const hint = await display.getAttribute('title')
+    assert.match(hint ?? '', new RegExp(`${expected} damage per full cast`))
+    assert.match(hint ?? '', new RegExp(`21 per hit × ${targets === 1 ? 3 : 4} modeled hits`))
+    assert.match(hint ?? '', /base effect 20 per hit → 21 per hit at mote rank I/)
     const efficiencyColumn = await page.getByRole('table', { name: 'Spell catalog' }).locator('thead th').evaluateAll((headers) => headers.findIndex((header) => header.textContent?.replace(/\s/g, '').includes('Damage/Mana')))
     assert.equal(await row.locator('td').nth(efficiencyColumn).innerText(), targets === 1 ? '6.30' : '8.40', 'efficiency uses one client mana payment')
   }

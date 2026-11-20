@@ -5,7 +5,7 @@ export type BrowseDisplayField = SpellBrowseSort | 'rank' | 'spa'
 export type SpellColumnView = 'browse' | 'progression' | 'compare-hp' | 'compare-effects' | 'presets'
 
 export const BROWSE_EXTRA_COLUMNS: { field: BrowseDisplayField; label: string }[] = [
-  { field: 'cast', label: 'Cast (s)' }, { field: 'recovery', label: 'Recovery (s)' }, { field: 'recast', label: 'Recast (s)' },
+  { field: 'cast', label: 'Cast (s)' }, { field: 'recast', label: 'Recast (s)' }, { field: 'recovery', label: 'Global recovery (s)' },
   { field: 'duration', label: 'Delivery (s)' }, { field: 'ticks', label: 'Ticks' }, { field: 'waves', label: 'Waves' },
   { field: 'targets', label: 'Targets' }, { field: 'hits', label: 'Hits' }
 ]
@@ -17,7 +17,7 @@ export function browseColumnWidth(field: BrowseDisplayField): number {
     type: 92, amount: 96, mana: 70, efficiency: 92, rate: 110, selected: 100, description: 280, spa: 240 }
   return widths[field] ?? 90
 }
-export const DEFAULT_BROWSE_COLUMNS: BrowseDisplayField[] = ['id', 'rank', 'classes', 'category', 'type', 'amount', 'mana', 'efficiency', 'rate', 'selected']
+export const DEFAULT_BROWSE_COLUMNS: BrowseDisplayField[] = ['id', 'rank', 'classes', 'category', 'type', 'amount', 'mana', 'efficiency', 'rate', 'recast', 'selected']
 const identityColumns: BrowseColumn[] = [
   { field: 'rank', label: 'Rank' }, { field: 'classes', label: 'Class/Level' }
 ]

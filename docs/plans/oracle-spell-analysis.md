@@ -18,9 +18,17 @@ Browse uses the selected pack size, including when its DD filter includes area s
 a Browse record preserves that scope. Healing stays per recipient. The DD/DoT ranking views
 explicitly show one-target full casts; AOE rankings use pack totals.
 
-Modeled cycle DPS/HPS divides full amount by cast plus max(recovery, recast, delivery). Delivery
-includes full periodic duration or a verified wave window. This is a ranking estimate, not measured
-combat output or a rotation. Unsupported timing removes only the rate when amount remains known.
+Modeled DPS/HPS estimates the sustained rate of repeating the same spell. It divides the full-cast
+amount by cast time plus the longest of global recovery, spell-specific recast, or the full delivery
+window for ticks or rain waves. The model assumes these waits run together. Unsupported timing
+removes only the rate when the amount remains known.
+
+The [EQL launch notes](https://www.everquestlegends.com/patch-notes/eql-update-notes-7-28-2026)
+distinguish reuse and recovery. The EQL wiki preserves a [casting-time calculation](https://eqlwiki.com/Game_Mechanics)
+that uses the longer wait, but its historical example values are not current EQL measurements.
+The [invocation descriptions](https://eqlwiki.com/Stances_%26_Invocations) describe Arcane Mastery
+reducing cast and recovery and Inversion moving part of the cast into global recovery.
+Exact timer interaction under those invocations needs a controlled in-game test before it is modeled.
 
 Details lead with plain-English, level-evaluated client effects: slow/haste percentages, duration,
 target, resist and range. The technical table retains SPA numbers and raw formula fields beside

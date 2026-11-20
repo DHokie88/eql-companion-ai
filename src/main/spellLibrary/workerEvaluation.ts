@@ -90,7 +90,7 @@ export class WorkerSpellEvaluation {
 
 export function spellEvaluationScope(query: Record<string, unknown>): string {
   const analysis = analysisArg(query.analysis)
-  if (analysis) return `${analysis.scope === 'pack' ? 'Aggregate pack total' : 'One-target full cast'}. Supported direct effects, full-duration periodic effects and verified rain hit budgets. Modeled cycle rate divides amount by cast time plus the maximum of recovery, recast and delivery. Efficiency uses client mana cost. Partial estimates identify missing inputs and unknown caps.`
+  if (analysis) return `${analysis.scope === 'pack' ? 'Aggregate pack total' : 'One-target full cast'}. Supported direct effects, full-duration periodic effects and verified rain hit budgets. Modeled rate divides the full-cast amount by cast time plus the longest of spell recast, global recovery, or effect delivery. It assumes those waits overlap. Efficiency uses the modeled mana cost. Partial estimates identify missing inputs and unknown caps.`
   const options = evaluationArg(query.evaluation)
   if (!options || options.mode === 'client') return CLIENT_SPELL_CALCULATION_SCOPE
   return `${options.mode === 'emulate' ? 'Simulated' : 'Detected-character'} estimate: measured mote rules, qualifying worn damage/healing focus and supported best-carried bard instrument equipment, one target, full duration. Efficiency uses client mana cost. AA, temporary singing bonuses, critical hits, resists, mana/cast-time modifiers, recourse and repeated waves are excluded. Partial estimates identify missing inputs and unknown instrument caps.`

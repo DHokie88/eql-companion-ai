@@ -21,6 +21,14 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.23.2',
+    date: '2026-11-20',
+    entries: [
+      { kind: 'changed', text: 'Spells explains the base client description and the modeled amount after rank, including how area hits, rain waves, or ticks contribute to the total.', fromReport: true },
+      { kind: 'changed', text: 'Recast is shown by default. Global recovery remains an optional column. The modeled rate explains the same-spell cycle and its assumptions.', fromReport: true }
+    ]
+  },
+  {
     version: '0.23.1',
     date: '2026-11-20',
     entries: [
