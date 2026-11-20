@@ -1,9 +1,11 @@
-import { type JSX, useCallback, useState } from 'react'
-import { Accordion, AccordionDetails, AccordionSummary, Alert, Box, Button, CircularProgress, FormControl, InputLabel, MenuItem, Pagination, Select, Stack, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography } from '@mui/material'
-import type { SpellDataset, SpellHistoryResult } from '@shared/spellLibrary'
+import { type JSX, type ReactNode, useCallback, useState } from 'react'
+import { Accordion, AccordionDetails, AccordionSummary, Alert, Box, Button, Chip, CircularProgress, FormControl, InputLabel, MenuItem, Pagination, Select, Stack, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography } from '@mui/material'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import { SPELL_SOURCE_FILES, type SpellDataset, type SpellHistoryResult, type SpellObservation } from '@shared/spellLibrary'
 import { useLibraryQuery } from './useLibraryQuery'
 import { useSpellLibraryStatus } from './libraryState'
 import { LibrarySpellDetail } from './LibrarySpellDetail'
+import { SpellUpdateChanges } from './SpellUpdateChanges'
 
 function FieldChanges({ id, before, after }: { id: number; before: string; after: string }): JSX.Element {
   const load = useCallback(() => window.eq.spellLibrary.beforeAfter({ id, beforeSnapshotId: before, afterSnapshotId: after }), [id, before, after])
@@ -34,7 +36,7 @@ function SpellTimeline({ id, onOpen }: { id: number; onOpen: (id: number) => voi
   if (snapshot) return <LibrarySpellDetail id={id} snapshotId={snapshot} onBack={() => setSnapshot(null)} onHistory={() => setSnapshot(null)} />
   return <Stack spacing={1} data-testid="spells-timeline">
     {loading && <CircularProgress size={20} />}{error && <Alert severity="error">{error}</Alert>}
-    {data?.entries.map((entry) => <Accordion key={entry.observation.id}><AccordionSummary>{new Date(entry.observation.observedAt).toLocaleString()} · {entry.observation.outcome} · {entry.record?.name ?? 'Record absent'}</AccordionSummary><AccordionDetails><Stack spacing={1}><Typography>{entry.observation.message}</Typography><Button size="small" onClick={() => onOpen(id)}>Open current ID {id}</Button>{entry.record && <Button size="small" onClick={() => setSnapshot(entry.observation.snapshotId)}>View captured record</Button>}{entry.observation.previousSnapshotId && entry.observation.snapshotId && <FieldChanges id={id} before={entry.observation.previousSnapshotId} after={entry.observation.snapshotId} />}</Stack></AccordionDetails></Accordion>)}
+    {data?.entries.map((entry) => <Accordion key={entry.observation.id} slotProps={{ transition: { unmountOnExit: true } }}><AccordionSummary expandIcon={<ExpandMoreIcon />}>{new Date(entry.observation.observedAt).toLocaleString()} · {entry.observation.outcome} · {entry.record?.name ?? 'Record absent'}</AccordionSummary><AccordionDetails><Stack spacing={1}><Typography>{entry.observation.message}</Typography><Button size="small" onClick={() => onOpen(id)}>Open current ID {id}</Button>{entry.record && <Button size="small" onClick={() => setSnapshot(entry.observation.snapshotId)}>View captured record</Button>}{entry.observation.previousSnapshotId && entry.observation.snapshotId && <FieldChanges id={id} before={entry.observation.previousSnapshotId} after={entry.observation.snapshotId} />}</Stack></AccordionDetails></Accordion>)}
     {data?.entries.length === 0 && <Typography>No captured history for spell ID {id}.</Typography>}
   </Stack>
 }
@@ -50,25 +52,115 @@ function snapshotPair(data: SpellHistoryResult | null, before: string | null, af
   return { snapshots, beforeId, afterId }
 }
 
+const UPDATES_PER_PAGE = 20
+
 export function SpellHistory({ focusId, onOpen }: { focusId: number | null; onOpen: (id: number) => void }): JSX.Element {
+  const timeline = <HistoryDisclosure label="Spell timeline" testId="spells-history-timeline-toggle" defaultExpanded={focusId !== null}>
+    <FindSpellTimeline key={focusId} focusId={focusId} onOpen={onOpen} />
+  </HistoryDisclosure>
+  return <Stack spacing={2} data-testid="spells-history">
+    {focusId !== null && timeline}
+    <ClientUpdates />
+    {focusId === null && timeline}
+    <HistoryDisclosure label="Check log" testId="spells-history-check-log"><CheckLog /></HistoryDisclosure>
+    <HistoryDisclosure label="Compare captured snapshots" testId="spells-history-manual-compare"><ManualComparison onOpen={onOpen} /></HistoryDisclosure>
+  </Stack>
+}
+
+function HistoryDisclosure({ label, testId, defaultExpanded = false, children }: {
+  label: string; testId: string; defaultExpanded?: boolean; children: ReactNode
+}): JSX.Element {
+  return <Accordion disableGutters defaultExpanded={defaultExpanded} slotProps={{ transition: { unmountOnExit: true } }}>
+    <AccordionSummary expandIcon={<ExpandMoreIcon />} data-testid={testId}>{label}</AccordionSummary>
+    <AccordionDetails>{children}</AccordionDetails>
+  </Accordion>
+}
+
+function ClientUpdates(): JSX.Element {
+  const [page, setPage] = useState(1)
+  const [expandedId, setExpandedId] = useState<number | null>(null)
+  const load = useCallback(() => window.eq.spellLibrary.history({ page, pageSize: UPDATES_PER_PAGE, updatesOnly: true }), [page])
+  const { data, loading, error } = useLibraryQuery(load)
+  return <Stack spacing={1.5} data-testid="spells-client-updates">
+    <Typography variant="h6" component="h2">Client spell updates</Typography>
+    <Typography variant="body2" color="text.secondary">First seen is when Oracle captured the update.</Typography>
+    {loading && <CircularProgress size={22} aria-label="Loading spell updates" />}
+    {error && <Alert severity="error">{error}</Alert>}
+    {data && <ClientUpdateList data={data} page={page} setPage={setPage} expandedId={expandedId} onExpand={setExpandedId} />}
+  </Stack>
+}
+
+function ClientUpdateList({ data: { observations, snapshots, totalObservations }, page, setPage, expandedId, onExpand }: {
+  data: SpellHistoryResult; page: number; setPage: (value: number) => void
+  expandedId: number | null; onExpand: (id: number | null) => void
+}): JSX.Element {
+  if (!observations.length) return <Typography color="text.secondary">No client spell updates captured yet.</Typography>
+  const datasets = new Map(snapshots.map((snapshot) => [snapshot.snapshotId, snapshot]))
+  return <Stack spacing={1}>
+    <Typography variant="subtitle2" color="text.secondary" sx={{ px: 2 }}>First seen</Typography>
+    {observations.map((observation) => <ClientUpdate key={observation.id} observation={observation}
+      datasets={datasets} expanded={expandedId === observation.id} onExpand={(open) => onExpand(open ? observation.id : null)} />)}
+    {totalObservations > UPDATES_PER_PAGE && <Pagination page={page} count={Math.ceil(totalObservations / UPDATES_PER_PAGE)}
+      onChange={(_event, value) => { setPage(value); onExpand(null) }} />}
+  </Stack>
+}
+
+function ClientUpdate({ observation, datasets, expanded, onExpand }: {
+  observation: SpellObservation; datasets: Map<string, SpellDataset>; expanded: boolean; onExpand: (open: boolean) => void
+}): JSX.Element | null {
+  const { previousSnapshotId, snapshotId, id, outcome, observedAt } = observation
+  if (!previousSnapshotId || !snapshotId) return null
+  const before = datasets.get(previousSnapshotId)
+  const after = datasets.get(snapshotId)
+  const files = SPELL_SOURCE_FILES.filter((file) => before?.hashes[file] !== after?.hashes[file])
+  const pair = { beforeSnapshotId: previousSnapshotId, afterSnapshotId: snapshotId }
+  return <Accordion disableGutters expanded={expanded} onChange={(_event, value) => onExpand(value)}
+    slotProps={{ transition: { unmountOnExit: true } }}>
+    <AccordionSummary expandIcon={<ExpandMoreIcon />} data-testid="spells-history-update" data-observation-id={id}>
+      <Stack direction="row" gap={2} alignItems="baseline" flexWrap="wrap">
+        <Typography sx={{ fontWeight: 600 }}>{new Date(observedAt).toLocaleString()}</Typography>
+        <Typography variant="body2" color="text.secondary">{files.join(' · ')}</Typography>
+        {outcome === 'rollback' && <Chip size="small" variant="outlined" label="Earlier files restored" />}
+      </Stack>
+    </AccordionSummary>
+    <AccordionDetails><SpellUpdateChanges pair={pair} /></AccordionDetails>
+  </Accordion>
+}
+
+function FindSpellTimeline({ focusId, onOpen }: { focusId: number | null; onOpen: (id: number) => void }): JSX.Element {
+  const [spellId, setSpellId] = useState(focusId?.toString() ?? '')
+  const timelineId = /^\d+$/.test(spellId) ? Number(spellId) : null
+  return <Stack spacing={1}>
+    <TextField size="small" label="Numeric spell ID" type="number" value={spellId}
+      slotProps={{ htmlInput: { min: 0, 'data-testid': 'spells-timeline-id' } }}
+      onChange={(event) => setSpellId(event.target.value)} sx={{ maxWidth: 240 }} />
+    {timelineId !== null && <SpellTimeline key={timelineId} id={timelineId} onOpen={onOpen} />}
+  </Stack>
+}
+
+function CheckLog(): JSX.Element {
   const checkedAt = useSpellLibraryStatus().checkedAt
   const [page, setPage] = useState(1)
-  const [before, setBefore] = useState<string | null>(null)
-  const [after, setAfter] = useState<string | null>(null)
-  const [spellId, setSpellId] = useState(focusId?.toString() ?? '')
   const load = useCallback(() => window.eq.spellLibrary.history({ page, pageSize: 30 }), [page])
   const { data, loading, error } = useLibraryQuery(load, checkedAt)
+  return <Stack spacing={1}>
+    {loading && <CircularProgress size={20} aria-label="Loading check log" />}
+    {error && <Alert severity="error">{error}</Alert>}
+    {data && <ObservedChecks data={data} page={page} setPage={setPage} />}
+  </Stack>
+}
+
+function ManualComparison({ onOpen }: { onOpen: (id: number) => void }): JSX.Element {
+  const checkedAt = useSpellLibraryStatus().checkedAt
+  const [before, setBefore] = useState<string | null>(null)
+  const [after, setAfter] = useState<string | null>(null)
+  const load = useCallback(() => window.eq.spellLibrary.history({ pageSize: 1 }), [])
+  const { data, loading, error } = useLibraryQuery(load, checkedAt)
   const { snapshots, afterId, beforeId } = snapshotPair(data, before, after)
-  const timelineId = /^\d+$/.test(spellId) ? Number(spellId) : null
-  return <Stack spacing={2} data-testid="spells-history">
-    <Alert severity="info">History begins with Oracle’s first captured baseline. Dates mean “first observed by Oracle,” not official patch dates. Changes while Oracle was closed cannot be reconstructed without older source files. Captured history is retained indefinitely.</Alert>
-    {loading && <CircularProgress size={22} />}{error && <Alert severity="error">{error}</Alert>}
-    {data && <>
-      <ObservedChecks data={data} page={page} setPage={setPage} />
-      <HistoryComparison snapshots={snapshots} beforeId={beforeId} afterId={afterId} setBefore={setBefore} setAfter={setAfter} onOpen={onOpen} />
-    </>}
-    <Typography variant="h6">Spell timeline</Typography><TextField size="small" label="Numeric spell ID" type="number" value={spellId} slotProps={{ htmlInput: { min: 0, 'data-testid': 'spells-timeline-id' } }} onChange={(e) => setSpellId(e.target.value)} sx={{ maxWidth: 240 }} />
-    {timelineId !== null && <SpellTimeline key={timelineId} id={timelineId} onOpen={onOpen} />}
+  return <Stack spacing={1}>
+    {loading && <CircularProgress size={20} aria-label="Loading snapshots" />}
+    {error && <Alert severity="error">{error}</Alert>}
+    <HistoryComparison snapshots={snapshots} beforeId={beforeId} afterId={afterId} setBefore={setBefore} setAfter={setAfter} onOpen={onOpen} />
   </Stack>
 }
 
@@ -85,5 +177,5 @@ function HistoryComparison({ snapshots, beforeId, afterId, setBefore, setAfter, 
   snapshots: SpellDataset[]; beforeId: string; afterId: string; setBefore: (id: string) => void; setAfter: (id: string) => void; onOpen: (id: number) => void
 }): JSX.Element | null {
   if (snapshots.length === 0) return null
-  return <><Typography variant="h6">Compare captured snapshots</Typography><Stack direction="row" flexWrap="wrap" gap={1}><SnapshotPicker label="Before snapshot" value={beforeId} snapshots={snapshots} onChange={setBefore} /><SnapshotPicker label="After snapshot" value={afterId} snapshots={snapshots} onChange={setAfter} /></Stack><SnapshotChanges key={`${beforeId}:${afterId}`} before={beforeId} after={afterId} onOpen={onOpen} /></>
+  return <><Stack direction="row" flexWrap="wrap" gap={1}><SnapshotPicker label="Before snapshot" value={beforeId} snapshots={snapshots} onChange={setBefore} /><SnapshotPicker label="After snapshot" value={afterId} snapshots={snapshots} onChange={setAfter} /></Stack><SnapshotChanges key={`${beforeId}:${afterId}`} before={beforeId} after={afterId} onOpen={onOpen} /></>
 }
