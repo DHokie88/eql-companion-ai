@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { FormControl, FormControlLabel, Switch, InputLabel, MenuItem, Select, Stack, Tooltip } from '@mui/material'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import { SPELL_CLASSES, type SpellClass } from '@shared/spellLibrary'
+import { CLASS_ABBRS } from '@shared/classCombo'
 import type { SpellTargetCount } from '@shared/spellAnalysis'
 import { SpellModifierControls } from './SpellModifierControls'
 import { SpellTargetControls } from './SpellTargetControls'
@@ -42,7 +43,7 @@ function ClassesPicker({ mode, classes, combo, onChange }: {
   return <FormControl size="small" sx={{ minWidth: 190, maxWidth: 440 }}><InputLabel id="spells-classes-label" shrink>Classes</InputLabel>
     <Select multiple displayEmpty open={open} onOpen={() => setOpen(true)} onClose={() => setOpen(false)} labelId="spells-classes-label" label="Classes" value={mode === 'all' ? [...SPELL_CLASSES] : classes} data-testid="spells-classes" renderValue={(values) => mode === 'all' ? 'All' : values.length ? values.join(' / ') : 'Select…'} onChange={(event) => choose(typeof event.target.value === 'string' ? event.target.value.split(',') : event.target.value)} MenuProps={{ slotProps: { paper: { sx: { bgcolor: 'background.paper', backgroundImage: 'none' } } } }}>
       <MenuItem value="all" data-testid="spells-classes-all">All</MenuItem><MenuItem value="none" data-testid="spells-classes-none">None</MenuItem><MenuItem value="mine" disabled={!combo.length} data-testid="spells-classes-mine">My classes</MenuItem>
-      {SPELL_CLASSES.map((code) => <MenuItem key={code} value={code}>{code}</MenuItem>)}
+      {CLASS_ABBRS.map((code) => <MenuItem key={code} value={code}>{code}</MenuItem>)}
     </Select>
   </FormControl>
 }

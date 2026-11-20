@@ -21,6 +21,13 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.22.2',
+    date: '2026-11-20',
+    entries: [
+      { kind: 'changed', text: 'Class dropdowns list classes alphabetically by their displayed labels. In Spells, All, None, and My classes stay at the top.', fromReport: true }
+    ]
+  },
+  {
     version: '0.22.1',
     date: '2026-11-20',
     entries: [

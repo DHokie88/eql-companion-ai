@@ -37,7 +37,7 @@
 //
 // Pure, dependency-free and node-testable, with RELATIVE value imports — the mobSearch.ts
 // precedent (AGENTS.md, Toolchain gotchas).
-import type { ClassAbbr } from './classCombo'
+import { CLASS_ABBRS, type ClassAbbr } from './classCombo'
 
 /** One statement of "this class gets this spell at this level". */
 export interface SpellClassLevel {
@@ -135,6 +135,10 @@ const DISPLAY_NAME_BY_ABBR: Readonly<Record<ClassAbbr, string>> = {
 export function classDisplayName(abbr: ClassAbbr): string {
   return DISPLAY_NAME_BY_ABBR[abbr]
 }
+
+/** Option order for class menus that display full names. */
+export const CLASS_ABBRS_BY_DISPLAY_NAME: readonly ClassAbbr[] =
+  [...CLASS_ABBRS].sort((a, b) => classDisplayName(a).localeCompare(classDisplayName(b), 'en'))
 
 /** `Enchanter - Level 37 (Autogranted)` -> ENC 37. Trailing notes are ignored, not required. */
 const SEGMENT = /^([A-Za-z][A-Za-z ]*?)\s*-\s*Level\s*(\d+)\b/

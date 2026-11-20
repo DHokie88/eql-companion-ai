@@ -40,8 +40,8 @@
 import { type JSX, useEffect, useMemo } from 'react'
 import { Box, Chip, IconButton, Stack } from '@mui/material'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
-import { CLASS_ABBRS, MAX_COMBO_SLOTS, resolvedClasses, type ClassAbbr } from '@shared/classCombo'
-import { classDisplayName } from '@shared/spellLevels'
+import { MAX_COMBO_SLOTS, resolvedClasses, type ClassAbbr } from '@shared/classCombo'
+import { CLASS_ABBRS_BY_DISPLAY_NAME, classDisplayName } from '@shared/spellLevels'
 import { useComboSnap } from '../profiles/ClassComboData'
 import { useWishlist } from '../wishlist/useWishlist'
 import { wishFromDonor } from '../wishlist/wishSearch'
@@ -71,7 +71,7 @@ function ClassFilter({ classes }: { classes: BrowseClassesApi }): JSX.Element {
   // not to a popper racing the option list.
   return (
     <ChipMultiSelect
-      options={CLASS_ABBRS}
+      options={CLASS_ABBRS_BY_DISPLAY_NAME}
       value={classes.classes}
       onChange={(next) => classes.set(next)}
       label="Classes"

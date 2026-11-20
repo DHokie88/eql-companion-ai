@@ -101,7 +101,12 @@ try {
   const notice = page.getByTestId('telemetry-notice-off')
   if (await notice.isVisible()) await notice.click()
   await page.getByTestId('nav-spells').click()
-  await page.getByTestId('spells-classes').click(); await page.getByTestId('spells-classes-all').click()
+  await page.getByTestId('spells-classes').click()
+  assert.deepEqual(await page.getByRole('option').allTextContents(), [
+    'All', 'None', 'My classes', 'BER', 'BRD', 'BST', 'CLR', 'DRU', 'ENC', 'MAG', 'MNK',
+    'NEC', 'PAL', 'RNG', 'ROG', 'SHD', 'SHM', 'WAR', 'WIZ'
+  ])
+  await page.getByTestId('spells-classes-all').click()
   await page.getByTestId('spells-sort-id').click()
   await expectRows(page, [906, 907, 908, 909, 910, 911, 912])
 

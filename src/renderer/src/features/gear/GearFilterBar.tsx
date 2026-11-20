@@ -33,11 +33,10 @@
 import type { JSX } from 'react'
 import { Chip, IconButton, MenuItem, Stack, TextField } from '@mui/material'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
-import { CLASS_ABBRS } from '@shared/classCombo'
 import type { ItemUpgradeState } from '@shared/itemUpgrade'
 import { EQUIP_SLOTS } from '@shared/planner/types'
 import { WEAPON_PICKS, WEAPON_PICK_LABEL } from '@shared/planner/weaponType'
-import { classDisplayName } from '@shared/spellLevels'
+import { CLASS_ABBRS_BY_DISPLAY_NAME, classDisplayName } from '@shared/spellLevels'
 import ChipMultiSelect from '../../components/ChipMultiSelect'
 import { CURRENT_ERA_LABEL } from '../planner/plannerData'
 import { SOCKET_LABEL } from '../planner/plannerGroups'
@@ -200,7 +199,7 @@ function IdentityRow({ filters, setFilters, text, setText, classes, visible }: O
           removes. The placeholder is what says an empty pick is no filter at all. */}
       {visible.has('classes') && (
         <ChipMultiSelect
-          options={CLASS_ABBRS}
+          options={CLASS_ABBRS_BY_DISPLAY_NAME}
           value={classes.classes}
           onChange={classes.set}
           label="Classes"
