@@ -2,7 +2,6 @@ import { Fragment, type JSX } from 'react'
 import { Box, Button, IconButton, Stack, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import type { SpellBrowseSort, SpellMetric, SpellSummary } from '@shared/spellLibrary'
-import { spellEraCaption } from '@shared/spellBrowseEra'
 import { spellBrowseEffectText } from '@shared/spellBrowseEffects'
 import { amount, efficiencyAmount, wholeAmount, EstimateAmount } from './SpellEstimate'
 import { SpellNameButton, SpellSortHeader, type useSpellSort } from './SpellTableControls'
@@ -54,18 +53,16 @@ function SpaCell({ record }: { record: SpellSummary }): JSX.Element {
 }
 function TextCell({ record, field }: Pick<CellProps, 'record' | 'field'>): JSX.Element {
   if (field === 'classes') return <>{record.classes.length ? record.classes.map((c) => `${c.code} ${c.level}`).join(' · ') : 'Internal / NPC'}</>
-  if (field === 'era') return <>{spellEraCaption(record.era ?? 'unknown')}</>
   if (field === 'description') return <Typography variant="body2" sx={{ minWidth: 220, maxWidth: 420, whiteSpace: 'normal', lineHeight: 1.6 }}>{record.description ?? '-'}</Typography>
   if (field === 'type') return <>{record.typeLabel ?? record.spellType?.toUpperCase() ?? '-'}</>
   return <>{field === 'rate' ? wholeAmount(browseTimingValue(record, field)) : amount(browseTimingValue(record, field))}</>
 }
-export function SpellBrowseTable({ records, selected, sort, filters, metric = 'damage', columns = DEFAULT_BROWSE_COLUMNS, uniformType = false, onOpen, onToggle }: {
+export function SpellBrowseTable({ records, selected, sort, categoryDisplay = 'both', metric = 'damage', columns = DEFAULT_BROWSE_COLUMNS, uniformType = false, onOpen, onToggle }: {
   records: SpellSummary[]; selected: number[]; sort: ReturnType<typeof useSpellSort<SpellBrowseSort>>
-  filters?: { category: string; subcategory: string }; metric?: SpellMetric; columns?: BrowseDisplayField[]; uniformType?: boolean
+  categoryDisplay?: CategoryDisplay; metric?: SpellMetric; columns?: BrowseDisplayField[]; uniformType?: boolean
   onOpen: (id: number) => void; onToggle: (id: number) => void
 }): JSX.Element {
-  const categoryDisplay = !filters?.category ? 'both' : filters.subcategory ? 'none' : 'subcategory'
-  const visible = browseColumns(metric, categoryDisplay, columns, uniformType)
+  const visible = browseColumns(metric, categoryDisplay, columns, { uniformType })
   const totalWidth = visible.reduce((sum, c) => sum + browseColumnWidth(c.field), 0)
   const [expanded, setExpanded] = useSpellWorkspaceState<string[]>('browse-expanded-lines', [])
   const row = (record: SpellSummary, alternative = false): JSX.Element => <TableRow key={record.id} hover data-testid="spells-record" data-spell-id={record.id} data-alternative={alternative || undefined} sx={alternative ? { bgcolor: 'background.paper' } : undefined}>
@@ -76,7 +73,7 @@ export function SpellBrowseTable({ records, selected, sort, filters, metric = 'd
       }} onOpen={onOpen} onToggle={onToggle} />
     </TableCell>)}
   </TableRow>
-  const plain = new Set<BrowseDisplayField>(['rank', 'spa', 'era'])
+  const plain = new Set<BrowseDisplayField>(['rank', 'spa'])
   const scroll = visible.some((column) => column.field === 'spa' || column.field === 'description')
   return <Box sx={{ overflowX: 'auto' }} data-testid="spells-table-scroll"><Table size="small" aria-label="Spell catalog" sx={{ tableLayout: 'fixed', width: '100%', minWidth: scroll ? totalWidth : '100%', '& .MuiTableCell-root': { px: 1, py: 1, fontVariantNumeric: 'tabular-nums' } }}><colgroup>{visible.map((column) => <col key={column.field} style={{ width: `${100 * browseColumnWidth(column.field) / totalWidth}%` }} />)}</colgroup><TableHead><TableRow>
     {visible.map((column) => plain.has(column.field)

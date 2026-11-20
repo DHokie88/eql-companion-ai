@@ -18,6 +18,11 @@ export function useSpellSort<T extends string>(initial: T, direction: SpellSortD
   return { ...sort, changeSort, selectSort }
 }
 
+export function visibleSpellSort<T extends string>(sort: ReturnType<typeof useSpellSort<T>>, columns: readonly { field: string }[], fallback: T): ReturnType<typeof useSpellSort<T>> {
+  if (columns.some(({ field }) => field === sort.field)) return sort
+  return { ...sort, field: fallback, direction: 'asc', changeSort: (field) => sort.selectSort(field, field === fallback ? 'desc' : 'asc') }
+}
+
 export function SpellSortHeader<T extends string>({ field, label, sort, numeric = false, align }: {
   field: T; label: string; numeric?: boolean; align?: 'left' | 'center' | 'right'; sort: { field: T; direction: SpellSortDirection; changeSort: (field: T) => void }
 }): JSX.Element {

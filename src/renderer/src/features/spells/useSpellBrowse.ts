@@ -6,8 +6,7 @@ import { useSearchText } from './useSearchText'
 import { useSpellSort } from './SpellTableControls'
 import { useSpellPageReset, useSpellWorkspaceState } from './spellWorkspace'
 import type { SpellAnalysisOptions, SpellRankingCategory } from '@shared/spellAnalysis'
-import { browseColumns, DEFAULT_BROWSE_COLUMNS, hideUniformTypeColumn, type BrowseDisplayField } from './spellBrowseColumns'
-import type { BrowseEra } from './SpellBrowseToolbar'
+import { browseColumns, DEFAULT_BROWSE_COLUMNS, hideUniformTypeColumn, type BrowseDisplayField, type CategoryDisplay } from './spellBrowseColumns'
 import { effectiveBrowseMax } from './spellLevelRange'
 import { filterColumnPreset, useSpellColumnSelection } from './spellColumnPresets'
 
@@ -45,15 +44,18 @@ export function browseCategory(filters: BrowseFilters, data?: import('@shared/sp
   if (!filters.category && filters.type === 'dot') return 'Damage Over Time'
   return filters.category || ((filters.type || filters.hpFilter) && categories.length === 1 ? categories[0] : '')
 }
-function useVisibleSort(input: { sort: ReturnType<typeof useSpellSort<SpellBrowseSort>>; filters: BrowseFilters; metric: SpellMetric; columns: BrowseDisplayField[]; data?: import('@shared/spellLibrary').SpellSearchResult | null }): void {
-  const { sort, filters, metric, columns, data } = input
-  const category = browseCategory(filters, data)
+function useVisibleSort(input: {
+  sort: ReturnType<typeof useSpellSort<SpellBrowseSort>>; fields: BrowseDisplayField[]; category: string; subcategory: string; automatic: boolean
+}): void {
+  const { sort, fields, category, subcategory, automatic } = input
   const { field: sortField, direction: sortDirection, selectSort: chooseSort } = sort
-  useEffect(() => { adjustCategorySort({ field: sortField, direction: sortDirection, selectSort: chooseSort }, category, filters.subcategory) }, [category, filters.subcategory, sortField, sortDirection, chooseSort])
-  const fields = browseColumns(metric, !category ? 'both' : filters.subcategory ? 'none' : 'subcategory', columns, hideUniformTypeColumn(filters.type, data?.matchingTypes)).map((column) => column.field).join(',')
   useEffect(() => {
-    if (!fields.split(',').includes(sortField) && !['category', 'subcategory'].includes(sortField) && sortField !== 'name') chooseSort('name', 'asc')
-  }, [fields, sortField, chooseSort])
+    if (automatic) adjustCategorySort({ field: sortField, direction: sortDirection, selectSort: chooseSort }, category, subcategory)
+  }, [category, subcategory, sortField, sortDirection, chooseSort, automatic])
+  const visible = fields.includes(sortField) || (automatic && ['category', 'subcategory'].includes(sortField))
+  useEffect(() => {
+    if (!visible && sortField !== 'name') chooseSort('name', 'asc')
+  }, [visible, sortField, chooseSort])
 }
 
 export function useSpellBrowse({ classes, level, autoMax, allSpells, evaluation, selected, analysis, bestInLine = false, enabled = true }: {
@@ -64,32 +66,36 @@ export function useSpellBrowse({ classes, level, autoMax, allSpells, evaluation,
   const sort = useSpellSort<SpellBrowseSort>('efficiency', 'desc', 'id')
   const [group, setGroup] = useSpellWorkspaceState<NonNullable<SpellSearchQuery['group']>>('browse-group', 'all')
   const [metric, setMetric] = useSpellWorkspaceState<SpellMetric>('browse-metric', 'damage')
-  const columnSelection = useSpellColumnSelection('browse-visible-columns', DEFAULT_BROWSE_COLUMNS, filterColumnPreset(filters))
+  const columnSelection = useSpellColumnSelection('browse-visible-columns', { view: 'browse', baseline: DEFAULT_BROWSE_COLUMNS, inferred: filterColumnPreset(filters) })
   const { columns } = columnSelection
-  const [era, setEra] = useSpellWorkspaceState<BrowseEra>('browse-era', 'current')
   const queryText = useSearchText(filters.text)
   const includeEffects = columns.includes('spa')
   const { min, category, subcategory, effect, type, polarity, hpFilter } = filters
   const maximum = filters.max === null || filters.max === '' ? String(effectiveBrowseMax(autoMax, min)) : filters.max
   const invalid = browseFilterError(filters, maximum)
   const classKey = classes.join(','), selectedKey = sort.field === 'selected' ? selected.join(',') : ''
-  useSpellPageReset(`${classKey}:${level}:${allSpells}:${sort.field}:${sort.direction}:${group}:${metric}:${bestInLine}:${era}:${min}:${maximum}`, setPage)
+  useSpellPageReset(`${classKey}:${level}:${allSpells}:${sort.field}:${sort.direction}:${group}:${metric}:${bestInLine}:${min}:${maximum}`, setPage)
   const load = useCallback(() => {
     if (invalid) return Promise.reject(new Error(invalid))
     const query: SpellSearchQuery = { text: queryText, classes: classKey ? classKey.split(',') as SpellClass[] : [], level, allSpells, allLevels: true,
       minLevel: min === '' ? 0 : Number(min), maxLevel: maximum === '' ? undefined : Number(maximum),
       category: category || undefined, subcategory: subcategory || undefined, effect: effect === '' ? undefined : Number(effect),
       type: browseType(type), polarity: polarity || undefined, hpFilter: hpFilter || undefined, bestInLine, group, metric, includeHighlights: false,
-      browseRank: true, era, includeEffects,
+      browseRank: true, includeEffects,
       sortBy: sort.field, direction: sort.direction, selectedIds: selectedKey ? selectedKey.split(',').map(Number) : [], page, pageSize: 40, evaluation: { ...evaluation, rankOnly: true }, analysis }
     return window.eq.spellLibrary.search(query)
-  }, [queryText, classKey, level, allSpells, min, category, subcategory, effect, type, polarity, hpFilter, bestInLine, maximum, sort.field, sort.direction, selectedKey, page, evaluation, invalid, analysis, group, metric, era, includeEffects])
+  }, [queryText, classKey, level, allSpells, min, category, subcategory, effect, type, polarity, hpFilter, bestInLine, maximum, sort.field, sort.direction, selectedKey, page, evaluation, invalid, analysis, group, metric, includeEffects])
   const result = useLibraryQuery(load, undefined, enabled)
-  useVisibleSort({ sort, filters, metric, columns, data: result.data })
+  const automatic = columnSelection.preset === 'default' || columnSelection.preset === 'auto'
+  const activeCategory = browseCategory(filters, result.data)
+  const display: CategoryDisplay = !automatic || !activeCategory ? 'both' : subcategory ? 'none' : 'subcategory'
+  const uniformType = automatic && hideUniformTypeColumn(type, result.data?.matchingTypes)
+  const fields = browseColumns(metric, display, columns, { uniformType }).map((column) => column.field)
+  useVisibleSort({ sort, fields, category: activeCategory, subcategory, automatic })
   const change = <K extends keyof BrowseFilters>(key: K, value: BrowseFilters[K]): void => {
     const category = key === 'category' ? value : filters.category
     const subcategory = key === 'category' ? '' : key === 'subcategory' ? value : filters.subcategory
-    adjustCategorySort(sort, category, subcategory)
+    if (automatic) adjustCategorySort(sort, category, subcategory)
     const newMetric = key === 'hpFilter' && value ? value as SpellMetric : key === 'type' ? typeMetric(value as BrowseFilters['type']) : null
     if (newMetric) setMetric(newMetric)
     setFilters((current) => ({ ...current, [key]: value, ...(key === 'category' ? { subcategory: '' } : {}), ...(key === 'type' ? { hpFilter: '' } : key === 'hpFilter' ? { type: '' } : {}) })); setPage(1)
@@ -100,5 +106,5 @@ export function useSpellBrowse({ classes, level, autoMax, allSpells, evaluation,
     setFilters((current) => ({ ...current, type: category, hpFilter: '' })); setMetric(typeMetric(category) ?? 'damage')
     setGroup('ranked'); selectSort('efficiency', 'desc'); setPage(1)
   }, [setFilters, setMetric, setGroup, selectSort, setPage])
-  return { ...result, ...columnSelection, filters, maximum, change, reset, page, setPage, sort, invalid, group, setGroup, metric, setMetric, bestInLine, focusCategory, era, setEra }
+  return { ...result, ...columnSelection, filters, maximum, change, reset, page, setPage, sort, invalid, group, setGroup, metric, setMetric, bestInLine, focusCategory, display, uniformType }
 }

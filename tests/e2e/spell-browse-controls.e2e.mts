@@ -40,6 +40,28 @@ async function choose(page: Page, testId: string, label: string): Promise<void> 
   await page.getByTestId(testId).click(); await page.getByRole('option', { name: label, exact: true }).click()
 }
 
+async function progressionColumns(page: Page): Promise<void> {
+  await page.getByTestId('spells-tab-by-level').click()
+  await page.getByRole('tab', { name: 'Upcoming', exact: true }).click()
+  await page.getByTestId('spells-min-level').fill('5')
+  await page.getByTestId('spells-max-level').fill('12')
+  await page.getByTestId('spells-max-level').press('Enter')
+  await page.getByTestId('by-level-record').first().waitFor()
+  const table = page.getByRole('table', { name: 'Client spell eligibility by level' })
+  assert.equal(await table.getByTestId('spells-sort-level').count(), 1)
+  assert.equal(await table.getByRole('columnheader', { name: 'Preview', exact: true }).count(), 1)
+  await page.getByTestId('spells-columns').click()
+  const enabled = await page.getByRole('option', { selected: true }).evaluateAll((options) => options.map((option) => option.getAttribute('data-testid')!))
+  for (const testId of enabled) await page.getByTestId(testId).click()
+  await page.keyboard.press('Escape')
+  assert.deepEqual((await table.getByRole('columnheader').allTextContents()).map((value) => value.trim()), ['Spell'])
+  assert.equal(await table.getByText(/Eligible at level/).count(), 0)
+  await page.getByTestId('by-level-record').first().waitFor()
+  await page.getByTestId('spells-tab-browse').click()
+  await page.getByTestId('spells-tab-by-level').click()
+  assert.deepEqual((await table.getByRole('columnheader').allTextContents()).map((value) => value.trim()), ['Spell'])
+}
+
 buildIfStale()
 const staged = stageFixture('e2e-combat.log'), profile = makeUserData()
 const sources = spellBundle(rows().map((r) => r.join('^')))
@@ -137,12 +159,10 @@ try {
   assert.equal(await selectedTable.getByTestId('spells-open-7').evaluate((e) => getComputedStyle(e).textAlign), 'left')
   await page.getByTestId('spells-tab-browse').click()
   await firstId(page, 7)
-  assert.match(await page.getByTestId('spells-era-label').innerText(), /Classic EQL/)
-  assert.equal(await page.locator('[data-testid^="spell-era-"]').count(), 0)
-  await page.getByTestId('spells-era-switch').click()
-  assert.match(await page.getByTestId('spells-era-label').innerText(), /Kunark estimate/)
-  assert.equal(await page.locator('[data-testid^="spell-era-"]').count(), 0)
+  assert.equal(await page.getByTestId('spells-era-switch').count(), 0)
+  assert.equal(await page.getByTestId('spells-era-label').count(), 0)
   await page.getByTestId('spells-columns').click()
+  assert.equal(await page.getByTestId('spells-column-era').count(), 0)
   await page.getByTestId('spells-column-spa').click()
   await page.keyboard.press('Escape')
   assert.match(await page.getByTestId('spell-spa-7').innerText(), /SPA 100/)
@@ -152,6 +172,7 @@ try {
   await page.getByTestId('spells-sort-classes').click(); await firstId(page, 249)
   await page.getByRole('button', { name: 'Go to page 2', exact: true }).click(); await firstId(page, 211)
   assert.equal((await visibleIds(page)).at(-1), 7, 'Class/Level descending keeps the lowest class on the last page')
+  await progressionColumns(page)
   console.log('PASS spell Browse controls: wrapped-name alignment, all data headers, global sorting/pagination, Class/Level numeric order across pages, level bounds and validation, type/category/subcategory/SPA/helpful-harmful filters, reset, selection, detail/back and Compare sorting.')
 } catch (error) { await dumpArtifacts(page, 'spell-browse-controls-failure'); throw error }
 finally { await launched.close(); await staged.dispose(); await removeUserData(profile) }

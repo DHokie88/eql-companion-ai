@@ -28,7 +28,8 @@ export function SpellCompare({ ids, level, evaluation, targets, initialScope, on
   const metric = choice === 'auto' ? data?.metric ?? 'damage' : choice
   const hp = hitPointMetric(metric)
   const suggested = compareColumnPreset(metric)
-  const columnSelection = useSpellColumnSelection('compare-columns', DEFAULT_COMPARE_COLUMNS, suggested, hp ? undefined : suggested)
+  const view = hp ? 'compare-hp' : 'compare-effects'
+  const columnSelection = useSpellColumnSelection('compare-columns', { view, baseline: DEFAULT_COMPARE_COLUMNS, inferred: suggested, defaultPreset: hp ? undefined : suggested })
   const referenceId = reference !== null && ids.includes(reference) ? reference : ids[0]
   const visible = compareColumns(columnSelection.columns, metric)
   return <Stack spacing={2} data-testid="spells-compare">
@@ -41,7 +42,7 @@ export function SpellCompare({ ids, level, evaluation, targets, initialScope, on
       <CompareMetricPicker choice={choice} onChange={setChoice} detected={data?.results.length ? data.metric : undefined} />
       {hp && <CompareScopePicker scope={scope} onChange={setScope} />}
       <CompareReferencePicker data={data} referenceId={referenceId} onChange={setReference} />
-      <BrowseColumnPicker metric={hp ?? 'damage'} {...columnSelection} columnCount={visible.length} />
+      <BrowseColumnPicker metric={hp ?? 'damage'} {...columnSelection} view={view} columnCount={visible.length} />
     </Stack></Stack></Paper>
     <CompareResults data={data} empty={!ids.length} error={error} loading={loading} showHp={hp !== null} columns={visible} referenceId={referenceId} onOpen={(id) => onOpen(id, scope)} onRemove={onRemove} />
   </Stack>

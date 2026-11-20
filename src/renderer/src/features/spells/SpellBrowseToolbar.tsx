@@ -3,7 +3,6 @@ import { flushSync } from 'react-dom'
 import { Box, FormControlLabel, Slider, Stack, Switch, Typography } from '@mui/material'
 import { romanRank } from '@shared/spellLines'
 import { selectSpellPreviewRank, toggleShowMine } from '@shared/spellPreviewControls'
-import type { SpellEraFilter } from '@shared/spellBrowseEra'
 import { useSpellRankState } from './spellRankState'
 
 const RANK_MARKS = Array.from({ length: 10 }, (_, index) => ({ value: index + 1 }))
@@ -55,18 +54,13 @@ export function SpellRankSlider(): JSX.Element | null {
   </Stack>
 }
 
-export function SpellBrowseToolbar({ era, onEra }: { era: 'current' | 'preview'; onEra: (era: 'current' | 'preview') => void }): JSX.Element | null {
+export function SpellBrowseToolbar(): JSX.Element | null {
   const state = useSpellRankState()
   const context = state?.context
   if (!state || !context) return null
   const mine = context.preferences.browse?.useMyRanks === true
-  const current = era === 'current'
   return <Stack direction="row" gap={1.5} alignItems="center" flexWrap="wrap" data-testid="spells-browse-toolbar" sx={{ px: 0.5 }}>
     <SpellRankSlider />
     <FormControlLabel sx={{ mr: 0 }} label="Use my ranks" data-testid="spells-use-my-ranks" control={<Switch size="small" checked={mine} disabled={state.loading} data-testid="spells-mode-mine" onChange={(_event, checked) => state.update(toggleShowMine(context.preferences, checked))} />} />
-    <FormControlLabel sx={{ mr: 0 }} label="Current era" data-testid="spells-current-era" control={<Switch size="small" checked={current} data-testid="spells-era-switch" onChange={(_event, checked) => onEra(checked ? 'current' : 'preview')} />} />
-    <Typography variant="caption" data-testid="spells-era-label" color="text.secondary">{current ? 'Classic EQL' : 'Kunark estimate'}</Typography>
   </Stack>
 }
-
-export type BrowseEra = Extract<SpellEraFilter, 'current' | 'preview'>
