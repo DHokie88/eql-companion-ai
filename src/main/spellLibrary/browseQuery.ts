@@ -5,6 +5,7 @@ import { spellEraAdmits, type SpellEraFilter } from '../../shared/spellBrowseEra
 import { classesArg, levelArg, optionalText, spellLevelBound } from './queryValidation'
 import { spellEraLabel } from './spellBrowseEraTable'
 import { integerArg } from './workerProtocol'
+import { clientSpellDescription } from '../../shared/clientSpellDescriptions'
 
 export const SEARCH_QUERY_FIELDS = ['snapshotId', 'text', 'classes', 'level', 'category', 'subcategory', 'effect', 'allSpells', 'allLevels',
   'minLevel', 'maxLevel', 'type', 'polarity', 'mana', 'sortBy', 'direction', 'selectedIds', 'page', 'pageSize', 'evaluation', 'analysis', 'group', 'metric', 'includeHighlights', 'bestInLine', 'hpFilter', 'era', 'includeEffects', 'browseRank']
@@ -71,7 +72,7 @@ function matchesLevel(record: ClientSpellRecord, options: SearchOptions): boolea
   return (options.minLevel === undefined || learned >= options.minLevel) && (ceiling === undefined || learned <= ceiling)
 }
 function matchesText(record: ClientSpellRecord, text: string): boolean {
-  return /^\d+$/.test(text) ? record.id === Number(text) : `${record.name} ${record.description}`.toLowerCase().includes(text)
+  return /^\d+$/.test(text) ? record.id === Number(text) : `${record.name} ${clientSpellDescription(record)}`.toLowerCase().includes(text)
 }
 function matchesTraits(record: ClientSpellRecord, options: SearchOptions, mechanics?: SpellMechanicsCatalog): boolean {
   if (options.hpFilter) {

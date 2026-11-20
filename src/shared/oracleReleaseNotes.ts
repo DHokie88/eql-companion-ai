@@ -21,6 +21,13 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.22.1',
+    date: '2026-11-20',
+    entries: [
+      { kind: 'fixed', text: "Spell descriptions convert stun times from milliseconds to seconds. Brusco's Bombastic Bellow now shows 8 seconds, Song of Highsun shows 1 second, and Denon's Bereavement shows 0.5 seconds.", fromReport: true }
+    ]
+  },
+  {
     version: '0.22.0',
     date: '2026-11-20',
     entries: [

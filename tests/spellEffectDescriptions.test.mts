@@ -25,6 +25,28 @@ test('unknown target caps stay explicit, and unrelated description tokens remain
   }
 })
 
+test('stun seconds are formatted by slot while existing snapshots and unrelated values stay intact', () => {
+  for (const [base, expected] of [[8000, '8 seconds'], [1000, '1 second'], [500, '0.5 seconds']] as const) {
+    const row = spellFields(101, 'Test Stun Song', 190)
+    row[189] = `1|21|${base}|5250|100|55$2|79|-222|0|100|0`
+    const sources = spellBundle([row.join('^')])
+    sources['dbstr_us.txt'] = '900^6^Deals #2 damage and stuns for #1 seconds up to level @1. PvP: $1s. Raw: #1 milliseconds. Hits #2 monsters.^0^\n'
+    const record = parseClientSpellBundle(sources)[0]
+    const before = JSON.stringify(record)
+    assert.equal(describeClientSpell(record, 55).description,
+      `Deals 222 damage and stuns for ${expected} up to level 55. PvP: 5.25s. Raw: ${base} milliseconds. Hits 222 monsters.`)
+    assert.match(record.description, new RegExp(`for ${base} seconds`))
+    assert.equal(JSON.stringify(record), before)
+  }
+})
+
+test('seconds attached to non-stun values stay untouched and other documented stun slots convert', () => {
+  const row = spellRow()
+  row[172] = '1|64|1500|500|100|40$2|502|9000|0|100|1055$3|79|-9000|0|100|0'
+  const record = syntheticCatalog([row], 'Spin #1 secs, fearstun #2 second, unrelated #3 seconds.').records[0]
+  assert.equal(clientSpellDescription(record), 'Spin 1.5 secs, fearstun 9 seconds, unrelated 9000 seconds.')
+})
+
 test('slow details explain movement, attack percentage, duration, human target and casting range at the chosen level', () => {
   const row = spellRow(42, 'Synthetic Binding Song')
   row[4] = '120'; row[11] = '5'; row[12] = '2'; row[29] = '1'

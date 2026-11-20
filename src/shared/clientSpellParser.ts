@@ -228,7 +228,7 @@ function durationText(formula: number, cap: number): string {
   return cap > 0 ? `up to ${ticksText(cap)} (${label}, capped)` : `scales with caster level (${label})`
 }
 
-function resolveDescription(raw: string, record: ClientSpellRecord): string {
+export function resolveClientSpellDescription(raw: string, record: ClientSpellRecord): string {
   const slots = new Map(record.effects.map((effect) => [effect.slot, effect]))
   return raw.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/&#39;/g, "'")
     .replace(/[ \t]+\n/g, '\n').trim().replace(/([#$@])(\d{1,2})|%z/g, (token: string, kind: string | undefined, number: string | undefined) => {
@@ -358,7 +358,7 @@ function enrichRecord(record: ClientSpellRecord, strings: Map<string, string>, n
   record.subcategory = strings.get(`${String(fields.subcategoryId)}:5`) ?? ''
   const preferred = strings.get(`${String(fields.descriptionId)}:6`)
   record.rawDescription = preferred?.length ? preferred : strings.get(`${record.id}:6`) ?? ''
-  record.description = resolveDescription(record.rawDescription, record)
+  record.description = resolveClientSpellDescription(record.rawDescription, record)
   enrichNames(record, strings)
   for (const effect of record.effects) fields[`effect${effect.slot}`] = describeEffect(effect, record, names)
   const recourse = Number(fields.recourse)

@@ -1,14 +1,34 @@
 import type { ClientSpellEffect, ClientSpellRecord } from './spellLibrary'
 import { clientSpellEffectAmount, clientSpellDurationTicks } from './clientSpellCalculations'
-import { clientSpellEffectLabel } from './clientSpellParser'
+import { clientSpellEffectLabel, resolveClientSpellDescription } from './clientSpellParser'
 
 export interface SpellEffectDescription { slot: number; spa: number; label: string; text: string; neutral: boolean }
 export interface SpellPresentation { description: string; level: number; duration: string; target: string; range: string; resist: string; effects: SpellEffectDescription[]; bard?: import('./bardInstruments').BardSongPresentation }
+const STUN_DURATION_SPAS = new Set([21, 64, 502])
+
+function displayDescription(record: ClientSpellRecord): string {
+  if (!record.effects.some((effect) => STUN_DURATION_SPAS.has(effect.spa))) return record.description
+  // For stun slots, # is the ordinary duration, $ the PvP duration and @ a level cap.
+  // Convert only duration tokens labeled in seconds, leaving raw millisecond text alone.
+  const raw = record.rawDescription.replace(/([#$])(\d{1,2})([ \t]*(?:seconds?|secs?|s))\b/gi,
+    (token: string, kind: string, slot: string, units: string): string => {
+      const effect = record.effects.find((entry) => entry.slot === Number(slot) && STUN_DURATION_SPAS.has(entry.spa))
+      if (!effect) return token
+      const seconds = Math.abs(kind === '#' ? effect.base : effect.limit) / 1000
+      const unit = units.trimStart()
+      if (unit.length === 1) return `${seconds}${units}`
+      const gap = units.slice(0, units.length - unit.length)
+      const singular = unit.length < 6 ? 'sec' : 'second'
+      return `${seconds}${gap}${singular}${seconds === 1 ? '' : 's'}`
+    })
+  return raw === record.rawDescription ? record.description : resolveClientSpellDescription(raw, record)
+}
+
 /** Resolve display tokens against this captured record without rewriting source history. */
 export function clientSpellDescription(record: ClientSpellRecord, level?: number): string {
   const cap = record.fields.aeMaxTargets
   const targets = typeof cap === 'number' && Number.isSafeInteger(cap) && cap > 0 ? String(cap) : 'an unspecified number of'
-  const description = record.description.replace(/%T\b/g, targets)
+  const description = displayDescription(record).replace(/%T\b/g, targets)
   const slow = level === undefined ? '' : clientSpellSlowSummary(record, level)
   return [description, slow].filter(Boolean).join(' ')
 }
