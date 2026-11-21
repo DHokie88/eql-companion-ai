@@ -167,6 +167,21 @@ function PadRow({ height, colSpan }: { height: number; colSpan: number }): JSX.E
   )
 }
 
+/** The label uses the same state and ownership data that scaled this row. */
+function UpgradeLabel({ row, compare }: { row: GearRow; compare: GearCompareData | undefined }): JSX.Element | null {
+  if (!compare?.showUpgradeLabels) return null
+  const ownedTier = ownedUpgradeState(compare.ownedStats ?? null, row)
+  const state = ownedTier ?? compare.state
+  const title = ownedTier
+    ? 'Your highest owned tier; partial progress is unavailable in the inventory export.'
+    : `Simulated tier ${String(state.full)}${state.fraction ? `, ${String(state.fraction)}/${String(2 ** state.full)} progress` : ''}`
+  return (
+    <Box component="span" data-testid="gear-upgrade-label" sx={{ flexShrink: 0, color: 'text.secondary' }} title={title}>
+      ({ownedTier ? 'yours ' : ''}+{state.full})
+    </Box>
+  )
+}
+
 /**
  * ONE CANDIDATE. Every number on it is the SCALED one — the row this component is handed has
  * already been through `scaleAll` at the table's plus-state, so nothing here knows the simulation
@@ -198,19 +213,12 @@ const GearLine = memo(function GearLine({
   // already the ownership key — phase 3's seam — so there is nothing to normalise here.
   const owned = ownership === null ? null : ownershipFor(ownership, row)
   const wish = on.wish
-  const ownedTier = compare?.showUpgradeLabels ? ownedUpgradeState(compare.ownedStats ?? null, row) : null
-  const labelState = ownedTier ?? compare?.state
   const line = (
     <TableRow hover data-testid="gear-row" data-item-key={row.key} sx={FIXED_ROW}>
       <TableCell sx={{ px: 1.5 }}>
         <Stack direction="row" spacing={0.5} alignItems="center" sx={{ flexWrap: 'nowrap', minWidth: 0 }}>
           <DonorName name={row.name} onOpen={on.openLoot} />
-          {compare?.showUpgradeLabels && labelState && (
-            <Box component="span" data-testid="gear-upgrade-label" sx={{ flexShrink: 0, color: 'text.secondary' }}
-              title={ownedTier ? 'Your highest owned tier; partial progress is unavailable in the inventory export.' : `Simulated tier ${String(labelState.full)}${labelState.fraction ? `, ${String(labelState.fraction)}/${String(2 ** labelState.full)} progress` : ''}`}>
-              ({ownedTier ? 'yours ' : ''}+{labelState.full})
-            </Box>
-          )}
+          <UpgradeLabel row={row} compare={compare} />
           <EraChip subject={row} />
         </Stack>
       </TableCell>

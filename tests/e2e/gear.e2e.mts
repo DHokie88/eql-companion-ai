@@ -128,6 +128,7 @@ import { stepGearWish } from './gearWishSteps.mjs'
 // JOS-338's comparison card, likewise — and it is the step that hit-tests the JOS-143 regression
 // with a popper open over this tab for the first time since the table shipped.
 import { stepGearCompare } from './gearCompareSteps.mjs'
+import { checkOwnedTierLabel, checkSimulatedTierLabel } from './gearUpgradeLabelSteps.mjs'
 // JOS-329's away-and-back steps, shared with the planner and character specs — one module because
 // the claim is identical on every tab of the area and only the fingerprint differs.
 import { stepGearMemory, stepGearMemoryRelaunched } from './areaMemorySteps.mjs'
@@ -581,20 +582,13 @@ async function stepUpgrade(page: Page): Promise<void> {
   const owned = expectedAt({ full: 5, fraction: 0 })
   const ownedScreen = await until(async () => { const reading = await screenAt(page); return reading.dmg === owned.dmg && reading.wis === owned.wis && reading.ratio === owned.ratio }, 15_000)
   check('owned stats use the inventory tier instead of the slider', ownedScreen)
-  const tierLabel = (key: string): string => `${ROW}[data-item-key="${key}"] [data-testid="gear-upgrade-label"]`
-  check('owned item names identify the tier used for their stats', (await textOf(page, tierLabel(THELVORN_KEY))).trim() === '(yours +5)')
-  await page.hover(`${ROW}[data-item-key="${THELVORN_KEY}"]`)
-  check('the owned comparison identifies the tier-floor estimate', await until(async () => (await countOf(page, '[data-testid="gear-compare-owned-stats"]')) > 0, 15_000))
+  await checkOwnedTierLabel(page, THELVORN_KEY)
   const unownedKey = 'zraxthril forged flamberge' // Primary, not in the inventory fixture, base damage 9.
   await typeAndSettle(page, SEARCH, unownedKey)
   const unownedVisible = await until(async () => (await countOf(page, `${ROW}[data-item-key="${unownedKey}"]`)) === 1, 15_000)
   const simulatedDamage = String(scaleGearRow({ ...THELVORN_BASE, stats: { DMG: 9 } }, CHECKPOINT).stats.DMG)
   check('unowned primary uses simulated damage with owned stats enabled', unownedVisible && (await cellText(page, unownedKey, 'DMG')) === simulatedDamage && ['', 'Looted'].includes(await cellText(page, unownedKey, 'owned')))
-  check('unowned item names show the simulated tier', (await textOf(page, tierLabel(unownedKey))).trim() === '(+2)')
-  const simTitle = await page.getAttribute(tierLabel(unownedKey), 'title')
-  check('the simulated tier identifies partial progress', simTitle?.includes('3/4 progress') === true, simTitle ?? '')
-  await page.click('[data-testid="gear-owned-stats-toggle"]')
-  check('tier labels disappear when owned stats are off', (await countOf(page, tierLabel(unownedKey))) === 0)
+  await checkSimulatedTierLabel(page, unownedKey)
   check('unowned item keeps simulated damage after switching owned stats off', (await cellText(page, unownedKey, 'DMG')) === simulatedDamage)
   await typeAndSettle(page, SEARCH, 'thelvorn')
   check('turning owned stats off restores the simulation', await until(async () => (await cellText(page, THELVORN_KEY, 'DMG')) === want.dmg, 15_000))
