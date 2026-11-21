@@ -18,7 +18,7 @@
 // way anyone says they want to see it, and the bet was wrong: a player comparing two breastplates
 // wants the seven attributes on screen without inventing seven thresholds to conjure them. So the
 // picker offers the WHOLE vocabulary (`PICKABLE_COLUMNS` — every `GearStatKey`, the derived
-// `RATIO` and `EFF_HP`, plus weapon handedness and type) and
+// `RATIO` and `EFF_HP`, plus weapon handedness, type and proc) and
 // an explicit choice WINS; absent a choice the derivation still runs, which is what keeps the tab's
 // first screen what it was. The distinction the storage layer has to preserve is therefore ABSENT
 // vs EMPTY: no stored key means "derive", a stored `[]` means "the user asked for no numeric
@@ -51,10 +51,10 @@ export const CORE_COLUMNS: readonly GearSortKey[] = ['AC', 'HP', 'MP', 'RATIO']
 
 /** Lead with the fields that distinguish weapons, then show other selected Gear columns. */
 export const WEAPON_COMPARE_COLUMNS: readonly GearSortKey[] = [
-  'RATIO', 'DMG', 'DELAY', 'HAND', 'WEAPON_TYPE', 'DMG_BONUS', 'BACKSTAB', 'RANGE', 'HASTE'
+  'RATIO', 'DMG', 'DELAY', 'HAND', 'WEAPON_TYPE', 'DMG_BONUS', 'BACKSTAB', 'RANGE', 'HASTE', 'PROC'
 ]
 
-export const GEAR_RATIO_HINT = 'Damage divided by delay at the displayed tier. The ratio excludes procs, haste and damage bonus.'
+export const GEAR_RATIO_HINT = 'Damage divided by delay at the displayed tier. The ratio excludes damage bonus, procs, haste, and off-hand attacks.'
 
 /** A sort can add one column to the core. */
 export const MAX_DERIVED_COLUMNS = 1
@@ -85,6 +85,7 @@ export function columnLabel(key: GearSortKey): string {
   if (key === 'RATIO') return 'Ratio'
   if (key === 'HAND') return 'Handedness'
   if (key === 'WEAPON_TYPE') return 'Weapon type'
+  if (key === 'PROC') return 'Proc'
   if (key === 'name') return 'Item'
   return key.replace(/_/g, ' ')
 }
@@ -110,7 +111,7 @@ function column(key: GearSortKey): GearColumn {
  * picker in the same commit, which is the only way "all stats" can stay true.
  */
 export const PICKABLE_COLUMNS: readonly GearSortKey[] = GEAR_STAT_KEYS.flatMap<GearSortKey>((key) => {
-  if (key === 'DELAY') return [key, 'RATIO', 'HAND', 'WEAPON_TYPE']
+  if (key === 'DELAY') return [key, 'RATIO', 'HAND', 'WEAPON_TYPE', 'PROC']
   if (key === 'HP') return [key, 'EFF_HP']
   return [key]
 })

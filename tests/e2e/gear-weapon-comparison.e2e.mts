@@ -70,7 +70,7 @@ await runGearSuite('gear-weapon-comparison', async (_app, page) => {
   check('the catalog contains the searched armor piece', await waitForRows(page, rowFor(ARMOR)))
   await page.click(WEAPONS)
   check('Weapons keeps the search and excludes the armor piece', await page.locator(SEARCH).inputValue() === ARMOR && await settle(async () => (await countOf(page, rowFor(ARMOR))) === 0, Boolean))
-  const required = ['RATIO', 'DMG', 'DELAY', 'HAND', 'WEAPON_TYPE', 'DMG_BONUS', 'BACKSTAB', 'RANGE', 'HASTE']
+  const required = ['RATIO', 'DMG', 'DELAY', 'HAND', 'WEAPON_TYPE', 'DMG_BONUS', 'BACKSTAB', 'RANGE', 'HASTE', 'PROC']
   check('the weapon layout exposes every comparison column', (await Promise.all(required.map((key) => countOf(page, sortButton(key))))).every((n) => n === 1))
   await checkWeaponRanking(page)
   await checkWeaponColumns(page)

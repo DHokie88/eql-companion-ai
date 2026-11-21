@@ -146,12 +146,13 @@ test('a stored choice DEGRADES rather than erroring, whatever another build wrot
 test('the picker offers every indexed stat, both derived keys and both weapon text keys', () => {
   // TWO DERIVED KEYS SINCE JOS-336: `RATIO` and `EFF_HP`. Neither is a field of `GearStats`, both
   // are computed off the SCALED vector at read time, and both are offered exactly like a stat.
-  assert.equal(PICKABLE_COLUMNS.length, GEAR_STAT_KEYS.length + 4)
+  assert.equal(PICKABLE_COLUMNS.length, GEAR_STAT_KEYS.length + 5)
   for (const key of GEAR_STAT_KEYS) assert.ok(PICKABLE_COLUMNS.includes(key), `${key} is offered`)
   assert.ok(PICKABLE_COLUMNS.includes('RATIO'))
   assert.ok(PICKABLE_COLUMNS.includes('EFF_HP'))
   assert.ok(PICKABLE_COLUMNS.includes('HAND'))
   assert.ok(PICKABLE_COLUMNS.includes('WEAPON_TYPE'))
+  assert.ok(PICKABLE_COLUMNS.includes('PROC'))
   assert.ok(!PICKABLE_COLUMNS.includes('name' as GearSortKey), 'the item column is not optional')
   // A DERIVED KEY STANDS BESIDE THE NUMBERS IT IS MADE OF — the only documentation a flat checkbox
   // list can carry (gearColumns.ts). Ratio follows DELAY; effective HP follows HP, one row under

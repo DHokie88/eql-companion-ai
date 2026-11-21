@@ -8,7 +8,7 @@ import { Box, IconButton, Stack, Table, TableBody, TableCell, TableHead, TableRo
 import type { GearRow } from '@shared/planner/gear'
 import type { WindowedRows } from '../../lib/useWindowedRows'
 import { EraChip, DonorName } from '../planner/PlannerChips'
-import { statText, type GearColumn } from './gearColumns'
+import { GEAR_RATIO_HINT, statText, type GearColumn } from './gearColumns'
 // JOS-338 — the ONE door a card may reach these rows through (its header states the three
 // guarantees that make it safe over this tab's dropdown toolbar).
 import { GearRowCompare } from './GearCompareCard'
@@ -52,9 +52,10 @@ const FIXED_ROW = {
 const NUMERIC_PAD = { px: 0.75 } as const
 
 const COLUMN_HINT: Partial<Record<GearSortKey, string>> = {
-  RATIO: 'Displayed weapon damage divided by attack delay. This does not include bonus damage, procs, or off-hand attacks.',
+  RATIO: GEAR_RATIO_HINT,
   HAND: 'One-handed, two-handed, or ranged, from the listed weapon skill.',
-  WEAPON_TYPE: 'Weapon skill from the item data. An empty cell means the skill is unavailable.'
+  WEAPON_TYPE: 'Weapon skill from the item data. An empty cell means the skill is unavailable.',
+  PROC: 'Combat effects listed on the item. Select the item for effect details.'
 }
 
 function GearValueCell({ row, column }: { row: GearRow; column: GearColumn }): JSX.Element {

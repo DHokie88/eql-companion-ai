@@ -55,8 +55,8 @@ Open **Gear → Weapons**. The list starts with the highest damage-to-delay rati
 keeps your current search, Slots, Weapon type, Classes, era, and ownership filters.
 For example, choose **Two-handed** in Weapon type to compare only those weapons.
 Click a column header to sort by handedness, weapon type, damage, delay, damage
-bonus, backstab, range, or haste. Turn Weapons off to return to your regular Gear
-layout and sort. Handedness and Weapon type are also available in **Columns**.
+bonus, backstab, range, haste, or the listed combat proc. Turn Weapons off to return to your regular Gear
+layout and sort. Handedness, Weapon type, and Proc are also available in **Columns**.
 
 **Ratio** divides the displayed damage by attack delay. With **Use owned stats** on,
 it uses the highest inventory tier for an owned weapon and the simulation for other

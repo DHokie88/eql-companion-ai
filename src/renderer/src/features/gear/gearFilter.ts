@@ -236,7 +236,7 @@ export function filterGearRows<T extends GearRow>(
  * never will. Nothing indexes it, nothing scales it, and nothing stores it — it is computed from the
  * vector at the moment somebody asks, which is exactly why the plus-state moves it for free.
  */
-const TEXT_SORT_KEYS = ['name', 'slot', 'classes', 'owned', 'HAND', 'WEAPON_TYPE'] as const
+const TEXT_SORT_KEYS = ['name', 'slot', 'classes', 'owned', 'HAND', 'WEAPON_TYPE', 'PROC'] as const
 const TEXT_SORT_KEY_SET: ReadonlySet<string> = new Set(TEXT_SORT_KEYS)
 
 type TextSortKey = (typeof TEXT_SORT_KEYS)[number]
@@ -262,6 +262,7 @@ export function isGearWeapon(row: GearRow): boolean {
 
 /** Empty labels stay blank when the item has no recognized weapon skill. */
 export function weaponColumnText(row: GearRow, key: GearSortKey): string | undefined {
+  if (key === 'PROC') return row.effects.filter((effect) => effect.kind === 'combat').map((effect) => effect.name).join(' · ')
   if (key !== 'HAND' && key !== 'WEAPON_TYPE') return undefined
   const type = weaponTypeOf(row.skill)
   if (type === null) return ''

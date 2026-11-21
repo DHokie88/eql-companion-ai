@@ -2,7 +2,7 @@ import { gearTableLayout, PICKABLE_COLUMNS, type GearColumn } from './gearColumn
 
 export const GEAR_ITEM_TIER_MIN_WIDTH = 220
 
-const WEAPON_WIDTHS: Readonly<Record<string, number>> = { HAND: 108, WEAPON_TYPE: 128 }
+const WEAPON_WIDTHS: Readonly<Record<string, number>> = { HAND: 108, WEAPON_TYPE: 128, PROC: 172 }
 
 const KNOWN = new Set<string>(['name', 'actions', 'SCORE', 'slot', 'classes', 'owned', ...PICKABLE_COLUMNS])
 

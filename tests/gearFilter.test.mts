@@ -181,6 +181,8 @@ test('weapon text columns share the filter vocabulary and sort labels with stabl
   assert.equal(weaponColumnText(SLOPPY, 'WEAPON_TYPE'), '1H Slashing')
   assert.equal(weaponColumnText(BOW, 'HAND'), 'Ranged')
   assert.equal(weaponColumnText(THELVORN, 'RATIO'), undefined)
+  assert.equal(weaponColumnText(THELVORN, 'PROC'), 'Dismiss Summoned')
+  assert.equal(weaponColumnText(CROWN, 'PROC'), '')
   const rows = [MISSING_SKILL, GREATSWORD, THELVORN, BOW, CLUB]
   assert.deepEqual(names(sortGearRows(rows, { key: 'HAND', dir: 'asc' })), names([THELVORN, CLUB, BOW, GREATSWORD, MISSING_SKILL]))
   assert.deepEqual(names(sortGearRows(rows, { key: 'HAND', dir: 'desc' })), names([GREATSWORD, BOW, THELVORN, CLUB, MISSING_SKILL]))
