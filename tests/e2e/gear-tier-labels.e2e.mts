@@ -1,6 +1,6 @@
 /** Focused Gear tier labels against a real inventory dump and simulated fractional tier. */
 import type { Page } from 'playwright-core'
-import { buildIfStale, check, countOf, dumpArtifacts, failures, reportRun, settle, settleCount } from './appHarness.mjs'
+import { buildIfStale, check, dumpArtifacts, failures, reportRun, settle, settleCount } from './appHarness.mjs'
 import { mainWindow } from './appWindow.mjs'
 import { launchOnFixture } from './logFixture.mjs'
 import { clearPicks } from './gearFilterSteps.mjs'
