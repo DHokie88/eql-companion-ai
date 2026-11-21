@@ -2,6 +2,8 @@ import { gearTableLayout, PICKABLE_COLUMNS, type GearColumn } from './gearColumn
 
 export const GEAR_ITEM_TIER_MIN_WIDTH = 220
 
+const WEAPON_WIDTHS: Readonly<Record<string, number>> = { HAND: 108, WEAPON_TYPE: 128 }
+
 const KNOWN = new Set<string>(['name', 'actions', 'SCORE', 'slot', 'classes', 'owned', ...PICKABLE_COLUMNS])
 
 export function sanitizeGearWidths(value: unknown): Record<string, number> {
@@ -18,7 +20,7 @@ export function gearWidths(columns: readonly GearColumn[], hasOwned: boolean, av
     name: Number.parseFloat(layout.name), actions: Number.parseFloat(layout.actions), slot: Number.parseFloat(layout.slot),
     classes: Number.parseFloat(layout.classes), owned: Number.parseFloat(layout.owned)
   }
-  for (const column of columns) defaults[column.key] = Math.max(64, column.label.length * 6 + 40)
+  for (const column of columns) defaults[column.key] = WEAPON_WIDTHS[column.key] ?? Math.max(64, column.label.length * 6 + 40)
   const keys = ['name', 'actions', 'slot', 'classes', ...columns.map((c) => c.key), ...(hasOwned ? ['owned'] : [])]
   const widths = Object.fromEntries(keys.map((key) => [key, saved[key] ?? defaults[key]]))
   const otherWidth = keys.slice(1).reduce((sum, key) => sum + widths[key], 0)
