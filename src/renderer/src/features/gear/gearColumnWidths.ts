@@ -12,7 +12,7 @@ export function sanitizeGearWidths(value: unknown): Record<string, number> {
 }
 
 /** Explicit pixel widths. Only an uncustomized Item column absorbs spare room. */
-export function gearWidths(columns: readonly GearColumn[], hasOwned: boolean, available: number, saved: Readonly<Record<string, number>>, showTierLabels = false) {
+export function gearWidths(columns: readonly GearColumn[], hasOwned: boolean, available: number, saved: Readonly<Record<string, number>>) {
   const layout = gearTableLayout(columns.length, hasOwned)
   const defaults: Record<string, number> = {
     name: Number.parseFloat(layout.name), actions: Number.parseFloat(layout.actions), slot: Number.parseFloat(layout.slot),
@@ -23,6 +23,12 @@ export function gearWidths(columns: readonly GearColumn[], hasOwned: boolean, av
   const widths = Object.fromEntries(keys.map((key) => [key, saved[key] ?? defaults[key]]))
   const otherWidth = keys.slice(1).reduce((sum, key) => sum + widths[key], 0)
   if (saved.name === undefined) widths.name = Math.max(defaults.name, available - otherWidth)
-  if (showTierLabels) widths.name = Math.max(GEAR_ITEM_TIER_MIN_WIDTH, widths.name)
   return { widths, total: keys.reduce((sum, key) => sum + widths[key], 0) }
+}
+
+/** A visible tier label needs room beside the item name without changing its saved width. */
+export function withTierLabelMinimum(layout: ReturnType<typeof gearWidths>, showTierLabels: boolean): ReturnType<typeof gearWidths> {
+  if (!showTierLabels || layout.widths.name >= GEAR_ITEM_TIER_MIN_WIDTH) return layout
+  const name = GEAR_ITEM_TIER_MIN_WIDTH
+  return { widths: { ...layout.widths, name }, total: layout.total + name - layout.widths.name }
 }

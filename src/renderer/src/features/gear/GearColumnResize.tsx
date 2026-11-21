@@ -31,7 +31,7 @@ export default function GearColumnResize({ column, label, width, onResize, minWi
         event.currentTarget.setPointerCapture(event.pointerId)
       }}
       onPointerMove={(event) => {
-        if (drag.current) onResize(column, drag.current.width + event.clientX - drag.current.x)
+        if (drag.current) onResize(column, Math.max(minWidth, drag.current.width + event.clientX - drag.current.x))
       }}
       onPointerUp={(event) => {
         drag.current = null

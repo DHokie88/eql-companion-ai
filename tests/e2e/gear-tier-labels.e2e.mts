@@ -57,6 +57,16 @@ async function steps(page: Page): Promise<void> {
   await resize.focus()
   await page.keyboard.press('ArrowRight')
   check('the restored Item width can still be resized', await settle(async () => await resize.getAttribute('aria-valuenow') === '80', (ok) => ok, { timeoutMs: 15_000 }))
+  await page.click('[data-testid="gear-owned-stats-toggle"]')
+  await settle(async () => await resize.getAttribute('aria-valuenow') === '220', (ok) => ok, { timeoutMs: 15_000 })
+  const handle = await resize.boundingBox()
+  if (!handle) throw new Error('Item resize handle is not visible')
+  await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(handle.x - 100, handle.y + handle.height / 2)
+  await page.mouse.up()
+  check('dragging cannot save an Item width below its visible minimum',
+    await page.evaluate(() => JSON.parse(localStorage.getItem('eq.gear.columnWidths') ?? '{}').name === 220))
 }
 
 async function main(): Promise<void> {

@@ -21,7 +21,7 @@
 // number the corpus states, only that the model treats every key in the vocabulary alike. Using
 // two real items would have meant hand-writing thirty-three stats twice for no extra proof.
 
-import { gearWidths, sanitizeGearWidths } from '../src/renderer/src/features/gear/gearColumnWidths'
+import { gearWidths, sanitizeGearWidths, withTierLabelMinimum } from '../src/renderer/src/features/gear/gearColumnWidths'
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { GEAR_STAT_KEYS, type GearRow, type GearStats } from '../src/shared/planner/gear'
@@ -245,13 +245,13 @@ test('tier labels temporarily protect item names without changing saved widths',
   const columns = columnsFor(null, { key: 'AC', dir: 'desc' })
   const saved = { name: 64 }
   const ordinary = gearWidths(columns, true, 500, saved)
-  const labeled = gearWidths(columns, true, 500, saved, true)
+  const labeled = withTierLabelMinimum(ordinary, true)
   assert.equal(labeled.widths.name, 220)
   assert.equal(labeled.total, ordinary.total + 156)
   assert.ok(labeled.total > 500, 'narrow tables remain scrollable')
   assert.equal(saved.name, 64)
   assert.equal(gearWidths(columns, true, 500, saved).widths.name, 64)
-  assert.equal(gearWidths(columns, true, 500, { name: 300 }, true).widths.name, 300)
+  assert.equal(withTierLabelMinimum(gearWidths(columns, true, 500, { name: 300 }), true).widths.name, 300)
 })
 
 test('malformed stored widths degrade safely and preserve valid recognized columns', () => {

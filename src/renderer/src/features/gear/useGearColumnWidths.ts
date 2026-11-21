@@ -1,6 +1,6 @@
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import type { GearColumn } from './gearColumns'
-import { gearWidths, sanitizeGearWidths } from './gearColumnWidths'
+import { gearWidths, sanitizeGearWidths, withTierLabelMinimum } from './gearColumnWidths'
 
 const STORAGE_KEY = 'eq.gear.columnWidths'
 function readWidths(): Record<string, number> {
@@ -24,7 +24,7 @@ export function useGearColumnWidths(columns: readonly GearColumn[], hasOwned: bo
     observer.observe(parent)
     return () => observer.disconnect()
   }, [])
-  const { widths, total } = gearWidths(columns, hasOwned, available, saved, showTierLabels)
+  const { widths, total } = withTierLabelMinimum(gearWidths(columns, hasOwned, available, saved), showTierLabels)
   const resize = useCallback((key: string, width: number | null) => {
     setSaved((previous) => {
       const next = width === null
