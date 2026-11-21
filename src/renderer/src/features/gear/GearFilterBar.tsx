@@ -103,16 +103,19 @@ export interface GearFilterBarProps {
   visible: ReadonlySet<GearControl>
 }
 
+/** Alphabetize only this picker; other surfaces keep the equipment's physical order. */
+const SLOT_OPTIONS = [...EQUIP_SLOTS].sort()
+
 /** Walk the dropdown order, starting after the most recently selected slot. */
 function SlotPicker({ filters, setFilters }: Pick<GearFilterBarProps, 'filters' | 'setFilters'>): JSX.Element {
   const selected = filters.slots[filters.slots.length - 1]
-  const current = selected === undefined ? -1 : EQUIP_SLOTS.indexOf(selected)
-  const next = EQUIP_SLOTS[(current + 1) % EQUIP_SLOTS.length]
+  const current = selected === undefined ? -1 : SLOT_OPTIONS.indexOf(selected)
+  const next = SLOT_OPTIONS[(current + 1) % SLOT_OPTIONS.length]
 
   return (
     <Stack direction="row" alignItems="center" spacing={0.25}>
       <ChipMultiSelect
-        options={EQUIP_SLOTS}
+        options={SLOT_OPTIONS}
         value={filters.slots}
         onChange={(slots) => setFilters({ ...filters, slots })}
         label="Slots"

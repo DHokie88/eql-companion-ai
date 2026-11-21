@@ -26,6 +26,7 @@
  * place would make the rest of the spec depend on what the fixture log happens to infer.
  */
 import type { Page } from 'playwright-core'
+import { EQUIP_SLOTS } from '../../src/shared/planner/types'
 import { check, countOf, note, settle } from './appHarness.mjs'
 
 const ROW = '[data-testid="gear-row"]'
@@ -183,6 +184,15 @@ export async function stepGearClassFilter(page: Page): Promise<void> {
  * the control was on screen, and that question survives the shape change.
  */
 export async function stepGearSlotPicks(page: Page, all: number): Promise<number> {
+  await clearPicks(page, SLOT)
+  await page.click(`${SLOT} input`)
+  const options = page.locator('[role="listbox"] [role="option"]')
+  await settle(async () => options.count(), (count) => count === EQUIP_SLOTS.length, { timeoutMs: 15_000 })
+  const shown = await options.allTextContents()
+  check('Slots offers every equipment slot in alphabetical order',
+    JSON.stringify(shown) === JSON.stringify([...EQUIP_SLOTS].sort()), shown.join(', '))
+  await page.keyboard.press('Escape')
+
   await pickIn(page, SLOT, 'PRIMARY')
   const narrowed = await until(async () => (await shownCount(page)) < all, 15_000)
   const primaries = await shownCount(page)
@@ -198,20 +208,22 @@ export async function stepGearSlotPicks(page: Page, all: number): Promise<number
   )
 
   await page.click(NEXT_SLOT)
-  check('Next slot replaces both picks with Range and keeps the dropdown closed',
-    (await chipsIn(page, SLOT)).join(',') === 'RANGE' &&
+  check('Next slot replaces both picks with Shoulders and keeps the dropdown closed',
+    (await chipsIn(page, SLOT)).join(',') === 'SHOULDERS' &&
       (await page.getAttribute(`${SLOT} input`, 'aria-expanded')) === 'false')
   await page.click(NEXT_SLOT)
-  check('Next slot advances Range to Ammo', (await chipsIn(page, SLOT)).join(',') === 'AMMO')
+  check('Next slot advances Shoulders to Waist', (await chipsIn(page, SLOT)).join(',') === 'WAIST')
   await page.click(NEXT_SLOT)
-  check('Next slot wraps Ammo to Head', (await chipsIn(page, SLOT)).join(',') === 'HEAD')
+  check('Next slot advances Waist to Wrist', (await chipsIn(page, SLOT)).join(',') === 'WRIST')
+  await page.click(NEXT_SLOT)
+  check('Next slot wraps Wrist to Ammo', (await chipsIn(page, SLOT)).join(',') === 'AMMO')
 
   await clearPicks(page, SLOT)
   const emptied = await until(async () => (await shownCount(page)) === all, 15_000)
   check('…and clearing the picker returns the full corpus', emptied, `${String(await shownCount(page))} of ${String(all)}`)
 
   await page.click(NEXT_SLOT)
-  check('Next slot starts at Head with no pick', (await chipsIn(page, SLOT)).join(',') === 'HEAD')
+  check('Next slot starts at Ammo with no pick', (await chipsIn(page, SLOT)).join(',') === 'AMMO')
   await clearPicks(page, SLOT)
 
   await pickIn(page, SLOT, 'PRIMARY')
