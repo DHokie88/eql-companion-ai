@@ -36,6 +36,8 @@
     // reaches has to be LISTED, so a module index.ts imports must be named here too — that is
     // what `perf.ts` (the HUD's slice of the bridge) is doing in this list.
     "src/preload/perf.ts",
+    // The install discovery bridge is part of window.eq, too.
+    "src/preload/eqConfig.ts",
     "src/preload/characterApi.ts",
     // …and `discordApi.ts` (posting a character card to a Discord channel webhook), likewise.
     "src/preload/discordApi.ts",
