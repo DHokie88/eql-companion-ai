@@ -1,5 +1,7 @@
 import { gearTableLayout, PICKABLE_COLUMNS, type GearColumn } from './gearColumns'
 
+export const GEAR_ITEM_TIER_MIN_WIDTH = 220
+
 const KNOWN = new Set<string>(['name', 'actions', 'SCORE', 'slot', 'classes', 'owned', ...PICKABLE_COLUMNS])
 
 export function sanitizeGearWidths(value: unknown): Record<string, number> {
@@ -22,4 +24,11 @@ export function gearWidths(columns: readonly GearColumn[], hasOwned: boolean, av
   const otherWidth = keys.slice(1).reduce((sum, key) => sum + widths[key], 0)
   if (saved.name === undefined) widths.name = Math.max(defaults.name, available - otherWidth)
   return { widths, total: keys.reduce((sum, key) => sum + widths[key], 0) }
+}
+
+/** A visible tier label needs room beside the item name without changing its saved width. */
+export function withTierLabelMinimum(layout: ReturnType<typeof gearWidths>, showTierLabels: boolean): ReturnType<typeof gearWidths> {
+  if (!showTierLabels || layout.widths.name >= GEAR_ITEM_TIER_MIN_WIDTH) return layout
+  const name = GEAR_ITEM_TIER_MIN_WIDTH
+  return { widths: { ...layout.widths, name }, total: layout.total + name - layout.widths.name }
 }

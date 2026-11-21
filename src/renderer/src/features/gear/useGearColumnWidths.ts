@@ -1,6 +1,6 @@
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import type { GearColumn } from './gearColumns'
-import { gearWidths, sanitizeGearWidths } from './gearColumnWidths'
+import { gearWidths, sanitizeGearWidths, withTierLabelMinimum } from './gearColumnWidths'
 
 const STORAGE_KEY = 'eq.gear.columnWidths'
 function readWidths(): Record<string, number> {
@@ -12,7 +12,7 @@ function readWidths(): Record<string, number> {
 }
 
 /** Pixel widths keep short stats compact; the item name alone receives spare space. */
-export function useGearColumnWidths(columns: readonly GearColumn[], hasOwned: boolean) {
+export function useGearColumnWidths(columns: readonly GearColumn[], hasOwned: boolean, showTierLabels = false) {
   const tableRef = useRef<HTMLTableElement>(null)
   const [available, setAvailable] = useState(0)
   const [saved, setSaved] = useState(readWidths)
@@ -24,7 +24,7 @@ export function useGearColumnWidths(columns: readonly GearColumn[], hasOwned: bo
     observer.observe(parent)
     return () => observer.disconnect()
   }, [])
-  const { widths, total } = gearWidths(columns, hasOwned, available, saved)
+  const { widths, total } = withTierLabelMinimum(gearWidths(columns, hasOwned, available, saved), showTierLabels)
   const resize = useCallback((key: string, width: number | null) => {
     setSaved((previous) => {
       const next = width === null

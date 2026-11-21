@@ -464,7 +464,7 @@ function useOwnedStats(rows: readonly GearRow[], state: ItemUpgradeState, active
 } {
   const stateForRow = useCallback((row: GearRow) => (active ? ownedUpgradeState(map, row) : null) ?? state, [active, map, state])
   const base = useGearCompare(rows, state)
-  const compare = useMemo(() => ({ ...base, ownedStats: active ? map : null }), [base, active, map])
+  const compare = useMemo(() => ({ ...base, ownedStats: active ? map : null, showUpgradeLabels: active }), [base, active, map])
   return { stateForRow, compare }
 }
 

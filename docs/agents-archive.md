@@ -3857,3 +3857,13 @@ the tree, disabled.
   read defaults to the user cohort; `--cohort all` renders both SIDE BY SIDE
   and nothing ever sums them. Rows aggregated before a marking keep their
   cohort and the digest says so.
+
+## Dynamic imports and dev-only dependencies (moved from AGENTS.md 2026-11-20)
+
+- **A dynamic `import()` is BUNDLED, not externalized** — "it's a devDep so
+  production can't load it" is FALSE by default: the triage tab's first
+  build shipped 917 kB of working AWS SDK into `out/main` with only a
+  boolean guarding it. Dev-only main-process code must ALSO be listed in
+  `externalizeDepsPlugin({ include })` so the emitted chunk carries bare
+  unresolvable `require`s. Measure the built output; never trust the
+  dependency graph's intuition.

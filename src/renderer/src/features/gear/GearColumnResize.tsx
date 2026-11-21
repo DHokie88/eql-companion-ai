@@ -2,10 +2,11 @@ import { type JSX, useRef } from 'react'
 import { Box } from '@mui/material'
 
 /** Pointer capture keeps a drag working outside the header without global listeners. */
-export default function GearColumnResize({ column, label, width, onResize }: {
+export default function GearColumnResize({ column, label, width, onResize, minWidth = 64 }: {
   column: string
   label: string
   width: number
+  minWidth?: number
   onResize: (key: string, width: number | null) => void
 }): JSX.Element {
   const drag = useRef<{ x: number; width: number } | null>(null)
@@ -15,7 +16,7 @@ export default function GearColumnResize({ column, label, width, onResize }: {
       aria-label={`Resize ${label} column`}
       aria-orientation="vertical"
       aria-valuenow={Math.round(width)}
-      aria-valuemin={64}
+      aria-valuemin={minWidth}
       aria-valuemax={2400}
       tabIndex={0}
       data-testid={`gear-resize-${column}`}
@@ -30,7 +31,7 @@ export default function GearColumnResize({ column, label, width, onResize }: {
         event.currentTarget.setPointerCapture(event.pointerId)
       }}
       onPointerMove={(event) => {
-        if (drag.current) onResize(column, drag.current.width + event.clientX - drag.current.x)
+        if (drag.current) onResize(column, Math.max(minWidth, drag.current.width + event.clientX - drag.current.x))
       }}
       onPointerUp={(event) => {
         drag.current = null
@@ -47,7 +48,7 @@ export default function GearColumnResize({ column, label, width, onResize }: {
         if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
         event.preventDefault()
         event.stopPropagation()
-        onResize(column, width + (event.key === 'ArrowRight' ? 16 : -16))
+        onResize(column, Math.max(minWidth, width + (event.key === 'ArrowRight' ? 16 : -16)))
       }}
       sx={{
         position: 'absolute', right: 0, top: 0, bottom: 0, width: 8,

@@ -247,6 +247,8 @@ export interface GearCompareData {
   state: ItemUpgradeState
   /** Optional per-item ownership for the gear table; other surfaces remain simulated. */
   ownedStats?: GearOwnershipMap | null
+  /** Label Gear rows when the owned-stats control is active, even without an inventory dump. */
+  showUpgradeLabels?: boolean
 }
 
 export function useGearCompare(rows: readonly GearRow[], state: ItemUpgradeState): GearCompareData {

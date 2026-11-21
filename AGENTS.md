@@ -146,6 +146,7 @@ docs/agents-archive.md.
   row (spec · signature · occurrences · disposition), integrators append on
   sighting, and a flake at 3+ occurrences must have a fix ticket or chip —
   "green on re-run" is a report line, never a resolution. Known rows:
+  - `gear.e2e` · 300 s timeout on Windows · 2 sightings (2026-11-20), including isolated · split checks passed; watch.
   - `forkLauncher.test` / `forkStartup.mts` temp cleanup · EBUSY removing the probe cwd or Chromium DIPS
     while startup assertions were green · 1 sighting each (2026-10-21, Gear weighting verification) ·
     launcher waits for its owned probe to exit; startup tracks all profile-owned Electron children;
@@ -424,13 +425,10 @@ docs/agents-archive.md.
   world-supplied text (tooltips keep the facts); controls never shrink.
 - Chromium `navigator.clipboard` needs a permission this app denies
   wholesale — clipboard writes route over IPC to main's clipboard API.
-- **A dynamic `import()` is BUNDLED, not externalized** — "it's a devDep so
-  production can't load it" is FALSE by default: the triage tab's first
-  build shipped 917 kB of working AWS SDK into `out/main` with only a
-  boolean guarding it. Dev-only main-process code must ALSO be listed in
-  `externalizeDepsPlugin({ include })` so the emitted chunk carries bare
-  unresolvable `require`s. Measure the built output; never trust the
-  dependency graph's intuition.
+- **A dynamic `import()` is BUNDLED, not externalized.** Dev-only main-process
+  code must ALSO be listed in `externalizeDepsPlugin({ include })` so the emitted
+  chunk carries bare unresolvable `require`s. Measure the built output; never
+  trust the dependency graph's intuition. History: docs/agents-archive.md.
 - **Never reference a vite `define` bare**, and **anchor a dev-only flag on
   `import.meta.env.DEV`, not on the `define`.** Defines exist only from
   dev-server START, so a bare identifier under a stale server is a
