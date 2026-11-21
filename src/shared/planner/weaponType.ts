@@ -150,6 +150,11 @@ export function weaponTypeOf(skill: string | undefined): WeaponType | null {
   return SKILL_TYPES.get(normalizeSkillToken(skill)) ?? null
 }
 
+/** The same category used by the weapon filter, for a row whose type is known. */
+export function weaponCategoryOf(type: WeaponType): WeaponCategory | undefined {
+  return WEAPON_CATEGORIES.find((category) => WEAPON_CATEGORY_MEMBERS[category].includes(type))
+}
+
 /** Does this one pick cover this type? A type covers itself; a category covers its members. */
 export function pickCoversType(pick: WeaponPick, type: WeaponType): boolean {
   if (!isWeaponCategory(pick)) return pick === type
