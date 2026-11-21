@@ -16,4 +16,3 @@ export const OFFLINE_VIEWS: Partial<Record<View, JSX.Element>> = {
   oracle: <OracleView />,
   ...(OWNER_TOOLS ? { triage: <DevTriageView /> } : {})
 }
-

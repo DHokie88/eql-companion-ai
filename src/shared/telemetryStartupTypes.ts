@@ -91,4 +91,3 @@ export interface StartupStutterStats {
 // the CONTRACT SHAPES, which the validator and the Lambda need; the edges and ceilings stay
 // in telemetry.ts. The other file is the CLIENT-SIDE constructor, which nothing on the server has
 // ever needed and which the ingest bundle no longer carries.
-
