@@ -377,6 +377,10 @@ function CountLine({
       <OutputKindLine kind="inventory" quiet loadedAt={ownership.readAt} testId="gear-dump-line" />
 
       <ShapePickers prefs={prefs} sort={sort} weaponMode={weaponMode} />
+      <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}
+        title="Unmarked base values come from the wiki. Upgrade estimates use the selected tier or the start of your owned tier.">
+        <Box component="span" sx={{ color: 'success.light' }}>✓</Box> Ruby verified · ~ Estimated
+      </Typography>
     </Stack>
   )
 }

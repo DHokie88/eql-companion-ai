@@ -31,6 +31,7 @@
 
 import { itemKey, type ItemDbEntry, type ItemDbFile } from '../itemsDb'
 import { renamedItems } from '../../shared/itemRenames'
+import { gearStatCheck } from '../gearStatChecks'
 import {
   ITEMS_RESEARCH,
   knowledgeWithResearch,
@@ -57,6 +58,7 @@ import {
   type GearEffect,
   type GearIndexPayload,
   type GearRow,
+  type GearStatKey,
   type GearStats
 } from '../../shared/planner/gear'
 import type { ItemEffect, ItemStat, ItemStatBlock } from '../../shared/itemStats'
@@ -320,6 +322,14 @@ function countRow(acc: Acc, row: GearRow): void {
   if (row.eraDerived !== undefined) acc.stats.eraDerivedRows++
 }
 
+function verifiedBaseStats(page: string, stats: GearStats): GearStatKey[] {
+  const checked = gearStatCheck(page)
+  if (!checked) return []
+  return Object.keys(checked.base).filter((key): key is GearStatKey =>
+    isGearStatKey(key) && stats[key] === checked.base[key]
+  )
+}
+
 /** One page → its row, or null when the corpus places the item in no slot at all. */
 function pageRow(
   entry: ItemDbEntry,
@@ -338,6 +348,7 @@ function pageRow(
   if (slots.length === 0) return null
 
   const read = readGearStats(block)
+  const verified = verifiedBaseStats(entry.page, read.stats)
   foldReading(acc, read)
   // LAYER 3 is keyed by the PAGE's canonical key (`eraDerive.ts` walks pages, not alias keys), while
   // the row's key comes from the item NAME. They differ on the 196 `|itemname` alias pages, and the
@@ -353,6 +364,7 @@ function pageRow(
     quest: k.quest,
     playerCrafted: k.playerCrafted === true,
     stats: read.stats,
+    ...(verified.length > 0 && { verifiedBaseStats: verified }),
     effects: block.effects.map((e) => gearEffect(e, spells, acc)),
     ...optionalFields(k, read, synthesizesVoidSave(block, ANY_UPGRADED), acc.derived.get(itemKey(entry.page)))
   }

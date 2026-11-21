@@ -29,6 +29,7 @@ import { hasBonusDamage, itemBaseName, parseStatsBlock } from '../shared/itemSta
 // has since changed is corrected at LOAD, never in the file. Read its header before adding a row.
 import { renamedItems } from '../shared/itemRenames'
 import type { ItemKnowledge } from '../shared/types'
+import { gearStatCheck } from './gearStatChecks'
 
 /**
  * The canonical item key — ONE definition for the committed DB, the userData cache, and the
@@ -75,7 +76,7 @@ export interface ItemDbFile {
  */
 export function knowledgeFromDb(entry: ItemDbEntry): Omit<ItemKnowledge, 'cached'> {
   return {
-    ...repairStoredDamage(entry),
+    ...repairCheckedAc(repairStoredDamage(entry)),
     name: entry.name ?? entry.page,
     lore: entry.lore ?? false,
     quest: entry.quest ?? false,
@@ -88,6 +89,15 @@ function repairStoredDamage(entry: ItemDbEntry): ItemDbEntry {
   if (!entry.stats || !entry.statsBlock || !hasBonusDamage(entry.statsBlock)) return entry
   const parsed = parseStatsBlock(entry.statsBlock)
   return { ...entry, stats: { ...entry.stats, dmg: parsed.dmg, extras: parsed.extras } }
+}
+
+/** Apply a reviewed base AC correction to both bundled and newly downloaded wiki records. */
+function repairCheckedAc(entry: ItemDbEntry): ItemDbEntry {
+  const check = gearStatCheck(entry.page)
+  const stale = check?.staleAc
+  const corrected = check?.base.AC
+  if (stale === undefined || corrected === undefined || entry.stats?.ac !== stale) return entry
+  return { ...entry, stats: { ...entry.stats, ac: corrected } }
 }
 
 /** A wiki page title in MediaWiki's canonical form: `_` is a space, runs of space collapse, and
