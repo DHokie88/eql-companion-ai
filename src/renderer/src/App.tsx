@@ -3,6 +3,7 @@ import { Box, CssBaseline } from '@mui/material'
 import type { AppFocus, CharacterRef } from '@shared/types'
 import TitleBar from './components/TitleBar'
 import NavDrawer from './components/NavDrawer'
+import { OFFLINE_VIEWS } from './offlineViews'
 // THE CONTENT COLUMN — everything right of the nav drawer. Moved out of this file at its 400-
 // code-line ceiling (JOS-503), where the house rule is to split rather than to ratchet; it carries
 // the app's ONE scroller plus the two fixed bands above it (the gear area's in-area tab bar,
@@ -52,20 +53,12 @@ import AlertsView from './features/alerts/AlertsView'
 import BuffsView from './features/buffs/BuffsView'
 import TimersView from './features/timers/TimersView'
 import PreferencesView from './features/preferences/PreferencesView'
-import CommunityView from './features/community/CommunityView'
-import OracleView from './features/oracle/OracleView'
 // TWO FACTS THE PREFERENCES SNAPSHOT CANNOT LEARN FROM A CARD: what the X does (JOS-139 — the tray
 // menu carries the same checkbox) and WHICH OVERLAYS ARE OPEN (JOS-408 — the title bar's Overlay
 // menu opens them, and the Appearance rows tag a closed one). Both are recorded HERE, at the root.
 // See the effect.
 import { peekPrefsSnapshot, recordPref } from './features/preferences/prefsSnapshot'
 import FeedbackDialog from './features/feedback/FeedbackDialog'
-// OWNER-ONLY. `devTriage` holds the single `DEV_TOOLS ? lazy(() => import(…)) : null` — the
-// STRIP, which is a compile-time question and stays on `DEV_TOOLS`; in a build without the flag
-// its only use below is dead code, so rollup drops the import and the entire triage feature with
-// it. WHETHER TO SHOW IT is a second question and a runtime one (`OWNER_TOOLS`, JOS-72). See
-// devTriage.tsx / devFlags.ts.
-import DevTriageView from './devTriage'
 // The CHARACTER SHEET (JOS-45, released JOS-327). It used to come through `unreleasedCharacter.tsx`
 // — a `UNRELEASED ? lazy(() => import(…)) : null` twin of `devTriage` above, whose whole job was to
 // keep the tree out of packaged bytes. The owner released the tab, so that file is gone and this is
@@ -77,7 +70,6 @@ import { ZoneLootBranch } from './features/zoneloot/ZoneLootView'
 import { CraftingBranch } from './features/crafting/CraftingView'
 import { BuildBranch } from './features/build/BuildView'
 import { SpellLinkProvider } from './lib/spellLink'
-import { OWNER_TOOLS } from './devFlags'
 import { useFeedbackDialog, type FeedbackPrefill } from './features/feedback/useFeedback'
 // Usage analytics (docs/plans/usage-analytics.md). The notice is mounted unconditionally and
 // renders nothing once it has been answered; `useViewDwell` reports how long each tab was on
@@ -90,13 +82,6 @@ import { TelemetryNotice } from './features/preferences/TelemetryNotice'
 import { WhatsNewTeaser } from './features/whatsnew/WhatsNewTeaser'
 import { setCurrentView } from './lib/currentView'
 import { dwellView, useViewDwell } from './lib/telemetry'
-
-// These views read reference data rather than a character log. Dev tools still strip at build time.
-const OFFLINE_VIEWS: Partial<Record<View, JSX.Element>> = {
-  community: <CommunityView />,
-  oracle: <OracleView />,
-  ...(OWNER_TOOLS ? { triage: <DevTriageView /> } : {})
-}
 
 /**
  * The views the router reaches with at most ONE callback — split out of `ViewContent` purely as
