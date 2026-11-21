@@ -161,7 +161,7 @@ import {
   DEFAULT_GEAR_FILTERS,
   filterGearRows,
   isGearTextSort,
-  isGearWeapon,
+  gearWeapons,
   scaleAll,
   sortGearRows,
   WEAPON_GEAR_SORT,
@@ -223,7 +223,7 @@ function useTableRows(
   opts: { sort: GearSort; weaponMode: boolean; deps: GearFilterDeps; chosen: GearSortKey[] | null; priorities: GearPriorities; extras: PriorityKey[]; hasOwned: boolean; stateForRow?: (row: GearRow) => ItemUpgradeState }
 ): TableState {
   const { sort, weaponMode, deps, chosen, priorities, extras, hasOwned, stateForRow } = opts
-  const candidates = useMemo(() => weaponMode ? rows.filter(isGearWeapon) : rows, [rows, weaponMode])
+  const candidates = useMemo(() => weaponMode ? gearWeapons(rows) : rows, [rows, weaponMode])
   const scaled = useMemo(() => scaleAll(candidates, state, stateForRow), [candidates, state, stateForRow])
   const filtered = useMemo(() => filterGearRows(scaled, filters, deps), [scaled, filters, deps])
   const columns = useMemo(() => weaponMode
@@ -306,7 +306,7 @@ function ShapePickers({ prefs, sort, weaponMode }: { prefs: GearPrefs; sort: Gea
       <GearPicker
         label="Columns"
         testId="gear-columns"
-        hint="Which stat columns the table draws. Every one of them sorts."
+        hint="Which comparison columns the table draws. Every one of them sorts."
         options={PICKABLE_COLUMNS}
         optionLabel={columnLabel}
         chosen={prefs.columns}

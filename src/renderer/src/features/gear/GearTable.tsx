@@ -61,7 +61,7 @@ const COLUMN_HINT: Partial<Record<GearSortKey, string>> = {
 function GearValueCell({ row, column }: { row: GearRow; column: GearColumn }): JSX.Element {
   const weaponText = weaponColumnText(row, column.key)
   return (
-    <TableCell align="center" data-testid={`gear-cell-${column.key}`} sx={NUMERIC_PAD} title={weaponText || undefined}>
+    <TableCell align="center" data-testid={`gear-cell-${column.key}`} sx={NUMERIC_PAD} title={weaponText === '' ? undefined : weaponText}>
       {weaponText ?? statText(sortValue(row, column.key), column.key)}
     </TableCell>
   )
