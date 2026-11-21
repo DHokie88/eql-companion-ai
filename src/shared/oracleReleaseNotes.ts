@@ -21,6 +21,13 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.27.0',
+    date: '2026-11-20',
+    entries: [
+      { kind: 'new', text: 'With Use owned stats on, Gear shows each item’s owned tier or simulated tier beside its name. Hover the tier for details about partial progress.' }
+    ]
+  },
+  {
     version: '0.26.0',
     date: '2026-11-20',
     entries: [
