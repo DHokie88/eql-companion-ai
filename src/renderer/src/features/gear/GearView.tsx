@@ -135,7 +135,7 @@ import GearTable, { ROW_HEIGHT } from './GearTable'
 import { useWishlist } from '../wishlist/useWishlist'
 import { wishFromGear } from '../wishlist/wishSearch'
 import { useGearPrefs, type GearPrefs } from './useGearPrefs'
-import { sanitizeFlag, sanitizeGearForm, sanitizeGearSort, type GearFormMemory } from './areaMemory'
+import { sanitizeFlag, sanitizeGearForm, sanitizeGearSort, sanitizeWeaponSort, type GearFormMemory } from './areaMemory'
 import { useRemembered, useRememberedSearch } from './useAreaMemory'
 import {
   GEAR_CONTROLS,
@@ -145,7 +145,7 @@ import {
   toggleColumn,
   toggleControl
 } from './gearPrefs'
-import { PICKABLE_COLUMNS, columnLabel, columnsFor, sortWithin, type GearColumn } from './gearColumns'
+import { PICKABLE_COLUMNS, WEAPON_COMPARE_COLUMNS, columnLabel, columnsFor, sortWithin, weaponColumnsFor, type GearColumn } from './gearColumns'
 import {
   useEraHidden,
   useGearClasses,
@@ -160,8 +160,11 @@ import { ownedCellText, ownershipFor, ownedUpgradeState, uncountedNote, type Gea
 import {
   DEFAULT_GEAR_FILTERS,
   filterGearRows,
+  isGearTextSort,
+  isGearWeapon,
   scaleAll,
   sortGearRows,
+  WEAPON_GEAR_SORT,
   type GearFilterDeps,
   type GearFilters,
   type GearSort,
@@ -184,8 +187,10 @@ function nextSort(sort: GearSort, key: GearSortKey): GearSort {
   // Names read A→Z; every number reads best-first, which for WEIGHT and DELAY is still "most" —
   // this table states what an item HAS, and inverting two columns' defaults would be a preference
   // the user can express in one click anyway.
-  return { key, dir: ['name', 'slot', 'classes', 'owned'].includes(key) ? 'asc' : 'desc' }
+  return { key, dir: isGearTextSort(key) ? 'asc' : 'desc' }
 }
+
+const SCORE_COLUMN: GearColumn = { key: 'SCORE', label: 'Score', percent: false }
 
 interface TableState {
   rows: GearRow[]
@@ -215,12 +220,15 @@ function useTableRows(
   rows: readonly GearRow[],
   state: ItemUpgradeState,
   filters: GearFilters,
-  opts: { sort: GearSort; deps: GearFilterDeps; chosen: GearSortKey[] | null; priorities: GearPriorities; extras: PriorityKey[]; hasOwned: boolean; stateForRow?: (row: GearRow) => ItemUpgradeState }
+  opts: { sort: GearSort; weaponMode: boolean; deps: GearFilterDeps; chosen: GearSortKey[] | null; priorities: GearPriorities; extras: PriorityKey[]; hasOwned: boolean; stateForRow?: (row: GearRow) => ItemUpgradeState }
 ): TableState {
-  const { sort, deps, chosen, priorities, extras, hasOwned, stateForRow } = opts
-  const scaled = useMemo(() => scaleAll(rows, state, stateForRow), [rows, state, stateForRow])
+  const { sort, weaponMode, deps, chosen, priorities, extras, hasOwned, stateForRow } = opts
+  const candidates = useMemo(() => weaponMode ? rows.filter(isGearWeapon) : rows, [rows, weaponMode])
+  const scaled = useMemo(() => scaleAll(candidates, state, stateForRow), [candidates, state, stateForRow])
   const filtered = useMemo(() => filterGearRows(scaled, filters, deps), [scaled, filters, deps])
-  const columns = useMemo(() => [{ key: 'SCORE' as const, label: 'Score', percent: false }, ...columnsFor(chosen, sort)], [chosen, sort])
+  const columns = useMemo(() => weaponMode
+    ? [...weaponColumnsFor(chosen, sort), SCORE_COLUMN]
+    : [SCORE_COLUMN, ...columnsFor(chosen, sort)], [chosen, sort, weaponMode])
   const scored = useMemo(() => scoreGear(filtered, priorities, extras), [filtered, priorities, extras])
   const inForce = useMemo(() => sortWithin(sort, columns, hasOwned), [sort, columns, hasOwned])
   const sorted = useMemo(() => sortGearRows(scored, inForce, deps), [scored, inForce, deps])
@@ -254,7 +262,7 @@ function useTableRows(
  * did not do while a toggle they DID flip sits unmentioned. Same voice as the other two: the count
  * that would come back, and the control that is holding it.
  */
-function emptyText(ready: boolean, refused: boolean, table: TableState): string {
+function emptyText(ready: boolean, refused: boolean, table: TableState, weaponMode: boolean): string {
   if (refused) return 'This build cannot read the gear index it was served - it states a newer version.'
   if (!ready) return 'Reading the item database…'
   if (table.hiddenByOwned > 0) {
@@ -266,7 +274,9 @@ function emptyText(ready: boolean, refused: boolean, table: TableState): string 
   if (table.hiddenByClasses > 0) {
     return `No gear matches these filters - but ${String(table.hiddenByClasses)} items match once the Classes picker is cleared. An item whose page states no class list is never hidden by it.`
   }
-  return 'No gear matches these filters.'
+  return weaponMode
+    ? 'No weapons match these filters. Adjust the filters or turn off Weapons to see other gear.'
+    : 'No gear matches these filters.'
 }
 
 /**
@@ -289,8 +299,8 @@ function ownedHint(map: GearOwnershipMap | null, uncounted: string | null): stri
  * nothing is chosen shows exactly the columns on screen ticked, and the first click promotes that
  * list rather than replacing it.
  */
-function ShapePickers({ prefs, columns }: { prefs: GearPrefs; columns: readonly GearColumn[] }): JSX.Element {
-  const seed = useMemo(() => columns.filter((c) => c.key !== 'SCORE').map((c) => c.key), [columns])
+function ShapePickers({ prefs, sort, weaponMode }: { prefs: GearPrefs; sort: GearSort; weaponMode: boolean }): JSX.Element {
+  const seed = useMemo(() => columnsFor(null, sort).map((c) => c.key), [sort])
   return (
     <>
       <GearPicker
@@ -301,6 +311,7 @@ function ShapePickers({ prefs, columns }: { prefs: GearPrefs; columns: readonly 
         optionLabel={columnLabel}
         chosen={prefs.columns}
         fallback={seed}
+        locked={weaponMode ? WEAPON_COMPARE_COLUMNS : undefined}
         resetLabel="Follow the filters and the sort"
         toggle={toggleColumn}
         onChange={prefs.setColumns}
@@ -335,14 +346,16 @@ function CountLine({
   wikiDatasetGeneratedAt,
   ownership,
   prefs,
-  columns
+  sort,
+  weaponMode
 }: {
   counts: { shown: number; total: number }
   scrapedAt: string | null
   wikiDatasetGeneratedAt: string | null
   ownership: { readAt: number | null }
   prefs: GearPrefs
-  columns: readonly GearColumn[]
+  sort: GearSort
+  weaponMode: boolean
 }): JSX.Element {
   return (
     <Stack direction="row" spacing={1} alignItems="baseline" sx={{ mb: 0.5, flexShrink: 0 }}>
@@ -363,7 +376,7 @@ function CountLine({
           own read instant, which is the fact the prop is documented to want. */}
       <OutputKindLine kind="inventory" quiet loadedAt={ownership.readAt} testId="gear-dump-line" />
 
-      <ShapePickers prefs={prefs} columns={columns} />
+      <ShapePickers prefs={prefs} sort={sort} weaponMode={weaponMode} />
     </Stack>
   )
 }
@@ -468,6 +481,18 @@ function useOwnedStats(rows: readonly GearRow[], state: ItemUpgradeState, active
   return { stateForRow, compare }
 }
 
+function useGearViewSort() {
+  const [generalSort, setGeneralSort] = useRemembered<GearSort>('eq.gear.sort', sanitizeGearSort)
+  const [weaponSort, setWeaponSort] = useRemembered('eq.gear.weaponSort', sanitizeWeaponSort)
+  const weaponMode = weaponSort !== null
+  return {
+    weaponMode,
+    sort: weaponSort ?? generalSort,
+    setSort: weaponMode ? setWeaponSort : setGeneralSort,
+    toggleWeaponMode: () => setWeaponSort(weaponMode ? null : WEAPON_GEAR_SORT)
+  }
+}
+
 export default function GearView({ onOpenLoot, onPreview }: GearViewProps = {}): JSX.Element {
   const { rows, ready, refused, scrapedAt, wikiDatasetGeneratedAt } = useGearIndex()
   const classes = useGearClasses()
@@ -478,7 +503,7 @@ export default function GearView({ onOpenLoot, onPreview }: GearViewProps = {}):
   const prefs = useGearPrefs()
   const { own, setOwn } = useGearForm()
   const [text, setText] = useRememberedSearch('eq.gear.search')
-  const [sort, setSort] = useRemembered<GearSort>('eq.gear.sort', sanitizeGearSort)
+  const { sort, setSort, weaponMode, toggleWeaponMode } = useGearViewSort()
   const scrollRef = useRef<HTMLDivElement>(null)
 
   // Both deferrals, and nothing else deferred: the two controls whose every movement re-derives
@@ -505,7 +530,7 @@ export default function GearView({ onOpenLoot, onPreview }: GearViewProps = {}):
   const owned = useOwned(ownership.map)
   const deps = useMemo(() => ({ ...era, ...owned, ownedText: (row: GearRow) => ownership.map === null ? '' : ownedCellText(ownershipFor(ownership.map, row)) }), [era, owned, ownership.map])
   const { stateForRow, compare } = useOwnedStats(rows, state, visible.has('upgrade') && showOwnedStats, ownership.map)
-  const table = useTableRows(rows, state, filters, { sort, deps, chosen: prefs.columns, priorities: prefs.priorities, extras: prefs.priorityExtras, hasOwned: ownership.map !== null, stateForRow })
+  const table = useTableRows(rows, state, filters, { sort, weaponMode, deps, chosen: prefs.columns, priorities: prefs.priorities, extras: prefs.priorityExtras, hasOwned: ownership.map !== null, stateForRow })
   const win = useWindowedRows({ count: table.rows.length, rowHeight: ROW_HEIGHT, scrollRef })
   const hint = useMemo(
     () => ownedHint(ownership.map, uncountedNote(ownership.payload.uncounted)),
@@ -523,6 +548,7 @@ export default function GearView({ onOpenLoot, onPreview }: GearViewProps = {}):
         upgrade={upgrade}
         showOwnedStats={showOwnedStats}
         setShowOwnedStats={setShowOwnedStats}
+        weapons={{ enabled: weaponMode, toggle: () => { scrollRef.current?.scrollTo(0, 0); toggleWeaponMode() } }}
         visible={visible}
       />
 
@@ -532,7 +558,7 @@ export default function GearView({ onOpenLoot, onPreview }: GearViewProps = {}):
         wikiDatasetGeneratedAt={wikiDatasetGeneratedAt}
         ownership={ownership}
         prefs={prefs}
-        columns={table.columns}
+        sort={sort} weaponMode={weaponMode}
       />
 
       {/* THE TABLE IS THE WHOLE BODY NOW. Until JOS-325 this was a `nowrap` ROW — the list on the
@@ -579,7 +605,7 @@ export default function GearView({ onOpenLoot, onPreview }: GearViewProps = {}):
         />
         {table.rows.length === 0 && (
           <Typography variant="body2" color="text.secondary" data-testid="gear-empty" sx={{ p: 2 }}>
-            {emptyText(ready, refused, table)}
+            {emptyText(ready, refused, table, weaponMode)}
           </Typography>
         )}
       </Box>

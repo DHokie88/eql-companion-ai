@@ -79,6 +79,7 @@ function ToggleChip({
       title={hint}
       color={on ? 'primary' : 'default'}
       variant={on ? 'filled' : 'outlined'}
+      aria-pressed={on}
       onClick={onToggle}
       sx={{ flexShrink: 0 }}
     />
@@ -99,6 +100,7 @@ export interface GearFilterBarProps {
   upgrade: { state: ItemUpgradeState; set: (s: ItemUpgradeState) => void }
   showOwnedStats: boolean
   setShowOwnedStats: (v: boolean) => void
+  weapons: { enabled: boolean; toggle: () => void }
   /** which controls to draw (JOS-297) — `gearPrefs.controlsVisible`, the whole set by default */
   visible: ReadonlySet<GearControl>
 }
@@ -182,7 +184,7 @@ function SelectRow({ filters, setFilters, visible }: Pick<GearFilterBarProps, 'f
 }
 
 /** WHICH ITEMS: name, slot, classes, effect kind, era. Search is always drawn — see the header. */
-function IdentityRow({ filters, setFilters, text, setText, classes, visible }: Omit<GearFilterBarProps, 'upgrade' | 'priorities' | 'onPriorities' | 'extras' | 'onExtras' | 'showOwnedStats' | 'setShowOwnedStats'>): JSX.Element {
+function IdentityRow({ filters, setFilters, text, setText, classes, visible }: Omit<GearFilterBarProps, 'upgrade' | 'priorities' | 'onPriorities' | 'extras' | 'onExtras' | 'showOwnedStats' | 'setShowOwnedStats' | 'weapons'>): JSX.Element {
   return (
     <Stack direction="row" spacing={1} alignItems="center" sx={{ flexWrap: 'nowrap' }}>
       <TextField
@@ -230,9 +232,10 @@ function IdentityRow({ filters, setFilters, text, setText, classes, visible }: O
 }
 
 /** The simulation and related display and filter controls. */
-function NumbersRow({ upgrade, filters, setFilters, visible, showOwnedStats, setShowOwnedStats }: Pick<GearFilterBarProps, 'upgrade' | 'filters' | 'setFilters' | 'visible' | 'showOwnedStats' | 'setShowOwnedStats'>): JSX.Element {
+function NumbersRow({ upgrade, filters, setFilters, visible, showOwnedStats, setShowOwnedStats, weapons }: Pick<GearFilterBarProps, 'upgrade' | 'filters' | 'setFilters' | 'visible' | 'showOwnedStats' | 'setShowOwnedStats' | 'weapons'>): JSX.Element {
   return (
     <Stack direction="row" spacing={1} useFlexGap alignItems="center" sx={{ flexWrap: 'wrap', minWidth: 0 }}>
+      <ToggleChip label="Weapons" testId="gear-weapons-toggle" on={weapons.enabled} onToggle={weapons.toggle} hint="Show only weapons, with damage, delay, ratio, handedness and weapon type together." />
       {visible.has('upgrade') && <UpgradeSlider state={upgrade.state} onChange={upgrade.set} />}
       {visible.has('era') && <ToggleChip label="Current era" testId="gear-era-toggle" on={filters.eraOnly} onToggle={() => setFilters({ ...filters, eraOnly: !filters.eraOnly })} hint={`Hide items from outside ${CURRENT_ERA_LABEL}`} />}
       {visible.has('owned') && <ToggleChip label="Owned" testId="gear-owned-toggle" on={filters.ownedOnly} onToggle={() => setFilters({ ...filters, ownedOnly: !filters.ownedOnly })} hint="Keep only wearable copies in your newest /outputfile inventory dump. Some key rings are not counted; see the Owned column." />}
@@ -242,7 +245,7 @@ function NumbersRow({ upgrade, filters, setFilters, visible, showOwnedStats, set
 }
 
 export default function GearFilterBar(props: GearFilterBarProps): JSX.Element {
-  const { filters, setFilters, text, setText, classes, upgrade, visible, priorities, onPriorities, extras, onExtras, showOwnedStats, setShowOwnedStats } = props
+  const { filters, setFilters, text, setText, classes, upgrade, visible, priorities, onPriorities, extras, onExtras, showOwnedStats, setShowOwnedStats, weapons } = props
   return (
     <Stack spacing={1} sx={{ mb: 1, flexShrink: 0 }}>
       <IdentityRow
@@ -254,7 +257,7 @@ export default function GearFilterBar(props: GearFilterBarProps): JSX.Element {
         visible={visible}
       />
       <GearPriorityBar value={priorities} onChange={onPriorities} extras={extras} onExtras={onExtras} />
-      {(['upgrade', 'era', 'owned'] as const).some((c) => visible.has(c)) && <NumbersRow upgrade={upgrade} filters={filters} setFilters={setFilters} visible={visible} showOwnedStats={showOwnedStats} setShowOwnedStats={setShowOwnedStats} />}
+      <NumbersRow upgrade={upgrade} filters={filters} setFilters={setFilters} visible={visible} showOwnedStats={showOwnedStats} setShowOwnedStats={setShowOwnedStats} weapons={weapons} />
     </Stack>
   )
 }

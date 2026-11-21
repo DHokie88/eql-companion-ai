@@ -35,6 +35,8 @@ export interface GearPickerProps<T extends string> {
   chosen: readonly T[] | null
   /** what the checkboxes show while nothing is chosen — the default, made visible */
   fallback: readonly T[]
+  /** Keys shown by the active layout, independent of the saved column choice. */
+  locked?: readonly T[]
   /** what "back to the default" says, so each picker can name its own default behaviour */
   resetLabel: string
   /**
@@ -60,6 +62,7 @@ export default function GearPicker<T extends string>({
   optionLabel,
   chosen,
   fallback,
+  locked = [],
   resetLabel,
   toggle,
   onChange,
@@ -67,13 +70,14 @@ export default function GearPicker<T extends string>({
 }: GearPickerProps<T>): JSX.Element {
   const [anchor, setAnchor] = useState<HTMLElement | null>(null)
   const current = chosen ?? fallback
-  const on = new Set<string>(current)
+  const on = new Set([...current, ...locked])
+  const required = new Set(locked)
 
   return (
     <>
       <Chip
         size="small"
-        label={`${label} · ${String(current.length)}`}
+        label={`${label} · ${String(on.size)}`}
         data-testid={`${testId}-toggle`}
         color={chosen === null ? 'default' : 'primary'}
         variant={chosen === null ? 'outlined' : 'filled'}
@@ -97,10 +101,16 @@ export default function GearPicker<T extends string>({
           </Typography>
         </MenuItem>
         <Divider />
+        {required.size > 0 && (
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', px: 2, py: 0.75 }}>
+            The Weapons view always shows its comparison columns.
+          </Typography>
+        )}
         {options.map((option) => (
           <MenuItem
             key={option}
             data-testid={`${testId}-option-${option}`}
+            disabled={required.has(option)}
             onClick={() => onChange(toggle(current, option))}
           >
             <Checkbox size="small" checked={on.has(option)} tabIndex={-1} disableRipple sx={{ p: 0.25, mr: 1 }} />

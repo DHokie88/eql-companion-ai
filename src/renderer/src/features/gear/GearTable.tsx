@@ -13,7 +13,7 @@ import { statText, type GearColumn } from './gearColumns'
 // guarantees that make it safe over this tab's dropdown toolbar).
 import { GearRowCompare } from './GearCompareCard'
 import type { GearCompareData } from './gearData'
-import { sortValue, type GearSort, type GearSortKey } from './gearFilter'
+import { sortValue, weaponColumnText, type GearSort, type GearSortKey } from './gearFilter'
 import { ownedCellText, ownedCellTitle, ownershipFor, ownedUpgradeState, type GearOwnershipMap } from './gearOwnership'
 // JOS-343 — the ONE wish control in the app, shared with the Exaltations donor row by owner ruling.
 import StarBorderIcon from '@mui/icons-material/StarBorder'
@@ -50,6 +50,21 @@ const FIXED_ROW = {
  * MUI's default 16px a side spends 32px of a ~60px cell on air; 8px keeps the header its own.
  */
 const NUMERIC_PAD = { px: 0.75 } as const
+
+const COLUMN_HINT: Partial<Record<GearSortKey, string>> = {
+  RATIO: 'Displayed weapon damage divided by attack delay. This does not include bonus damage, procs, or off-hand attacks.',
+  HAND: 'One-handed, two-handed, or ranged, from the listed weapon skill.',
+  WEAPON_TYPE: 'Weapon skill from the item data. An empty cell means the skill is unavailable.'
+}
+
+function GearValueCell({ row, column }: { row: GearRow; column: GearColumn }): JSX.Element {
+  const weaponText = weaponColumnText(row, column.key)
+  return (
+    <TableCell align="center" data-testid={`gear-cell-${column.key}`} sx={NUMERIC_PAD} title={weaponText || undefined}>
+      {weaponText ?? statText(sortValue(row, column.key), column.key)}
+    </TableCell>
+  )
+}
 
 /** Long class lists use two 10px lines inside the same fixed-height row. */
 function ClassCell({ classes }: { classes: readonly ClassAbbr[] }): JSX.Element {
@@ -232,9 +247,7 @@ const GearLine = memo(function GearLine({
       <TableCell align="center" title={row.slots.join(' ')}>{row.slots.join(' ')}</TableCell>
       <ClassCell classes={row.classes} />
       {columns.map((c) => (
-        <TableCell key={c.key} align="center" data-testid={`gear-cell-${c.key}`} sx={NUMERIC_PAD}>
-          {statText(sortValue(row, c.key), c.key)}
-        </TableCell>
+        <GearValueCell key={c.key} row={row} column={c} />
       ))}
       {owned !== null && (
         <TableCell align="center" data-testid="gear-cell-owned" title={ownedCellTitle(owned)}>
@@ -343,7 +356,7 @@ export default function GearTable({
           <SortHeader column={{ key: 'slot', label: 'Slot' }} sort={sort} width={widths.slot} align="center" onSort={onSort} onResize={resize} />
           <SortHeader column={{ key: 'classes', label: 'Classes' }} sort={sort} width={widths.classes} align="center" onSort={onSort} onResize={resize} />
           {columns.map((c) => (
-            <SortHeader key={c.key} column={c} sort={sort} width={widths[c.key]} align="center" onSort={onSort} onResize={resize} />
+            <SortHeader key={c.key} column={c} sort={sort} width={widths[c.key]} title={COLUMN_HINT[c.key]} onSort={onSort} onResize={resize} />
           ))}
           {ownership !== null && (
             <SortHeader column={{ key: 'owned', label: 'Owned' }} sort={sort} width={widths.owned} align="center" onSort={onSort} onResize={resize} title={ownedHint} testId="gear-owned-header" />

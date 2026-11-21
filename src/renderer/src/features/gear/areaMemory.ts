@@ -104,6 +104,7 @@ export const AREA_FORM_TIER = {
   'eq.gear.upgrade': 'restart',
   'eq.gear.search': 'session',
   'eq.gear.ownedStats': 'session',
+  'eq.gear.weaponSort': 'session',
   // ---- the Exaltations tab ----
   /** socket tab, donor slot, "usable by these classes" — the three fields of `DonorFilters` */
   'eq.planner.filters': 'restart',
@@ -246,10 +247,15 @@ export function sanitizeGearForm(raw: unknown): GearFormMemory {
 /** Every axis the table can sort on: the item column, plus every column the picker can draw. */
 const SORT_KEYS: readonly GearSortKey[] = ['name', 'slot', 'classes', 'owned', 'SCORE', ...PICKABLE_COLUMNS]
 
-/**
- * The stored sort. Both halves are checked independently, so a build that renamed a stat key gives
- * back the DEFAULT sort rather than a lit header on a column that no longer exists.
- */
+/** An absent or invalid weapon sort opens the regular Gear view. */
+export function sanitizeWeaponSort(raw: unknown): GearSort | null {
+  const sort = asRecord(raw)
+  if (sort === null || !SORT_KEYS.some((key) => key === sort.key)) return null
+  if (sort.dir !== 'asc' && sort.dir !== 'desc') return null
+  return sanitizeGearSort(sort)
+}
+
+/** Default an invalid column or direction independently for regular Gear. */
 export function sanitizeGearSort(raw: unknown): GearSort {
   const o = asRecord(raw)
   if (o === null) return DEFAULT_GEAR_SORT
