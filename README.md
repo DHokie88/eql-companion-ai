@@ -65,6 +65,16 @@ and off-hand effects. A missing damage or delay leaves the ratio blank. Weapon t
 and handedness use the catalog's stated skill. Bows and throwing weapons appear as
 **Ranged**, and unknown skills leave those columns blank.
 
+## Gear stat sources
+
+In **Gear**, a check mark identifies a base value cross-checked against Ruby. A tilde
+identifies an upgrade estimate. Hover a number for its source, or hover the row
+for the item and equipped comparison. Unmarked base stats come from EQLWiki.
+**Use owned stats** estimates scalable values at the start of the highest tier in
+your inventory export. A verified attack delay stays verified when the damage
+changes with the tier. See the [initial Ruby cross-check](docs/research/eqo-gear-data-20261121.md)
+for the reviewed items and source links.
+
 ## Building
 
 See [`SETUP.md`](SETUP.md). After pulling `eqo`, build from the Windows checkout

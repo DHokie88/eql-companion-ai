@@ -22,6 +22,14 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.29.0',
+    date: '2026-11-21',
+    entries: [
+      { kind: 'new', text: 'Gear marks numbers cross-checked against Ruby and shows when it estimates upgraded stats. Hover a value to see its source.' },
+      { kind: 'fixed', text: 'Corrected base armor class for Lustrous Russet Vambraces (13), Greaves (14), and Helm (14) using Ruby’s item records.' }
+    ]
+  },
+  {
     version: '0.28.0',
     date: '2026-11-20',
     entries: [

@@ -5,7 +5,8 @@
 
 import { type JSX, memo, useMemo } from 'react'
 import { Box, IconButton, Stack, Table, TableBody, TableCell, TableHead, TableRow, TableSortLabel } from '@mui/material'
-import type { GearRow } from '@shared/planner/gear'
+import { isGearStatKey, type GearRow } from '@shared/planner/gear'
+import { ITEM_UPGRADE_BASE, type ItemUpgradeState } from '@shared/itemUpgrade'
 import type { WindowedRows } from '../../lib/useWindowedRows'
 import { EraChip, DonorName } from '../planner/PlannerChips'
 import { GEAR_RATIO_HINT, statText, type GearColumn } from './gearColumns'
@@ -25,6 +26,7 @@ import GearColumnResize from './GearColumnResize'
 import { useGearColumnWidths } from './useGearColumnWidths'
 import { GEAR_ITEM_TIER_MIN_WIDTH } from './gearColumnWidths'
 import { gearClassText } from './gearClassText'
+import { gearStatEvidence, GEAR_STAT_EVIDENCE_LABELS, type GearStatEvidence } from './gearStatEvidence'
 import type { ClassAbbr } from '@shared/classCombo'
 
 /** Dense row height (px), MUI `size="small"` — the number the windowing hook is handed. */
@@ -58,11 +60,31 @@ const COLUMN_HINT: Partial<Record<GearSortKey, string>> = {
   PROC: 'Combat effects listed on the item. Select the item for effect details.'
 }
 
-function GearValueCell({ row, column }: { row: GearRow; column: GearColumn }): JSX.Element {
-  const weaponText = weaponColumnText(row, column.key)
+const GEAR_VALUE_CELL = {
+  ...NUMERIC_PAD,
+  '&[data-stat-source="verified"] > span::after, &[data-stat-source="estimated"] > span::after': {
+    ml: 0.3, fontSize: '0.7em', verticalAlign: 'super'
+  },
+  '&[data-stat-source="verified"] > span::after': { content: '"✓"', color: 'success.light' },
+  '&[data-stat-source="estimated"] > span::after': { content: '"~"', color: 'text.secondary' }
+} as const
+
+function columnEvidence(row: GearRow, key: GearSortKey, state: ItemUpgradeState): GearStatEvidence | undefined {
+  if (isGearStatKey(key)) return gearStatEvidence(row, key, state)
+  if (key === 'RATIO' && gearStatEvidence(row, 'DMG', state) === 'estimated') return 'estimated'
+  return undefined
+}
+
+function GearValueCell({ row, column, state }: { row: GearRow; column: GearColumn; state: ItemUpgradeState }): JSX.Element {
+  const key = column.key
+  const weaponText = weaponColumnText(row, key)
+  const text = weaponText ?? statText(sortValue(row, key), key)
+  const source = text === '' ? undefined : columnEvidence(row, key, state)
+  const label = source === undefined ? undefined : GEAR_STAT_EVIDENCE_LABELS[source]
   return (
-    <TableCell align="center" data-testid={`gear-cell-${column.key}`} sx={NUMERIC_PAD} title={weaponText === '' ? undefined : weaponText}>
-      {weaponText ?? statText(sortValue(row, column.key), column.key)}
+    <TableCell align="center" data-testid={`gear-cell-${key}`} data-stat-source={source}
+      title={label ?? weaponText} aria-label={label ? `${column.label} ${text}. ${label}` : undefined} sx={GEAR_VALUE_CELL}>
+      <span>{text}</span>
     </TableCell>
   )
 }
@@ -230,6 +252,7 @@ const GearLine = memo(function GearLine({
   // already the ownership key — phase 3's seam — so there is nothing to normalise here.
   const owned = ownership === null ? null : ownershipFor(ownership, row)
   const wish = on.wish
+  const state = ownedUpgradeState(compare?.ownedStats ?? null, row) ?? compare?.state ?? ITEM_UPGRADE_BASE
   const line = (
     <TableRow hover data-testid="gear-row" data-item-key={row.key} sx={FIXED_ROW}>
       <TableCell sx={{ px: 1.5 }}>
@@ -248,7 +271,7 @@ const GearLine = memo(function GearLine({
       <TableCell align="center" title={row.slots.join(' ')}>{row.slots.join(' ')}</TableCell>
       <ClassCell classes={row.classes} />
       {columns.map((c) => (
-        <GearValueCell key={c.key} row={row} column={c} />
+        <GearValueCell key={c.key} row={row} column={c} state={state} />
       ))}
       {owned !== null && (
         <TableCell align="center" data-testid="gear-cell-owned" title={ownedCellTitle(owned)}>

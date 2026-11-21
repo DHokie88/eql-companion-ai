@@ -189,6 +189,8 @@ export interface GearRow {
   rangeText?: string
   /** THE BASE numeric vector — the whole point of the row (see `gearScale.ts`) */
   stats: GearStats
+  /** Base fields that still match the Ruby cross-check. Scaling preserves these keys. */
+  verifiedBaseStats?: GearStatKey[]
   /** every effect line the page states, socketed or not */
   effects: GearEffect[]
   /**

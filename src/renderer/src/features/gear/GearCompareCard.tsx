@@ -105,7 +105,7 @@ import { type JSX, type ReactElement, useCallback, useEffect, useState } from 'r
 import type { GearRow } from '@shared/planner/gear'
 import { scaleGearRow } from '@shared/planner/gearScale'
 import { ITEM_MAX_TIER } from '@shared/itemStats'
-import { percentLabel } from '@shared/itemUpgrade'
+import { percentLabel, type ItemUpgradeState } from '@shared/itemUpgrade'
 import { outputKind } from '@shared/outputs/kinds'
 import { CARD_LABEL, CARD_MONO, CARD_TEXT, LABEL_STYLE, MoreLine, TEXT_STYLE } from '../../lib/hoverCards'
 import { Tooltip } from '../../lib/Tooltip'
@@ -121,6 +121,7 @@ import {
 } from './gearCompare'
 import type { GearCompareData } from './gearData'
 import { ownedUpgradeState } from './gearOwnership'
+import { gearStatEvidence, GEAR_STAT_EVIDENCE_LABELS } from './gearStatEvidence'
 
 /** How many of the item's own stats the left card lists before collapsing to "+N more". */
 const MAX_STATS = 10
@@ -184,35 +185,38 @@ const INVENTORY_COMMAND = outputKind('inventory').command
  * WHAT THE TABLE IS SIMULATING, said on the card too (JOS-284's slider).
  *
  * The row this card is handed is the SCALED one, so at a non-base plus-state the item card states
- * numbers no copy in the world has yet — and the equipped card beside it is a real object off a
- * real dump. A comparison between a simulation and a fact has to say which is which; at base there
- * is nothing to say and the line is absent, which is also the whole of the Exaltations browser's
- * case (it hands this card `ITEM_UPGRADE_BASE` and simulates nothing).
+ * estimates. The inventory dump records the owned tier but omits progress within that tier.
  */
 function SimulatedLine({ data, row }: { data: GearCompareData; row: GearRow }): JSX.Element | null {
   const ownedState = ownedUpgradeState(data.ownedStats ?? null, row)
+  if (ownedState?.full === 0) return null
   if (ownedState) return <div style={{ ...LABEL_STYLE, marginTop: 2 }} data-testid="gear-compare-owned-stats">owned tier {ownedState.full} · tier-floor estimate (partial progress unavailable)</div>
   const { full, fraction } = data.state
   if (full === 0) return null
   const denominator = full >= ITEM_MAX_TIER ? 0 : 2 ** full
   return (
     <div style={{ ...LABEL_STYLE, marginTop: 2 }} data-testid="gear-compare-simulated">
-      simulated at Tier {full}
+      estimated at tier {full}
       {denominator > 0 && ` · ${String(fraction)}/${String(denominator)}`} · {percentLabel(data.state)}
     </div>
   )
 }
 
 /** The hovered item's own numbers, in the corpus's key order. Absent keys draw nothing (law 1). */
-function ItemStats({ row }: { row: GearRow }): JSX.Element | null {
+function ItemStats({ row, state }: { row: GearRow; state: ItemUpgradeState }): JSX.Element | null {
   // `compareStats(…, null)` states every key the page states and nothing else, so the `flatMap` is
   // the compiler's proof rather than a filter: an entry with no `item` cannot reach `statPairText`.
-  const stated = compareStats(row.stats, null).flatMap((s) => (s.item === undefined ? [] : [statPairText(s.key, s.item)]))
+  const stated = compareStats(row.stats, null).flatMap(({ key, item }) => item === undefined ? [] : [{ key, text: statPairText(key, item) }])
   if (stated.length === 0) return null
   return (
     <>
       <div style={{ ...TEXT_STYLE, marginTop: 3 }} data-testid="gear-compare-stats">
-        {stated.slice(0, MAX_STATS).join(' · ')}
+        {stated.slice(0, MAX_STATS).map(({ key, text }, index) => {
+          const source = gearStatEvidence(row, key, state)
+          return <span key={key}>{index > 0 && ' · '}{text}{source === 'verified' && (
+            <sup style={{ color: ITEM_ACCENT }} aria-label={GEAR_STAT_EVIDENCE_LABELS.verified}> ✓</sup>
+          )}</span>
+        })}
       </div>
       <MoreLine total={stated.length} shown={MAX_STATS} />
     </>
@@ -259,6 +263,9 @@ function EquippedRow({ cell, row, data }: { cell: EquippedCell; row: GearRow; da
       {host !== null && worn === undefined && (
         <div style={LABEL_STYLE}>the item database has no numbers for that one</div>
       )}
+      {worn !== undefined && host !== null && equippedState(host).full > 0 && (
+        <div style={LABEL_STYLE}>Estimated at the start of the equipped tier</div>
+      )}
       {changes.length > 0 && (
         <>
           <div style={LABEL_STYLE} data-testid="gear-compare-delta">
@@ -281,7 +288,7 @@ export function GearCompareCard({ row, data }: { row: GearRow; data: GearCompare
         {row.classes.length > 0 && ` · ${row.classes.length >= 16 ? 'ALL' : row.classes.join(' ')}`}
       </div>
       <SimulatedLine data={data} row={row} />
-      <ItemStats row={row} />
+      <ItemStats row={row} state={ownedUpgradeState(data.ownedStats ?? null, row) ?? data.state} />
     </div>
   )
 }
