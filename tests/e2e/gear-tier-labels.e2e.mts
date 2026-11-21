@@ -17,6 +17,7 @@ async function selectItem(page: Page, name: string): Promise<void> {
 }
 
 async function steps(page: Page): Promise<void> {
+  await page.evaluate(() => localStorage.setItem('eq.gear.columnWidths', JSON.stringify({ name: 64 })))
   await page.click('[data-testid="nav-gear"]', { timeout: 60_000 })
   await page.click('[data-testid="tab-gear"]', { timeout: 30_000 })
   await settleCount(page, '[data-testid="gear-row"]', 1, { timeoutMs: 60_000 })
@@ -30,13 +31,32 @@ async function steps(page: Page): Promise<void> {
   await page.press(fraction, 'End')
   const sliderReady = await settle(async () => (await page.getByTestId('gear-upgrade-label').innerText()).includes('3/4'), (ok) => ok, { timeoutMs: 15_000 })
   check('the simulation is tier 2 with 3/4 progress', sliderReady)
+  const resize = page.getByTestId('gear-resize-name')
+  check('the saved narrow Item width is used before labels are shown', await resize.getAttribute('aria-valuenow') === '64')
   await page.click('[data-testid="gear-owned-stats-toggle"]')
   await selectItem(page, OWNED_KEY)
   const ownedReady = await settle(async () => (await page.locator(`${row(OWNED_KEY)} [data-testid="gear-item-tier-label"]`).innerText()) === '(yours +5)', (ok) => ok, { timeoutMs: 30_000 })
   check('the owned tier label is ready', ownedReady)
+  const geometry = await page.locator(row(OWNED_KEY)).evaluate((el) => {
+    const cell = el.querySelector('td')?.getBoundingClientRect()
+    const name = el.querySelector('[data-testid="planner-donor-name"]')?.getBoundingClientRect()
+    const label = el.querySelector('[data-testid="gear-item-tier-label"]')?.getBoundingClientRect()
+    return { cell: cell?.width ?? 0, name: name?.width ?? 0, labelRight: label?.right ?? Infinity,
+      cellRight: cell?.right ?? 0, rowHeight: el.getBoundingClientRect().height }
+  })
+  check('the Item cell has room for its name and tier label at a saved narrow width',
+    geometry.cell >= 220 && geometry.name >= 80 && geometry.labelRight <= geometry.cellRight && Math.abs(geometry.rowHeight - 37) <= 1,
+    JSON.stringify(geometry))
+  check('the resize handle reports the temporary Item minimum', await resize.getAttribute('aria-valuemin') === '220')
+  check('showing the tier does not overwrite the saved width', await page.evaluate(() => JSON.parse(localStorage.getItem('eq.gear.columnWidths') ?? '{}').name === 64))
   await checkOwnedTierLabel(page, OWNED_KEY)
   await selectItem(page, UNOWNED_KEY)
   await checkSimulatedTierLabel(page, UNOWNED_KEY)
+  const restored = await settle(async () => await resize.getAttribute('aria-valuenow') === '64', (ok) => ok, { timeoutMs: 15_000 })
+  check('turning labels off restores the saved width and normal resize minimum', restored && await resize.getAttribute('aria-valuemin') === '64')
+  await resize.focus()
+  await page.keyboard.press('ArrowRight')
+  check('the restored Item width can still be resized', await settle(async () => await resize.getAttribute('aria-valuenow') === '80', (ok) => ok, { timeoutMs: 15_000 }))
 }
 
 async function main(): Promise<void> {

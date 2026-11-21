@@ -1,5 +1,7 @@
 import { gearTableLayout, PICKABLE_COLUMNS, type GearColumn } from './gearColumns'
 
+export const GEAR_ITEM_TIER_MIN_WIDTH = 220
+
 const KNOWN = new Set<string>(['name', 'actions', 'SCORE', 'slot', 'classes', 'owned', ...PICKABLE_COLUMNS])
 
 export function sanitizeGearWidths(value: unknown): Record<string, number> {
@@ -10,7 +12,7 @@ export function sanitizeGearWidths(value: unknown): Record<string, number> {
 }
 
 /** Explicit pixel widths. Only an uncustomized Item column absorbs spare room. */
-export function gearWidths(columns: readonly GearColumn[], hasOwned: boolean, available: number, saved: Readonly<Record<string, number>>) {
+export function gearWidths(columns: readonly GearColumn[], hasOwned: boolean, available: number, saved: Readonly<Record<string, number>>, showTierLabels = false) {
   const layout = gearTableLayout(columns.length, hasOwned)
   const defaults: Record<string, number> = {
     name: Number.parseFloat(layout.name), actions: Number.parseFloat(layout.actions), slot: Number.parseFloat(layout.slot),
@@ -21,5 +23,6 @@ export function gearWidths(columns: readonly GearColumn[], hasOwned: boolean, av
   const widths = Object.fromEntries(keys.map((key) => [key, saved[key] ?? defaults[key]]))
   const otherWidth = keys.slice(1).reduce((sum, key) => sum + widths[key], 0)
   if (saved.name === undefined) widths.name = Math.max(defaults.name, available - otherWidth)
+  if (showTierLabels) widths.name = Math.max(GEAR_ITEM_TIER_MIN_WIDTH, widths.name)
   return { widths, total: keys.reduce((sum, key) => sum + widths[key], 0) }
 }

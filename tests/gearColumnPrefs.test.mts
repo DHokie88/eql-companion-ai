@@ -241,6 +241,19 @@ test('custom widths follow column identity through hiding and changing the colum
   assert.equal(hidden.widths.owned, undefined)
 })
 
+test('tier labels temporarily protect item names without changing saved widths', () => {
+  const columns = columnsFor(null, { key: 'AC', dir: 'desc' })
+  const saved = { name: 64 }
+  const ordinary = gearWidths(columns, true, 500, saved)
+  const labeled = gearWidths(columns, true, 500, saved, true)
+  assert.equal(labeled.widths.name, 220)
+  assert.equal(labeled.total, ordinary.total + 156)
+  assert.ok(labeled.total > 500, 'narrow tables remain scrollable')
+  assert.equal(saved.name, 64)
+  assert.equal(gearWidths(columns, true, 500, saved).widths.name, 64)
+  assert.equal(gearWidths(columns, true, 500, { name: 300 }, true).widths.name, 300)
+})
+
 test('malformed stored widths degrade safely and preserve valid recognized columns', () => {
   for (const value of [null, [], 'bad', 42]) assert.deepEqual(sanitizeGearWidths(value), {})
   assert.deepEqual(sanitizeGearWidths({

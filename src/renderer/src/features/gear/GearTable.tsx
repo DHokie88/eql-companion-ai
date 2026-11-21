@@ -23,6 +23,7 @@ import StarIcon from '@mui/icons-material/Star'
 import PreviewButton from '../character/PreviewButton'
 import GearColumnResize from './GearColumnResize'
 import { useGearColumnWidths } from './useGearColumnWidths'
+import { GEAR_ITEM_TIER_MIN_WIDTH } from './gearColumnWidths'
 import { gearClassText } from './gearClassText'
 import type { ClassAbbr } from '@shared/classCombo'
 
@@ -267,12 +268,14 @@ function SortHeader({
   align = 'center',
   onSort,
   onResize,
+  minWidth,
   title,
   testId
 }: {
   column: { key: GearSortKey; label: string }
   sort: GearSort
   width: number
+  minWidth?: number
   title?: string
   testId?: string
   align?: 'center'
@@ -291,7 +294,7 @@ function SortHeader({
       >
         {column.label}
       </TableSortLabel>
-      <GearColumnResize column={column.key} label={column.label} width={width} onResize={onResize} />
+      <GearColumnResize column={column.key} label={column.label} width={width} minWidth={minWidth} onResize={onResize} />
     </TableCell>
   )
 }
@@ -311,7 +314,8 @@ export default function GearTable({
   compare
 }: GearTableProps): JSX.Element {
   const span = columns.length + (ownership === null ? 4 : 5)
-  const { tableRef, widths, total, resize } = useGearColumnWidths(columns, ownership !== null)
+  const showTierLabels = compare?.showUpgradeLabels === true
+  const { tableRef, widths, total, resize } = useGearColumnWidths(columns, ownership !== null, showTierLabels)
   // ONE object for the row's callbacks, memoized on the callbacks themselves: `GearLine` is
   // `memo`'d and a fresh literal per render would defeat it on every keystroke. It held two until
   // JOS-325 retired the `+`, and holds two again since JOS-335 — which is exactly why it stayed an
@@ -334,7 +338,7 @@ export default function GearTable({
       </colgroup>
       <TableHead>
         <TableRow>
-          <SortHeader column={{ key: 'name', label: 'Item' }} sort={sort} width={widths.name} onSort={onSort} onResize={resize} />
+          <SortHeader column={{ key: 'name', label: 'Item' }} sort={sort} width={widths.name} minWidth={showTierLabels ? GEAR_ITEM_TIER_MIN_WIDTH : 64} onSort={onSort} onResize={resize} />
           <TableCell align="center" sx={{ position: 'sticky', px: 0.75 }}>Actions<GearColumnResize column="actions" label="Actions" width={widths.actions} onResize={resize} /></TableCell>
           <SortHeader column={{ key: 'slot', label: 'Slot' }} sort={sort} width={widths.slot} align="center" onSort={onSort} onResize={resize} />
           <SortHeader column={{ key: 'classes', label: 'Classes' }} sort={sort} width={widths.classes} align="center" onSort={onSort} onResize={resize} />
