@@ -424,13 +424,10 @@ docs/agents-archive.md.
   world-supplied text (tooltips keep the facts); controls never shrink.
 - Chromium `navigator.clipboard` needs a permission this app denies
   wholesale — clipboard writes route over IPC to main's clipboard API.
-- **A dynamic `import()` is BUNDLED, not externalized** — "it's a devDep so
-  production can't load it" is FALSE by default: the triage tab's first
-  build shipped 917 kB of working AWS SDK into `out/main` with only a
-  boolean guarding it. Dev-only main-process code must ALSO be listed in
-  `externalizeDepsPlugin({ include })` so the emitted chunk carries bare
-  unresolvable `require`s. Measure the built output; never trust the
-  dependency graph's intuition.
+- **A dynamic `import()` is BUNDLED, not externalized.** Dev-only main-process
+  code must ALSO be listed in `externalizeDepsPlugin({ include })` so the emitted
+  chunk carries bare unresolvable `require`s. Measure the built output; never
+  trust the dependency graph's intuition. History: docs/agents-archive.md.
 - **Never reference a vite `define` bare**, and **anchor a dev-only flag on
   `import.meta.env.DEV`, not on the `define`.** Defines exist only from
   dev-server START, so a bare identifier under a stale server is a
