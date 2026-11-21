@@ -146,6 +146,7 @@ docs/agents-archive.md.
   row (spec · signature · occurrences · disposition), integrators append on
   sighting, and a flake at 3+ occurrences must have a fix ticket or chip —
   "green on re-run" is a report line, never a resolution. Known rows:
+  - `gear.e2e` · 300 s timeout during concurrent Windows checks · 1 sighting (2026-11-20) · isolated rerun pending.
   - `forkLauncher.test` / `forkStartup.mts` temp cleanup · EBUSY removing the probe cwd or Chromium DIPS
     while startup assertions were green · 1 sighting each (2026-10-21, Gear weighting verification) ·
     launcher waits for its owned probe to exit; startup tracks all profile-owned Electron children;
