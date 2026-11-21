@@ -35,22 +35,20 @@ import assert from 'node:assert/strict'
 import type { GearRow } from '../src/shared/planner/gear'
 import { CLASS_ABBRS } from '../src/shared/classCombo'
 import { scaleGearRow } from '../src/shared/planner/gearScale'
+import { row, THELVORN, CROWN, PLAIN, CLUB, ALL, ARMS } from './gearFilterFixtures.mjs'
 import type { ItemUpgradeState } from '../src/shared/itemUpgrade'
 import {
   DEFAULT_GEAR_FILTERS,
   DEFAULT_GEAR_SORT,
-  WEAPON_GEAR_SORT,
   classMismatch,
   effectMatches,
   filterGearRows,
   gearTableRows,
-  isGearWeapon,
   matchesGear,
   scaleAll,
   slotMatches,
   sortGearRows,
   sortValue,
-  weaponColumnText,
   type GearFilters
 } from '../src/renderer/src/features/gear/gearFilter'
 import {
@@ -75,120 +73,6 @@ import {
 // =================================================================================
 // FIXTURES
 // =================================================================================
-
-function row(over: Partial<GearRow> & Pick<GearRow, 'key' | 'name'>): GearRow {
-  return {
-    searchKey: over.name.toLowerCase(),
-    slots: [],
-    classes: [],
-    races: ['ALL'],
-    flags: [],
-    quest: false,
-    playerCrafted: false,
-    stats: {},
-    effects: [],
-    ...over
-  }
-}
-
-/** Thelvorn, Blade of Light — DMG 20, Atk Delay 26, WIS +15, WT 3.0 (tests/gearIndex.test.mts). */
-const THELVORN = row({
-  key: 'thelvorn, blade of light',
-  name: 'Thelvorn, Blade of Light',
-  slots: ['PRIMARY'],
-  classes: ['PAL'],
-  skill: '1H Slashing',
-  stats: { WIS: 15, DMG: 20, DELAY: 26, WEIGHT: 3 },
-  effects: [{ name: 'Dismiss Summoned', kind: 'combat', socket: 'proc', tierRequired: 4 }]
-})
-
-/** Crown of King Tranix — AC 13, CHA +15, SV MAGIC +20, WT 1.0, and the SV VOID synthesis case. */
-const CROWN = row({
-  key: 'crown of king tranix',
-  name: 'Crown of King Tranix',
-  slots: ['HEAD'],
-  classes: ['CLR', 'ENC', 'MAG', 'NEC', 'WIZ'],
-  stats: { AC: 13, CHA: 15, SV_MAGIC: 20, WEIGHT: 1 },
-  voidSynth: true,
-  effects: [{ name: 'Shielding', kind: 'worn', socket: 'worn', tierRequired: 3 }],
-  eraTag: 'Classic'
-})
-
-/** A plain, effect-free, stat-free row — the "states none" case every rule has to survive. */
-const PLAIN = row({ key: 'cloth cap', name: 'Cloth Cap', slots: ['HEAD'], classes: [], stats: { WEIGHT: 0.5 } })
-
-/** A second weapon with a WORSE base ratio but a haste line, for the sort and threshold tests. */
-const CLUB = row({
-  key: 'wooden club',
-  name: 'Wooden Club',
-  slots: ['PRIMARY', 'SECONDARY'],
-  classes: ['WAR', 'PAL'],
-  skill: '1H Blunt',
-  stats: { DMG: 5, DELAY: 30, HASTE: 10, HP_REGEN: 2, WEIGHT: 2 },
-  effects: []
-})
-
-const ALL = [THELVORN, CROWN, PLAIN, CLUB]
-
-/**
- * THE WEAPON-TYPE FIXTURES (JOS-302), and the four spellings are chosen from the corpus census in
- * `shared/planner/weaponType.ts` rather than invented: a clean `2H Slashing`, an `Archery`, the
- * bare `Piercing` that 322 pages state for the one-handed skill, and the stray `1H Slashing /` an
- * editor left a separator on. `PLAIN` (no `Skill:` at all) rides along as the not-a-weapon case.
- */
-const GREATSWORD = row({
-  key: 'greatsword',
-  name: 'Greatsword',
-  slots: ['PRIMARY'],
-  skill: '2H Slashing',
-  stats: { DMG: 30, DELAY: 45 }
-})
-const BOW = row({ key: 'short bow', name: 'Short Bow', slots: ['RANGE'], skill: 'Archery', stats: { DMG: 6, DELAY: 40 } })
-const DAGGER = row({
-  key: 'rusty dagger',
-  name: 'Rusty Dagger',
-  slots: ['PRIMARY', 'SECONDARY'],
-  skill: 'Piercing',
-  stats: { DMG: 3, DELAY: 22 }
-})
-const SLOPPY = row({
-  key: 'faydark champions long sword',
-  name: 'Faydark Champions Long Sword',
-  slots: ['PRIMARY', 'SECONDARY'],
-  skill: '1H Slashing /',
-  stats: { DMG: 9, DELAY: 27 }
-})
-
-const ARMS = [THELVORN, CLUB, GREATSWORD, BOW, DAGGER, SLOPPY, PLAIN]
-
-const MISSING_SKILL = row({ key: 'unknown blade', name: 'Unknown Blade', stats: { DMG: 20, DELAY: 10 } })
-const MISSING_DELAY = row({ key: 'training blade', name: 'Training Blade', skill: '2H Piercing', stats: { DMG: 20 } })
-
-test('weapon comparison uses known skills and ratio evidence, and leaves unavailable fields blank', () => {
-  const weapons = [...ARMS, MISSING_SKILL, MISSING_DELAY].filter(isGearWeapon)
-  assert.deepEqual(names(weapons), names([...ARMS.slice(0, -1), MISSING_SKILL, MISSING_DELAY]))
-  const ranked = sortGearRows(weapons, WEAPON_GEAR_SORT)
-  assert.equal(ranked[0], MISSING_SKILL, 'the best known ratio ranks first even without a named skill')
-  assert.equal(ranked.at(-1), MISSING_DELAY, 'a recognized weapon with no ratio stays visible at the end')
-  assert.equal(weaponColumnText(MISSING_SKILL, 'WEAPON_TYPE'), '')
-  assert.equal(weaponColumnText(MISSING_SKILL, 'HAND'), '')
-  assert.equal(weaponColumnText(MISSING_DELAY, 'HAND'), 'Two-handed')
-  assert.equal(sortValue(MISSING_DELAY, 'RATIO'), undefined)
-})
-
-test('weapon text columns share the filter vocabulary and sort labels with stable name ties', () => {
-  assert.equal(weaponColumnText(DAGGER, 'WEAPON_TYPE'), '1H Piercing')
-  assert.equal(weaponColumnText(SLOPPY, 'WEAPON_TYPE'), '1H Slashing')
-  assert.equal(weaponColumnText(BOW, 'HAND'), 'Ranged')
-  assert.equal(weaponColumnText(THELVORN, 'RATIO'), undefined)
-  assert.equal(weaponColumnText(THELVORN, 'PROC'), 'Dismiss Summoned')
-  assert.equal(weaponColumnText(CROWN, 'PROC'), '')
-  const rows = [MISSING_SKILL, GREATSWORD, THELVORN, BOW, CLUB]
-  assert.deepEqual(names(sortGearRows(rows, { key: 'HAND', dir: 'asc' })), names([THELVORN, CLUB, BOW, GREATSWORD, MISSING_SKILL]))
-  assert.deepEqual(names(sortGearRows(rows, { key: 'HAND', dir: 'desc' })), names([GREATSWORD, BOW, THELVORN, CLUB, MISSING_SKILL]))
-  assert.deepEqual(names(sortGearRows(rows, { key: 'WEAPON_TYPE', dir: 'asc' })), names([CLUB, THELVORN, GREATSWORD, BOW, MISSING_SKILL]))
-  assert.deepEqual(names(sortGearRows(rows, { key: 'WEAPON_TYPE', dir: 'desc' })), names([BOW, GREATSWORD, THELVORN, CLUB, MISSING_SKILL]))
-})
 
 /** "Tier 2   3 / 4" — the owner screenshot every phase-0 number in this repo is verified against. */
 const CHECKPOINT: ItemUpgradeState = { full: 2, fraction: 3 }

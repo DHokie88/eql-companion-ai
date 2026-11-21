@@ -52,6 +52,7 @@ import {
   weaponTypeOf,
   type WeaponPick
 } from '../../../../shared/planner/weaponType'
+import { gearProcText } from '../../../../shared/planner/gearProc'
 import type { EquipSlot, SocketType } from '../../../../shared/planner/types'
 
 // ---- the filter model ---------------------------------------------------------------------
@@ -260,9 +261,14 @@ export function isGearWeapon(row: GearRow): boolean {
   return weaponTypeOf(row.skill) !== null || gearRatio(row.stats) !== undefined
 }
 
+/** The Gear catalog is fetched once; comparison mode narrows that same catalog locally. */
+export function gearWeapons<T extends GearRow>(rows: readonly T[]): T[] {
+  return rows.filter(isGearWeapon)
+}
+
 /** Empty labels stay blank when the item has no recognized weapon skill. */
 export function weaponColumnText(row: GearRow, key: GearSortKey): string | undefined {
-  if (key === 'PROC') return row.effects.filter((effect) => effect.kind === 'combat').map((effect) => effect.name).join(' · ')
+  if (key === 'PROC') return gearProcText(row)
   if (key !== 'HAND' && key !== 'WEAPON_TYPE') return undefined
   const type = weaponTypeOf(row.skill)
   if (type === null) return ''
