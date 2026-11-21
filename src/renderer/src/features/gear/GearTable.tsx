@@ -176,7 +176,7 @@ function UpgradeLabel({ row, compare }: { row: GearRow; compare: GearCompareData
     ? 'Your highest owned tier; partial progress is unavailable in the inventory export.'
     : `Simulated tier ${String(state.full)}${state.fraction ? `, ${String(state.fraction)}/${String(2 ** state.full)} progress` : ''}`
   return (
-    <Box component="span" data-testid="gear-upgrade-label" sx={{ flexShrink: 0, color: 'text.secondary' }} title={title}>
+    <Box component="span" data-testid="gear-item-tier-label" sx={{ flexShrink: 0, color: 'text.secondary' }} title={title}>
       ({ownedTier ? 'yours ' : ''}+{state.full})
     </Box>
   )
