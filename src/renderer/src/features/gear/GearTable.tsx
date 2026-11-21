@@ -14,7 +14,7 @@ import { statText, type GearColumn } from './gearColumns'
 import { GearRowCompare } from './GearCompareCard'
 import type { GearCompareData } from './gearData'
 import { sortValue, type GearSort, type GearSortKey } from './gearFilter'
-import { ownedCellText, ownedCellTitle, ownershipFor, type GearOwnershipMap } from './gearOwnership'
+import { ownedCellText, ownedCellTitle, ownershipFor, ownedUpgradeState, type GearOwnershipMap } from './gearOwnership'
 // JOS-343 — the ONE wish control in the app, shared with the Exaltations donor row by owner ruling.
 import StarBorderIcon from '@mui/icons-material/StarBorder'
 import StarIcon from '@mui/icons-material/Star'
@@ -198,11 +198,19 @@ const GearLine = memo(function GearLine({
   // already the ownership key — phase 3's seam — so there is nothing to normalise here.
   const owned = ownership === null ? null : ownershipFor(ownership, row)
   const wish = on.wish
+  const ownedTier = compare?.showUpgradeLabels ? ownedUpgradeState(compare.ownedStats ?? null, row) : null
+  const labelState = ownedTier ?? compare?.state
   const line = (
     <TableRow hover data-testid="gear-row" data-item-key={row.key} sx={FIXED_ROW}>
       <TableCell sx={{ px: 1.5 }}>
         <Stack direction="row" spacing={0.5} alignItems="center" sx={{ flexWrap: 'nowrap', minWidth: 0 }}>
           <DonorName name={row.name} onOpen={on.openLoot} />
+          {compare?.showUpgradeLabels && labelState && (
+            <Box component="span" data-testid="gear-upgrade-label" sx={{ flexShrink: 0, color: 'text.secondary' }}
+              title={ownedTier ? 'Your highest owned tier; partial progress is unavailable in the inventory export.' : `Simulated tier ${String(labelState.full)}${labelState.fraction ? `, ${String(labelState.fraction)}/${String(2 ** labelState.full)} progress` : ''}`}>
+              ({ownedTier ? 'yours ' : ''}+{labelState.full})
+            </Box>
+          )}
           <EraChip subject={row} />
         </Stack>
       </TableCell>
