@@ -67,7 +67,10 @@ and handedness use the catalog's stated skill. Bows and throwing weapons appear 
 
 ## Building
 
-See [`SETUP.md`](SETUP.md). Feature plans are in [`ROADMAP.md`](ROADMAP.md).
+See [`SETUP.md`](SETUP.md). After pulling `eqo`, build from the Windows checkout
+that your shortcut uses. `Open-Fork.cmd` loads that checkout's `out/` directory.
+Run `npm run build` and `npm run test:startup`, then reopen the app to load the new
+build. Feature plans are in [`ROADMAP.md`](ROADMAP.md).
 
 ## License
 
