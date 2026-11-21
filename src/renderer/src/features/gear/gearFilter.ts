@@ -45,7 +45,13 @@ import type { ClassAbbr } from '../../../../shared/classCombo'
 import type { ItemUpgradeState } from '../../../../shared/itemUpgrade'
 import type { GearRow, GearStatKey } from '../../../../shared/planner/gear'
 import { gearEffectiveHp, gearRatio, scaleGearRow } from '../../../../shared/planner/gearScale'
-import { weaponPicksMatch, type WeaponPick } from '../../../../shared/planner/weaponType'
+import {
+  WEAPON_PICK_LABEL,
+  weaponCategoryOf,
+  weaponPicksMatch,
+  weaponTypeOf,
+  type WeaponPick
+} from '../../../../shared/planner/weaponType'
 import type { EquipSlot, SocketType } from '../../../../shared/planner/types'
 
 // ---- the filter model ---------------------------------------------------------------------
@@ -223,14 +229,22 @@ export function filterGearRows<T extends GearRow>(
 /**
  * Any numeric column, plus the DERIVED ones. `RATIO` is `gearRatio` (never a second opinion on
  * DMG/DELAY), `EFF_HP` is `gearEffectiveHp` (JOS-336 — raw HP plus raw STA, likewise never a second
- * opinion). Name, slot, classes and ownership sort by their displayed text; `SCORE` reads the
- * priority score attached by the caller.
+ * opinion). Text columns sort by their displayed labels, including weapon handedness and type.
+ * `SCORE` reads the priority score attached by the caller.
  *
  * A DERIVED KEY IS NOT A VECTOR KEY, and the union says so: `GearStats` has no `EFF_HP` field and
  * never will. Nothing indexes it, nothing scales it, and nothing stores it — it is computed from the
  * vector at the moment somebody asks, which is exactly why the plus-state moves it for free.
  */
-export type GearSortKey = 'name' | 'slot' | 'classes' | 'owned' | 'SCORE' | 'RATIO' | 'EFF_HP' | GearStatKey
+const TEXT_SORT_KEYS = ['name', 'slot', 'classes', 'owned', 'HAND', 'WEAPON_TYPE', 'PROC'] as const
+const TEXT_SORT_KEY_SET: ReadonlySet<string> = new Set(TEXT_SORT_KEYS)
+
+type TextSortKey = (typeof TEXT_SORT_KEYS)[number]
+export type GearSortKey = TextSortKey | 'SCORE' | 'RATIO' | 'EFF_HP' | GearStatKey
+
+export function isGearTextSort(key: GearSortKey): key is TextSortKey {
+  return TEXT_SORT_KEY_SET.has(key)
+}
 
 export interface GearSort {
   key: GearSortKey
@@ -239,6 +253,23 @@ export interface GearSort {
 
 /** The table opens on the highest AC — a ranking, so the first screen says something. */
 export const DEFAULT_GEAR_SORT: GearSort = { key: 'AC', dir: 'desc' }
+export const WEAPON_GEAR_SORT: GearSort = { key: 'RATIO', dir: 'desc' }
+
+/** A known skill or a damage/delay pair identifies a weapon, even with other fields missing. */
+export function isGearWeapon(row: GearRow): boolean {
+  return weaponTypeOf(row.skill) !== null || gearRatio(row.stats) !== undefined
+}
+
+/** Empty labels stay blank when the item has no recognized weapon skill. */
+export function weaponColumnText(row: GearRow, key: GearSortKey): string | undefined {
+  if (key === 'PROC') return row.effects.filter((effect) => effect.kind === 'combat').map((effect) => effect.name).join(' · ')
+  if (key !== 'HAND' && key !== 'WEAPON_TYPE') return undefined
+  const type = weaponTypeOf(row.skill)
+  if (type === null) return ''
+  if (key === 'WEAPON_TYPE') return WEAPON_PICK_LABEL[type]
+  const category = weaponCategoryOf(type)
+  return category === undefined ? '' : WEAPON_PICK_LABEL[category]
+}
 
 /**
  * The number a sort reads, or `undefined` when the row states none (which sorts LAST, both ways).
@@ -246,24 +277,27 @@ export const DEFAULT_GEAR_SORT: GearSort = { key: 'AC', dir: 'desc' }
  * THE DERIVED ARMS COME FIRST AND EACH DELEGATES. `gearRatio` and `gearEffectiveHp` both live in
  * `shared/planner/gearScale.ts` beside the scaler, so the cell the table DRAWS and the number the
  * sort RANKS by are one function call rather than two agreeing implementations — which is the
- * property that lets `GearTable` render every column with `statText(sortValue(row, key), key)` and
- * never learn that two of the keys are not vector fields.
+ * property that lets `GearTable` render numeric columns with `statText(sortValue(row, key), key)`
+ * and leaves the text columns to their own labels.
  */
 export function sortValue(row: GearRow & { priorityScore?: number }, key: GearSortKey): number | undefined {
-  if (key === 'name' || key === 'slot' || key === 'classes' || key === 'owned') return undefined
+  if (isGearTextSort(key)) return undefined
   if (key === 'SCORE') return row.priorityScore
   if (key === 'RATIO') return gearRatio(row.stats)
   if (key === 'EFF_HP') return gearEffectiveHp(row.stats)
   return row.stats[key]
 }
 
-function sortText(row: GearRow, key: 'slot' | 'classes' | 'owned', deps: GearFilterDeps): string {
+type LabelSortKey = Exclude<TextSortKey, 'name'>
+
+function sortText(row: GearRow, key: LabelSortKey, deps: GearFilterDeps): string {
   if (key === 'slot') return row.slots.join(' ')
   if (key === 'classes') return gearClassText(row.classes).tokens.join(' ')
-  return deps.ownedText?.(row).trim() ?? ''
+  if (key === 'owned') return deps.ownedText?.(row).trim() ?? ''
+  return weaponColumnText(row, key) ?? ''
 }
 
-function compareText(a: GearRow, b: GearRow, key: 'slot' | 'classes' | 'owned', { deps, sign }: { deps: GearFilterDeps; sign: number }): number {
+function compareText(a: GearRow, b: GearRow, key: LabelSortKey, { deps, sign }: { deps: GearFilterDeps; sign: number }): number {
   const av = sortText(a, key, deps)
   const bv = sortText(b, key, deps)
   if (av === '' || bv === '') {
@@ -286,7 +320,7 @@ export function sortGearRows<T extends GearRow>(rows: readonly T[], sort: GearSo
   const sign = sort.dir === 'asc' ? 1 : -1
   return [...rows].sort((a, b) => {
     if (sort.key === 'name') return sign * a.name.localeCompare(b.name)
-    if (sort.key === 'slot' || sort.key === 'classes' || sort.key === 'owned') {
+    if (isGearTextSort(sort.key)) {
       return compareText(a, b, sort.key, { deps, sign })
     }
     const av = sortValue(a, sort.key)

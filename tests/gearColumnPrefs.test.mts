@@ -8,7 +8,7 @@
 //   1. THE PICKER PERSISTS, AND EXPLICIT BEATS DERIVED. A stored choice wins outright, an absent
 //      key falls back to the derived seed, and a stored EMPTY list is a choice rather than an
 //      absence — the one distinction a naive `?? []` would erase.
-//   2. EVERY EXPOSED KEY SORTS. The picker offers thirty-three keys and every one of them is a
+//   2. EVERY EXPOSED KEY SORTS. Every key the picker offers is a
 //      working sort axis in BOTH directions, with an absent value LAST either way — which is the
 //      property that makes "expose it on every header" safe rather than a promise.
 //   3. THE WIDTHS FIT OR THE TABLE SCROLLS. Readable pixel defaults keep the name and controls
@@ -28,14 +28,18 @@ import { GEAR_STAT_KEYS, type GearRow, type GearStats } from '../src/shared/plan
 import {
   CORE_COLUMNS,
   PICKABLE_COLUMNS,
+  WEAPON_COMPARE_COLUMNS,
   columnsFor,
   gearTableLayout,
   sortWithin,
-  visibleColumns
+  visibleColumns,
+  weaponColumnsFor
 } from '../src/renderer/src/features/gear/gearColumns'
 import {
   DEFAULT_GEAR_FILTERS,
   DEFAULT_GEAR_SORT,
+  WEAPON_GEAR_SORT,
+  isGearTextSort,
   sortGearRows,
   sortValue,
   type GearFilters,
@@ -139,13 +143,16 @@ test('a stored choice DEGRADES rather than erroring, whatever another build wrot
   assert.deepEqual(sanitizeColumns(['EFF_HP']), ['EFF_HP'], '…and so is the derived effective HP')
 })
 
-test('the picker offers the WHOLE vocabulary - every indexed stat, both derived keys, never the name', () => {
+test('the picker offers every indexed stat, both derived keys and both weapon text keys', () => {
   // TWO DERIVED KEYS SINCE JOS-336: `RATIO` and `EFF_HP`. Neither is a field of `GearStats`, both
   // are computed off the SCALED vector at read time, and both are offered exactly like a stat.
-  assert.equal(PICKABLE_COLUMNS.length, GEAR_STAT_KEYS.length + 2)
+  assert.equal(PICKABLE_COLUMNS.length, GEAR_STAT_KEYS.length + 5)
   for (const key of GEAR_STAT_KEYS) assert.ok(PICKABLE_COLUMNS.includes(key), `${key} is offered`)
   assert.ok(PICKABLE_COLUMNS.includes('RATIO'))
   assert.ok(PICKABLE_COLUMNS.includes('EFF_HP'))
+  assert.ok(PICKABLE_COLUMNS.includes('HAND'))
+  assert.ok(PICKABLE_COLUMNS.includes('WEAPON_TYPE'))
+  assert.ok(PICKABLE_COLUMNS.includes('PROC'))
   assert.ok(!PICKABLE_COLUMNS.includes('name' as GearSortKey), 'the item column is not optional')
   // A DERIVED KEY STANDS BESIDE THE NUMBERS IT IS MADE OF — the only documentation a flat checkbox
   // list can carry (gearColumns.ts). Ratio follows DELAY; effective HP follows HP, one row under
@@ -159,6 +166,14 @@ test('the picker offers the WHOLE vocabulary - every indexed stat, both derived 
   for (const key of ['STR', 'STA', 'AGI', 'DEX', 'WIS', 'INT', 'CHA'] as const) {
     assert.ok(PICKABLE_COLUMNS.includes(key), `${key} is one click away`)
   }
+})
+
+test('weapon comparison keeps its leading columns available with any regular column preference', () => {
+  const chosen: GearSortKey[] = ['HP', 'DELAY', 'CHA']
+  assert.deepEqual(weaponColumnsFor(chosen, WEAPON_GEAR_SORT).map((c) => c.key), [...WEAPON_COMPARE_COLUMNS, 'HP', 'CHA'])
+  assert.deepEqual(weaponColumnsFor([], WEAPON_GEAR_SORT).map((c) => c.key), WEAPON_COMPARE_COLUMNS)
+  assert.deepEqual(columnsFor(chosen, DEFAULT_GEAR_SORT).map((c) => c.key), ['HP', 'DELAY', 'CHA'])
+  assert.deepEqual(sanitizeColumns(['HAND', 'WEAPON_TYPE']), ['HAND', 'WEAPON_TYPE'])
 })
 
 test('a toggle keeps VOCABULARY order, and the first click promotes the seed unchanged but for it', () => {
@@ -179,15 +194,15 @@ function order(key: GearSortKey): number {
 // 2. EVERY EXPOSED KEY SORTS, IN BOTH DIRECTIONS, WITH ABSENT LAST
 // =================================================================================
 
-test('every key the picker offers is a working sort axis - the exposure IS the sortability', () => {
-  for (const key of PICKABLE_COLUMNS) {
+test('every numeric key the picker offers has a working sort value', () => {
+  for (const key of PICKABLE_COLUMNS.filter((key) => !isGearTextSort(key))) {
     assert.notEqual(sortValue(HIGH, key), undefined, `${key} reads a number off a row that states it`)
     assert.equal(sortValue(NONE, key), undefined, `${key} reads nothing off a row that states none`)
   }
 })
 
-test('every exposed key ranks BOTH ways, and an absent value sorts LAST either way', () => {
-  for (const key of PICKABLE_COLUMNS) {
+test('every exposed numeric key ranks BOTH ways, and an absent value sorts LAST either way', () => {
+  for (const key of PICKABLE_COLUMNS.filter((key) => !isGearTextSort(key))) {
     for (const dir of ['desc', 'asc'] as const) {
       const sort: GearSort = { key, dir }
       const values = sortGearRows(ROWS, sort).map((r) => sortValue(r, key))
@@ -205,7 +220,7 @@ test('every exposed key ranks BOTH ways, and an absent value sorts LAST either w
 })
 
 test('the sort is confined to what is DRAWN - removing the sorted column moves the lit header', () => {
-  const shown = columnsFor(['STR', 'CHA'], filters(), DEFAULT_GEAR_SORT)
+  const shown = columnsFor(['STR', 'CHA'], DEFAULT_GEAR_SORT)
   const kept: GearSort = { key: 'STR', dir: 'asc' }
   assert.equal(sortWithin(kept, shown), kept, 'a sort on a drawn column is returned UNCHANGED - same object')
   assert.deepEqual(sortWithin({ key: 'AC', dir: 'desc' }, shown), { key: 'STR', dir: 'desc' }, 'it falls to the first drawn column')

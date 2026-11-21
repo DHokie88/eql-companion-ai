@@ -1,4 +1,4 @@
-// gear/gearColumns.ts — WHICH numeric columns the table draws, and how wide they are.
+// gear/gearColumns.ts — WHICH optional columns the table draws, and how wide they are.
 //
 // THE PROBLEM THIS SOLVES. `GEAR_STAT_KEYS` is 32 keys wide and the ticket asks to sort by ANY of
 // them, regens and backstab included. Thirty-two columns is not a table anyone can read, so the
@@ -17,8 +17,8 @@
 // tab: *ALL stats should be there*). The derivation was a bet that asking about a stat is the only
 // way anyone says they want to see it, and the bet was wrong: a player comparing two breastplates
 // wants the seven attributes on screen without inventing seven thresholds to conjure them. So the
-// picker offers the WHOLE vocabulary (`PICKABLE_COLUMNS` — every `GearStatKey`, plus the DERIVED
-// `RATIO` and, since JOS-336, `EFF_HP`) and
+// picker offers the WHOLE vocabulary (`PICKABLE_COLUMNS` — every `GearStatKey`, the derived
+// `RATIO` and `EFF_HP`, plus weapon handedness, type and proc) and
 // an explicit choice WINS; absent a choice the derivation still runs, which is what keeps the tab's
 // first screen what it was. The distinction the storage layer has to preserve is therefore ABSENT
 // vs EMPTY: no stored key means "derive", a stored `[]` means "the user asked for no numeric
@@ -39,7 +39,7 @@
 // and `tests/gearColumnPrefs.test.mts` that a chosen set of thirty overflows on purpose.
 
 import { GEAR_PERCENT_STAT_KEYS, GEAR_STAT_KEYS, type GearStatKey } from '../../../../shared/planner/gear'
-import type { GearSort, GearSortKey } from './gearFilter'
+import { isGearTextSort, type GearSort, type GearSortKey } from './gearFilter'
 
 /**
  * The columns that are always there: armour, the two pools every class reads, and the weapon
@@ -48,6 +48,13 @@ import type { GearSort, GearSortKey } from './gearFilter'
  * half of what the selector is for.
  */
 export const CORE_COLUMNS: readonly GearSortKey[] = ['AC', 'HP', 'MP', 'RATIO']
+
+/** Lead with the fields that distinguish weapons, then show other selected Gear columns. */
+export const WEAPON_COMPARE_COLUMNS: readonly GearSortKey[] = [
+  'RATIO', 'DMG', 'DELAY', 'HAND', 'WEAPON_TYPE', 'DMG_BONUS', 'BACKSTAB', 'RANGE', 'HASTE', 'PROC'
+]
+
+export const GEAR_RATIO_HINT = 'Damage divided by delay at the displayed tier. The ratio excludes damage bonus, procs, haste, and off-hand attacks.'
 
 /** A sort can add one column to the core. */
 export const MAX_DERIVED_COLUMNS = 1
@@ -76,6 +83,9 @@ export function columnLabel(key: GearSortKey): string {
   if (resist !== undefined) return resist
   if (key === 'SCORE') return 'Score'
   if (key === 'RATIO') return 'Ratio'
+  if (key === 'HAND') return 'Handedness'
+  if (key === 'WEAPON_TYPE') return 'Weapon type'
+  if (key === 'PROC') return 'Proc'
   if (key === 'name') return 'Item'
   return key.replace(/_/g, ' ')
 }
@@ -86,11 +96,9 @@ function column(key: GearSortKey): GearColumn {
 
 /**
  * EVERY KEY THE PICKER OFFERS, in the corpus's own order with each DERIVED key standing beside the
- * numbers it is made of. Thirty-four: the thirty-two indexed stats — the seven attributes, the
- * pools, the regens, Attack, Haste, the ten saves, the weapon block and weight — plus the derived
- * ratio (after DELAY, the second of its two inputs) and the derived effective HP (after HP, likewise
- * the second of its two — STA leads the attribute run and HP closes the gap to the pools, so `EFF HP`
- * lands directly under both halves of its own sum). `name` is NOT in it: the item column is not
+ * numbers it is made of. The indexed weapon stats sit with the derived ratio and the two text
+ * columns for handedness and type. Effective HP follows HP, with STA just above the pools.
+ * `name` is NOT in it: the item column is not
  * optional, it is what a row IS.
  *
  * PLACEMENT IS THE ONLY DOCUMENTATION A CHECKBOX LIST GETS. A picker is a flat column of labels with
@@ -103,7 +111,7 @@ function column(key: GearSortKey): GearColumn {
  * picker in the same commit, which is the only way "all stats" can stay true.
  */
 export const PICKABLE_COLUMNS: readonly GearSortKey[] = GEAR_STAT_KEYS.flatMap<GearSortKey>((key) => {
-  if (key === 'DELAY') return [key, 'RATIO']
+  if (key === 'DELAY') return [key, 'RATIO', 'HAND', 'WEAPON_TYPE', 'PROC']
   if (key === 'HP') return [key, 'EFF_HP']
   return [key]
 })
@@ -142,6 +150,12 @@ export function columnsFor(chosen: readonly GearSortKey[] | null, sort: GearSort
   return chosen === null ? visibleColumns(sort) : chosen.map(column)
 }
 
+/** The weapon layout combines its comparison block with the regular columns, without saving it. */
+export function weaponColumnsFor(chosen: readonly GearSortKey[] | null, sort: GearSort): GearColumn[] {
+  const keys = new Set([...WEAPON_COMPARE_COLUMNS, ...columnsFor(chosen, sort).map((c) => c.key)])
+  return [...keys].map(column)
+}
+
 /**
  * THE SORT, CONFINED TO WHAT IS ON SCREEN. Removing the column you were sorting by must not leave
  * the table ordered by an invisible number with no lit header to explain it — so the sort falls to
@@ -154,7 +168,8 @@ export function sortWithin(sort: GearSort, columns: readonly GearColumn[], hasOw
   if (sort.key === 'owned' && !hasOwned) return { key: 'name', dir: 'asc' }
   if (['name', 'slot', 'classes', 'owned', 'SCORE'].includes(sort.key) || columns.some((c) => c.key === sort.key)) return sort
   const first = columns[0]
-  return first === undefined ? { key: 'name', dir: 'asc' } : { key: first.key, dir: 'desc' }
+  if (first === undefined) return { key: 'name', dir: 'asc' }
+  return { key: first.key, dir: isGearTextSort(first.key) ? 'asc' : 'desc' }
 }
 
 /** Default pixel widths and their minimum table width; spare room belongs to Item. */

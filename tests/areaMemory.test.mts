@@ -49,6 +49,7 @@ import {
   sanitizeGearClasses,
   sanitizeGearForm,
   sanitizeGearSort,
+  sanitizeWeaponSort,
   sanitizeItemFocus,
   sanitizeOpenGroups,
   sanitizeSearch,
@@ -99,7 +100,7 @@ const BROWSE_FALLBACK: BrowseFormMemory = { socket: 'proc', slot: null, trioOnly
 
 test('the restart split is a table, and every key in it is on one of exactly two tiers', () => {
   const keys = Object.keys(AREA_FORM_TIER) as AreaFormKey[]
-  assert.equal(keys.length, 15, 'the owned stats preference joins the existing fourteen stored fields')
+  assert.equal(keys.length, 16, 'the weapon sort joins the existing fifteen stored fields')
   for (const key of keys) {
     const tier = tierOf(key)
     assert.ok(tier === 'restart' || tier === 'session', `${key} is on an unknown tier ${tier}`)
@@ -117,6 +118,7 @@ test('WHAT YOU TYPED IS SESSION-SCOPED — every search box, on all four tabs', 
   // …and the two narrowings that are reached BY typing ride with them (areaMemory's header argues
   // the item picker; the expanded set is ephemeral navigation state).
   assert.equal(tierOf('eq.gear.ownedStats'), 'session')
+  assert.equal(tierOf('eq.gear.weaponSort'), 'session')
   assert.equal(tierOf('eq.planner.item'), 'session')
   assert.equal(tierOf('eq.planner.open'), 'session')
   assert.equal(tierOf('eq.build.manaInt'), 'session')
@@ -170,6 +172,7 @@ const anyIdList = (raw: unknown): boolean =>
 const READERS: Reader[] = [
   { key: 'eq.gear.filters', read: sanitizeGearForm, fallback: DEFAULT_GEAR_FORM },
   { key: 'eq.gear.sort', read: sanitizeGearSort, fallback: DEFAULT_GEAR_SORT },
+  { key: 'eq.gear.weaponSort', read: sanitizeWeaponSort, fallback: null },
   { key: 'eq.gear.classes', read: sanitizeGearClasses, fallback: null },
   { key: 'eq.gear.upgrade', read: sanitizeUpgrade, fallback: ITEM_UPGRADE_BASE },
   { key: 'eq.gear.ownedStats', read: (r) => sanitizeFlag(r, false), fallback: false, legal: (r) => typeof r === 'boolean' },
@@ -266,6 +269,12 @@ test('a stored sort round-trips, and each half defaults independently of the oth
     dir: 'asc'
   })
   assert.deepEqual(sanitizeGearSort({ key, dir: 'sideways' }), { key, dir: DEFAULT_GEAR_SORT.dir })
+})
+
+test('weapon comparison keeps a separate sort and opens only with a valid saved sort', () => {
+  assert.deepEqual(sanitizeWeaponSort({ key: 'RATIO', dir: 'desc' }), { key: 'RATIO', dir: 'desc' })
+  assert.deepEqual(sanitizeWeaponSort({ key: 'WEAPON_TYPE', dir: 'asc' }), { key: 'WEAPON_TYPE', dir: 'asc' })
+  assert.equal(sanitizeWeaponSort({ key: 'RATIO', dir: 'sideways' }), null)
 })
 
 test('a stored browse form round-trips, including the socket tab and the trio toggle', () => {
