@@ -21,6 +21,13 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.28.0',
+    date: '2026-11-20',
+    entries: [
+      { kind: 'new', text: 'Turn on Weapons in Gear to compare by damage divided by delay. Sort by ratio, damage, delay, handedness, weapon type, damage bonus, backstab, range, or haste while keeping your existing filters. The ratio uses the stats shown for each item, including its owned or simulated tier.' }
+    ]
+  },
+  {
     version: '0.27.0',
     date: '2026-11-20',
     entries: [

@@ -49,6 +49,22 @@ guide is [`AGENTS.md`](AGENTS.md) and is still the best map of the code.
 - Settings still live in `%AppData%\everquest-companion\` so an existing install's data is
   picked up unchanged.
 
+## Comparing weapons
+
+Open **Gear → Weapons**. The list starts with the highest damage-to-delay ratio and
+keeps your current search, Slots, Weapon type, Classes, era, and ownership filters.
+For example, choose **Two-handed** in Weapon type to compare only those weapons.
+Click a column header to sort by handedness, weapon type, damage, delay, damage
+bonus, backstab, range, or haste. Turn Weapons off to return to your regular Gear
+layout and sort. Handedness and Weapon type are also available in **Columns**.
+
+**Ratio** divides the displayed damage by attack delay. With **Use owned stats** on,
+it uses the highest inventory tier for an owned weapon and the simulation for other
+weapons. The ratio is a basic comparison and excludes procs, damage bonus, haste,
+and off-hand effects. A missing damage or delay leaves the ratio blank. Weapon type
+and handedness use the catalog's stated skill. Bows and throwing weapons appear as
+**Ranged**, and unknown skills leave those columns blank.
+
 ## Building
 
 See [`SETUP.md`](SETUP.md). Feature plans are in [`ROADMAP.md`](ROADMAP.md).
