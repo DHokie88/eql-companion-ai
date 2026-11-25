@@ -23,6 +23,7 @@
 // ordering happens there, on rows nothing outside this feature has an opinion about.
 
 import type { FactionSnap } from '../../../../shared/factionTypes'
+import { factionStandings } from '../../../../shared/worth'
 
 /** One faction, as the panel draws it. OUR row type — see the header. */
 export interface FactionPanelRow {
@@ -73,10 +74,11 @@ export function factionRows(snap: FactionSnap | null, query = ''): FactionPanelR
   for (const [key, totals] of Object.entries(snap.factions)) {
     const searchKey = totals.display.toLowerCase()
     if (query !== '' && !searchKey.includes(query)) continue
+    const standing = factionStandings([{ name: totals.display, base: 0, adjusted: totals.delta }])
     rows.push({
       key,
       name: totals.display,
-      delta: totals.delta,
+      delta: standing[0]?.delta ?? totals.delta,
       deltaText: totals.hits === 0 ? NO_STATED_CHANGE : signed(totals.delta),
       hits: totals.hits,
       maxed: totals.maxed,

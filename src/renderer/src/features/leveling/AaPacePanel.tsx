@@ -15,6 +15,8 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 import HourglassBottomIcon from '@mui/icons-material/HourglassBottom'
 import ScienceIcon from '@mui/icons-material/Science'
 import type { AaPace } from '@shared/aaPace'
+import type { LevelingSnap } from '@shared/types'
+import { climbsFromLevels, nextAaPlan } from './levelDonor'
 import { Tooltip } from '../../lib/Tooltip'
 import { aaPaceCaption, aaPaceTiles, type AaPaceTile } from './aaPaceRows'
 import { BASIS_TITLE } from './rangeStatsRows'
@@ -81,6 +83,29 @@ export interface AaPacePanelProps {
  * Rendered whenever the log holds any AA at all. A character with no AA yet sees nothing here
  * rather than a row of em-dashes: the panel is a set of facts, and its presence is one of them.
  */
+/** Next AA rank and reincarnation climbs, from the leveling log. Hidden when the log has neither. */
+export function LevelDonor({ state, now }: { state: LevelingSnap; now: number }): JSX.Element | null {
+  const plan = nextAaPlan(state, now)
+  const climbs = climbsFromLevels(state.levels)
+  if (!plan && climbs.length === 0) return null
+  return (
+    <Stack spacing={0.25} data-testid="leveling-donor">
+      {plan && plan.cost > 0 && (
+        <Typography variant="caption" color="text.secondary" data-testid="leveling-aa-plan">
+          Next {plan.ability} costs {plan.cost}
+          {plan.shortfall > 0 ? `, short ${plan.shortfall}` : ''}
+          {plan.etaHours !== null ? `, about ${plan.etaHours.toFixed(1)} h` : ''}
+        </Typography>
+      )}
+      {climbs.length > 0 && (
+        <Typography variant="caption" color="text.secondary" data-testid="leveling-climbs">
+          {climbs.length} reincarnation climb{climbs.length === 1 ? '' : 's'}
+        </Typography>
+      )}
+    </Stack>
+  )
+}
+
 export function AaPacePanel({ pace, windowLabel }: AaPacePanelProps): JSX.Element | null {
   // WHICH HOUR (JOS-288), from the app-wide store this tab's basis control writes.
   const { basis } = useRateBasis()

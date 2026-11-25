@@ -31,6 +31,7 @@ import {
   type SoloReading
 } from '../../../../shared/build/profiles'
 import { bestBuild, buildScore, groupUpgrades, rankUpgrades, upgradesFor, type BuildSet, type CellUpgrade } from '../../../../shared/build/optimizer'
+import { slotLeaders, type SlotLeaders } from './slotPicks'
 // THE WORN READ IS SHARED NOW (shared/build/wornSet.ts). `useUpgradeFinder` asks the same question
 // from the Zone Loot rows and the item page, and two spellings of "what am I wearing" would be two
 // answers to it. `BUILD_CELLS` and `WornUnknown` are re-exported below for this tab's importers.
@@ -111,6 +112,7 @@ export interface BuildState {
   solo: SoloReading
   upgrades: CellUpgrade[]
   farmUpgrades: CellUpgrade[]
+  leaders: SlotLeaders
 }
 
 export function useBuild(): BuildState {
@@ -179,6 +181,11 @@ export function useBuild(): BuildState {
   const upgrades = useMemo(() => groupUpgrades(allUpgrades, 3), [allUpgrades])
   const farmUpgrades = useMemo(() => rankUpgrades(allUpgrades, UPGRADE_LIMIT), [allUpgrades])
 
+  const leaders = useMemo(() => {
+    const worn: GearRow[] = []
+    for (const row of set.values()) if (row) worn.push(row)
+    return slotLeaders({ rows: candidates, scoreOf: rowScore, owned: ownedOrLooted, classes, worn })
+  }, [candidates, rowScore, ownedOrLooted, classes, set])
   const score = useMemo(() => {
     const current = buildScore(set, weights, rowScore, hasteScore) + gearManaScore(manaBaseline, worn.values(), set.values())
     const bestSet = bestBuild(candidates, BUILD_CELLS, { classes, weights, excluded, score: rowScore, hasteScore, mana })
@@ -214,6 +221,6 @@ export function useBuild(): BuildState {
     score,
     kit,
     solo,
-    upgrades, farmUpgrades
+    upgrades, farmUpgrades, leaders
   }
 }

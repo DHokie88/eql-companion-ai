@@ -105,7 +105,7 @@ export default function BuildView({
   return (
     <Stack spacing={1.5} sx={{ height: '100%', minHeight: 0 }} data-testid="build-view">
       <LoadoutBar />
-      <Stack direction="row" spacing={1} alignItems="center"><Toolbar build={build} /><Button onClick={() => setEditingStrategies(true)} data-testid="build-edit-strategies">Edit strategies</Button></Stack>
+      <Stack direction="row" spacing={1} alignItems="center" data-testid="build-best-slot" title={build.leaders.primary ? `Best ${build.leaders.primary}${build.leaders.valetPrimary ? `, valet ${build.leaders.valetPrimary}` : ''}${build.leaders.spare.length > 0 ? `, ${String(build.leaders.spare.length)} spare` : ''}` : undefined}><Toolbar build={build} /><Button onClick={() => setEditingStrategies(true)} data-testid="build-edit-strategies">Edit strategies</Button></Stack>
       <ManaEstimateControls build={build} />
       <Dialog open={editingStrategies} onClose={() => setEditingStrategies(false)} maxWidth="md" fullWidth>
         <DialogTitle>Build strategies</DialogTitle><DialogContent>{buildStrategiesSection().items[0].content}</DialogContent>

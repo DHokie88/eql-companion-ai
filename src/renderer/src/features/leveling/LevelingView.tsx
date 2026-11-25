@@ -57,7 +57,7 @@ import { LedgerColumn, type FeedItem } from './LedgerColumn'
 // level bar caps out. It used to be pinned to the Overview card's "last hour of LOG time"
 // window; since JOS-75 it reads the tab's own SCOPE, like every other number here, and states
 // which one it got. The Overview card keeps its hour — that surface has no timescale to follow.
-import { AaPacePanel } from './AaPacePanel'
+import { AaPacePanel, LevelDonor } from './AaPacePanel'
 import { PALETTE } from '../../../../shared/palette'
 
 /**
@@ -601,6 +601,7 @@ export default function LevelingView({
             otherwise push the page sideways. Height is whatever its panels need, at every width.
             The sizing had to move up here because this box, unlike the charts, is ALWAYS drawn. */}
         <Stack spacing={2} sx={{ flex: { xs: '0 0 auto', lg: 2 }, minWidth: { lg: 320 } }}>
+          <LevelDonor state={state} now={Date.now()} />
           {charted ? (
             <ChartsColumn
               chrome={charted.chrome}

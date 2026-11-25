@@ -1,5 +1,6 @@
 import { type JSX, useRef } from 'react'
 import { Box } from '@mui/material'
+import { resizedColumnWidth } from './gearColumnWidths'
 
 /** Pointer capture keeps a drag working outside the header without global listeners. */
 export default function GearColumnResize({ column, label, width, onResize, minWidth = 64 }: {
@@ -31,7 +32,7 @@ export default function GearColumnResize({ column, label, width, onResize, minWi
         event.currentTarget.setPointerCapture(event.pointerId)
       }}
       onPointerMove={(event) => {
-        if (drag.current) onResize(column, Math.max(minWidth, drag.current.width + event.clientX - drag.current.x))
+        if (drag.current) onResize(column, resizedColumnWidth(drag.current.width, event.clientX - drag.current.x, minWidth))
       }}
       onPointerUp={(event) => {
         drag.current = null
@@ -48,7 +49,7 @@ export default function GearColumnResize({ column, label, width, onResize, minWi
         if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
         event.preventDefault()
         event.stopPropagation()
-        onResize(column, Math.max(minWidth, width + (event.key === 'ArrowRight' ? 16 : -16)))
+        onResize(column, resizedColumnWidth(width, event.key === 'ArrowRight' ? 16 : -16, minWidth))
       }}
       sx={{
         position: 'absolute', right: 0, top: 0, bottom: 0, width: 8,

@@ -1,6 +1,7 @@
 import type { JSX } from 'react'
 import { Chip, Stack } from '@mui/material'
 import type { ItemKnowledge, ItemRecipeUse } from '@shared/types'
+import { knowledgeTags } from './lootChipTags'
 
 interface BadgeFlags {
   recipes: ItemRecipeUse[]
@@ -43,16 +44,17 @@ export function KnowledgeBadge({
 }): JSX.Element | null {
   if (!knowledge) return null
   const flags = badgeFlags(knowledge, isPosky)
-  if (!knowledge.lore && !flags.showQuest && !flags.showTradeskill) return null
+  const tags = knowledgeTags({ quest: flags.showQuest, tradeskill: flags.showTradeskill })
+  if (!knowledge.lore && tags.length === 0) return null
   return (
     <Stack direction="row" spacing={0.5} alignItems="center" component="span">
       {knowledge.lore && (
         <Chip size="small" color="warning" variant="outlined" label="LORE" sx={{ height: 18, fontSize: 10 }} />
       )}
-      {flags.showQuest && (
+      {tags.includes('quest') && (
         <Chip size="small" color="secondary" variant="outlined" label="quest" sx={{ height: 18, fontSize: 10 }} />
       )}
-      {flags.showTradeskill && (
+      {tags.includes('tradeskill') && (
         <Chip size="small" color="info" variant="outlined" label="tradeskill" sx={{ height: 18, fontSize: 10 }} />
       )}
     </Stack>

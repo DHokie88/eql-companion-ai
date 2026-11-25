@@ -38,6 +38,7 @@
 // required items (law 1).
 
 import type { ClassUnlockRecord } from '@shared/types'
+import { unlockProgress } from '../../../../shared/worth'
 import type { QuestProgress } from './useProgress'
 import { everTurnedIn } from './questCompletion'
 
@@ -90,6 +91,9 @@ export function classUnlockRows(
     if (!seenAt.has(key)) seenAt.set(key, rec.ts)
   }
 
+  const remainingOf = new Map(unlockProgress([...byClass.entries()].map(([className, row]) => ({
+    family: 'class', label: className, have: row.turnedIn, need: row.total
+  }))).map((row) => [row.label, row.remaining]))
   const rows: ClassUnlockRow[] = []
   for (const [className, { turnedIn, total }] of byClass) {
     const at = seenAt.get(className.toLowerCase())
@@ -97,7 +101,7 @@ export function classUnlockRows(
       className,
       turnedIn,
       total,
-      remaining: total - turnedIn,
+      remaining: remainingOf.get(className) ?? 0,
       unlocked: false
     }
     if (at !== undefined) {

@@ -1,4 +1,12 @@
+import { resizeFraction } from '../../../../shared/worth'
 import { gearTableLayout, PICKABLE_COLUMNS, type GearColumn } from './gearColumns'
+
+/** Drag a column. The track is the widest a column may be, and the pane cannot shrink past `minWidth`. */
+export function resizedColumnWidth(width: number, deltaPx: number, minWidth: number, maxWidth = 2400): number {
+  if (!(maxWidth > 0)) return Math.max(minWidth, width)
+  const next = resizeFraction(width / maxWidth, deltaPx, maxWidth, minWidth) * maxWidth
+  return Math.round(Math.min(maxWidth, Math.max(minWidth, next)))
+}
 
 export const GEAR_ITEM_TIER_MIN_WIDTH = 220
 
