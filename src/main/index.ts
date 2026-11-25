@@ -85,7 +85,7 @@ import {
   reconcileOverlayDisplays,
   sendToMain
 } from './windows'
-import { watchDisplays } from './windowPlacement'
+import { raiseMainWindow, watchDisplays } from './windowPlacement'
 import { scheduleWikiDatasetStartupCheck } from './wikiDataset'
 import { OVERLAY_KINDS } from '../shared/types'
 
@@ -231,9 +231,8 @@ if (!gotSingleInstanceLock) {
     // Narrated so a foreground steal in dev.log always has an author. No raise grace here: a
     // second launch is the user asking for the APP, so the overlays parking is correct.
     logInfo('[everquest-companion] presence: second-instance raise (app relaunched)')
-    if (mainWindow.isMinimized()) mainWindow.restore()
-    mainWindow.show()
-    mainWindow.focus()
+    raiseMainWindow(mainWindow)
+    flushMainWindowState()
   })
 
   void app.whenReady().then(() => {

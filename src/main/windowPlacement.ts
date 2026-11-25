@@ -2,8 +2,7 @@
 // windowPlacement — asking the OS what screens exist, and where a window may go on them (JOS-187).
 // ============================================================================
 //
-// The Electron half of `displayFit.ts` (which is the pure geometry, and carries the policy
-// argument in its header — read that first). This file does two things and nothing else:
+// The Electron half of `displayFit.ts`, including placement and raising on an explicit reopen:
 //
 //   * it turns `screen`'s displays into the four-number shapes the geometry works in, and
 //   * it names the DEFAULT each window falls back to when its remembered rectangle is on no
@@ -30,8 +29,15 @@
 // process open (AGENTS.md: a main-process timer lands on the next 15.6 ms tick edge, which is
 // noise against a 300 ms settle).
 
-import { screen } from 'electron'
-import { centerIn, fitToDisplays, type DisplayArea, type Rect, type Size } from './displayFit'
+import { type BrowserWindow, screen } from 'electron'
+import {
+  centerIn,
+  fitToDisplays,
+  rescueToCursorDisplay,
+  type DisplayArea,
+  type Rect,
+  type Size
+} from './displayFit'
 import { defaultOverlayBounds } from './overlayLayout'
 import type { OverlayKind } from '../shared/types'
 
@@ -136,6 +142,55 @@ export function mainWindowBounds(stored?: Rect): Rect | undefined {
   const workArea = primaryWorkArea()
   const size: Size = { width: stored.width, height: stored.height }
   return workArea ? centerIn(size, workArea) : stored
+}
+
+/**
+ * Bring the main window onto the display where the user's cursor is and raise it to the front.
+ *
+ * Used by explicit user re-open gestures (`second-instance` from the desktop/taskbar shortcut and
+ * the tray icon's Open/click). Two Windows realities make a plain `w.show(); w.focus()` not enough:
+ *   1. A DisplayPort monitor switched to another input (e.g. HDMI) keeps hotplug/EDID asserted, so
+ *      a window remembered on that display is still "on a display" to the OS while invisible to the
+ *      user clicking the launcher on their active monitor.
+ *   2. `Open-Fork.cmd` detaches through `start`, so `cmd.exe` exits before the second Electron
+ *      instance requests the single-instance lock; Windows then denies `SetForegroundWindow` on
+ *      `w.focus()`, leaving the restored window behind borderless-fullscreen EverQuest. A brief
+ *      topmost promotion places the window at the top of the normal z-order band without leaving it
+ *      always-on-top.
+ */
+export function raiseMainWindow(w: BrowserWindow): void {
+  if (w.isMinimized()) w.restore()
+  try {
+    moveMainWindowToCursor(w)
+  } catch {
+    // Headless or unavailable screen metrics: fall through to show and raise.
+  }
+  w.setAlwaysOnTop(true)
+  try {
+    w.show()
+    w.focus()
+  } finally {
+    w.setAlwaysOnTop(false)
+  }
+  w.moveTop()
+}
+
+function moveMainWindowToCursor(w: BrowserWindow): void {
+  const cursorDisplay = screen.getDisplayNearestPoint(screen.getCursorScreenPoint())
+  const normal = w.getNormalBounds()
+  const windowDisplay = screen.getDisplayMatching(w.getBounds())
+  const target = rescueToCursorDisplay(normal, windowDisplay.id, cursorDisplay)
+  if (!target) return
+
+  const maximized = w.isMaximized()
+  if (maximized) w.unmaximize()
+  w.setBounds(target)
+  if (process.platform === 'win32' && windowDisplay.scaleFactor !== cursorDisplay.scaleFactor) {
+    // Windows resizes the window during the DPI change. Once it is on the destination display,
+    // reapply the requested size using that display's scale.
+    w.setBounds(target)
+  }
+  if (maximized) w.maximize()
 }
 
 /** How long the monitor arrangement has to hold still before windows are re-placed against it. */

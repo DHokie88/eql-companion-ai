@@ -22,6 +22,13 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.32.1',
+    date: '2026-11-25',
+    entries: [
+      { kind: 'fixed', text: 'Reopening EQ Oracle from its desktop or taskbar shortcut or tray icon moves the window onto the monitor where your cursor is and raises it above a borderless-fullscreen game window.', fromReport: true }
+    ]
+  },
+  {
     version: '0.32.0',
     date: '2026-11-25',
     entries: [
@@ -367,15 +374,6 @@ export const RELEASE_NOTES: readonly ReleaseNote[] = [
       { kind: 'changed', text: 'Browse damage uses the client base and selected or observed mote rank without equipment focus. Spell details retain equipment estimates. Rank rules are identified as a community model, with separate direct-hit, DoT-tick and DoT-duration scaling.' },
       { kind: 'new', text: 'Best in line now supports captured poison and other compatible DoT lines, including separate initial-hit and periodic effects. Area DoTs show their captured target cap, such as AoE4 DoT.' },
       { kind: 'changed', text: 'Removed the separate AOE cap filter. Targets selects a scenario from one to eight enemies and respects each spell\'s own cap. Older oversized or maximum previews open at eight.' }
-    ]
-  },
-  {
-    version: '0.3.0',
-    date: '2026-10-19',
-    entries: [
-      { kind: 'new', text: 'Best in line groups supported stat buffs, such as AC buffs, using their captured line, target and effect slot. It shows the strongest base effect at the current level; expand its arrow for alternatives in strength order. Unverified DoT, rain and shared-timer relationships stay separate. Counts include every matching spell.' },
-      { kind: 'changed', text: 'All damage and All heals share the type row with a compact AOE cap and Columns picker. Every column except Spell and Class/Level is selectable, including Description. A uniform Type column hides automatically.' },
-      { kind: 'changed', text: 'Damage/Mana headers wrap to two lines. Removed the separate Level column and mana filter, renamed Polarity to Helpful / harmful, and simplified the level control to left/right arrows.' }
     ]
   },
   ...ORACLE_RELEASE_ARCHIVE
