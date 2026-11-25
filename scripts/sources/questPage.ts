@@ -52,6 +52,8 @@ export interface ParsedQuestPage extends QuestTopTable {
   expReward: boolean
   /** the quest's steps, one plain-text line each (see `extractSteps`) */
   steps: string[]
+  /** `Starts In:` label, when the page states one */
+  startsIn?: string
   /** true when the page is a disambiguation hub, not a quest */
   disambiguation: boolean
   /** true when the page has a questTopTable header block */
@@ -204,9 +206,9 @@ export function splitSections(wikitext: string): { lead: string; sections: WikiS
   const lead: string[] = []
   let cur: WikiSection | null = null
   for (const line of lines) {
-    const h = /^\s*={2,6}\s*(.+?)\s*={2,6}\s*$/.exec(line)
+    const h = /^\s*(=+)\s*(.+?)\s*\1\s*$/.exec(line)
     if (h) {
-      cur = { heading: h[1].trim(), text: '' }
+      cur = { heading: h[2].trim(), text: '' }
       sections.push(cur)
       continue
     }
@@ -228,6 +230,7 @@ const EXP_MARKER = /\{\{\s*(yougainexperience|exp)\s*\}\}|you gain experience/i
  * pasted in, so it is the fallback and gets the dialogue stripped.
  */
 const STEP_HEADINGS: RegExp[] = [
+  /^summary$/i,
   /quick list$/i,
   /checklist$/i, // "Checklist", "High-level Checklist"
   /^short walkthrough$/i,
@@ -277,7 +280,7 @@ function sectionWithChildren(wikitext: string, heading: RegExp): string | null {
   let level = 0
   const out: string[] = []
   for (const line of wikitext.split('\n')) {
-    const h = /^\s*(={2,6})\s*(.+?)\s*={2,6}\s*$/.exec(line)
+    const h = /^\s*(=+)\s*(.+?)\s*\1\s*$/.exec(line)
     if (!h) {
       if (level > 0) out.push(line)
       continue
@@ -365,6 +368,7 @@ export function parseQuestPage(
     ...linkTargets(bodyText).filter(isItem)
   ]).filter((n) => !rewardKeys.has(n.toLowerCase()))
 
+  const startsIn = startsInLabel(wikitext)
   return {
     page,
     startZone: top?.startZone,
@@ -378,9 +382,18 @@ export function parseQuestPage(
     requiredItems,
     expReward: EXP_MARKER.test(wikitext),
     steps: extractSteps(withoutTable),
+    startsIn,
     disambiguation: /\{\{\s*disambig/i.test(wikitext),
     hasTopTable: top !== null
   }
+}
+
+/** `Starts In: East Freeport` and the wiki's `'''Starts In:''' [[East Freeport]]`. */
+export function startsInLabel(wikitext: string): string | undefined {
+  const match = /starts in\s*:\s*'''?\s*(.+)/i.exec(wikitext)
+  if (!match) return undefined
+  const text = stripMarkup(match[1]).replace(/['*]+/g, ' ').replace(/\s+/g, ' ').trim()
+  return text.length > 0 ? text : undefined
 }
 
 /** A parse is "empty" when it yielded nothing worth committing (logged, never dropped silently). */

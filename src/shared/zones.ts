@@ -416,14 +416,18 @@ export const ZONES: readonly ZoneEntry[] = [
   { short: 'thurgadinb', name: 'Icewell Keep', era: 'velious' }, // in default set
   { short: 'velketor', name: "Velketor's Labyrinth", era: 'velious' },
   { short: 'wakening', name: 'The Wakening Land', aliases: ['Wakening Lands'], era: 'velious' },
-  { short: 'westwastes', name: 'Western Wastes', era: 'velious' }
+  { short: 'westwastes', name: 'Western Wastes', era: 'velious' },
+  // EQL client zone files dated 2026-10-22. Names are the client's ZoneNames.txt.
+  { short: 'nektropos', name: 'Nektropos Castle', aliases: ['Castle Nektropos'] },
+  { short: 'lakenerius', name: 'Lake Nerius' },
+  { short: 'nektrunder', name: 'Nektropos Undercrofts' }
 ]
 
 // TODO(zone table) — candidates deliberately LEFT OUT because they could not be verified:
 //   - `EverQuest Legends Tutorial`: the one observed log zone with no stem. It is EQL-new content
 //     (NPCs Doug / Dougina / "a rambunctious pet"), NOT Gloomingdeep, so `tutorial` / `tutoriala` /
 //     `tutorialb` would all be a guess. Resolves to null -> the viewer's zone picker.
-//   - `aviak` (Aviak Village), `erudsxing2` (Marauder's Mire), `nektropos`, `cshome` (Sunset Home):
+//   - `aviak` (Aviak Village), `erudsxing2` (Marauder's Mire), `cshome` (Sunset Home):
 //     on eqlwiki's table but with NO file in either pack, so nothing to point at.
 //   - `oldkaesoraa`: in the default set, no long name in any source. EQL-new or a variant of Kaesora.
 //   - The Live-EQ revamp stems the classic rows deliberately shadow — `northro`/`southro`,

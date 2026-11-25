@@ -1,4 +1,4 @@
-import type { JSX } from 'react'
+import { useState, type JSX } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material'
 import type { ItemKnowledge } from '@shared/types'
 // The engine's served rows (JOS-484) — `{key, cells}`, identity outside the data.
@@ -7,6 +7,7 @@ import type { WindowedRows } from '../../lib/useWindowedRows'
 import type { InventoryRow } from '../inventory/reconcile'
 import type { GroupRow, KeyedLoot } from './lootGrouping'
 import { EngineFlatRow, FlatRow, GroupedRow } from './lootRows'
+import { sortLootRows, type LootSortKey } from './lootSort'
 
 /**
  * `tableLayout: fixed` — the other half of the fixed-height contract (JOS-260, lootRows.tsx).
@@ -94,24 +95,29 @@ export function GroupedLootTable({
   invByKey: Map<string, InventoryRow>
   onSelect: (item: string) => void
 }): JSX.Element {
+  const [column, setColumn] = useState<LootSortKey | null>(null)
+  const ordered = column === null ? rows : sortLootRows(rows, column)
+  const header = (key: LootSortKey, label: string): JSX.Element => (
+    <button type="button" data-testid={`loot-col-${key}`} onClick={() => setColumn(key)}>{label}</button>
+  )
   return (
     <Table size="small" stickyHeader sx={FIXED_TABLE}>
       <TableHead>
         <TableRow>
           {/* No width: the item NAME takes whatever the stated columns leave. */}
-          <TableCell>Item</TableCell>
-          <TableCell align="right" sx={{ width: '11%' }}>Times looted</TableCell>
+          <TableCell>{header('item', 'Item')}</TableCell>
+          <TableCell align="right" sx={{ width: '11%' }}>{header('count', 'Times looted')}</TableCell>
           {/* The header carries the caveat as ONE WORD (JOS-127 + the house tooltip diet): a
               popper on a sticky header hangs over the first rows, and every row is a control. */}
           <TableCell align="right" sx={{ width: '13%' }}>In inventory (est.)</TableCell>
           <TableCell sx={{ width: '20%' }}>Top source</TableCell>
           <TableCell align="right" sx={{ width: '8%' }}>Zones</TableCell>
-          <TableCell sx={{ width: '15%' }}>Last looted</TableCell>
+          <TableCell sx={{ width: '15%' }}>{header('recent', 'Last looted')}</TableCell>
         </TableRow>
       </TableHead>
       <TableBody>
         <PadRow height={win.topPad} colSpan={6} />
-        {rows.slice(win.start, win.end).map((g) => (
+        {ordered.slice(win.start, win.end).map((g) => (
           <GroupedRow
             key={g.key}
             g={g}

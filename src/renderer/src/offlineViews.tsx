@@ -1,5 +1,6 @@
 import type { JSX } from 'react'
 import type { View } from './appViews'
+import WorthView from './features/worth/WorthView'
 import CommunityView from './features/community/CommunityView'
 import OracleView from './features/oracle/OracleView'
 // OWNER-ONLY. `devTriage` holds the single `DEV_TOOLS ? lazy(() => import(…)) : null` — the
@@ -13,6 +14,7 @@ import { OWNER_TOOLS } from './devFlags'
 // These views read reference data rather than a character log. Dev tools still strip at build time.
 export const OFFLINE_VIEWS: Partial<Record<View, JSX.Element>> = {
   community: <CommunityView />,
+  worth: <WorthView />,
   oracle: <OracleView />,
   ...(OWNER_TOOLS ? { triage: <DevTriageView /> } : {})
 }

@@ -145,6 +145,9 @@ export const TELEMETRY_VIEWS = [
   'crafting',
   // The EverQuest Legends patch notes tab (EQ Zera) - same note as `crafting` above.
   'patchnotes',
+  // New tools (2026-11-25 donor parity). Telemetry is dark in this fork; the contract test
+  // still requires every reachable view to be named here.
+  'worth',
   'preferences',
   'triage'
 ] as const

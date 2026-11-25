@@ -1,5 +1,7 @@
 import { app } from 'electron'
+import { readdirSync } from 'node:fs'
 import { join } from 'node:path'
+import { companionSpellFile, pickSpellTable } from '../../shared/worth'
 import { effectiveEqRoot } from '../log/config'
 import { sendToMain } from '../windows'
 import { logError } from '../errorLog'
@@ -32,8 +34,11 @@ export function spellLibrary(): SpellLibraryService {
     prepareReference: prepareCapturedSpellTable,
     installReference: activateCapturedSpellTable,
     activateEngine: async (root, snapshotId, directory) => {
+      let names: string[] = []
+      try { names = readdirSync(directory) } catch { names = [] }
+      const table = pickSpellTable(names) ?? 'spells_us.txt'
       const result = await engineRequest('clientSpells.activate', {
-        root, snapshotId, spellsPath: join(directory, 'spells_us.txt'), dbstrPath: join(directory, 'dbstr_us.txt')
+        root, snapshotId, spellsPath: join(directory, table), dbstrPath: join(directory, companionSpellFile(table, 'dbstr'))
       })
       return result.clientSpellsActivated
     }

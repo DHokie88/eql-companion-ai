@@ -25,6 +25,7 @@ import {
   scaleDamage,
   scaleFlat,
   scalePrimary,
+  scaleAccuracy,
   scaleRange,
   scaleWeight,
   upgradeStatClass,
@@ -56,6 +57,8 @@ export function scaleGearStat(key: GearStatKey, base: number, state: ItemUpgrade
       return scaleRange(base, state)
     case 'weight':
       return scaleWeight(base, state)
+    case 'accuracy':
+      return scaleAccuracy(base, state, 'explicit')
     case 'delay':
       return base
     default:

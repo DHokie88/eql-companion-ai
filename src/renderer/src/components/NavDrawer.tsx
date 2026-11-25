@@ -129,7 +129,8 @@ const ROWS: NavRow[] = [
   // Respawn clocks (JOS-194) sit beside Buffs because both tabs are the same shape of answer —
   // a list of things counting down — and a player checking one is usually checking the other.
   { view: 'timers', icon: <TimerIcon /> },
-  { view: 'patchnotes', icon: <ArticleIcon />, badge: <PatchNotesBadge /> }
+  { view: 'patchnotes', icon: <ArticleIcon />, badge: <PatchNotesBadge /> },
+  { view: 'worth', icon: <AutoAwesomeIcon /> }
 ]
 
 /** Bottom-aligned, outside ROWS — it is not a feature view and never moves. */

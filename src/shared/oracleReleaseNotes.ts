@@ -22,6 +22,17 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.30.0',
+    date: '2026-11-25',
+    entries: [
+      { kind: 'new', text: 'New tools plans Alternate Advancement ranks, race unlocks, reincarnation climbs, Best in slot, Void motes, spare and valet gear, pet valet, exaltation sockets, spell loadouts, and the next mote to buy.' },
+      { kind: 'new', text: 'Combat can widen its panels. Damage rates use each row’s own attacking time, and a respawn alert can speak a chosen number of seconds early.' },
+      { kind: 'new', text: 'Nektropos Castle, Lake Nerius, and the Nektropos Undercrofts are in the zone list. Maps can follow a logged /loc, draw a route, and clear a crawl.' },
+      { kind: 'new', text: 'Loot columns sort from their headers and can show a Tradeskill tag. Wiki gaps, achievements, unlocks, skills, factions, and a loot upload wait for you to sign in. Macros send only when you confirm.' },
+      { kind: 'new', text: 'Quest pages read level-1 headings, Summary checklists, and Starts In. The spell file reader uses spells_<suffix>.txt when spells_us.txt is missing, and still reads the 173, 174, and 190-field US layout. Listed Void and explicit weapon Accuracy scale with the upgrade tier. Luclin hair and armour name the HAIR_POINT bone.' }
+    ]
+  },
+  {
     version: '0.29.0',
     date: '2026-11-21',
     entries: [

@@ -33,7 +33,7 @@ export interface SortableLootRow {
   last: number
 }
 
-export type LootSortKey = 'count' | 'recent'
+export type LootSortKey = 'count' | 'recent' | 'item'
 
 /**
  * Times looted stays the default: the grouped table's headline question is "what do I keep
@@ -43,7 +43,8 @@ export const DEFAULT_LOOT_SORT: LootSortKey = 'count'
 
 export const LOOT_SORT_OPTIONS: readonly { value: LootSortKey; label: string }[] = [
   { value: 'count', label: 'Times looted' },
-  { value: 'recent', label: 'Last looted' }
+  { value: 'recent', label: 'Last looted' },
+  { value: 'item', label: 'Item' }
 ]
 
 export function isLootSortKey(v: unknown): v is LootSortKey {
@@ -64,6 +65,8 @@ export function compareLootRows(sort: LootSortKey): (a: SortableLootRow, b: Sort
     // before the name does, so a corpse's three simultaneous drops read most-looted first.
     case 'recent':
       return (a, b) => b.last - a.last || b.count - a.count || byItem(a, b)
+    case 'item':
+      return (a, b) => byItem(a, b) || b.count - a.count
   }
 }
 

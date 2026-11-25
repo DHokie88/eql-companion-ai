@@ -44,6 +44,7 @@ export type View =
   // fetched by main from www.everquestlegends.com on launch and cached on disk. It reads nothing
   // from the game log, so it renders with no characters at all, like Preferences.
   | 'patchnotes'
+  | 'worth'
   | 'preferences'
   // OWNER-ONLY view (src/renderer/src/features/triage/**). It stays in the union
   // unconditionally because a union member is a TYPE and types are erased — nothing of it
@@ -123,6 +124,7 @@ export const VIEW_LABELS: Record<View, string> = {
   buffs: 'Buffs',
   timers: 'Timers',
   patchnotes: 'Patch Notes',
+  worth: 'New tools',
   preferences: 'Preferences',
   triage: 'Triage',
   character: 'Character',
@@ -158,6 +160,7 @@ const KNOWN_VIEWS: View[] = [
   'buffs',
   'timers',
   'patchnotes',
+  'worth',
   'preferences',
   // JOS-327: `character` used to be spliced in behind `UNRELEASED` right here, beside the
   // owner-tools splice below. It is a plain member now — every build draws it.

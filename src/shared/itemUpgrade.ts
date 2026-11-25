@@ -106,7 +106,7 @@ export function excelRoundUp(value: number, digits = 0): number {
  * How a stat key scales. `unchanged` covers fields with no supported rule here, such as
  * heroic stats, Attack, damage bonus, Accuracy and effect magnitudes.
  */
-export type UpgradeStatClass = 'primary' | 'flat' | 'damage' | 'backstab' | 'range' | 'delay' | 'weight' | 'unchanged'
+export type UpgradeStatClass = 'primary' | 'flat' | 'damage' | 'backstab' | 'range' | 'delay' | 'weight' | 'accuracy' | 'unchanged'
 
 /**
  * Key aliases match the whole normalized key. A compound name such as `MANA REGEN`
@@ -160,6 +160,7 @@ export function upgradeStatClass(key: string): UpgradeStatClass {
   if (k === 'RANGE') return 'range'
   if (k === 'DELAY') return 'delay'
   if (k === 'WEIGHT') return 'weight'
+  if (k === 'ACCURACY' || k === 'ATK') return 'accuracy'
   if (FLAT_KEYS.has(k)) return 'flat'
   if (PRIMARY_KEYS.has(k) || VOID_KEYS.has(k)) return 'primary'
   return 'unchanged'
@@ -242,6 +243,31 @@ export function scaleWeight(base: number, state: ItemUpgradeState): number {
   const level = s.fraction === 0 ? s.full : Math.log(totalProgression(s)) / Math.LN2
   const exact = s.fraction === 0 ? wholeTierWeight(base, s.full, factor) : undefined
   return Math.max(0, exact ?? Math.ceil(base * (1 - perLog2 * level) * factor) / factor)
+}
+
+/**
+ * Explicit weapon Accuracy follows the wiki curve. A generated accuracy line is context the
+ * item did not state, so it stays at the number the parser already has.
+ */
+export function scaleAccuracy(base: number, state: ItemUpgradeState, source: 'explicit' | 'generated'): number {
+  if (source !== 'explicit') return base
+  const s = normalizeUpgradeState(state)
+  if (s.full === 0 || !Number.isFinite(base)) return base
+  const { perLog2, precision } = rules.accuracy
+  const factor = 10 ** precision
+  const level = s.fraction === 0 ? s.full : Math.log(totalProgression(s)) / Math.LN2
+  return Math.ceil((base + perLog2 * level) * factor) / factor
+}
+
+/**
+ * A listed Void base scales like any other resist. When the base field is absent and the item
+ * qualifies, the rank-based Void line is the one the wiki adds.
+ */
+export function voidAtTier(listed: number | undefined, state: ItemUpgradeState, qualifies: boolean): number | undefined {
+  if (listed !== undefined) return scalePrimary(listed, state)
+  const s = normalizeUpgradeState(state)
+  if (!qualifies || s.full === 0) return undefined
+  return upgradeVoidBonus(state)
 }
 
 // ---- SV VOID synthesis ----------------------------------------------------------
