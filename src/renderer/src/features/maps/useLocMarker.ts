@@ -29,7 +29,8 @@ import {
   setLocMarker,
   type LocMarkers
 } from './locMarker'
-import { crawlList, followTrail } from './loggedLoc'
+import type { MapLines } from '@shared/maps'
+import { crawlList, locBlocked, stepTrail } from './loggedLoc'
 import type { MapViewport } from './useMapViewport'
 
 /** What the toolbar needs to state the marker, and what the surface needs to draw it. */
@@ -42,15 +43,28 @@ export interface LocMarkerState {
   show: () => void
   /** Forget this zone's marker. */
   clear: () => void
+  /** Named mobs on this map, marked when the kill log has already cleared them. */
+  crawl: { name: string; cleared: boolean }[]
 }
 
-export function useLocMarker(zone: ZoneShort | null, vp: MapViewport): LocMarkerState {
+export function useLocMarker(
+  zone: ZoneShort | null,
+  vp: MapViewport,
+  world: { lines: MapLines | null; names: readonly string[]; killed: readonly string[] }
+): LocMarkerState {
   const [marks, setMarks] = useState<LocMarkers>(loadLocMarkers)
+  const [crawl, setCrawl] = useState<{ name: string; cleared: boolean }[]>([])
   const trail = useRef<{ x: number; y: number; z: number }[]>([])
-  const cleared = useRef<string[]>([])
+  const lines = world.lines
+  const names = world.names
+  const killed = world.killed
   useEffect(() => {
     saveLocMarkers(marks)
   }, [marks])
+
+  useEffect(() => {
+    trail.current = []
+  }, [zone])
 
   const marker = locMarkerFor(marks, zone)
   const { centerOn, zoomedIn, view } = vp
@@ -70,17 +84,20 @@ export function useLocMarker(zone: ZoneShort | null, vp: MapViewport): LocMarker
       // No map open ⇒ nowhere to remember it. The field is gated on `hasMap`, so this is a guard,
       // not a path: a marker filed under no zone could never be found again.
       if (zone == null) return
-      const samples = trail.current
-      samples.push({ x: loc.ew, y: loc.ns, z: loc.z })
-      if (samples.length > 12) samples.shift()
-      const followed = followTrail(samples, () => false)
-      crawlList([], cleared.current)
-      if (followed.here && Number.isFinite(followed.here.headingDeg)) {
-        setMarks((prev) => setLocMarker(prev, zone, loc))
-        goTo(loc)
-      }
+      const blocked = locBlocked(lines?.coords ?? null, lines?.count ?? 0)
+      const decision = stepTrail({
+        samples: trail.current,
+        loc: { x: loc.ew, y: loc.ns, z: loc.z },
+        blocked,
+        names,
+        killed
+      })
+      setCrawl(decision.crawl)
+      if (!decision.place) return
+      setMarks((prev) => setLocMarker(prev, zone, loc))
+      goTo(loc)
     },
-    [zone, goTo]
+    [zone, goTo, lines, names, killed]
   )
 
   const show = useCallback(() => {
@@ -89,8 +106,9 @@ export function useLocMarker(zone: ZoneShort | null, vp: MapViewport): LocMarker
 
   const clear = useCallback(() => {
     if (zone == null) return
+    trail.current = []
     setMarks((prev) => clearLocMarker(prev, zone))
   }, [zone])
 
-  return { marker, place, show, clear }
+  return { marker, place, show, clear, crawl: crawl.length > 0 ? crawl : crawlList(names, killed) }
 }

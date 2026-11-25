@@ -44,8 +44,8 @@
 import { useCallback, useEffect, useMemo, useState, useRef, type JSX } from 'react'
 import { Box, Chip, Paper, Stack, Typography } from '@mui/material'
 import MapIcon from '@mui/icons-material/Map'
-import type { CharacterSnap } from '@shared/types'
-import type { MapBounds, MapData, MapPackPrefs, ZoneShort } from '@shared/maps'
+import type { CharacterSnap, KillsSnap } from '@shared/types'
+import type { MapBounds, MapData, MapLines, MapPackPrefs, ZoneShort } from '@shared/maps'
 import { zoneShortName } from '@shared/zones'
 import { useModule } from '../../lib/useModule'
 import { trackFeature } from '../../lib/telemetry'
@@ -57,6 +57,7 @@ import { useMapViewport } from './useMapViewport'
 import MapToolbar from './MapToolbar'
 import { zoneLabel } from './zoneOptions'
 import { loadPackPrefs, savePackPrefs, useMapData, useMapPacks } from './useMapData'
+import { clearedNames, killedDisplays, paneMobNames } from './loggedLoc'
 import { useLocMarker } from './useLocMarker'
 import {
   loadZoneSelection,
@@ -355,6 +356,18 @@ function useMapOpenTracking(data: MapData | null): void {
   }, [loaded])
 }
 
+function markerWorld(
+  data: MapData | null,
+  mobs: readonly { name: string }[],
+  kills: KillsSnap | null
+): { lines: MapLines | null; names: string[]; killed: string[] } {
+  return {
+    lines: data === null ? null : data.lines,
+    names: paneMobNames(mobs),
+    killed: killedDisplays(kills === null ? undefined : kills.mobs)
+  }
+}
+
 export default function MapsView(): JSX.Element {
   // WHERE YOU ARE. The character module owns the raw display zone off the `zone` log event; it
   // is undefined until the log prints one, and that absence is a state this view renders.
@@ -385,15 +398,17 @@ export default function MapsView(): JSX.Element {
   const hostRef = useRef<HTMLDivElement>(null)
   const vp = useMapViewport({ bounds: data?.bounds ?? EMPTY_BOUNDS, id: data?.zone ?? '', hostRef })
   const { marker, onJump } = useSearchJump({ vp, zone: data?.zone, pick })
-  // THE POSITION YOU TOLD IT (JOS-98). Keyed on the zone actually DRAWN, never the one being
-  // fetched: a marker attributed to a map that has not loaded would be drawn against the previous
-  // zone's bounds for a frame — a dot in the wrong place, which is the one thing this must not do.
-  const loc = useLocMarker(data?.zone ?? null, vp)
 
   // THE SIDEBAR. Open by default, remembered in `eq.maps.pane`, closed from its own header. Its
   // filtered rows are derived ONCE and read by both the list and the surface's pins.
   const zoneName = zoneLongName(zone, raw)
   const pane = useZonePane({ vp, data, zoneName, prefs, zones })
+  const kills = useModule<KillsSnap>('kills')
+  // THE POSITION YOU TOLD IT (JOS-98). Keyed on the zone actually DRAWN, never the one being
+  // fetched: a marker attributed to a map that has not loaded would be drawn against the previous
+  // zone's bounds for a frame — a dot in the wrong place, which is the one thing this must not do.
+  // A map line that crosses the route refuses the marker. Cleared mobs come off the kill log.
+  const loc = useLocMarker(data?.zone ?? null, vp, markerWorld(data, pane.mobs, kills))
 
   return (
     <Stack spacing={1.5} sx={{ height: '100%' }}>
@@ -445,6 +460,7 @@ export default function MapsView(): JSX.Element {
         zoneName={zoneName}
         marker={marker}
         locMarker={loc.marker}
+        cleared={clearedNames(loc.crawl)}
         onJump={onJump}
       />
       {/* Reserved for the same reason and on the same condition as the toolbar's row (JOS-205). */}

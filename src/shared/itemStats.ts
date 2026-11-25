@@ -132,7 +132,7 @@ const STRUCT_KEYS = [
  */
 const STAT_KEYS = [
   'STR', 'STA', 'AGI', 'DEX', 'WIS', 'INT', 'CHA', 'HP', 'MANA', 'END', 'ENDURANCE',
-  'Haste', 'Attack', 'HP Regen', 'Mana Regen', 'End Regen', 'Endurance Regen', 'Regen',
+  'Haste', 'Attack', 'Accuracy', 'HP Regen', 'Mana Regen', 'End Regen', 'Endurance Regen', 'Regen',
   'Charges', 'Rec Level', 'Recommended Level',
   'Required Level', 'Req Level', 'Cast Time', 'Cooldown', 'Recast', 'Range Damage'
 ]
@@ -422,6 +422,15 @@ function applyPair(out: ItemStatBlock, keyRaw: string, value: string): void {
   const text = TEXT_FIELDS[upper]
   if (text) {
     out[text] = value
+    return
+  }
+  if (upper === 'ACCURACY') {
+    const generated = /\(\s*generated\s*\)/i.test(value)
+    out.stats.push({
+      key: upper,
+      value: value.replace(/\(\s*generated\s*\)/i, '').trim(),
+      accuracy: generated ? 'generated' : 'explicit'
+    })
     return
   }
   out.stats.push({ key: upper, value })

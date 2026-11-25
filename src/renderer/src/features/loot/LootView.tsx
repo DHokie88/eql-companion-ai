@@ -57,6 +57,8 @@ import { EngineClientContext } from '../../lib/useView'
 import { EngineLootLedger } from './EngineLootLedger'
 import { NotablePickupsStrip, useNotableStrip } from './NotablePickupsStrip'
 import { lootMaySend } from './lootSend'
+import { loadLootSignedIn } from './lootSession'
+import { LootSignIn } from './LootSignIn'
 import { useLootRows } from './useLootRows'
 // HOW FAST THE SLICE IS PAYING (JOS-261) — the aggregate loot-per-hour the caption states, joined
 // against the same `progression` snapshot the slice was resolved from.
@@ -330,6 +332,7 @@ export default function LootView(props: LootViewProps = {}): JSX.Element {
   // WHICH WORLD THIS LEDGER READS (JOS-484) — component state, because it is a comparison somebody
   // is making right now and not a preference anybody keeps (LootChrome's LootSourceToggle).
   const [source, setSource] = useState<LootSource>('app')
+  const [signedIn, setSignedIn] = useState(loadLootSignedIn)
   const engineClient = useContext(EngineClientContext)
   // `prog` comes back with the slice on purpose (TimesliceState.prog): the rate line below needs a
   // `rangeStats` over this very slice, and a second subscription to the same module is how a
@@ -363,21 +366,19 @@ export default function LootView(props: LootViewProps = {}): JSX.Element {
   const scrollRef = useRef<HTMLDivElement>(null)
   const detail = useLootDetail(props, scrollRef)
 
-  const selected = detail.selected
-  if (selected !== null) {
-    const p = { item: selected, events: sliced, slice, detail, nav: props.nav, invByKey, onPreview: props.onPreview }
+  if (detail.selected !== null) {
+    const p = { item: detail.selected, events: sliced, slice, detail, nav: props.nav, invByKey, onPreview: props.onPreview }
     return <LootDetailTakeover {...p} />
   }
 
-  const served = { client: engineClient, source, setSource, knowledgeByKey, onSelect: detail.open }
-  const engine = engineLedger(served)
+  const engine = engineLedger({ client: engineClient, source, setSource, knowledgeByKey, onSelect: detail.open })
   if (engine !== null) return engine
 
   return (
     // `minHeight: 0`: this column's last child is the scrolling ledger, and a flex column whose
     // items keep their automatic minimum size cannot shrink one — the list would size itself to
     // its own content and push the scroll onto the app shell behind it (JOS-260).
-    <Stack spacing={2} data-testid="loot-list" data-loot-send={lootMaySend(events.length, false).send ? 'yes' : 'no'} sx={{ height: '100%', minHeight: 0 }}>
+    <Stack spacing={2} data-testid="loot-list" data-loot-send={lootMaySend(events.length, signedIn).send ? 'yes' : 'no'} sx={{ height: '100%', minHeight: 0 }}>
       {/* ABOVE the toolbar and on its own row: it governs everything below it, including the
           filters, and it must never be crowded into the same line as the search box (the
           compact-bar contract — controls never shrink). */}
@@ -402,6 +403,8 @@ export default function LootView(props: LootViewProps = {}): JSX.Element {
         setCountSource={setCountSource}
         onReload={() => void onReload()}
       />
+
+      <LootSignIn signedIn={signedIn} onChange={setSignedIn} />
 
       <LootSummary
         eventCount={sliced.length}

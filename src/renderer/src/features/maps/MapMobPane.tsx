@@ -91,6 +91,8 @@ export interface MapMobPaneProps {
   onHit: (to: JumpTarget) => void
   /** The drawn pin set hit its ceiling — said out loud rather than quietly trimmed. */
   pinsCapped: boolean
+  /** Mob names the kill log has cleared. Matching rows are marked. */
+  cleared: readonly string[]
   onClose: () => void
 }
 
@@ -126,11 +128,13 @@ function rowNote(row: MapPaneRow): string | null {
 function Row({
   row,
   selected,
-  onSelect
+  onSelect,
+  cleared
 }: {
   row: MapPaneRow
   selected: boolean
   onSelect: (row: MapPaneRow) => void
+  cleared: boolean
 }): JSX.Element {
   const locatable = isLocatable(row)
   const level = row.kind === 'mob' ? row.level : undefined
@@ -139,6 +143,7 @@ function Row({
       dense
       disabled={!locatable}
       selected={selected}
+      data-cleared={cleared ? 'yes' : 'no'}
       data-testid={row.kind === 'mob' ? 'maps-pane-mob' : 'maps-pane-label'}
       onClick={() => {
         onSelect(row)
@@ -181,7 +186,8 @@ function Section({
   rows,
   selectedId,
   onSelect,
-  empty
+  empty,
+  cleared
 }: {
   title: string
   note: string
@@ -189,6 +195,7 @@ function Section({
   selectedId: string | null
   onSelect: (row: MapPaneRow) => void
   empty: string
+  cleared: ReadonlySet<string>
 }): JSX.Element {
   return (
     <Stack spacing={0.5} sx={{ mb: 1 }}>
@@ -196,7 +203,7 @@ function Section({
       {rows.length > 0 ? (
         <List dense disablePadding>
           {rows.slice(0, SECTION_ROWS).map((r) => (
-            <Row key={r.id} row={r} selected={r.id === selectedId} onSelect={onSelect} />
+            <Row key={r.id} row={r} selected={r.id === selectedId} onSelect={onSelect} cleared={cleared.has(r.name.toLowerCase())} />
           ))}
         </List>
       ) : (
@@ -294,11 +301,16 @@ function HitSection({
 
 export default function MapMobPane(props: MapMobPaneProps): JSX.Element {
   const { zoneName, hasMap, mobs, labels, hits, counts, query, onQuery } = props
-  const { selectedId, onSelect, onHit, pinsCapped, onClose } = props
+  const { selectedId, onSelect, onHit, pinsCapped, onClose, cleared } = props
+  const clearedSet = new Set<string>()
+  for (const name of cleared) clearedSet.add(name.toLowerCase())
+  let clearedCount = 0
+  for (const mob of mobs) if (clearedSet.has(mob.name.toLowerCase())) clearedCount += 1
   return (
     <Paper
       variant="outlined"
       data-testid="maps-pane"
+      data-crawl-cleared={clearedCount}
       sx={{
         width: PANE_WIDTH,
         flexShrink: 0,
@@ -359,6 +371,7 @@ export default function MapMobPane(props: MapMobPaneProps): JSX.Element {
           rows={mobs}
           selectedId={selectedId}
           onSelect={onSelect}
+          cleared={clearedSet}
           empty={
             zoneName == null
               ? 'No zone is open.'
@@ -373,6 +386,7 @@ export default function MapMobPane(props: MapMobPaneProps): JSX.Element {
           rows={labels}
           selectedId={selectedId}
           onSelect={onSelect}
+          cleared={clearedSet}
           empty={
             !hasMap
               ? 'No map is open.'

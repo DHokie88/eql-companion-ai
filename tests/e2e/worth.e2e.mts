@@ -4,7 +4,7 @@
  * Run: `node --import tsx tests/e2e/run-all.mts worth`
  */
 import type { Page } from 'playwright-core'
-import { buildIfStale, check, countOf, dumpArtifacts, failures, reportRun } from './appHarness.mjs'
+import { buildIfStale, check, countOf, dumpArtifacts, failures, reportRun, settle } from './appHarness.mjs'
 import { mainWindow } from './appWindow.mjs'
 import { launchOnFixture } from './logFixture.mjs'
 
@@ -47,6 +47,18 @@ async function main(): Promise<void> {
     check('the item column changes the loot order', before !== after, `${before} -> ${after}`)
     await page.click('[data-testid="worth-signin"]')
     check('signing in is what sends the loot', (await textOf(page, '[data-testid="worth-upload"]')).includes('Send 2'))
+    await page.click('[data-testid="nav-loot"]')
+    await page.waitForSelector('[data-testid="loot-list"]', { timeout: 15_000 })
+    const beforeLootSign = await page.getAttribute('[data-testid="loot-list"]', 'data-loot-send')
+    check('loot upload stays off before signing in on the Loot tab', beforeLootSign === 'no', String(beforeLootSign))
+    await page.click('[data-testid="loot-sign-in"]')
+    const lootPage = page
+    const afterLootSign = await settle(
+      () => lootPage.getAttribute('[data-testid="loot-list"]', 'data-loot-send'),
+      (v) => v === 'yes',
+      { timeoutMs: 5_000 }
+    )
+    check('signing in on the Loot tab enables loot upload', afterLootSign === 'yes', String(afterLootSign))
     await page.click('[data-testid="nav-oracle"]')
     check('Ask EQ Oracle is still a destination', (await countOf(page, '[data-testid="nav-oracle"]')) === 1)
     if (failures.length) await dumpArtifacts(page, 'worth-FAIL')

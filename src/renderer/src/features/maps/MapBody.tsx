@@ -256,13 +256,15 @@ export interface MapBodyProps {
   marker: Marker | null
   /** This zone's typed-/loc marker, or null. Persistent, unlike `marker` above it. */
   locMarker: EqLoc | null
+  /** Mob names the kill log has already cleared. The list marks them. */
+  cleared: readonly string[]
   /** A cross-zone hit was clicked — `useSearchJump`'s handler, which changes zone first. */
   onJump: (to: JumpTarget) => void
 }
 
 export default function MapBody(props: MapBodyProps): JSX.Element {
   const { data, empty, vp, hostRef, layers, bands, floor, pane, zoneName, marker, onJump } = props
-  const { locMarker } = props
+  const { locMarker, cleared } = props
   return (
     <Stack direction="row" spacing={1.5} sx={{ position: 'relative', flexGrow: 1, minHeight: 0 }}>
       {data != null ? (
@@ -294,6 +296,7 @@ export default function MapBody(props: MapBodyProps): JSX.Element {
           onSelect={pane.select}
           onHit={onJump}
           pinsCapped={pane.pinsCapped}
+          cleared={cleared}
           onClose={() => {
             pane.setOpen(false)
           }}

@@ -22,6 +22,13 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.32.0',
+    date: '2026-11-25',
+    entries: [
+      { kind: 'fixed', text: 'Luclin hair and armour mount on their point bones. A map line that blocks the route refuses the /loc marker, and cleared mobs are marked on the list. Coverage notes stay drafts until confirmed, and name the categories still missing. Loot upload follows the sign-in on this machine. Fight search reads sealed log copies and leaves the live log unread. A generated Accuracy line does not scale.' }
+    ]
+  },
+  {
     version: '0.31.0',
     date: '2026-11-25',
     entries: [
@@ -369,15 +376,6 @@ export const RELEASE_NOTES: readonly ReleaseNote[] = [
       { kind: 'new', text: 'Best in line groups supported stat buffs, such as AC buffs, using their captured line, target and effect slot. It shows the strongest base effect at the current level; expand its arrow for alternatives in strength order. Unverified DoT, rain and shared-timer relationships stay separate. Counts include every matching spell.' },
       { kind: 'changed', text: 'All damage and All heals share the type row with a compact AOE cap and Columns picker. Every column except Spell and Class/Level is selectable, including Description. A uniform Type column hides automatically.' },
       { kind: 'changed', text: 'Damage/Mana headers wrap to two lines. Removed the separate Level column and mana filter, renamed Polarity to Helpful / harmful, and simplified the level control to left/right arrows.' }
-    ]
-  },
-  {
-    version: '0.2.2',
-    date: '2026-10-19',
-    entries: [
-      { kind: 'changed', text: 'Spell controls share one row: Classes, Level, Show mine, Rank, and Targets. Choosing a rank resets every spell preview and turns off Show mine; the toggle restores detected inputs.', fromReport: true },
-      { kind: 'changed', text: 'Spell lists show one damage or healing number, with a short per-hit calculation for rains. Equipment inputs, ranges, and calculation limits remain available in tooltips and spell details.' },
-      { kind: 'fixed', text: 'Type buttons now hide repeated category labels consistently with the category dropdown, using every matching spell rather than only the current page.' }
     ]
   },
   ...ORACLE_RELEASE_ARCHIVE

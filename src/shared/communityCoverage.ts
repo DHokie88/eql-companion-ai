@@ -22,6 +22,9 @@ const POLLS: CoverageSummary = {
   detail: 'Poll results are not included in the saved data.',
 }
 
+/** The coverage categories a note can close. A missing title is a gap. */
+export const COVERAGE_CATEGORIES = [HISTORICAL.title, PRICES.title, POLLS.title]
+
 const PERMISSION_PATTERNS = [/permission/, /http\s*403/, /restricted channels/, /private\/staff/]
 const HISTORICAL_PATTERNS = [/stored[-\s]harvest/, /earlier[-\s]capture/, /\boffline\b/, /not[-\s]rechecked/]
 const PRICE_PATTERNS = [/\bprices?\b/, /price-list/, /price list/, /wts\/wtb/]

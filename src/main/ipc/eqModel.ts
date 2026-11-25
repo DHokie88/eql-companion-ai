@@ -42,7 +42,8 @@ import {
 } from '../../shared/eqModel'
 import { effectiveEqRoot } from '../log/config'
 import { readPfs, type PfsArchive } from '../eqassets/pfs'
-import { RACE_CODES, SKIN_FACE_MAX, facesFor, readCharacter, readWld, type Skeleton, type WldFile } from '../eqassets/wld'
+import { RACE_CODES, SKIN_FACE_MAX, facesFor, readCharacter, readWld, type CharacterModel, type Skeleton, type WldFile } from '../eqassets/wld'
+import { mountPieces, pieceMeshes } from '../eqassets/pointMounts'
 import { readItem } from '../eqassets/wldItem'
 import { ddsToBmp, isDds } from '../eqassets/dds'
 import { readAnimation, readAnimationOrLent } from '../eqassets/wldAnim'
@@ -242,6 +243,20 @@ function weaponFor(hand: EqModelHand | undefined, attach: AttachPoint, textures:
   return null
 }
 
+function withPointMounts(
+  archive: Loaded,
+  model: CharacterModel,
+  textures: Record<string, string>,
+  payload: Omit<EqModelPayload, 'meshes' | 'mounts'>
+): EqModelPayload {
+  const extras = pieceMeshes(archive.wld, model.actor, model.skeleton, model.meshes)
+  for (const mesh of extras) collectTextures(archive.pfs, mesh, textures)
+  const hung = mountPieces({ actor: model.actor, bones: model.bones, meshes: model.meshes, extras })
+  const out: EqModelPayload = { ...payload, meshes: hung.skinned }
+  if (hung.mounts.length > 0) out.mounts = hung.mounts
+  return out
+}
+
 export function loadEqModel(code: unknown, wear?: unknown, hands?: unknown): EqModelPayload | null {
   if (typeof code !== 'string' || !/^[A-Z]{3}$/.test(code)) return null
   const races = raceArchive(code)
@@ -257,7 +272,13 @@ export function loadEqModel(code: unknown, wear?: unknown, hands?: unknown): EqM
   const secondary = weaponFor(held.secondary, 'L_POINT', textures)
   if (primary) weapons.push(primary)
   if (secondary) weapons.push(secondary)
-  const out: EqModelPayload = { actor: model.actor, bones: model.bones, meshes: model.meshes, clips: idle ? [idle] : [], weapons, textures }
+  const out = withPointMounts(races, model, textures, {
+    actor: model.actor,
+    bones: model.bones,
+    clips: idle ? [idle] : [],
+    weapons,
+    textures
+  })
   const faces = facesFor(code, races.pfs.has)
   if (faces.length > 0) out.faces = faces
   if (model.defaultFace !== undefined) out.defaultFace = model.defaultFace
