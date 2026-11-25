@@ -71,6 +71,16 @@ function ticksSince(history: readonly [number, number][], since: number): number
  * `sessionStart` is the instant `shared/timeslice.sessionStartOf` answered, or null when the log
  * states no logout. `query` arrives already normalised (trim + lowercase).
  */
+/** Tradeskill levels the log has actually stated. Zero means unstated and is left out. */
+export function statedSkillLevels(snap: SkillSnap | null): Record<string, number> | undefined {
+  if (!snap) return undefined
+  const out: Record<string, number> = {}
+  for (const skill of Object.values(snap.skills)) {
+    if (skill.value > 0) out[skill.display] = skill.value
+  }
+  return Object.keys(out).length > 0 ? out : undefined
+}
+
 export function skillRows(snap: SkillSnap | null, sessionStart: number | null, query = ''): SkillPanelRow[] {
   if (!snap) return []
   const rows: SkillPanelRow[] = []

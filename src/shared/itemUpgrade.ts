@@ -321,13 +321,23 @@ function renderStatValue(source: string, scaled: number): string {
   return `${body}${suffix}`
 }
 
-function scaleStat(stat: ItemStat, state: ItemUpgradeState): ItemStat {
-  const cls = upgradeStatClass(stat.key)
-  if (cls !== 'primary' && cls !== 'flat') return stat
+function scaledNumber(stat: ItemStat, state: ItemUpgradeState): number | undefined {
   const base = statNumber(stat.value)
-  if (base === undefined) return stat
-  const scaled = cls === 'primary' ? scalePrimary(base, state) : scaleFlat(base, state)
-  return scaled === base ? stat : { key: stat.key, value: renderStatValue(stat.value, scaled) }
+  if (base === undefined) return undefined
+  const key = normalizeStatKey(stat.key)
+  if (key === 'SV_VOID' || key === 'SV_CORRUPTION') return voidAtTier(base, state, true)
+  const cls = upgradeStatClass(stat.key)
+  if (cls === 'primary') return scalePrimary(base, state)
+  if (cls === 'flat') return scaleFlat(base, state)
+  if (cls === 'accuracy') return scaleAccuracy(base, state, stat.accuracy === 'generated' ? 'generated' : 'explicit')
+  return undefined
+}
+
+function scaleStat(stat: ItemStat, state: ItemUpgradeState): ItemStat {
+  const base = statNumber(stat.value)
+  const scaled = scaledNumber(stat, state)
+  if (base === undefined || scaled === undefined || scaled === base) return stat
+  return { ...stat, value: renderStatValue(stat.value, scaled) }
 }
 
 /** WT is stored as TEXT ("3.0"), so an unreadable or unscaled weight survives verbatim. */
@@ -366,7 +376,8 @@ function scaleRangeText(range: string, state: ItemUpgradeState): string {
 export function scaleStatBlock(block: ItemStatBlock, state: ItemUpgradeState): ItemStatBlock {
   const s = normalizeUpgradeState(state)
   const saves = block.saves.map((sv) => scaleStat(sv, s))
-  if (synthesizesVoidSave(block, s)) saves.push({ key: 'SV VOID', value: `+${upgradeVoidBonus(s)}` })
+  const rankedVoid = voidAtTier(undefined, s, synthesizesVoidSave(block, s))
+  if (rankedVoid !== undefined) saves.push({ key: 'SV VOID', value: `+${rankedVoid}` })
 
   return {
     ...block,

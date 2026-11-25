@@ -1,7 +1,7 @@
 import { indexClientSpellBundle } from '../../shared/clientSpellParser'
 import {
-  SPELL_SOURCE_FILES, type ClientSpellRecord, type SpellBeforeAfterResult, type SpellChangesResult,
-  type SpellChangeSummary, type SpellClass, type SpellDataset, type SpellSourceFile, type SpellUpdateCounts,
+  capturedSourceNames, type ClientSpellRecord, type SpellBeforeAfterResult, type SpellChangesResult,
+  type SpellChangeSummary, type SpellClass, type SpellDataset, type SpellUpdateCounts,
   type SpellUpdateSection
 } from '../../shared/spellLibrary'
 import { changeKind, spellDifferences } from './differences'
@@ -84,8 +84,8 @@ export class SpellClientChangelog {
 
   private index(dataset: SpellDataset): SpellIndex {
     const decoder = new TextDecoder('utf-8', { fatal: true })
-    const sources = Object.fromEntries(SPELL_SOURCE_FILES.map((file) =>
-      [file, decoder.decode(this.storage.readArchivedSource(dataset.hashes[file]))])) as Record<SpellSourceFile, string>
+    const sources = Object.fromEntries(capturedSourceNames(Object.keys(dataset.hashes)).map((file) =>
+      [file, decoder.decode(this.storage.readArchivedSource(dataset.hashes[file]))]))
     return indexClientSpellBundle(sources)
   }
 

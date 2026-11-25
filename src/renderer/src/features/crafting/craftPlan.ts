@@ -7,11 +7,9 @@
 // ---------------------------------------------------------------------------
 // WHAT "MAKEABLE" MEANS HERE, AND WHAT IT DELIBERATELY DOES NOT
 // ---------------------------------------------------------------------------
-// It means YOU HOLD THE INGREDIENTS. Not "your skill is high enough" — no recipe in the corpus
-// states a skill requirement (only `trivial`, which is where a skill stops rising), and this app
-// knows no character's tradeskill values at all. Claiming otherwise would be inventing a fact the
-// data cannot support (law 1), so the UI's own words are "You can make now" and never "You can
-// craft this".
+// It means YOU HOLD THE INGREDIENTS. A recipe's `trivial` becomes a gate only when the character
+// log has stated that tradeskill. An unstated skill is not treated as zero: that would hide every
+// combine the bags can already make. The UI's own words stay "You can make now".
 //
 // THREE RULES DECIDE A VERDICT, and each one is a fact the corpus states:
 //
@@ -52,6 +50,7 @@
 // spelled as such.
 
 import type { CraftIndex, CraftRecipe, CraftSkill } from '../../../../shared/craft'
+import { canMakeRecipe } from '../../../../shared/worth'
 
 /** One ingredient you are short of, and by how much. */
 export interface CraftNeed {
@@ -132,6 +131,17 @@ export interface CraftFilter {
   /** '' is Any */
   skill: CraftSkill | ''
   query: string
+  /** Stated tradeskill levels, keyed by the skill's display name. Absent when the log stated none. */
+  skills?: Readonly<Record<string, number>>
+}
+
+/** Ingredient-makeable, and not below a stated trivial. An unstated skill does not refuse the recipe. */
+export function withSkill(verdict: CraftVerdict, skills: Readonly<Record<string, number>> | undefined): boolean {
+  if (!verdict.makeable) return false
+  const trivial = verdict.recipe.trivial
+  if (skills === undefined || trivial === undefined) return true
+  if (skills[verdict.recipe.skill] === undefined) return true
+  return canMakeRecipe({ skill: verdict.recipe.skill, trivial }, skills, true)
 }
 
 /** The three sections the tab draws. `all` is capped by the CALLER, not here. */
@@ -181,7 +191,7 @@ export function craftPlan(index: CraftIndex, have: HaveFn, filter: CraftFilter):
     if (needle !== '' && !matches(recipe, needle)) continue
     const verdict = craftVerdict(recipe, have)
     plan.all.push(verdict)
-    if (verdict.makeable) plan.makeable.push(verdict)
+    if (withSkill(verdict, filter.skills)) plan.makeable.push(verdict)
     // An unstated recipe is one away from nothing (its silence is not a list of one), and neither
     // is a recipe you have not started — `isOneAway` states both halves.
     else if (isOneAway(verdict)) plan.oneAway.push(verdict)

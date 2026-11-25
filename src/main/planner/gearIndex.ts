@@ -135,6 +135,8 @@ export interface GearStatReading {
   unindexed: Record<string, number>
   /** indexed keys whose value no parse could read, by key */
   unreadable: Record<string, number>
+  /** Set when the block states weapon accuracy. Generated lines do not scale. */
+  accuracySource?: 'explicit' | 'generated'
 }
 
 const bump = (m: Record<string, number>, key: string): void => {
@@ -156,6 +158,7 @@ function foldStatRows(rows: readonly ItemStat[], out: GearStatReading): void {
     }
     if (statInteger(row.value) === null) out.percents++
     else out.integers++
+    if (key === 'ACCURACY') out.accuracySource = row.accuracy === 'generated' ? 'generated' : 'explicit'
     // Last stated wins. No committed page states one indexed key twice today; if one ever does,
     // the duplicate is the page's own text and the later line is the one the window would draw.
     out.stats[key] = n
@@ -298,6 +301,7 @@ function optionalFields(
     ...(k.stats?.skill === undefined ? {} : { skill: k.stats.skill }),
     ...(read?.rangeText === undefined ? {} : { rangeText: read.rangeText }),
     ...(voidSynth ? { voidSynth: true as const } : {}),
+    ...(read?.accuracySource === undefined ? {} : { accuracySource: read.accuracySource }),
     // Copied per row (donors do the same) so a consumer never needs a second index to answer
     // "where does this drop".
     ...(k.dropsFrom === undefined ? {} : { wikiSources: k.dropsFrom.map((s) => ({ ...s })) })

@@ -5,6 +5,17 @@ import type { SpellAnalysis, SpellAnalysisOptions, SpellByLevelQuery, SpellByLev
 /** Local client catalog contract. Source bytes and filesystem paths never cross this bridge. */
 export const SPELL_SOURCE_FILES = ['spells_us.txt', 'spells_us_str.txt', 'dbstr_us.txt'] as const
 export type SpellSourceFile = (typeof SPELL_SOURCE_FILES)[number]
+/**
+ * US installs keep this three-file order so an unchanged client keeps its snapshot id.
+ * Any other suffix set sorts by name.
+ */
+export function capturedSourceNames(names: readonly string[]): string[] {
+  const present = new Set(names)
+  if (present.size === SPELL_SOURCE_FILES.length && SPELL_SOURCE_FILES.every((name) => present.has(name))) {
+    return [...SPELL_SOURCE_FILES]
+  }
+  return [...names].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
+}
 /** Bump when interpreted columns change so identical source bytes publish a new snapshot. */
 export const CLIENT_SPELL_PARSER_VERSION = '2'
 export const SPELL_CLASSES = ['WAR', 'CLR', 'PAL', 'RNG', 'SHD', 'DRU', 'MNK', 'BRD', 'ROG', 'SHM', 'NEC', 'WIZ', 'MAG', 'ENC', 'BST', 'BER'] as const
@@ -44,7 +55,7 @@ export interface SpellDataset {
   parserVersion: string
   firstObserved: string
   recordCount: number
-  hashes: Record<SpellSourceFile, string>
+  hashes: Record<string, string>
 }
 export type SpellCheckReason = 'startup' | 'game-launch' | 'installation-change' | 'manual'
 export interface SpellLibraryStatus {

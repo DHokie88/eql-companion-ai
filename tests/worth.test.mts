@@ -171,6 +171,7 @@ test('map follow, route, crawl, examine text, and wiki draft', () => {
   assert.equal(loc?.headingDeg, 0)
   assert.equal(routeTo({ x: 0, y: 0 }, { x: 2, y: 0 }, () => false)?.length, 2)
   assert.equal(routeTo({ x: 0, y: 0 }, { x: 2, y: 0 }, (x) => x === 1), null)
+  assert.equal(routeTo({ x: 0, y: 0 }, { x: 4, y: 0 }, (x) => x === 1), null)
   assert.equal(crawlMarks(['a bat', 'a rat'], ['A Bat'])[0]?.cleared, true)
   assert.equal(parseExamine('AC: 12\nSV Void: 3').AC, 12)
   assert.equal(wikiContribution({ title: 'A bat', fact: 'Drops a bone.', confirmed: false }).status, 'draft')

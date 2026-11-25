@@ -1,7 +1,7 @@
 import { type JSX, type ReactNode, useCallback, useState } from 'react'
 import { Accordion, AccordionDetails, AccordionSummary, Alert, Box, Button, Chip, CircularProgress, FormControl, InputLabel, MenuItem, Pagination, Select, Stack, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import { SPELL_SOURCE_FILES, type SpellDataset, type SpellHistoryResult, type SpellObservation } from '@shared/spellLibrary'
+import { capturedSourceNames, type SpellDataset, type SpellHistoryResult, type SpellObservation } from '@shared/spellLibrary'
 import { useLibraryQuery } from './useLibraryQuery'
 import { useSpellLibraryStatus } from './libraryState'
 import { LibrarySpellDetail } from './LibrarySpellDetail'
@@ -134,7 +134,7 @@ function ClientUpdate({ observation, datasets, expanded, onExpand }: {
   if (!previousSnapshotId || !snapshotId) return null
   const before = datasets.get(previousSnapshotId)
   const after = datasets.get(snapshotId)
-  const files = SPELL_SOURCE_FILES.filter((file) => before?.hashes[file] !== after?.hashes[file])
+  const files = capturedSourceNames([...new Set([...Object.keys(before?.hashes ?? {}), ...Object.keys(after?.hashes ?? {})])]).filter((file) => before?.hashes[file] !== after?.hashes[file])
   const pair = { beforeSnapshotId: previousSnapshotId, afterSnapshotId: snapshotId }
   return <Accordion disableGutters expanded={expanded} onChange={(_event, value) => onExpand(value)}
     slotProps={{ transition: { unmountOnExit: true } }}>

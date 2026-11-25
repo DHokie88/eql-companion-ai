@@ -17,7 +17,7 @@
 // restored from a previous session is NOT a question anyone just asked — snapping the viewport on
 // mount would fight the zone's own fit and move a map the user never touched.
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ZoneShort } from '@shared/maps'
 import { JUMP_ZOOM } from './MapBody'
 import { mapFromLoc, type EqLoc } from './mapGeometry'
@@ -29,6 +29,7 @@ import {
   setLocMarker,
   type LocMarkers
 } from './locMarker'
+import { crawlList, followTrail } from './loggedLoc'
 import type { MapViewport } from './useMapViewport'
 
 /** What the toolbar needs to state the marker, and what the surface needs to draw it. */
@@ -45,6 +46,8 @@ export interface LocMarkerState {
 
 export function useLocMarker(zone: ZoneShort | null, vp: MapViewport): LocMarkerState {
   const [marks, setMarks] = useState<LocMarkers>(loadLocMarkers)
+  const trail = useRef<{ x: number; y: number; z: number }[]>([])
+  const cleared = useRef<string[]>([])
   useEffect(() => {
     saveLocMarkers(marks)
   }, [marks])
@@ -67,8 +70,15 @@ export function useLocMarker(zone: ZoneShort | null, vp: MapViewport): LocMarker
       // No map open ⇒ nowhere to remember it. The field is gated on `hasMap`, so this is a guard,
       // not a path: a marker filed under no zone could never be found again.
       if (zone == null) return
-      setMarks((prev) => setLocMarker(prev, zone, loc))
-      goTo(loc)
+      const samples = trail.current
+      samples.push({ x: loc.ew, y: loc.ns, z: loc.z })
+      if (samples.length > 12) samples.shift()
+      const followed = followTrail(samples, () => false)
+      crawlList([], cleared.current)
+      if (followed.here && Number.isFinite(followed.here.headingDeg)) {
+        setMarks((prev) => setLocMarker(prev, zone, loc))
+        goTo(loc)
+      }
     },
     [zone, goTo]
   )

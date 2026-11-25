@@ -11,9 +11,12 @@
 
 import { ipcRenderer } from 'electron'
 import { IPC } from '../shared/ipc'
+import type { SealedFightArchive } from '../shared/fightArchive'
 import type { CharacterRef, LogLine, LogSwitchNudge } from '../shared/types'
 
 export const logStreamBridge = {
+  /** Sealed fight rows beside the live log. The live log's name comes back unchanged. */
+  archivedFights: (): Promise<SealedFightArchive> => ipcRenderer.invoke(IPC.archivedFights),
   onLine: (cb: (line: LogLine) => void): (() => void) => {
     const listener = (_e: unknown, line: LogLine): void => cb(line)
     ipcRenderer.on(IPC.onLine, listener)

@@ -6,7 +6,7 @@ import { type ReactNode } from 'react'
 import { Box, Collapse, Paper, Stack, Typography } from '@mui/material'
 import { CATEGORY_LABEL, type DamageCategory } from '@shared/combat'
 import { formatNum as fmt, formatRate } from '../../lib/formatRate'
-import { laneDps } from './petRows'
+import { entityOwnDps } from './petRows'
 import type { ProcAnnotation } from './procRows'
 import { landEvidence } from './landEvidence'
 import { useAbilityExpand } from './abilityExpand'
@@ -339,7 +339,7 @@ function ProcTag({ proc }: { proc: ProcAnnotation }): React.JSX.Element {
  */
 function skillRight(s: SkillRow, a: string, activeSec: number | undefined, compact?: boolean): string {
   if (activeSec === undefined || compact) return `${a}${fmt(s.total)}`
-  return `${a}${formatRate(laneDps(s.total, activeSec))} · ${a}${fmt(s.total)}`
+  return `${a}${formatRate(entityOwnDps(s.total, activeSec))} · ${a}${fmt(s.total)}`
 }
 
 /**

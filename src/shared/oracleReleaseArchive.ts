@@ -3,6 +3,13 @@ import type { ReleaseNote } from './releaseNotes'
 /** The original EQ Oracle releases. */
 export const ORACLE_RELEASE_ARCHIVE: readonly ReleaseNote[] = [
   {
+    version: '0.2.1',
+    date: '2026-10-19',
+    entries: [
+      { kind: 'fixed', text: 'Show mine and Yours badges now recognize observed mote ranks when an internal spell shares the player spell\'s name, including Conflagration IX. Duplicate player spells and classic spell lines remain unresolved rather than borrowing another record\'s rank.', fromReport: true }
+    ]
+  },
+  {
     version: '0.2.0',
     date: '2026-10-19',
     entries: [

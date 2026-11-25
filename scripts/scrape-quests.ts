@@ -286,6 +286,7 @@ function nonQuestReason(parsed: ParsedQuestPage): string | null {
 function toQuestEntry(parsed: ParsedQuestPage): QuestEntry {
   const entry: QuestEntry = { name: parsed.page, page: parsed.page }
   if (parsed.startZone) entry.startZone = parsed.startZone
+  if (parsed.startsIn) entry.startsIn = parsed.startsIn
   if (parsed.giver) entry.giver = parsed.giver
   if (parsed.minLevel != null) entry.minLevel = parsed.minLevel
   if (parsed.classes.length) entry.classes = parsed.classes

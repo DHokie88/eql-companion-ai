@@ -68,6 +68,7 @@ export const GEAR_STAT_KEYS = [
   'MANA_REGEN',
   'END_REGEN',
   'ATTACK',
+  'ACCURACY',
   'HASTE',
   'SV_FIRE',
   'SV_COLD',
@@ -203,6 +204,11 @@ export interface GearRow {
    * the row carrying the block the rule reads.
    */
   voidSynth?: true
+  /**
+   * Weapon accuracy's source. Explicit lines scale. Generated lines stay at the stored number.
+   * Absent when the item states no accuracy.
+   */
+  accuracySource?: 'explicit' | 'generated'
   /**
    * What the ITEM PAGE says about where this drops (`|dropsfrom`) — carried for the same reason
    * `PlannerDonor` carries it: it is a second witness beside the renderer's mob-catalog inversion,

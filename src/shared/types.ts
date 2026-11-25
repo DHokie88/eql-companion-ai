@@ -507,8 +507,8 @@ export interface QuestEntry {
   name: string
   /** wiki page title (linkable) */
   page: string
-  /** "Start Zone" cell */
-  startZone?: string
+  /** "Start Zone" cell. `startsIn` is the wiki Starts In label when the page states one. */
+  startZone?: string; startsIn?: string
   /** "Quest Giver" NPC */
   giver?: string
   /** "Minimum Level" (numeric part only) */

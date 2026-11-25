@@ -4,7 +4,7 @@ import { dirname, join, resolve, sep } from 'node:path'
 import { gzipSync, gunzipSync } from 'node:zlib'
 import { randomUUID } from 'node:crypto'
 import {
-  SPELL_SOURCE_FILES, type ClientSpellRecord, type SpellCheckReason, type SpellDataset,
+  capturedSourceNames, type ClientSpellRecord, type SpellCheckReason, type SpellDataset,
   type SpellObservation
 } from '../../shared/spellLibrary'
 import { sourceHash, type CapturedSpellBundle } from './capture'
@@ -132,8 +132,10 @@ export class SpellLibraryStorage {
     const directory = join(this.storageDir, 'materialized', `${dataset.snapshotId}-${randomUUID()}`)
     mkdirSync(directory, { recursive: true })
     try {
-      for (const name of SPELL_SOURCE_FILES) {
-        writeFileSync(join(directory, name), this.readArchivedSource(dataset.hashes[name]), { flag: 'wx' })
+      for (const name of capturedSourceNames(Object.keys(dataset.hashes))) {
+        const hash = dataset.hashes[name]
+        if (!hash) throw new Error(`Spell dataset is missing ${name}`)
+        writeFileSync(join(directory, name), this.readArchivedSource(hash), { flag: 'wx' })
       }
       return directory
     } catch (error) { rmSync(directory, { recursive: true, force: true }); throw error }
@@ -169,7 +171,7 @@ export class SpellLibraryStorage {
     }
   }
   private archiveCapture(capture: CapturedSpellBundle): void {
-    for (const name of SPELL_SOURCE_FILES) {
+    for (const name of capturedSourceNames(Object.keys(capture.hashes))) {
       if (sourceHash(capture.sources[name]) !== capture.hashes[name]) throw new Error('Capture hash mismatch')
       this.archiveSource(capture.hashes[name], capture.sources[name])
     }
@@ -191,7 +193,8 @@ export class SpellLibraryStorage {
   publish(input: SpellImportInput): SpellCheckResult {
     this.validateRecords(input)
     const installId = this.ensureInstall(input.root)
-    const contentId = `c-${identityHash(SPELL_SOURCE_FILES.map((name) => [name, input.capture.hashes[name]]))}`
+    const names = capturedSourceNames(Object.keys(input.capture.hashes))
+    const contentId = `c-${identityHash(names.map((name) => [name, input.capture.hashes[name]]))}`
     const snapshotId = `s-${identityHash({ contentId, parserVersion: input.parserVersion })}`
     const observedAt = new Date().toISOString()
     const previous = this.active(installId)

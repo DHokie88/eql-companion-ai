@@ -23,6 +23,9 @@
 import { type JSX, useCallback, useDeferredValue, useMemo, useState } from 'react'
 import { Box, MenuItem, Paper, Select, Stack, TextField, Typography } from '@mui/material'
 import { TRADESKILLS, craftIngredientCount, type CraftIndex, type CraftSkill } from '@shared/craft'
+import type { SkillSnap } from '@shared/types'
+import { useModule } from '../../lib/useModule'
+import { statedSkillLevels } from '../character/skillRows'
 import CraftRow from './CraftRow'
 import { craftPlan, type CraftVerdict, type HaveFn } from './craftPlan'
 import { useCraftHoldings, useCraftIndex, useCraftSkill } from './useCraftIndex'
@@ -139,10 +142,12 @@ export default function CraftingView({ onOpenLoot }: { onOpenLoot: (item?: strin
   const deferred = useDeferredValue(query)
   const [skill, setSkill] = useCraftSkill()
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set<string>())
+  const skillSnap = useModule<SkillSnap>('skills')
+  const levels = useMemo(() => statedSkillLevels(skillSnap), [skillSnap])
 
   const plan = useMemo(
-    () => (index === null ? null : craftPlan(index, have, { skill, query: deferred })),
-    [index, have, skill, deferred]
+    () => (index === null ? null : craftPlan(index, have, { skill, query: deferred, skills: levels })),
+    [index, have, skill, deferred, levels]
   )
   const ingredients = useMemo(() => (index === null ? 0 : craftIngredientCount(index)), [index])
 

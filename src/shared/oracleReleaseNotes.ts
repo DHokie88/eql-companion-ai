@@ -22,6 +22,13 @@ export const UPSTREAM_BASE = {
 
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    version: '0.31.0',
+    date: '2026-11-25',
+    entries: [
+      { kind: 'fixed', text: 'Spell files other than spells_us.txt open on the reader. Listed Void and explicit Accuracy scale on the item. A route stops at a blocked cell. Luclin hair and armour hang on the point bones. Fight search reads sealed history and leaves the live log name alone. A stated tradeskill gates a recipe at its trivial.' }
+    ]
+  },
+  {
     version: '0.30.0',
     date: '2026-11-25',
     entries: [
@@ -371,13 +378,6 @@ export const RELEASE_NOTES: readonly ReleaseNote[] = [
       { kind: 'changed', text: 'Spell controls share one row: Classes, Level, Show mine, Rank, and Targets. Choosing a rank resets every spell preview and turns off Show mine; the toggle restores detected inputs.', fromReport: true },
       { kind: 'changed', text: 'Spell lists show one damage or healing number, with a short per-hit calculation for rains. Equipment inputs, ranges, and calculation limits remain available in tooltips and spell details.' },
       { kind: 'fixed', text: 'Type buttons now hide repeated category labels consistently with the category dropdown, using every matching spell rather than only the current page.' }
-    ]
-  },
-  {
-    version: '0.2.1',
-    date: '2026-10-19',
-    entries: [
-      { kind: 'fixed', text: 'Show mine and Yours badges now recognize observed mote ranks when an internal spell shares the player spell\'s name, including Conflagration IX. Duplicate player spells and classic spell lines remain unresolved rather than borrowing another record\'s rank.', fromReport: true }
     ]
   },
   ...ORACLE_RELEASE_ARCHIVE

@@ -52,6 +52,7 @@
 
 import { flattenSkills, type SkillRow } from './dashboardData'
 import type { SourceView } from '@shared/combat'
+import { ownTimeDps } from '../../../../shared/worth'
 
 /** The synthetic line item that stands for ONE pet inside your breakdown. */
 export interface PetRow {
@@ -116,6 +117,12 @@ export function petSources(entities: SourceView[]): SourceView[] {
  */
 export function laneDps(total: number, activeSec: number): number {
   return total / Math.max(1, activeSec)
+}
+
+/** Damage over this row's own attacking seconds. Zero seconds keeps the lane's existing rate. */
+export function entityOwnDps(total: number, ownSec: number): number {
+  if (ownSec > 0) return ownTimeDps(total, ownSec)
+  return laneDps(total, ownSec)
 }
 
 /** Sum one numeric field across a set of sources. */

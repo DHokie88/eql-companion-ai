@@ -18,6 +18,7 @@ import {
   type SearchState
 } from './fightPickerRows'
 import type { FightPickerProps } from './FightPicker'
+import { searchPickerFights } from './fightSearch'
 
 export interface PickerState {
   open: boolean
@@ -126,8 +127,12 @@ function useFightSearch(
     }
     const seq = ++seqRef.current
     const t = setTimeout(() => {
-      window.eq
-        .searchFights(q, SEARCH_LIMIT)
+      searchPickerFights(
+        q,
+        SEARCH_LIMIT,
+        (text, limit) => window.eq.searchFights(text, limit),
+        () => window.eq.archivedFights()
+      )
         .then((res) => {
           if (seq !== seqRef.current) return
           setResults({ query: q, hits: res.hits, corpus: res.corpus })

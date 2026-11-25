@@ -1,7 +1,9 @@
 // Compatibility projection of the active, validated spell-library revision.
 // Full ID-keyed records and durable caches live in the library's SQLite workers.
+import { readdirSync } from 'node:fs'
 import { Worker } from 'node:worker_threads'
 import { join, resolve } from 'node:path'
+import { spellTablePath } from '../spellLibrary/spellTableFile'
 import { effectiveEqRoot } from '../log/config'
 import { logError } from '../errorLog'
 import { resetLevelUnlocksCache } from '../data/levelUnlocks'
@@ -17,7 +19,12 @@ let revision = 'unavailable'
 let sourceMtime: number | null = null
 const rootKey = (value: string): string => resolve(value).replace(/\\/g, '/').toLowerCase()
 
-export function spellsUsPath(): string { return join(effectiveEqRoot(), 'spells_us.txt') }
+export function spellsUsPath(): string {
+  const root = effectiveEqRoot()
+  let names: string[] = []
+  try { names = readdirSync(root) } catch { names = [] }
+  return spellTablePath(root, names)
+}
 export function spellTableRevision(): string { return revision }
 
 /** Root changes invalidate the projection immediately; same-install refreshes keep the old handle. */

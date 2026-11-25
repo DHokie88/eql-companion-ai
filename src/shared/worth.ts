@@ -287,9 +287,22 @@ export function followLoggedLoc(samples: readonly { x: number; y: number; z: num
 }
 
 export function routeTo(from: { x: number; y: number }, to: { x: number; y: number }, blocked: (x: number, y: number) => boolean): { x: number; y: number }[] | null {
-  const mid = { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 }
-  if (blocked(from.x, from.y) || blocked(to.x, to.y) || blocked(mid.x, mid.y)) return null
-  return [from, to]
+  let x = Math.round(from.x)
+  let y = Math.round(from.y)
+  const x1 = Math.round(to.x)
+  const y1 = Math.round(to.y)
+  const dx = Math.abs(x1 - x)
+  const dy = Math.abs(y1 - y)
+  const sx = x < x1 ? 1 : -1
+  const sy = y < y1 ? 1 : -1
+  let err = dx - dy
+  for (;;) {
+    if (blocked(x, y)) return null
+    if (x === x1 && y === y1) return [from, to]
+    const doubled = 2 * err
+    if (doubled > -dy) { err -= dy; x += sx }
+    if (doubled < dx) { err += dx; y += sy }
+  }
 }
 
 export function crawlMarks(names: readonly string[], killed: readonly string[]): { name: string; cleared: boolean }[] {

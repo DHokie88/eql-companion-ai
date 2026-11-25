@@ -16,6 +16,7 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { PALETTE } from '../../../../shared/palette'
 import type { EqModelClip, EqModelHands, EqModelMaterial, EqModelMesh, EqModelPayload, EqModelWear, Tint } from '@shared/eqModel'
+import { attachPointMounts } from './figureMounts'
 
 /** A texture from a data URL, in the game's pixel look: nearest magnification, sRGB, repeating. */
 function loadTexture(loader: THREE.TextureLoader, url: string): THREE.Texture {
@@ -201,6 +202,14 @@ function buildGeometry(m: EqModelMesh, mc: MaterialCache): { geo: THREE.BufferGe
   return { geo, mats }
 }
 
+function hangPointMounts(model: EqModelPayload, skeleton: THREE.Skeleton, mc: MaterialCache): void {
+  const mounts = (model.mounts ?? []).map((mount) => {
+    const { geo, mats } = buildGeometry(mount.mesh, mc)
+    return { point: mount.point, mesh: new THREE.Mesh(geo, mats) }
+  })
+  attachPointMounts(skeleton.bones, model.actor, mounts)
+}
+
 /** Build the figure: skinned body meshes on one skeleton, weapons on their bones, the idle playing. */
 function buildFigure(model: EqModelPayload): Built {
   const built: Built = { group: new THREE.Group(), geometries: [], materials: [], textures: [], mixer: null, flipbooks: [], turning: [] }
@@ -242,6 +251,7 @@ function buildFigure(model: EqModelPayload): Built {
     for (const m of mats) if (m instanceof THREE.MeshLambertMaterial && m.blending === THREE.AdditiveBlending) glows.push(m)
     built.turning.push({ pivot, glows })
   }
+  hangPointMounts(model, skeleton, mc)
   const idle = model.clips[0]
   if (idle && root) {
     built.mixer = new THREE.AnimationMixer(root)

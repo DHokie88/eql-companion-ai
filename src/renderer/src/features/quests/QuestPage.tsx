@@ -20,6 +20,7 @@ import { formatDate } from '../../lib/formatDate'
 import { QuestSteps } from './QuestSteps'
 import { isPinned, ticksFor, useQuestPins } from './useQuestPins'
 import { useQuestProgress } from './useQuestProgress'
+import { questPlaceLabel } from './questStart'
 
 type Held = ReadonlyMap<string, LootedQuestItem>
 type OpenLoot = (item: string) => void
@@ -101,7 +102,7 @@ function StepsSection({
 /** Title and the one-line facts under it: giver · zone, level, classes, experience, the wiki page. */
 function QuestHeader({ quest }: { quest: QuestEntry }): JSX.Element {
   const open = questClasses(quest)
-  const where = [quest.giver, quest.startZone].filter(Boolean).join(' · ')
+  const where = questPlaceLabel(quest)
   const wikiUrl = wikiPageUrl(quest.page)
   const facts: { key: string; text: string; color?: string }[] = [
     { key: 'where', text: where },

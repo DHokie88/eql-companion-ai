@@ -29,11 +29,13 @@ import {
   scaleRange,
   scaleWeight,
   upgradeStatClass,
-  upgradeVoidBonus,
+  voidAtTier,
   type ItemUpgradeState
 } from '../itemUpgrade'
 import { damageRatio } from '../itemStats'
 import { GEAR_STAT_KEYS, type GearRow, type GearStatKey, type GearStats } from './gear'
+
+const LISTED_VOID: ReadonlySet<string> = new Set(['SV_VOID', 'SV_CORRUPTION'])
 
 /**
  * One base value at `state`, by the rule its key takes.
@@ -43,7 +45,13 @@ import { GEAR_STAT_KEYS, type GearRow, type GearStatKey, type GearStats } from '
  * improves — see `scaleStatBlock`'s header), where `unchanged` is the default for everything phase
  * 0's reference leaves alone.
  */
-export function scaleGearStat(key: GearStatKey, base: number, state: ItemUpgradeState): number {
+export function scaleGearStat(
+  key: GearStatKey,
+  base: number,
+  state: ItemUpgradeState,
+  accuracy: 'explicit' | 'generated' = 'explicit'
+): number {
+  if (LISTED_VOID.has(key)) return voidAtTier(base, state, true) ?? base
   switch (upgradeStatClass(key)) {
     case 'primary':
       return scalePrimary(base, state)
@@ -58,7 +66,7 @@ export function scaleGearStat(key: GearStatKey, base: number, state: ItemUpgrade
     case 'weight':
       return scaleWeight(base, state)
     case 'accuracy':
-      return scaleAccuracy(base, state, 'explicit')
+      return scaleAccuracy(base, state, accuracy)
     case 'delay':
       return base
     default:
@@ -75,7 +83,8 @@ export function scaleGearStat(key: GearStatKey, base: number, state: ItemUpgrade
 export function scaleGearStats(
   stats: GearStats,
   state: ItemUpgradeState,
-  voidSynth = false
+  voidSynth = false,
+  accuracy: 'explicit' | 'generated' = 'explicit'
 ): GearStats {
   const s = normalizeUpgradeState(state)
   const out: GearStats = {}
@@ -84,17 +93,16 @@ export function scaleGearStats(
   for (const key of GEAR_STAT_KEYS) {
     const base = stats[key]
     if (base === undefined) continue
-    out[key] = scaleGearStat(key, base, s)
+    out[key] = scaleGearStat(key, base, s, accuracy)
   }
-  if (voidSynth && s.full > 0 && out.SV_VOID === undefined && out.SV_CORRUPTION === undefined) {
-    out.SV_VOID = upgradeVoidBonus(s)
-  }
+  const ranked = voidAtTier(undefined, s, voidSynth)
+  if (ranked !== undefined && out.SV_VOID === undefined && out.SV_CORRUPTION === undefined) out.SV_VOID = ranked
   return out
 }
 
 /** The same row at `state` — the map the gear table runs on every slider move. */
 export function scaleGearRow(row: GearRow, state: ItemUpgradeState): GearRow {
-  return { ...row, stats: scaleGearStats(row.stats, state, row.voidSynth === true) }
+  return { ...row, stats: scaleGearStats(row.stats, state, row.voidSynth === true, row.accuracySource ?? 'explicit') }
 }
 
 /**

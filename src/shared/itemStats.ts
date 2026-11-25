@@ -51,6 +51,8 @@ export interface ItemEffect {
 export interface ItemStat {
   key: string
   value: string
+  /** Weapon accuracy only. A generated line is not a number the item stated, so it does not scale. */
+  accuracy?: 'explicit' | 'generated'
 }
 
 /**

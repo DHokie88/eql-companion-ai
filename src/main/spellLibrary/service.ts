@@ -1,4 +1,5 @@
 import { join, resolve } from 'node:path'
+import { spellTableFile } from './spellTableFile'
 import type { SpellCheckReason, SpellDataset, SpellLibraryStatus, SpellObservation } from '../../shared/spellLibrary'
 import { SpellWorkerRpc } from './rpc'
 import type { SpellResistTable } from '../../shared/resistTypes'
@@ -133,7 +134,7 @@ export class SpellLibraryService {
   }
   private async activate(published: Published, root: string, generation: number): Promise<void> {
     this.publish({ phase: 'activating', message: 'Preparing spell references for the captured revision…' })
-    const table = await this.deps.prepareReference(join(published.materializedDir, 'spells_us.txt'))
+    const table = await this.deps.prepareReference(await spellTableFile(published.materializedDir))
     if (!this.owns(root, generation)) return
     const previous = this.desired
     this.desired = { ...published, root, generation }

@@ -34,6 +34,8 @@
 
 import { ipcMain } from 'electron'
 import { IPC } from '../../shared/ipc'
+import { eqLogsDir } from '../log/config'
+import { readSealedFights } from '../logArchive/history'
 import type { CombatSnapshot, FightSearchResult, SnapshotOpts } from '../../shared/combat'
 import {
   serveCombatSnapshot,
@@ -103,4 +105,5 @@ export function registerWorldIpc(): void {
       return serveSearchFights(query, clampLimit(limit), () => ({ hits: [], corpus: 0 }))
     }
   )
+  ipcMain.handle(IPC.archivedFights, () => readSealedFights(eqLogsDir()))
 }

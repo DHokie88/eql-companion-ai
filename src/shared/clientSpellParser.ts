@@ -2,7 +2,8 @@
  * Pure over already-captured strings; callers publish nothing until this succeeds.
  * The standalone Build-EQLSpellCards.py owns the original verified column map.
  */
-import { SPELL_CLASSES, type ClientSpellEffect, type ClientSpellRecord, type SpellSourceFile } from './spellLibrary'
+import { SPELL_CLASSES, type ClientSpellEffect, type ClientSpellRecord } from './spellLibrary'
+import { chosenSpellTexts } from './spellBundlePick'
 
 // The standalone tool's EQEmu effect vocabulary, not a game-data snapshot.
 const SPA_NAMES: readonly string[] = [
@@ -138,7 +139,7 @@ export const INTERPRETED_SPELL_COLUMNS: ReadonlySet<number> = new Set([
   ...Array.from({ length: 16 }, (_value, index) => index + 36)
 ])
 
-function sourceLines(text: string, file: SpellSourceFile, retainBlank = false): string[] {
+function sourceLines(text: string, file: string, retainBlank = false): string[] {
   if (!text.trim()) throw new Error(`${file}: empty source file`)
   const lines = text.replace(/^\uFEFF/, '').split(/\r?\n/)
   return retainBlank ? lines : lines.filter((line) => line.length > 0)
@@ -380,18 +381,20 @@ function enrichNames(record: ClientSpellRecord, strings: Map<string, string>): v
   fields.durationText = durationText(record.durationFormula, record.durationCap)
 }
 
-function spellRowError(error: unknown, line: number): Error {
-  const reason = error instanceof Error ? error.message.replace(/^spells_us\.txt: /, '') : String(error)
-  return new Error(`spells_us.txt row ${line}: ${reason}`)
+function spellRowError(error: unknown, line: number, table: string): Error {
+  const raw = error instanceof Error ? error.message : String(error)
+  const reason = raw.replace(/^spells_us\.txt: /, '').replace(new RegExp(`^${table.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}: `), '')
+  return new Error(`${table} row ${line}: ${reason}`)
 }
 
 /** Index archived rows without holding a full catalog of parsed records in memory. */
-export function indexClientSpellBundle(sources: Record<SpellSourceFile, string>) {
-  const messages = parseMessages(sources['spells_us_str.txt'])
-  const strings = parseStrings(sources['dbstr_us.txt'])
+export function indexClientSpellBundle(sources: object) {
+  const chosen = chosenSpellTexts(sources)
+  const messages = parseMessages(chosen.messages)
+  const strings = parseStrings(chosen.strings)
   const rows = new Map<number, { line: string; number: number }>()
   const names = new Map<number, string>()
-  sourceLines(sources['spells_us.txt'], 'spells_us.txt', true).forEach((line, index) => {
+  sourceLines(chosen.rows, chosen.table, true).forEach((line, index) => {
     if (!line) return
     const [rawId, name] = line.split('^', 2)
     try {
@@ -399,7 +402,7 @@ export function indexClientSpellBundle(sources: Record<SpellSourceFile, string>)
       if (rows.has(id)) throw new Error(`duplicate spell ID ${id}`)
       rows.set(id, { line, number: index + 1 })
       names.set(id, name)
-    } catch (error) { throw spellRowError(error, index + 1) }
+    } catch (error) { throw spellRowError(error, index + 1, chosen.table) }
   })
   return {
     ids: (): IterableIterator<number> => rows.keys(),
@@ -411,21 +414,22 @@ export function indexClientSpellBundle(sources: Record<SpellSourceFile, string>)
         record.messages = messages.get(id) ?? {}
         enrichRecord(record, strings, names)
         return record
-      } catch (error) { throw spellRowError(error, row.number) }
+      } catch (error) { throw spellRowError(error, row.number, chosen.table) }
     }
   }
 }
 
-export function parseClientSpellBundle(sources: Record<SpellSourceFile, string>): ClientSpellRecord[] {
-  const messages = parseMessages(sources['spells_us_str.txt'])
-  const strings = parseStrings(sources['dbstr_us.txt'])
-  const records = sourceLines(sources['spells_us.txt'], 'spells_us.txt', true).flatMap((line, index) => {
+export function parseClientSpellBundle(sources: object): ClientSpellRecord[] {
+  const chosen = chosenSpellTexts(sources)
+  const messages = parseMessages(chosen.messages)
+  const strings = parseStrings(chosen.strings)
+  const records = sourceLines(chosen.rows, chosen.table, true).flatMap((line, index) => {
     if (!line) return []
-    try { return [parseRecord(line)] } catch (error) { throw spellRowError(error, index + 1) }
+    try { return [parseRecord(line)] } catch (error) { throw spellRowError(error, index + 1, chosen.table) }
   })
   const names = new Map<number, string>()
   for (const record of records) {
-    if (names.has(record.id)) throw new Error(`spells_us.txt: duplicate spell ID ${record.id}`)
+    if (names.has(record.id)) throw new Error(`${chosen.table}: duplicate spell ID ${record.id}`)
     names.set(record.id, record.name)
   }
   for (const record of records) {

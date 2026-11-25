@@ -76,6 +76,12 @@ export interface EqModelWeapon {
   mesh: EqModelMesh
 }
 
+/** A Luclin mesh hung on a point bone. The bone name is `hangPoint(actor, point)`. */
+export interface EqModelMount {
+  point: 'HAIR_POINT' | 'HEAD_POINT' | 'CHEST_POINT'
+  mesh: EqModelMesh
+}
+
 /**
  * WHAT THE FIGURE WEARS (phase 2). Classic armour is a TEXTURE VARIANT per body part - the files
  * are `<race><part><variant><index>.bmp`, variants 00 bare · 01 leather · 02 chain · 03 plate
@@ -129,6 +135,8 @@ export interface EqModelPayload {
   meshes: EqModelMesh[]
   clips: EqModelClip[]
   weapons: EqModelWeapon[]
+  /** Hair, head, and chest pieces. Absent on a figure that has none. */
+  mounts?: EqModelMount[]
   /** bitmap file name → data URL, for every texture a drawn mesh group references */
   textures: Record<string, string>
   /** the faces this actor's archive really has: the `F` digits with a piece-1 head texture, ascending */

@@ -1,5 +1,5 @@
 import { isMainThread, parentPort, workerData } from 'node:worker_threads'
-import { CLIENT_SPELL_PARSER_VERSION, SPELL_SOURCE_FILES, type SpellSourceFile } from '../../shared/spellLibrary'
+import { capturedSourceNames, CLIENT_SPELL_PARSER_VERSION } from '../../shared/spellLibrary'
 import { parseClientSpellBundle } from '../../shared/clientSpellParser'
 import { captureClientSpellBundle, type CaptureOptions } from './capture'
 import { SpellLibraryStorage, spellInstallId } from './storage'
@@ -46,7 +46,7 @@ export class SpellLibraryWriter {
       const capture = await captureClientSpellBundle(root, this.captureOptions)
       progress?.({ type: 'progress', phase: 'importing', message: 'Reading client spell records and preserving source history' })
       const decoder = new TextDecoder('utf-8', { fatal: true })
-      const sources = Object.fromEntries(SPELL_SOURCE_FILES.map((name) => [name, decoder.decode(capture.sources[name])])) as Record<SpellSourceFile, string>
+      const sources = Object.fromEntries(capturedSourceNames(Object.keys(capture.sources)).map((name) => [name, decoder.decode(capture.sources[name])]))
       const records = parseClientSpellBundle(sources)
       return this.storage.publish({ root, reason, parserVersion, capture, records })
     } catch (error) {

@@ -1,5 +1,6 @@
 import type { RespawnRow } from './respawn'
 import type { AlertSoundRef } from './types'
+import { respawnAlertAt } from './worth'
 
 /** Missing entry means off; zero lead means expiry. Optional fields preserve the original ding. */
 export interface RespawnAudioOption {
@@ -101,7 +102,7 @@ export class RespawnAudioClock {
       const prior = this.states.get(row.id)
       const state: AlarmState = {
         base: row.baseTs,
-        due: row.baseTs + (row.estimateMs ?? 0) - (lead ?? 0) * 1000,
+        due: respawnAlertAt(row.baseTs + (row.estimateMs ?? 0), lead ?? 0),
         last: now,
         fired: prior?.base === row.baseTs && prior.fired
       }
