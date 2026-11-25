@@ -1,10 +1,12 @@
 import { type JSX, useMemo, useState } from 'react'
 import { Box, Button, Stack, Typography } from '@mui/material'
+import { extractSteps, parseQuestPage } from '../../../../../scripts/sources/questPage'
 import { zoneShortName } from '@shared/zones'
 import { scaleAccuracy, voidAtTier } from '@shared/itemUpgrade'
 import { sortLootRows, type LootSortKey } from '../loot/lootSort'
 import {
   aaPlan,
+  bestInSlot,
   canMakeRecipe,
   crawlMarks,
   enduranceScore,
@@ -67,7 +69,8 @@ export default function WorthView(): JSX.Element {
       <Line id="worth-effects" text={`Proc ${figures.proc}, endurance ${figures.endurance}, temporary allowed ${figures.temporary}`} />
       <Line id="worth-dps" text={`Own-time DPS ${figures.dps}`} />
       <Line id="worth-zones" text={figures.zone} />
-      <Line id="worth-bis" text={`Valet ${figures.valet}`} />
+      <Line id="worth-quest" text={figures.quest} />
+      <Line id="worth-bis" text={`Best ${figures.best}, valet ${figures.valet}`} />
       <Line id="worth-void" text={`Mote ${figures.mote}`} />
       <Line id="worth-gaps" text={figures.gaps} />
       <Line id="worth-achievements" text={figures.achievements} />
@@ -105,48 +108,23 @@ export default function WorthView(): JSX.Element {
   )
 }
 
+function questLine(): string {
+  const page = [
+    "! '''Starts In:''' [[East Freeport]]",
+    '= Talk to the guard =',
+    '== Summary ==',
+    '* Hail the guard'
+  ].join('\n')
+  const parsed = parseQuestPage('A small errand', page)
+  const steps = extractSteps(page)
+  return `Starts in ${parsed.startsIn ?? 'missing'}: ${steps.join('; ')}`
+}
+
 function Line({ id, text }: { id: string; text: string }): JSX.Element {
   return <Box data-testid={id}>{text}</Box>
 }
 
-function demo(): {
-  aa: { shortfall: number; etaHours: number | null }
-  races: string
-  climbMs: number
-  proc: number
-  endurance: number
-  temporary: string
-  dps: number
-  zone: string
-  valet: string
-  mote: string
-  gaps: string
-  achievements: string
-  unlocks: string
-  skills: string
-  plan: string
-  loadout: { yours: string | null; pet: string | null }
-  moteSpell: string | null
-  tags: string
-  make: boolean
-  faction: string
-  spare: string
-  pet: string
-  exalt: { empty: string[] }
-  loc: { x: number; headingDeg: number } | null
-  route: boolean
-  crawl: string
-  examine: Record<string, number>
-  wiki: { status: string }
-  archive: string
-  history: { logName: string }
-  hair: string
-  voidListed: number | undefined
-  voidRank: number | undefined
-  accuracyExplicit: number
-  accuracyGenerated: number
-  spellFile: string | null
-} {
+function demo() {
   const items = [
     { name: 'Rust', slot: 'Primary', score: 1, classes: ['WAR'], owned: true },
     { name: 'Steel', slot: 'Primary', score: 5, classes: ['WAR'], owned: true }
@@ -174,6 +152,8 @@ function demo(): {
     temporary: String(plannedSetAllows(true)),
     dps: ownTimeDps(100, 4),
     zone: zoneShortName('Nektropos Castle') ?? 'missing',
+    quest: questLine(),
+    best: bestInSlot(items).get('Primary')?.name ?? 'none',
     valet: player.get('Primary')?.name ?? 'none',
     mote: voidMoteRank([{ name: 'Ring', gain: 2, hoursToReplace: 4 }])[0]?.name ?? 'none',
     gaps: wikiGaps(['New Helm'], ['Old Helm']).join(', '),

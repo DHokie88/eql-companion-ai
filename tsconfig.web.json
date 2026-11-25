@@ -92,6 +92,7 @@
     // …and `celebrationPost.ts` (the celebration-post preferences), likewise.
     "src/preload/celebrationPost.ts",
     // …and `patchNotesApi.ts` (the EverQuest Legends patch notes), likewise.
-    "src/preload/patchNotesApi.ts"
+    "src/preload/patchNotesApi.ts",
+    "scripts/sources/questPage.ts"
   ]
 }
