@@ -5,6 +5,12 @@ import { factionRows } from '../src/renderer/src/features/character/factionRows'
 import { resizedColumnWidth } from '../src/renderer/src/features/gear/gearColumnWidths'
 import { climbsFromLevels, nextAaPlan } from '../src/renderer/src/features/leveling/levelDonor'
 import { knowledgeTags } from '../src/renderer/src/features/loot/lootChipTags'
+import { examineNumbers, lootMaySend } from '../src/renderer/src/features/loot/lootSend'
+import { picksFromRankings } from '../src/renderer/src/features/leveling/spellPicks'
+import { nextRaceUnlock } from '../src/renderer/src/features/character/raceUnlocks'
+import { coverageGaps, noteDraft } from '../src/renderer/src/features/community/coverageDraft'
+import { startZones } from '../src/renderer/src/features/quests/questStart'
+import { macroSend } from '../src/shared/worth'
 import { classUnlockRows } from '../src/renderer/src/features/posky/classUnlocks'
 import type { QuestProgress } from '../src/renderer/src/features/posky/useProgress'
 import type { FactionSnap } from '../src/shared/factionTypes'
@@ -69,4 +75,25 @@ test('the build names the best item in a slot and a spare the classes have beate
   assert.equal(leaders.valetPrimary, 'Steel')
   assert.equal(leaders.endurance, 10)
   assert.ok(leaders.spare.includes('Iron'))
+})
+
+test('spell ranks, races, coverage, quests, examine text, loot send, and macros use the donor rules', () => {
+  const picks = picksFromRankings([
+    { name: 'Bolt', total: 3, metric: 'damage' },
+    { name: 'Pet Bolt', total: 9, metric: 'damage' },
+    { name: 'Shield', total: 1, metric: 'heal' }
+  ])
+  assert.equal(picks.yours, 'Bolt')
+  assert.equal(picks.pet, 'Pet Bolt')
+  assert.equal(picks.next, 'Pet Bolt')
+  assert.equal(picks.mote, 'Pet Bolt')
+  assert.equal(nextRaceUnlock([{ id: 'human', label: 'Human' }, { id: 'iksar', label: 'Iksar' }], ['human']), 'Iksar')
+  assert.equal(noteDraft('A bat', 'Drops a bone.', false).status, 'draft')
+  assert.deepEqual(coverageGaps(['New Helm', 'Old Helm'], ['Old Helm']), ['New Helm'])
+  assert.deepEqual(startZones([{ startZone: 'Crushbone', minLevel: 5 }, { startZone: 'Plane of Fear', minLevel: 50 }], 10), ['Crushbone'])
+  assert.equal(examineNumbers('AC: 12\nSV Void: 3').AC, 12)
+  assert.equal(lootMaySend(2, false).send, false)
+  assert.equal(lootMaySend(2, true).send, true)
+  assert.equal(macroSend('/pause', false).written, false)
+  assert.equal(macroSend('/pause', true).written, true)
 })

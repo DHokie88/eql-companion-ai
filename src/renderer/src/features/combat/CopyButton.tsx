@@ -11,6 +11,7 @@ import { IconButton } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import { Tooltip } from '../../lib/Tooltip'
+import { macroSend } from '../../../../shared/worth'
 
 /**
  * A panel header's copy affordance: it puts the CURRENT view — at whatever drill level it
@@ -46,9 +47,10 @@ export function CopyButton({
     return () => clearTimeout(t)
   }, [done])
   const copy = (): void => {
-    // Main answers false for a payload it refused to write (empty / oversized), so the
-    // checkmark tracks what actually reached the clipboard rather than that a call was made.
-    window.eq.writeClipboard(getText()).then(
+    // The click is the confirmation. An empty body is held, the same as a clipboard that refuses it.
+    const sent = macroSend(getText(), true)
+    if (!sent.written) return
+    window.eq.writeClipboard(sent.body).then(
       (ok) => {
         if (ok) {
           setDone(true)

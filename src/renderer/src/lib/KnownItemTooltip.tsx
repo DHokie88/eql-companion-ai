@@ -57,6 +57,7 @@ import type { ItemKnowledge } from '@shared/types'
 import { EQ_ITEM_COLORS } from './ItemWindow'
 import { ObservedItemWindow } from './ObservedItemWindow'
 import { questUseOutcomes, questUseWhere } from './itemKnowledgeView'
+import { examineNumbers } from '../features/loot/lootSend'
 import { Tooltip, type TooltipProps } from './Tooltip'
 
 /** How many quest uses / recipes the card lists before collapsing to "+N more". */
@@ -276,6 +277,10 @@ function WhatItsFor({ data, depth }: { data: ItemKnowledge; depth: number }): JS
 }
 
 /** The tooltip BODY: the game-style item window, then what our sources add beneath it. */
+function examineAc(data: { statsBlock?: string } | null | undefined, fallback: string | undefined): number | undefined {
+  return examineNumbers(data?.statsBlock ?? fallback).AC
+}
+
 function KnownItemCard({
   name,
   knowledge,
@@ -298,8 +303,9 @@ function KnownItemCard({
   extra?: ReactNode
 }): JSX.Element {
   const { data, loading } = useKnowledgeOnOpen(name, knowledge)
+  const examinedAc = examineAc(data, stats)
   return (
-    <Box sx={{ p: 0.25, minWidth: 190 }}>
+    <Box sx={{ p: 0.25, minWidth: 190 }} data-examine-ac={examinedAc}>
       {/* Both the module subscription (observed tier) and the lookup live INSIDE the body,
           so they exist only while this tooltip is open. */}
       <ObservedItemWindow

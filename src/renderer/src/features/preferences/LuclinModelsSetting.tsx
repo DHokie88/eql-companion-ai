@@ -10,6 +10,7 @@
 import type { JSX } from 'react'
 import { Box, Button, Checkbox, FormControlLabel, Stack, Switch, Typography } from '@mui/material'
 import { LUCLIN_RACES, type LuclinStatus } from '@shared/luclinModels'
+import { nextRaceUnlock } from '../character/raceUnlocks'
 import { GAME_FILE_DISCLAIMER } from '@shared/gameModsDisclaimer'
 import { useLuclin, type LuclinState } from './useLuclin'
 import { LuclinRiskDialog } from './LuclinRiskDialog'
@@ -48,8 +49,9 @@ function RaceList({ state }: { state: LuclinState }): JSX.Element {
     else next.delete(id)
     setPrefs({ races: LUCLIN_RACES.map((r) => r.id).filter((r) => next.has(r)) })
   }
+  const next = nextRaceUnlock(LUCLIN_RACES, prefs.races)
   return (
-    <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))' }}>
+    <Box title={next ? `Closest race ${next}` : undefined} sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))' }}>
       {LUCLIN_RACES.map((race) => {
         const missing = status !== null && !available.has(race.id)
         return (

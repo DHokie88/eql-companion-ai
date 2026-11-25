@@ -11,6 +11,7 @@ import type { ViewedLevel } from './viewedLevel'
 import { CompactSpellControls } from './CompactSpellControls'
 import { CompactSpellRankings } from './CompactSpellRankings'
 import { openLevelingSpells, useLevelingSpellAnalysis, useSpellSearchText } from './useLevelingSpellAnalysis'
+import { picksFromRankings } from './spellPicks'
 
 const TABS: { value: SpellRankingCategory; label: string }[] = [
   { value: 'dd', label: 'DD' }, { value: 'dot', label: 'DoT' }, { value: 'aoe', label: 'AOE' },
@@ -42,11 +43,14 @@ export function BestSpellsPanel({ viewed }: BestSpellsPanelProps): JSX.Element {
   const result = useLibraryQuery(load)
   useEffect(() => { setGroup('ranked') }, [tab, text, level])
   const focus = { tab: 'rankings' as const, level, classes, category: tab, analysis }
+  const ranked = []
+  for (const row of result.data?.records ?? []) ranked.push({ name: row.name, total: row.calculation.total, metric: row.calculation.metric })
+  const picks = picksFromRankings(ranked)
   const onSort = (next: SpellAnalysisSort): void => {
     setDirection(next === sortBy && direction === 'desc' ? 'asc' : 'desc')
     setSort(next)
   }
-  return <Paper variant="outlined" sx={{ p: 1.5 }} data-testid="best-spells" data-level={level} data-context={evaluation?.contextRevision ?? ''}>
+  return <Paper variant="outlined" sx={{ p: 1.5 }} data-testid="best-spells" data-level={level} data-context={evaluation?.contextRevision ?? ''} title={picks.next ? `Next mote ${picks.next}` : undefined}>
     <Stack spacing={1}>
       <Stack direction="row" alignItems="center" gap={0.5} flexWrap="wrap">
         <Typography variant="subtitle2">Best at</Typography>

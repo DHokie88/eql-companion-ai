@@ -22,6 +22,7 @@
 // here misstates a sentence; it can never manufacture or suppress a number.
 
 import { formatCpm, formatPpm } from '../../lib/formatRate'
+import { procScore } from '../../../../shared/worth'
 import { ORIGIN_COLOR } from './markerStyle'
 import type { ProcsView } from '@shared/combat'
 import type { ProcLaneView, ProcOrigin, ProcRateView, ProcSkillTag } from '@shared/procAnalytics'
@@ -260,6 +261,8 @@ export interface ProcAnnotation {
   /** The lane's hue, resolved here so the tag and the Procs panel's dot read one table
    *  (`markerStyle.ORIGIN_COLOR`) and a `click` tag can never wear the proc magenta. */
   color: string
+  /** HP-equivalent of the lane when a rate was stated. 0 when the lane has no rate. */
+  score: number
 }
 
 /**
@@ -310,6 +313,7 @@ export function procAnnotationFor(
   return {
     text: ppm.absent ? unit : `${unit} · ${ppm.text}`,
     hint: `${ORIGIN_NOTE[t.origin]}${lane} ${basis}${ppm.hint}`,
-    color: ORIGIN_COLOR[t.origin]
+    color: ORIGIN_COLOR[t.origin],
+    score: procScore(t.rate.count, t.rate.ppmActive ?? 0, t.rate.ppmActive ? 1 : 0)
   }
 }

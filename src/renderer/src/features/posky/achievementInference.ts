@@ -76,6 +76,7 @@
 
 import type { ClassUnlockClaim, ClassUnlockGrant } from '@shared/outputs/achievements'
 import type { PoskyQuest } from '@shared/types'
+import { searchAchievements } from '../../../../shared/worth'
 import { questKey } from './keys'
 
 /** One reward the achievements file spells differently from the (corrected) scrape. */
@@ -191,6 +192,16 @@ export interface AchievementVouchedQuests {
  * not be one — that gate exists in rewardInference.ts because possession of a TRADEABLE item proves
  * nothing, and this source is not reasoning from possession at all.
  */
+function visibleUnlocks(unlocks: readonly ClassUnlockClaim[]): ClassUnlockClaim[] {
+  const listed = []
+  for (const unlock of unlocks) listed.push({ group: unlock.className, name: unlock.item })
+  const names = new Set<string>()
+  for (const hit of searchAchievements(listed, '')) names.add(`${hit.group}\0${hit.name}`)
+  const out: ClassUnlockClaim[] = []
+  for (const unlock of unlocks) if (names.has(`${unlock.className}\0${unlock.item}`)) out.push(unlock)
+  return out
+}
+
 export function achievementVouchedQuests(
   quests: readonly Pick<PoskyQuest, 'className' | 'name' | 'reward'>[],
   unlocks: readonly ClassUnlockClaim[] | undefined
@@ -198,7 +209,7 @@ export function achievementVouchedQuests(
   const vouched: AchievementVouchedQuests = { quest: new Set(), classUnlock: new Set() }
   if (!unlocks || unlocks.length === 0) return vouched
   const earned = new Map<string, ClassUnlockGrant>()
-  for (const u of unlocks) {
+  for (const u of visibleUnlocks(unlocks)) {
     if (u.grant === undefined) continue
     earned.set(joinKey(u.className, u.item), u.grant)
   }

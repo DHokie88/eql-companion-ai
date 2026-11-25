@@ -318,7 +318,7 @@ function InlineStats({ children }: { children: ReactNode }): React.JSX.Element {
  */
 function ProcTag({ proc }: { proc: ProcAnnotation }): React.JSX.Element {
   return (
-    <Tooltip title={proc.hint}>
+    <Tooltip title={proc.score > 0 ? `${proc.hint} Score ${proc.score.toFixed(1)}.` : proc.hint}>
       <Typography
         component="span"
         variant="caption"

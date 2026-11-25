@@ -56,6 +56,7 @@ import { LootNotices, LootSourceToggle, LootSummary, LootToolbar, useLootSort, t
 import { EngineClientContext } from '../../lib/useView'
 import { EngineLootLedger } from './EngineLootLedger'
 import { NotablePickupsStrip, useNotableStrip } from './NotablePickupsStrip'
+import { lootMaySend } from './lootSend'
 import { useLootRows } from './useLootRows'
 // HOW FAST THE SLICE IS PAYING (JOS-261) — the aggregate loot-per-hour the caption states, joined
 // against the same `progression` snapshot the slice was resolved from.
@@ -376,7 +377,7 @@ export default function LootView(props: LootViewProps = {}): JSX.Element {
     // `minHeight: 0`: this column's last child is the scrolling ledger, and a flex column whose
     // items keep their automatic minimum size cannot shrink one — the list would size itself to
     // its own content and push the scroll onto the app shell behind it (JOS-260).
-    <Stack spacing={2} data-testid="loot-list" sx={{ height: '100%', minHeight: 0 }}>
+    <Stack spacing={2} data-testid="loot-list" data-loot-send={lootMaySend(events.length, false).send ? 'yes' : 'no'} sx={{ height: '100%', minHeight: 0 }}>
       {/* ABOVE the toolbar and on its own row: it governs everything below it, including the
           filters, and it must never be crowded into the same line as the search box (the
           compact-bar contract — controls never shrink). */}

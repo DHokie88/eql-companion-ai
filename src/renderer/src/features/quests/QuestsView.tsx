@@ -24,6 +24,7 @@ import { questClasses, type LootedQuestItem } from '../../../../shared/questInde
 import { useResolvedClasses } from '../alerts/lineIntel'
 import { QuestPage } from './QuestPage'
 import { QUEST_BY_PAGE, QUEST_CATALOG, QUEST_SCRAPED_AT, QUEST_ZONES, browseQuests, searchQuests } from './questSearch'
+import { startZones } from './questStart'
 import { TrackedQuests } from './TrackedQuests'
 import { useQuestItems } from './useQuestItems'
 import { useQuestPins } from './useQuestPins'
@@ -251,7 +252,7 @@ export default function QuestsView({ onOpenLoot, anchor = null, anchorNonce = 0,
         zone={zone}
         setZone={setZone}
       />
-      <Paper variant="outlined" sx={{ p: 1, flexGrow: 1, minHeight: 0, overflow: 'auto' }} data-testid="quests-list">
+      <Paper variant="outlined" sx={{ p: 1, flexGrow: 1, minHeight: 0, overflow: 'auto' }} data-testid="quests-list" data-zones={startZones(list, 50).length}>
         {list.length === 0 ? (
           <Typography variant="caption" color="text.disabled" sx={{ p: 1, display: 'block' }}>
             {searching ? 'No quest matches that.' : 'No quests match these filters.'}
