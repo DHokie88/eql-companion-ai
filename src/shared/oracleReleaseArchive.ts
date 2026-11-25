@@ -3,6 +3,15 @@ import type { ReleaseNote } from './releaseNotes'
 /** The original EQ Oracle releases. */
 export const ORACLE_RELEASE_ARCHIVE: readonly ReleaseNote[] = [
   {
+    version: '0.3.0',
+    date: '2026-10-19',
+    entries: [
+      { kind: 'new', text: 'Best in line groups supported stat buffs, such as AC buffs, using their captured line, target and effect slot. It shows the strongest base effect at the current level; expand its arrow for alternatives in strength order. Unverified DoT, rain and shared-timer relationships stay separate. Counts include every matching spell.' },
+      { kind: 'changed', text: 'All damage and All heals share the type row with a compact AOE cap and Columns picker. Every column except Spell and Class/Level is selectable, including Description. A uniform Type column hides automatically.' },
+      { kind: 'changed', text: 'Damage/Mana headers wrap to two lines. Removed the separate Level column and mana filter, renamed Polarity to Helpful / harmful, and simplified the level control to left/right arrows.' }
+    ]
+  },
+  {
     version: '0.2.2',
     date: '2026-10-19',
     entries: [

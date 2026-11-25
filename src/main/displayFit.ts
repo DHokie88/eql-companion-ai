@@ -238,3 +238,18 @@ export function fitToDisplays(
   if (parkedOverEdge(rect, best.bounds, options.slackPx ?? EDGE_SLACK_PX)) return rect
   return clampInto(rect, options.clampTo === 'workArea' ? best.workArea : best.bounds)
 }
+
+/**
+ * When an explicit user re-open gesture (re-running the desktop shortcut or clicking the tray
+ * icon) happens while the cursor is on a DIFFERENT display than the window (`cursorDisplay.id !==
+ * windowDisplayId`), centre the window's size in the cursor display's work area; when both are on
+ * the same display, return `null` so the window stays where the user put it.
+ */
+export function rescueToCursorDisplay(
+  size: Size,
+  windowDisplayId: number,
+  cursorDisplay: { id: number; workArea: Rect }
+): Rect | null {
+  if (windowDisplayId === cursorDisplay.id) return null
+  return centerIn(size, cursorDisplay.workArea)
+}

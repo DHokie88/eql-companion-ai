@@ -42,6 +42,7 @@ import {
   clampInto,
   fitToDisplays,
   intersectArea,
+  rescueToCursorDisplay,
   type DisplayArea,
   type Rect
 } from '../src/main/displayFit'
@@ -276,4 +277,18 @@ test('intersectArea is zero for rectangles that only touch', () => {
   assert.equal(intersectArea(a, { x: 100, y: 0, width: 100, height: 100 }), 0, 'edge to edge is not overlap')
   assert.equal(intersectArea(a, { x: 50, y: 50, width: 100, height: 100 }), 2500)
   assert.equal(intersectArea(a, a), 10_000)
+})
+
+test('rescueToCursorDisplay relocates a window stranded on another display when the user re-opens from the active monitor', () => {
+  const primaryWork: Rect = { x: 48, y: 0, width: 2512, height: 1440 }
+  assert.equal(
+    rescueToCursorDisplay({ width: 1350, height: 1151 }, 2, { id: 2, workArea: primaryWork }),
+    null,
+    'already on the cursor display: leave position untouched'
+  )
+  assert.deepEqual(
+    rescueToCursorDisplay({ width: 1350, height: 1151 }, 1, { id: 2, workArea: primaryWork }),
+    centerIn({ width: 1350, height: 1151 }, primaryWork),
+    'on a different display (e.g. DisplayPort monitor switched to HDMI): centre on the cursor display'
+  )
 })

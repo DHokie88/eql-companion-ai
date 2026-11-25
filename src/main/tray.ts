@@ -60,7 +60,8 @@ import { logError } from './errorLog'
 import { getCloseToTray, setCloseToTray } from './storeCloseToTray'
 import { raiseTopmost } from './topmost'
 import { playFromOutside } from './ipc/luclinModels'
-import { WEB_PREFERENCES, getMainWindow, sendToMain } from './windows'
+import { raiseMainWindow } from './windowPlacement'
+import { WEB_PREFERENCES, flushMainWindowState, getMainWindow, sendToMain } from './windows'
 import { PALETTE } from '../shared/palette'
 
 /**
@@ -134,9 +135,8 @@ function restoreMainWindow(): void {
   dismissTrayNotice()
   const w = getMainWindow()
   if (!w) return
-  if (w.isMinimized()) w.restore()
-  w.show()
-  w.focus()
+  raiseMainWindow(w)
+  flushMainWindowState()
 }
 
 /**
